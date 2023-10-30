@@ -64,6 +64,7 @@ def plot_df(df: pd.DataFrame):
     plt.tight_layout()
 
     # The created plot is saved to a file.
+    title = title.replace("/", "_")  # Replace "/" with "_"
     path = "./output/" + title + ".png"
     plt.savefig(path, bbox_inches='tight', dpi=400)
     print(title + ".png" + " saved")
