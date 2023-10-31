@@ -1,7 +1,8 @@
 import os
 import pandas as pd
+import numpy as np
 
-# If there is a CSV file that contains the mapping of the symbol to the ETF name, 
+# If there is a CSV file that contains the mapping of the symbol to the ETF name,
 # it will be read and a dictionary will be created.
 # The source of the data is: https://stockanalysis.com/etf/
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,7 +12,6 @@ my_dict = None
 if os.path.exists(etf_dict_path):
     etf_dict = pd.read_csv(etf_dict_path, delimiter=";")
     my_dict = dict(zip(etf_dict['Symbol'], etf_dict['Fund Name']))
-    
 
 
 def lookup_symbol(key: str) -> str:
@@ -53,3 +53,30 @@ def add_time_information(df: pd.DataFrame) -> pd.DataFrame:
     df['posix_time'] = df['timestamp'].apply(
         lambda x: x.timestamp())
     return df
+
+
+def create_one_hot_vector(symbols: list, symbol: str) -> np.array:
+    """
+    A one-hot vector is created from the list of all categories and the passed category.
+    The 1 is the index of the category in the ascending sorted category list.
+
+    Args:
+        symbols (list): List of all categories
+        symbol (str): Category for which a one-hot vector is to be created.
+
+    Raises:
+        ValueError: If the passed category is not in the category list.
+
+    Returns:
+        np.array: Passed category represented as one-hot vector.
+    """
+    unique_symbols = list(set(symbols))
+    unique_symbols.sort()
+
+    if symbol in unique_symbols:
+        index = unique_symbols.index(symbol)
+        one_hot_vector = np.zeros(len(unique_symbols), dtype=int)
+        one_hot_vector[index] = 1
+        return one_hot_vector
+    else:
+        raise ValueError(f"Symbol: '{symbol}' not found!")

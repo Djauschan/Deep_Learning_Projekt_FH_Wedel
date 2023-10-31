@@ -1,10 +1,11 @@
 import torch
 from torch.utils.data import Dataset
 from txtReader import DataReader
-from dataProcessing import lookup_symbol, add_time_information
+from dataProcessing import lookup_symbol, add_time_information, create_one_hot_vector
 from torch.utils.data import DataLoader
 import pandas as pd
 from config import DEBUG, BATCH_SIZE
+import numpy as np
 
 
 class PerSymbolETFDataset(Dataset):
@@ -13,12 +14,13 @@ class PerSymbolETFDataset(Dataset):
     Pytorch uses the 3 functions [__init__, __len__, __getitem__]
     """
 
-    def __init__(self, data_frame: pd.DataFrame):
+    def __init__(self, data_frame: pd.DataFrame, symbols: list):
         """
         Initializes the Pytorch data set.
 
         Args:
             data_frame (pd.DataFrame): Data frame that contains the data for the dataset.
+            symbols (list): List that contains all symbols.
         """
         # The symbol of the ETF is read out.
         self.symbol = data_frame["symbol"][1]
@@ -34,6 +36,14 @@ class PerSymbolETFDataset(Dataset):
 
         # Only the numerical data is used for machine learning.
         numeric_values = data_frame.iloc[:, 1:9].to_numpy()
+
+        # Represent symbol as one-hot vector
+        one_hot_vec = create_one_hot_vector(symbols, self.symbol)
+
+        # A one-hot vector is added to each entry from the time series,
+        # representing to which ETF the transaction belongs.
+        numeric_values = np.concatenate((numeric_values, np.tile(
+            one_hot_vec, (numeric_values.shape[0], 1))), axis=1)
 
         # The data of the current transaction is used to predict the data of the next transaction.
         input = numeric_values[:-1]
@@ -70,11 +80,13 @@ if __name__ == "__main__":
     # Create dataset
     txt_reader = DataReader()
     data = txt_reader.read_next_txt()
-    dataset = PerSymbolETFDataset(data)
+    dataset = PerSymbolETFDataset(data, txt_reader.symbols)
     # Create data loader
     dataloader = DataLoader(
         dataset, batch_size=BATCH_SIZE, shuffle=False)
     # Print the first sample.
-    test_sample = next(iter(dataloader))
-    print("Input: ", test_sample[0])
-    print("Output: ", test_sample[1])
+    test_sample = next(iter(dataloader))[0]
+    print("INPUT:")
+    print(test_sample[0])
+    print("OUTPUT:")
+    print(test_sample[1])

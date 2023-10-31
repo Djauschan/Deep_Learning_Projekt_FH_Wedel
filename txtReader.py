@@ -25,19 +25,19 @@ class DataReader():
         current_file_dir = os.path.dirname(os.path.abspath(__file__))
         data_dir_path = os.path.join(current_file_dir, data_dir_name)
         self.root_folder = data_dir_path
-        # A list is created that contains all file names.
-        self.txt_files = self.get_txt_files()
+        # A list containing all file names and a list containing all symbols are created.
+        self.txt_files, self.symbols = self.get_txt_files()
         # Counter, so that one file after the other can be read from the list of file names.
         self.current_file_idx = 0
 
-    def get_txt_files(self) -> list:
+    def get_txt_files(self) -> tuple[list, list]:
         """
-        Returns a list with the paths of all text files.
+        Returns a list with the paths of all read txt files and a list with all symbols.
 
         Returns:
-            list: List with the paths of all text files.
+            tuple[list, list]: List with paths of all read txt files and list with all symbols
         """
-        txt_files = []
+        txt_files, symbols = [], []
         # Traverse subdirectories.
         for root, dirs, files in os.walk(self.root_folder):
             for dir in dirs:
@@ -48,7 +48,8 @@ class DataReader():
                         # The paths of all text files are stored in a list.
                         if file.endswith(".txt"):
                             txt_files.append(os.path.join(dir_path, file))
-        return txt_files
+                            symbols.append(file.split("_")[0])
+        return txt_files, symbols
 
     def read_next_txt(self) -> pd.DataFrame:
         """

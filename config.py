@@ -2,7 +2,7 @@
 DEBUG: bool = False
 
 # Number of samples to be processed in a batch.
-BATCH_SIZE: int = 5
+BATCH_SIZE: int = 50
 
 # Constant that controls whether the created plots should be displayed.
 SHOW_PLOT: bool = False
