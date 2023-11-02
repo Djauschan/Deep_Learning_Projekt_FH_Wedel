@@ -3,7 +3,7 @@ import math
 import matplotlib.dates as mdates
 import os
 from dataProcessing import lookup_symbol
-from config import SHOW_PLOT
+from config import config
 import pandas as pd
 
 # If there is no output directory yet, one will be created.
@@ -69,7 +69,7 @@ def plot_df(df: pd.DataFrame):
     plt.savefig(path, bbox_inches='tight', dpi=400)
     print(title + ".png" + " saved")
 
-    if SHOW_PLOT:
+    if config["SHOW_PLOT"]:
         plt.show()
 
     # Close plot to reduce memory usage

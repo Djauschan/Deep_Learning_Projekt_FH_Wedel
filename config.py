@@ -1,12 +1,11 @@
-# Constant that controls whether debug output should be printed.
-DEBUG: bool = False
+import json
 
-# Number of samples to be processed in a batch.
-BATCH_SIZE: int = 50
+# Path to the JSON configuration file
+config_file_path: str = "./config.json"
 
-# Constant that controls whether the created plots should be displayed.
-SHOW_PLOT: bool = False
+# The JSON configuration file is deserialized into a python dictionary.
+config: dict = None
 
-# Constant that controls whether visulaisations should be created for all data.
-# The visualization of all data can take a long time.
-VISUALIZE_ALL: bool = False
+# Reading the JSON configuration file
+with open(config_file_path, "r") as config_file:
+    config = json.load(config_file)

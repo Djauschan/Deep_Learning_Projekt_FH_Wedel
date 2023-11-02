@@ -4,7 +4,7 @@ from txtReader import DataReader
 from dataProcessing import lookup_symbol, add_time_information, create_one_hot_vector
 from torch.utils.data import DataLoader
 import pandas as pd
-from config import DEBUG, BATCH_SIZE
+from config import config
 import numpy as np
 
 
@@ -31,7 +31,7 @@ class PerSymbolETFDataset(Dataset):
 
         data_frame = add_time_information(data_frame)
 
-        if DEBUG:
+        if config["DEBUG_OUTPUT"]:
             print(data_frame)
 
         # Only the numerical data is used for machine learning.
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     dataset = PerSymbolETFDataset(data, txt_reader.symbols)
     # Create data loader
     dataloader = DataLoader(
-        dataset, batch_size=BATCH_SIZE, shuffle=False)
+        dataset, batch_size=config["BATCH_SIZE"], shuffle=False)
     # Print the first sample.
     test_sample = next(iter(dataloader))[0]
     print("INPUT:")
