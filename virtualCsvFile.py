@@ -47,9 +47,6 @@ class virtualCsvFile:
         Returns:
             tuple[str, str]: Symbol, read line
         """
-        if index < 0 or index >= self.total_rows:
-            raise IndexError("Index out of range")
-
         for start_index, file_features in self.index_to_file.items():
             if index < start_index + file_features['file_rows']:
                 file_handle = file_features['file_handle']
