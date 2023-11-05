@@ -63,7 +63,7 @@ class DataReader():
             file_to_read = self.txt_files[self.current_file_idx]
             # Read in file.
             data = pd.read_csv(file_to_read, names=[
-                               "timestamp", "value 1", "value 2", "value 3", "value 4", "volume"])
+                               "timestamp", "open", "high", "low", "close", "volume"])
 
             # The ticker symbol to which the data belongs is included in the file name.
             filename = os.path.basename(file_to_read)
