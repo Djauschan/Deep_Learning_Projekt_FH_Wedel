@@ -1,17 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.utils.data as data
 import math
-import copy
-from torch.utils.data import Dataset
 from txtReader import DataReader
-from dataProcessing import lookup_symbol, add_time_information, create_one_hot_vector
 from torch.utils.data import DataLoader
-import pandas as pd
 from config import config
-import numpy as np
-from perSymbolETFDataset import PerSymbolETFDataset
+from data.perSymbolETFDataset import PerSymbolETFDataset
 
 #Transformer 1st try 
 

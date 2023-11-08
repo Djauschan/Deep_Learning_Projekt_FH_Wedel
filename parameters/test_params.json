@@ -1,0 +1,37 @@
+{
+    "name": "High Inflation",
+    "linear": false,
+    "samples_per_class": 100,
+    "batchsize": 4,
+    "epochs": 10,
+    "inflation": 10,
+    "patience": 0,
+    "validation_size": 0.2,
+    "learningrate": 0.0003,
+    "momentum": 0.99,
+    "gpu": false,
+    "seed": 42,
+    "translateH_range": [
+        0.1,
+        -0.1
+    ],
+    "translateH_chance": 0.5,
+    "translateV_range": [
+        0.1,
+        -0.1
+    ],
+    "translateV_chance": 0.5,
+    "channels": 1,
+    "net_struct": {
+        "start_channels": 2,
+        "channels": [
+            10,
+            100,
+            1000
+        ],
+        "classes": 3,
+        "make_norm": true
+    },
+    "criterion": "crossentropy",
+    "optimizer": "adam"
+}

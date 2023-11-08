@@ -4,24 +4,24 @@ import pandas as pd
 
 class DataReader():
     """
-    The class is used to read the data from the files.
+    The class is used to read the data2 from the files.
     """
 
-    def __init__(self, data_dir_name: str = "data"):
+    def __init__(self, data_dir_name: str = "data2"):
         """
-        Initializes a data reader.
+        Initializes a data2 reader.
 
         Args: \n
-            data_dir_name (str, optional): Directory in which the data is located. Defaults to "data". 
+            data_dir_name (str, optional): Directory in which the data2 is located. Defaults to "data2".
 
-        It is expected that the files containing the data are located in subdirectories. \n
+        It is expected that the files containing the data2 are located in subdirectories. \n
         C:. \n
-        ├───data \n
+        ├───data2 \n
         │   ├───etf-complete_tickers_A-C_1min_w1q7w \n
         │   ├───... \n
         │   └───etf-complete_tickers_T-Z_1min_mkvx9 \n
         """
-        # The data directory must be in the same folder as the reader.
+        # The data2 directory must be in the same folder as the reader.
         current_file_dir = os.path.dirname(os.path.abspath(__file__))
         data_dir_path = os.path.join(current_file_dir, data_dir_name)
         self.root_folder = data_dir_path
@@ -65,7 +65,7 @@ class DataReader():
             data = pd.read_csv(file_to_read, names=[
                                "timestamp", "open", "high", "low", "close", "volume"])
 
-            # The ticker symbol to which the data belongs is included in the file name.
+            # The ticker symbol to which the data2 belongs is included in the file name.
             filename = os.path.basename(file_to_read)
             data["symbol"] = filename.split("_")[0]
 
