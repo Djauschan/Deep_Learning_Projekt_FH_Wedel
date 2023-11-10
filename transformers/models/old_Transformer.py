@@ -2,25 +2,23 @@ import math
 
 import torch
 import torch.nn as nn
+import torch.optim as optim
+from config import config
+from data.perSymbolETFDataset import PerSymbolETFDataset
+from torch.utils.data import DataLoader
+from txtReader import DataReader
 
-# import torch.optim as optim
-# from torch.utils.data import DataLoader
+# Transformer 1st try
 
-# from transformers.pipelines.config import config
-# from transformers.preprocessing.perSymbolETFDataset import PerSymbolETFDataset
-# from transformers.preprocessing.txtReader import DataReader
+txt_reader = DataReader()
+data = txt_reader.read_next_txt()
+dataset = PerSymbolETFDataset(data, txt_reader.symbols)
+# Create data loader
+dataloader = DataLoader(dataset, batch_size=config["BATCH_SIZE"], shuffle=False)
 
-# # Transformer 1st try
-
-# txt_reader = DataReader()
-# data = txt_reader.read_next_txt()
-# dataset = PerSymbolETFDataset(data, txt_reader.symbols)
-# # Create data loader
-# dataloader = DataLoader(dataset, batch_size=config["BATCH_SIZE"], shuffle=False)
-
-# batch = next(iter(dataloader))
-# src_data = batch[0]
-# tgt_data = batch[1]
+batch = next(iter(dataloader))
+src_data = batch[0]
+tgt_data = batch[1]
 
 
 class MultiHeadAttention(nn.Module):
@@ -207,35 +205,58 @@ class Transformer(nn.Module):
         return output
 
 
-# # Modelltraining
-# criterion = nn.CrossEntropyLoss(ignore_index=0)
-# optimizer = optim.Adam(transformer.parameters(), lr=0.0001, betas=(0.9, 0.98), eps=1e-9)
+src_vocab_size = 5000
+tgt_vocab_size = 5000
+d_model = 512
+num_heads = 8
+num_layers = 6
+d_ff = 2048
+max_seq_length = 100
+dropout = 0.1
 
-# transformer.train()
+transformer = Transformer(
+    src_vocab_size,
+    tgt_vocab_size,
+    d_model,
+    num_heads,
+    num_layers,
+    d_ff,
+    max_seq_length,
+    dropout,
+)
 
-# for epoch in range(100):
-#     optimizer.zero_grad()
-#     output = transformer(src_data, tgt_data[:, :-1])
-#     loss = criterion(
-#         output.contiguous().view(-1, tgt_vocab_size),
-#         tgt_data[:, 1:].contiguous().view(-1),
-#     )
-#     loss.backward()
-#     optimizer.step()
-#     print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
 
-# """
-# #Performance Evaluation
-# transformer.eval()
+# Modelltraining
+criterion = nn.CrossEntropyLoss(ignore_index=0)
+optimizer = optim.Adam(transformer.parameters(), lr=0.0001, betas=(0.9, 0.98), eps=1e-9)
 
-# val_src_data =
-# val_tgt_data =
+transformer.train()
 
-# with torch.no_grad():
+for epoch in range(100):
+    optimizer.zero_grad()
+    output = transformer(src_data, tgt_data[:, :-1])
+    loss = criterion(
+        output.contiguous().view(-1, tgt_vocab_size),
+        tgt_data[:, 1:].contiguous().view(-1),
+    )
+    loss.backward()
+    optimizer.step()
+    print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
 
-#     val_output = transformer(val_src_data, val_tgt_data[:, :-1])
-#     val_loss = criterion(val_output.contiguous().view(-1, tgt_vocab_size), val_tgt_data[:, 1:].contiguous().view(-1))
-#     print(f"Validation Loss: {val_loss.item()}")
-# """
+"""
+#Performance Evaluation
+transformer.eval()
 
-# # https://www.datacamp.com/tutorial/building-a-transformer-with-py-torch
+#TODO
+
+val_src_data = 
+val_tgt_data = 
+
+with torch.no_grad():
+
+    val_output = transformer(val_src_data, val_tgt_data[:, :-1])
+    val_loss = criterion(val_output.contiguous().view(-1, tgt_vocab_size), val_tgt_data[:, 1:].contiguous().view(-1))
+    print(f"Validation Loss: {val_loss.item()}")
+"""
+
+# https://www.datacamp.com/tutorial/building-a-transformer-with-py-torch

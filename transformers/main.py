@@ -3,7 +3,7 @@ from typing import Final
 
 import yaml
 
-from transformers.config.trainer import Trainer
+from transformers.pipelines.trainer import Trainer
 
 TRAIN_COMMAND: Final[str] = "train"
 PREDICT_COMMAND: Final[str] = "predict"
@@ -43,9 +43,7 @@ def main() -> None:
     # TODO: Load Optimizer (could be part of training config)
 
     if args.pipeline == TRAIN_COMMAND:
-        trainer = Trainer(**config)
-        trainer.start_training()
-        print(trainer)
+        Trainer.start_training(**config)
     else:
         print("placeholder for predict")
 
