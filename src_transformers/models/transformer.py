@@ -3,25 +3,6 @@ import math
 import torch
 import torch.nn as nn
 
-# import torch.optim as optim
-# from torch.utils.data import DataLoader
-
-# from transformers.pipelines.config import config
-# from transformers.preprocessing.perSymbolETFDataset import PerSymbolETFDataset
-# from transformers.preprocessing.txtReader import DataReader
-
-# # Transformer 1st try
-
-# txt_reader = DataReader()
-# data = txt_reader.read_next_txt()
-# dataset = PerSymbolETFDataset(data, txt_reader.symbols)
-# # Create data loader
-# dataloader = DataLoader(dataset, batch_size=config["BATCH_SIZE"], shuffle=False)
-
-# batch = next(iter(dataloader))
-# src_data = batch[0]
-# tgt_data = batch[1]
-
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, num_heads):
@@ -207,24 +188,6 @@ class Transformer(nn.Module):
         return output
 
 
-# # Modelltraining
-# criterion = nn.CrossEntropyLoss(ignore_index=0)
-# optimizer = optim.Adam(transformer.parameters(), lr=0.0001, betas=(0.9, 0.98), eps=1e-9)
-
-# transformer.train()
-
-# for epoch in range(100):
-#     optimizer.zero_grad()
-#     output = transformer(src_data, tgt_data[:, :-1])
-#     loss = criterion(
-#         output.contiguous().view(-1, tgt_vocab_size),
-#         tgt_data[:, 1:].contiguous().view(-1),
-#     )
-#     loss.backward()
-#     optimizer.step()
-#     print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
-
-# """
 # #Performance Evaluation
 # transformer.eval()
 

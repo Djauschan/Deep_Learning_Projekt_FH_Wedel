@@ -1,8 +1,9 @@
 import os
+
 import pandas as pd
 
 
-class DataReader():
+class DataReader:
     """
     The class is used to read the data2 from the files.
     """
@@ -62,8 +63,10 @@ class DataReader():
         if self.current_file_idx < len(self.txt_files):
             file_to_read = self.txt_files[self.current_file_idx]
             # Read in file.
-            data = pd.read_csv(file_to_read, names=[
-                               "timestamp", "open", "high", "low", "close", "volume"])
+            data = pd.read_csv(
+                file_to_read,
+                names=["timestamp", "open", "high", "low", "close", "volume"],
+            )
 
             # The ticker symbol to which the data2 belongs is included in the file name.
             filename = os.path.basename(file_to_read)
@@ -71,7 +74,8 @@ class DataReader():
 
             # Convert timestamp to python timestamp.
             data["timestamp"] = pd.to_datetime(
-                data["timestamp"], format="%Y-%m-%d %H:%M:%S")
+                data["timestamp"], format="%Y-%m-%d %H:%M:%S"
+            )
 
             self.current_file_idx += 1
             return data

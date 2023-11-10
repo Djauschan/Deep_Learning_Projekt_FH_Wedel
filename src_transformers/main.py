@@ -3,7 +3,7 @@ from typing import Final
 
 import yaml
 
-from transformers.pipelines.trainer import Trainer
+from src_transformers.pipelines.trainer import Trainer
 
 TRAIN_COMMAND: Final[str] = "train"
 PREDICT_COMMAND: Final[str] = "predict"

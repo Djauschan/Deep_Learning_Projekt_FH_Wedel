@@ -5,12 +5,12 @@ import torch
 # from config import config
 from torch.utils.data import DataLoader, Dataset
 
-from transformers.preprocessing.dataProcessing import (
+from src_transformers.preprocessing.dataProcessing import (
     add_time_information,
     create_one_hot_vector,
     lookup_symbol,
 )
-from transformers.preprocessing.txtReader import DataReader
+from src_transformers.preprocessing.txtReader import DataReader
 
 
 class PerSymbolETFDataset(Dataset):
