@@ -2,22 +2,27 @@ import os
 import pandas as pd
 import numpy as np
 
-# If there is a CSV file that contains the mapping of the symbol to the ETF name,
-# it will be read and a dictionary will be created.
-# The source of the data is: https://stockanalysis.com/etf/
+# If CSV files containing the mapping of symbols to names are available,
+# they are read and dictionaries are created.
+# The dictionaries are expected in the data directory.
+# The source of the data is: https://stockanalysis.com/
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir_path = os.path.join(current_file_dir, "data")
-etf_dict_path = os.path.join(data_dir_path, "ETF_Mapping.csv")
-my_dict = None
-if os.path.exists(etf_dict_path):
-    etf_dict = pd.read_csv(etf_dict_path, delimiter=";")
-    my_dict = dict(zip(etf_dict['Symbol'], etf_dict['Fund Name']))
+etf_dict_path = os.path.join(data_dir_path, "etf_mapping.csv")
+stock_dict_path = os.path.join(data_dir_path, "stock_mapping.csv")
+dicts = []
+
+for file_path in [etf_dict_path, stock_dict_path]:
+    if os.path.exists(file_path):
+        dict_file = pd.read_csv(file_path)
+        dicts.append(dict(zip(dict_file.iloc[:, 0], dict_file.iloc[:, 1])))
 
 
 def lookup_symbol(key: str) -> str:
     """
-    Returns the name associated with the symbol, 
-    or None if the name is not in the dictionary or no dictionary has been created.
+    Returns the name assigned to the symbol, 
+    or None if the name is not contained in any dictionary 
+    or if no dictionary has been created.
 
     Args:
         key (str): Symbol whose name is being searched for.
@@ -25,8 +30,9 @@ def lookup_symbol(key: str) -> str:
     Returns:
         str: Name of the symbol or None
     """
-    if my_dict is not None:
-        return my_dict.get(key)
+    for dictionary in dicts:
+        if dictionary is not None and key in dictionary:
+            return dictionary.get(key)
     else:
         return None
 
