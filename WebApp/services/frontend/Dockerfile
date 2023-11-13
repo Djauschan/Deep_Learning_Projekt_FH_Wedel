@@ -4,9 +4,10 @@ FROM node:14.17.6-alpine
 # set working directory
 WORKDIR /app
 
-# install and cache app dependencies
-COPY ./services/frontend/package.json ./services/frontend/package-lock.json ./
-RUN npm install
+# install app dependencies
+COPY ./services/frontend/package.json ./
+RUN npm cache clean -force
+RUN npm install npm@latest -g
 
 # add app
 COPY ./services/frontend .
