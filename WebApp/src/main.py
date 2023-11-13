@@ -4,6 +4,8 @@ import crud, models, schemas
 from database import SessionLocal, engine
 import bcrypt
 from fastapi.middleware.cors import CORSMiddleware
+from yahoo_fin.stock_info import get_data
+import datetime as DT
 
 # Create tables in the database based on the model definitions
 models.Base.metadata.create_all(bind=engine)
@@ -31,6 +33,17 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+# test method to get Microsoft Stock 
+@app.post("/createStock/{stock_name}")
+def create_stock(stock_name: str, db: Session = Depends(get_db)):
+    return crud.create_stock(stock_name=stock_name, db=db)
+
+# method to get all stock entries
+@app.get("/getStocks", response_model=list[schemas.Stock])
+async def get_stocks(db: Session = Depends(get_db)):
+    return crud.get_stocks(db)
 
 # post method to delete table "users"
 @app.post("/deleteUsers/")
@@ -108,8 +121,8 @@ def user_login(login_request: schemas.LoginRequest, db: Session = Depends(get_db
     }
 
 @app.get("/getLogins/", response_model=list[schemas.Login])
-def read_logins(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    logins = crud.get_logins(db, skip=skip, limit=limit)
+def read_logins(query: str = '', limit: int = 100, db: Session = Depends(get_db)):
+    logins = crud.get_logins(db, query=query, limit=limit)
     return logins 
 
 @app.get("/getLoginByUser_ID/", response_model=list[schemas.Login])

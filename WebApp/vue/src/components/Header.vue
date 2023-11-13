@@ -1,16 +1,29 @@
 <template>
     <div class="Header sticky-top">
-        <div class="row">
-            <div class="col-md-0">
-                <div class="logo-container">Deep Learning Project</div>
+        <div class="row align-items-center">
+            <div class="d-flex justify-content-end">
+                <div v-if="isUserLoggedIn">
+                    <DropDownMenu />
+                </div>
             </div>
         </div>
     </div>
 </template>
   
 <script>
+import DropDownMenu from "./DropDownMenu.vue";
+import { mapState } from 'vuex';
 export default {
     name: "HeaderPart",
+    components: {
+        DropDownMenu,
+    },
+    computed: {
+        ...mapState(['logged_user']),
+        isUserLoggedIn() {
+            return this.logged_user !== null;
+        },
+    },
     data() {
         return {};
     },

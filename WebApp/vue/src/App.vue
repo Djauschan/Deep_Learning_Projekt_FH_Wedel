@@ -1,16 +1,25 @@
 <template>
   <div>
-    <HeaderPart class="header"></HeaderPart>
+    <div v-if="isUserLoggedIn">
+      <HeaderPart class="header"></HeaderPart>
+    </div>
     <router-view></router-view>
   </div>
 </template>
 
 <script>
 import HeaderPart from "./components/Header.vue";
+import { mapState } from 'vuex';
 export default {
   name: "App",
   components: {
     HeaderPart,
+  },
+  computed: {
+    ...mapState(['logged_user']),
+    isUserLoggedIn() {
+      return this.logged_user !== null;
+    },
   },
 };
 </script>

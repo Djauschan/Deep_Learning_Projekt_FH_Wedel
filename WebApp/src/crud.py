@@ -6,6 +6,8 @@ import models, schemas, database
 import bcrypt
 from datetime import datetime
 import socket
+import datetime as DT
+from yahoo_fin.stock_info import get_data
 
 # method to delete the table "users"
 def delete_users(db: Session):
@@ -69,8 +71,6 @@ def update_user_by_username(db: Session, username: str, updated_data: schemas.Us
 def create_login(db: Session, login: schemas.LoginCreate, owner_id: int, location: dict):
     now = datetime.now()
     current_date = now
-    hostname=socket.gethostname() 
-    IPAddr=socket.gethostbyname(hostname)
     db_login = models.Login(
         login_time=current_date, 
         location=location,
@@ -82,8 +82,9 @@ def create_login(db: Session, login: schemas.LoginCreate, owner_id: int, locatio
     return db_login
 
 # method to return all logins in table "login" (max. 100 entries)
-def get_logins(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Login).offset(skip).limit(limit).all()
+def get_logins(db: Session, query: str = '', limit: int = 100):
+    logins = db.query(models.Login).filter(models.Login.login_time.like(f"%{query}%")).limit(limit).all()
+    return [u.__dict__ for u in logins]
 
 # method to return all logins of a user in table "login"
 def get_logins_by_user_id(db: Session, owner_id: int):
@@ -96,3 +97,25 @@ def check_login(db: Session, user: schemas.User, pw: str):
 # method to return login by userid of a user in table "login"
 def get_logins_by_user_id(db: Session, owner_id: int):
     return db.query(models.Login).filter(models.Login.user_id == owner_id).all()
+
+# method to add stock to table 'stocks'
+def create_stock(db: Session, stock_name: str):
+    today = DT.date.today()
+    return_list = []
+    for i in range(0, 31):
+        if((today - DT.timedelta(days=i)).weekday() < 5):
+            date = today - DT.timedelta(days=i)
+            date2 = today - DT.timedelta(days=i - 1) 
+            stock = get_data(stock_name, start_date=date.strftime("%m/%d/%y"), end_date=date2.strftime("%m/%d/%y"), index_as_date = True, interval="1d")
+            db_stock = models.Stock(name=stock_name, date=date.strftime("%m/%d/%y"), open=stock.open, high=stock.high, low=stock.low, close=stock.close)
+            return_list.append(db_stock)
+            db.add(db_stock)
+            db.commit()
+            db.refresh(db_stock)
+            
+    return return_list
+        
+# method to return all stocks in table 'stocks'
+def get_stocks(db: Session):
+    stocks = db.query(models.Stock).filter(models.Stock.name.like(f"%{''}%")).limit(100).all()
+    return [u.__dict__ for u in stocks]
