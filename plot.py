@@ -19,8 +19,18 @@ def plot_df(df: pd.DataFrame):
         df (pd.DataFrame): Data frame for which a plot is to be created.
     """
 
+    # The type of the ticker symbol is read out.
+    df_type = df["type"][1]
+    # Then it is removed from the data frame, since it is the same for all lines.
+    df = df.drop("type", axis=1)
+
+    # The ticker symbol is read out.
+    symbol = df["symbol"][1]
+    # Then it is removed from the data frame, since it is the same for all lines.
+    df = df.drop("symbol", axis=1)
+
     # Determine the number of rows and columns in the plot needed to visualize the desired columns.
-    count: int = len(df.columns)-2
+    count: int = len(df.columns)-1
     rows: int = 2
     colums: int = math.ceil(count / 2)
 
@@ -30,13 +40,12 @@ def plot_df(df: pd.DataFrame):
 
     # Determine the title of the plot.
     # If possible, the name of the ETF is used as the title.
-    symbol: str = df.iloc[1, -1]
-    etf_name: str = lookup_symbol(symbol)
+    etf_name: str = lookup_symbol(symbol, df_type)
     title: str = ""
     if (etf_name is not None):
-        title = etf_name + " [" + symbol + "]"
+        title = etf_name + " [" + symbol + "]" + " {" + df_type + "}"
     else:
-        title = "Symbol " + symbol
+        title = "Symbol " + symbol + " {" + df_type + "}"
     fig.suptitle(title)
 
     # The desired columns of the data frame are visualized in the form of subplots.

@@ -22,10 +22,15 @@ class PerSymbolDataset(Dataset):
             data_frame (pd.DataFrame): Data frame that contains the data for the dataset.
             symbols (list): List that contains all symbols.
         """
+        # The type of the ticker symbol is read out.
+        self.type = data_frame["type"][1]
+        # Then it is removed from the data frame, since it is the same for all lines.
+        data_frame = data_frame.drop("type", axis=1)
+
         # The ticker symbol is read out.
         self.symbol = data_frame["symbol"][1]
         # The name of the ticker symbol is then looked up.
-        self.name = lookup_symbol(self.symbol)
+        self.name = lookup_symbol(self.symbol, self.type)
         # Then it is removed from the data frame, since it is the same for all lines.
         data_frame = data_frame.drop("symbol", axis=1)
 
@@ -35,6 +40,7 @@ class PerSymbolDataset(Dataset):
             print(data_frame)
 
         # Only the numerical data is used for machine learning.
+        # columns from position 1 (inclusive) to position 9 (exclusive)
         numeric_values = data_frame.iloc[:, 1:9].to_numpy()
 
         # Represent symbol as one-hot vector

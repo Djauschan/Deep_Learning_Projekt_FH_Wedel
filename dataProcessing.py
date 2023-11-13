@@ -12,29 +12,30 @@ etf_dict_path = os.path.join(data_dir_path, "etf_mapping.csv")
 stock_dict_path = os.path.join(data_dir_path, "stock_mapping.csv")
 # This dictionary was created manually.
 index_dict_path = os.path.join(data_dir_path, "index_mapping.csv")
-dicts = []
+dict_of_dicts: dict = {}
 
-for file_path in [index_dict_path, etf_dict_path, stock_dict_path]:
+for file_path, type in [(index_dict_path, "index"), (etf_dict_path, "ETF"), (stock_dict_path, "stock")]:
     if os.path.exists(file_path):
         dict_file = pd.read_csv(file_path)
-        dicts.append(dict(zip(dict_file.iloc[:, 0], dict_file.iloc[:, 1])))
+        dict_of_dicts[type] = (
+            dict(zip(dict_file.iloc[:, 0], dict_file.iloc[:, 1])))
 
 
-def lookup_symbol(key: str) -> str:
+def lookup_symbol(key: str, type: str) -> str:
     """
-    Returns the name assigned to the symbol, 
-    or None if the name is not contained in any dictionary 
-    or if no dictionary has been created.
+    Looks up the name of the passed symbol in the dictionary of the passed type.
+    Returns the name of the symbol or None if the symbol is not in the dictionary or the dictionary does not exist.
 
     Args:
-        key (str): Symbol whose name is being searched for.
+        key (str): Symbol for which the name is to be looked up.
+        type (str): Type of the symbol.
 
     Returns:
-        str: Name of the symbol or None
+        str: Name of the symbol or None if the symbol is not in the dictionary or the dictionary does not exist.
     """
-    for dictionary in dicts:
-        if dictionary is not None and key in dictionary:
-            return dictionary.get(key)
+    if type in dict_of_dicts:
+        dictionary: dict = dict_of_dicts.get(type)
+        return dictionary.get(key)
     else:
         return None
 

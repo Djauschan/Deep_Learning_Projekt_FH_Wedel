@@ -2,6 +2,8 @@ import os
 import pandas as pd
 from config import config
 
+type_dict = {"etf-complete": "ETF", "us3000": "stock", "usindex": "index"}
+
 
 class DataReader():
     """
@@ -61,6 +63,23 @@ class DataReader():
                                 symbols.append(symbol)
         return txt_files, symbols
 
+    def _get_type(self, file_path: str) -> str:
+        """
+        Returns the type of the data based on the path of the file.
+
+        Args:
+            file_path (str): path of the file
+
+        Returns:
+            str: type of data (EFT, stock, index)
+        """
+        directory = os.path.dirname(file_path)
+        folder_name = os.path.basename(directory)
+        for key in type_dict:
+            if key in folder_name:
+                return type_dict.get(key)
+        return None
+
     def read_next_txt(self) -> pd.DataFrame:
         """
         Reads in the next file if there are files that have not yet been read in.
@@ -71,6 +90,7 @@ class DataReader():
         # Check if there are files that have not been read in yet.
         if self.current_file_idx < len(self.txt_files):
             file_to_read = self.txt_files[self.current_file_idx]
+
             # Read in file.
             data = pd.read_csv(file_to_read, names=[
                                "timestamp", "open", "high", "low", "close", "volume"])
@@ -81,6 +101,9 @@ class DataReader():
             # The ticker symbol to which the data belongs is included in the file name.
             filename = os.path.basename(file_to_read)
             data["symbol"] = filename.split("_")[0]
+
+            # The type of the data is determined based on the path of the file.
+            data["type"] = self._get_type(file_to_read)
 
             # Convert timestamp to python timestamp.
             data["timestamp"] = pd.to_datetime(
