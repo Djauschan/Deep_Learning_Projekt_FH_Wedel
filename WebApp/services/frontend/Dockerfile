@@ -6,8 +6,9 @@ WORKDIR /app
 
 # install app dependencies
 COPY ./services/frontend/package.json ./
-RUN npm cache clean -force
-RUN npm install npm@latest -g
+RUN npm install bootstrap
+RUN npm install @popperjs/core
+RUN npm install
 
 # add app
 COPY ./services/frontend .
