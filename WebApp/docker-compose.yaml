@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: services/backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/backend:/code
+    environment:
+      - DATABASE_URL=sqlite:///./data/app.db
+
+  frontend:
+    build:
+      context: .
+      dockerfile: services/frontend/Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./services/frontend:/app
+    environment:
+      - VUE_APP_API_URL=http://0.0.0.0:8000
+    depends_on:
+      - backend

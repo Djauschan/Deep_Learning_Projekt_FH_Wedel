@@ -99,10 +99,10 @@ def get_logins_by_user_id(db: Session, owner_id: int):
     return db.query(models.Login).filter(models.Login.user_id == owner_id).all()
 
 # method to add stock to table 'stocks'
-def create_stock(db: Session, stock_name: str):
+def create_stock(db: Session, stock_name: str, ):
     today = DT.date.today()
     return_list = []
-    for i in range(0, 31):
+    for i in range(1, 31):
         if((today - DT.timedelta(days=i)).weekday() < 5):
             date = today - DT.timedelta(days=i)
             date2 = today - DT.timedelta(days=i - 1) 
@@ -110,11 +110,15 @@ def create_stock(db: Session, stock_name: str):
             db_stock = models.Stock(name=stock_name, date=date.strftime("%m/%d/%y"), open=stock.open, high=stock.high, low=stock.low, close=stock.close)
             return_list.append(db_stock)
             db.add(db_stock)
-            db.commit()
             db.refresh(db_stock)
             
+    db.commit()
+
     return return_list
+
+# method to update stock data in table 'stocks'
         
+
 # method to return all stocks in table 'stocks'
 def get_stocks(db: Session):
     stocks = db.query(models.Stock).filter(models.Stock.name.like(f"%{''}%")).limit(100).all()
