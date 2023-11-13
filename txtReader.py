@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from config import config
 
 
 class DataReader():
@@ -19,7 +20,8 @@ class DataReader():
         ├───data \n
         │   ├───etf-complete_tickers_A-C_1min_w1q7w \n
         │   ├───... \n
-        │   └───etf-complete_tickers_T-Z_1min_mkvx9 \n
+        │   ├───us3000_tickers_Y-Z_1min_v264r \n      
+        │   └───usindex_1min_u8d0l \n
         """
         # The data directory must be in the same folder as the reader.
         current_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -45,10 +47,18 @@ class DataReader():
                 # In the subdirectory all files are traversed.
                 for inner_root, inner_dirs, inner_files in os.walk(dir_path):
                     for file in inner_files:
-                        # The paths of all text files are stored in a list.
-                        if file.endswith(".txt"):
-                            txt_files.append(os.path.join(dir_path, file))
-                            symbols.append(file.split("_")[0])
+                        symbol = file.split("_")[0]
+                        if config["READ_ALL_FILES"] or self.root_folder.endswith("test"):
+                            # The paths of all text files are stored in a list.
+                            if file.endswith(".txt"):
+                                txt_files.append(os.path.join(dir_path, file))
+                                symbols.append(symbol)
+                        else:
+                            # The paths of all text files selected via the symbols
+                            # in the configuration file are saved in a list.
+                            if file.endswith(".txt") and symbol in config["SYMBOLS_TO_READ"]:
+                                txt_files.append(os.path.join(dir_path, file))
+                                symbols.append(symbol)
         return txt_files, symbols
 
     def read_next_txt(self) -> pd.DataFrame:
@@ -64,6 +74,9 @@ class DataReader():
             # Read in file.
             data = pd.read_csv(file_to_read, names=[
                                "timestamp", "open", "high", "low", "close", "volume"])
+
+            # Replace Nan vaules in voulme column with 0. Indices do not have a volume.
+            data["volume"] = data["volume"].fillna(0)
 
             # The ticker symbol to which the data belongs is included in the file name.
             filename = os.path.basename(file_to_read)

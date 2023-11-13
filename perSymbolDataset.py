@@ -8,7 +8,7 @@ from config import config
 import numpy as np
 
 
-class PerSymbolETFDataset(Dataset):
+class PerSymbolDataset(Dataset):
     """
     Data stored as tensors
     Pytorch uses the 3 functions [__init__, __len__, __getitem__]
@@ -22,9 +22,9 @@ class PerSymbolETFDataset(Dataset):
             data_frame (pd.DataFrame): Data frame that contains the data for the dataset.
             symbols (list): List that contains all symbols.
         """
-        # The symbol of the ETF is read out.
+        # The ticker symbol is read out.
         self.symbol = data_frame["symbol"][1]
-        # Then the name for the ETF is looked up.
+        # The name of the ticker symbol is then looked up.
         self.name = lookup_symbol(self.symbol)
         # Then it is removed from the data frame, since it is the same for all lines.
         data_frame = data_frame.drop("symbol", axis=1)
@@ -40,8 +40,8 @@ class PerSymbolETFDataset(Dataset):
         # Represent symbol as one-hot vector
         one_hot_vec = create_one_hot_vector(symbols, self.symbol)
 
-        # A one-hot vector is added to each entry from the time series,
-        # representing to which ETF the transaction belongs.
+        # A one-hot vector is added to each entry in the time series,
+        # indicating the ticker symbol to which the transaction belongs.
         numeric_values = np.concatenate((numeric_values, np.tile(
             one_hot_vec, (numeric_values.shape[0], 1))), axis=1)
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     # Create dataset
     txt_reader = DataReader()
     data = txt_reader.read_next_txt()
-    dataset = PerSymbolETFDataset(data, txt_reader.symbols)
+    dataset = PerSymbolDataset(data, txt_reader.symbols)
     # Create data loader
     dataloader = DataLoader(
         dataset, batch_size=config["BATCH_SIZE"], shuffle=False)

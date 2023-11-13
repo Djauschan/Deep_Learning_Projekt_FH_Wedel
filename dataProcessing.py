@@ -5,14 +5,16 @@ import numpy as np
 # If CSV files containing the mapping of symbols to names are available,
 # they are read and dictionaries are created.
 # The dictionaries are expected in the data directory.
-# The source of the data is: https://stockanalysis.com/
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir_path = os.path.join(current_file_dir, "data")
+# The source of the data is: https://stockanalysis.com/
 etf_dict_path = os.path.join(data_dir_path, "etf_mapping.csv")
 stock_dict_path = os.path.join(data_dir_path, "stock_mapping.csv")
+# This dictionary was created manually.
+index_dict_path = os.path.join(data_dir_path, "index_mapping.csv")
 dicts = []
 
-for file_path in [etf_dict_path, stock_dict_path]:
+for file_path in [index_dict_path, etf_dict_path, stock_dict_path]:
     if os.path.exists(file_path):
         dict_file = pd.read_csv(file_path)
         dicts.append(dict(zip(dict_file.iloc[:, 0], dict_file.iloc[:, 1])))
