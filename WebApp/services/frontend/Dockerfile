@@ -1,13 +1,11 @@
 # base image
-FROM node:14.17.6-alpine
+FROM node:18.12
 
 # set working directory
 WORKDIR /app
 
 # install app dependencies
-COPY ./services/frontend/package.json ./
-RUN npm install bootstrap
-RUN npm install @popperjs/core
+COPY ./services/frontend/package*.json ./
 RUN npm install
 
 # add app

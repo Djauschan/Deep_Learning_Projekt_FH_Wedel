@@ -1,6 +1,9 @@
 # MacOs attribute file
 .DS_Store
 
+# database
+sqql_app.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
