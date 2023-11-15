@@ -1,5 +1,5 @@
 import sys
-
+import pathlib
 import numpy as np
 import pandas as pd
 import torch
@@ -12,7 +12,8 @@ from src_transformers.preprocessing.datasets import Dataset_single_stock
 from src_transformers.utils.logger import Logger
 
 # TODO implement correctly
-PATH_FILE = "C:/Users/nikla/OneDrive/Uni/23WS/Projekt/Deep_Learning/data/raw_data/AAPL_1min.txt"
+PATH = pathlib.Path.cwd().parent
+FINAL_PATH = pathlib.Path.joinpath(PATH, "data", "raw_data", "AAPL_1min.txt")
 
 
 class NetTrainer():
@@ -95,7 +96,7 @@ class NetTrainer():
 
         """
 
-        ts = pd.read_csv(PATH_FILE, names=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        ts = pd.read_csv(FINAL_PATH, names=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
         self.dataset = Dataset_single_stock(ts['close'].iloc[:250], 197)
 
         dataset_size = len(self.dataset)
