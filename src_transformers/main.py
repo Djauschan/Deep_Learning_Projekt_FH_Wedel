@@ -4,8 +4,10 @@ from typing import Final
 import yaml
 
 from src_transformers.pipelines.trainer import Trainer
+from src_transformers.pipelines.old_nettrainer import NetTrainer
 
 TRAIN_COMMAND: Final[str] = "train"
+TRAIN_COMMAND_NK: Final[str] = "train_nk" # Second version to work parallel (niklas / luca) -> to be joint
 PREDICT_COMMAND: Final[str] = "predict"
 
 
@@ -23,7 +25,7 @@ def setup_parser() -> argparse.ArgumentParser:
         required=True,
         help="Path to the configuration file with specified options.",
     )
-    parser.add_argument("pipeline", choices=[TRAIN_COMMAND, PREDICT_COMMAND])
+    parser.add_argument("pipeline", choices=[TRAIN_COMMAND, TRAIN_COMMAND_NK, PREDICT_COMMAND])
 
     return parser
 
@@ -44,6 +46,23 @@ def main() -> None:
 
     if args.pipeline == TRAIN_COMMAND:
         Trainer.start_training(**config)
+    if args.pipeline == TRAIN_COMMAND_NK:
+        # niklas' version
+
+        #TODO: Put into main function
+        with open("C:/Users/nikla/OneDrive/Uni/23WS/Projekt/Deep_Learning/data/training_configs/training_config.yaml", "r", encoding="utf-8") as f:
+            config_tr = yaml.safe_load(f)
+        with open("C:/Users/nikla/OneDrive/Uni/23WS/Projekt/Deep_Learning/data/model_configs/slp_config.yaml", "r", encoding="utf-8") as f:
+            config_mdl = yaml.safe_load(f)
+
+        # Initialize nettrainer with parameters from config
+        trainer = NetTrainer(**config_tr['trainer_parameters'],
+                             model_name=config_mdl['model_name'],
+                             model_parameters=config_mdl['model_parameters'])
+        # TODO To be discussed: two configs, option: pass model config
+
+        # Start training
+        trainer.train(epochs=config['epochs'])
     else:
         print("placeholder for predict")
 

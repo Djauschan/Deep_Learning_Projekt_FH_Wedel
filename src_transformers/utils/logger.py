@@ -3,7 +3,7 @@ from datetime import datetime
 from PIL import Image
 import numpy as np
 import os
-from torchvision.transforms import ToTensor
+#from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 import io
 import torch
@@ -14,37 +14,44 @@ sys.path.append("../../")
 
 class Logger():
     """
-    Klaase die das Logging ermoeglicht.
-    Diese speichert alle Informationen im Summarywrite von pytorch
-    und gleichzeitig auf der Konsole.
+    Class that enables logging.
+    This saves all information in the Summarywrite of pytorch.
     """
 
-    def __init__(self, name="", locdir="runs", time_stamp=True):
+    def __init__(self, name="", locdir="./runs", time_stamp=True) -> None:
+        """
+        Initializer of the Logger class.
+        Args:
+            name: Name of the logger/the run
+            locdir: Directory where the logs are saved
+            time_stamp: [True] if a time stamp should be added to the name
+        """
         self._name = name
+        # Add time stamp to name if wanted
         if time_stamp:
             self._name = self._name + \
-                (" - " if name != "" else "") + str(datetime.now())
+                (" - " if name != "" else "") + datetime.now().strftime("%Y-%m-%d %H-%M-%S")
 
         self._locdir = locdir
         self._logger = SummaryWriter(locdir + "/" + self._name)
 
-    def log_string(self, desc, text):
+    def log_string(self, desc: str, text: str) -> None:
         """
-        Logged ein einen String TEXT im Token DESC
+        Logges a string TEXT in the token DESC
         """
         self._logger.add_text(desc, text)
 
-    def train_start(self):
+    def train_start(self) -> None:
         """
-        Logged den Startzeitpunkt des Trainings
+        Logges the start time of the training
         """
         print("[LOG]: Training startet.")
         self._trainstart = datetime.now()
         self._logger.add_text("trainduration/start", str(self._trainstart))
 
-    def train_end(self, reason):
+    def train_end(self, reason: str) -> None:
         """
-        Logged den Endzeitpunkt und Dauer des Trainings
+        Logges the end time and duration of the training
         """
         trainend = datetime.now()
         self._logger.add_text("trainduration/end", str(trainend))
@@ -54,20 +61,21 @@ class Logger():
         print("[LOG]: Training finished! Runtime {}, because of {}".format(
             (trainend - self._trainstart), reason))
 
-    def val_loss(self, value, step):
+    def val_loss(self, value: float, step: int) -> None:
         """
-        Logged den Loss der Validation
+        Logges the loss of the validation
         """
         print("[LOG]: Validation Step {} logged. Loss {}".format(step, value))
         self._logger.add_scalar("loss/val", value, step)
 
-    def train_loss(self, value, step):
+    def train_loss(self, value: float, step: int):
         """
-        Logged den Loss der Trainings
+        Logges the loss of the training
         """
         print("[LOG]: Training Step {} logged. Loss {}".format(step, value))
         self._logger.add_scalar("loss/train", value, step)
 
+    # TODO: implementieren?
     def model_log(self, model, input_data=None):
         """
         Logged das Model als Interactiven Graphen
@@ -76,18 +84,19 @@ class Logger():
         with torch.no_grad():
             self._logger.add_graph(model, input_data, False, False)
 
-    def model_text(self, model):
+    def model_text(self, model) -> None:
         """
-        Logged das Model in textueller Form
+        Logges the model in textual form
         """
         self._logger.add_text("model", str(model))
 
     def summary(self, category, desc):
         """
-        Logged eine Zusammenfassung des Trainings
+        Logges a summary of the training
         """
         self._logger.add_text("summary" + "/" + category, str(desc))
 
+    #TODO: Implementieren?
     def save_cur_image(self, net, step, data_input, data_output):
         """
         Logged ein Bild der atkuellen Klassifiezierung 
@@ -112,14 +121,14 @@ class Logger():
         buf.seek(0)
         # Convert PNG buffer to TF image
         image = Image.open(buf)
-        image = ToTensor()(image)
+        #image = ToTensor()(image)
         
         self._logger.add_image("image/class", image, step)
         plt.close(fig)
         
-    def save_net(self, model, filename="best_model"):
+    def save_net(self, model, filename="") -> None:
         """
-        Speichert das Trainierte Netz
+        Saves the trained model
         """
         path = os.path.join(self._locdir, 'model_saves')
         if (not os.path.exists(path)):
@@ -132,7 +141,7 @@ class Logger():
 
     def close(self):
         """
-        Beendet das loggen
+        Closes the logger
         """
         print("[LOG]: Closing logger.")
         self._logger.close()

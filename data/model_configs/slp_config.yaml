@@ -1,0 +1,3 @@
+model_name: test_slp
+model_parameters:
+  input_length: 197

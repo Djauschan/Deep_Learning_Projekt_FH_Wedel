@@ -66,3 +66,5 @@ class Trainer:
             print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
 
         # TODO: Save model
+
+
