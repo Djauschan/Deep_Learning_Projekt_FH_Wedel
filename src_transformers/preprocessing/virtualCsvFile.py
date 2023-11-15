@@ -41,9 +41,6 @@ class virtualCsvFile:
         Args:
             index (int): Index of the line to be read.
 
-        Raises:
-            IndexError: If the index is outside the permitted value range.
-
         Returns:
             tuple[str, str]: Symbol, read line
         """

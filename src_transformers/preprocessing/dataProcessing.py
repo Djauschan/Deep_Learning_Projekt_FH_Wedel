@@ -2,31 +2,40 @@ import os
 import pandas as pd
 import numpy as np
 
-# If there is a CSV file that contains the mapping of the symbol to the ETF name,
-# it will be read and a dictionary will be created.
-# The source of the data is: https://stockanalysis.com/etf/
+# If CSV files containing the mapping of symbols to names are available,
+# they are read and dictionaries are created.
+# The dictionaries are expected in the data directory.
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir_path = os.path.join(current_file_dir, "data")
-etf_dict_path = os.path.join(data_dir_path, "ETF_Mapping.csv")
-my_dict = None
-if os.path.exists(etf_dict_path):
-    etf_dict = pd.read_csv(etf_dict_path, delimiter=";")
-    my_dict = dict(zip(etf_dict['Symbol'], etf_dict['Fund Name']))
+# The source of the data is: https://stockanalysis.com/
+etf_dict_path = os.path.join(data_dir_path, "etf_mapping.csv")
+stock_dict_path = os.path.join(data_dir_path, "stock_mapping.csv")
+# This dictionary was created manually.
+index_dict_path = os.path.join(data_dir_path, "index_mapping.csv")
+dict_of_dicts: dict = {}
+
+for file_path, type in [(index_dict_path, "index"), (etf_dict_path, "ETF"), (stock_dict_path, "stock")]:
+    if os.path.exists(file_path):
+        dict_file = pd.read_csv(file_path)
+        dict_of_dicts[type] = (
+            dict(zip(dict_file.iloc[:, 0], dict_file.iloc[:, 1])))
 
 
-def lookup_symbol(key: str) -> str:
+def lookup_symbol(key: str, type: str) -> str:
     """
-    Returns the name associated with the symbol, 
-    or None if the name is not in the dictionary or no dictionary has been created.
+    Looks up the name of the passed symbol in the dictionary of the passed type.
+    Returns the name of the symbol or None if the symbol is not in the dictionary or the dictionary does not exist.
 
     Args:
-        key (str): Symbol whose name is being searched for.
+        key (str): Symbol for which the name is to be looked up.
+        type (str): Type of the symbol.
 
     Returns:
-        str: Name of the symbol or None
+        str: Name of the symbol or None if the symbol is not in the dictionary or the dictionary does not exist.
     """
-    if my_dict is not None:
-        return my_dict.get(key)
+    if type in dict_of_dicts:
+        dictionary: dict = dict_of_dicts.get(type)
+        return dictionary.get(key)
     else:
         return None
 

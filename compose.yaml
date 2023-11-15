@@ -1,0 +1,36 @@
+# Define services for the Docker Compose configuration
+services:
+
+  # Service to visualize data
+  visualize_data:
+    # Specify the build context for this service (current directory)
+    build:
+      context: .
+
+    # Bind mount the current directory to /app in the container
+    volumes:
+      - .:/app
+
+    # Map port 5001 on the host to port 5001 in the container
+    ports:
+      - 5001:5001
+
+    # Specify the command to run when the container starts
+    command: [ "python", "./visualize_data.py" ]
+
+  # Service for data loader
+  data_loader:
+    # Specify the build context for this service (current directory)
+    build:
+      context: .
+
+    # Bind mount the current directory to /app in the container
+    volumes:
+      - .:/app
+
+    # Map port 5001 on the host to port 5001 in the container
+    ports:
+      - 5002:5002
+
+    # Specify the command to run when the container starts
+    command: [ "python", "./perSymbolDataset.py" ]

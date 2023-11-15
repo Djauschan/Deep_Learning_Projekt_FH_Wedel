@@ -13,7 +13,7 @@ from src_transformers.preprocessing.dataProcessing import (
 from src_transformers.preprocessing.txtReader import DataReader
 
 
-class PerSymbolETFDataset(Dataset):
+class PerSymbolDataset(Dataset):
     """
     Data stored as tensors
     Pytorch uses the 3 functions [__init__, __len__, __getitem__]
@@ -27,10 +27,15 @@ class PerSymbolETFDataset(Dataset):
             data_frame (pd.DataFrame): Data frame that contains the data for the dataset.
             symbols (list): List that contains all symbols.
         """
-        # The symbol of the ETF is read out.
+        # The type of the ticker symbol is read out.
+        self.type = data_frame["type"][1]
+        # Then it is removed from the data frame, since it is the same for all lines.
+        data_frame = data_frame.drop("type", axis=1)
+
+        # The ticker symbol is read out.
         self.symbol = data_frame["symbol"][1]
-        # Then the name for the ETF is looked up.
-        self.name = lookup_symbol(self.symbol)
+        # The name of the ticker symbol is then looked up.
+        self.name = lookup_symbol(self.symbol, self.type)
         # Then it is removed from the data frame, since it is the same for all lines.
         data_frame = data_frame.drop("symbol", axis=1)
 
@@ -40,16 +45,24 @@ class PerSymbolETFDataset(Dataset):
         #     print(data_frame)
 
         # Only the numerical data is used for machine learning.
+        # columns from position 1 (inclusive) to position 9 (exclusive)
         numeric_values = data_frame.iloc[:, 1:9].to_numpy()
 
         # Represent symbol as one-hot vector
         one_hot_vec = create_one_hot_vector(symbols, self.symbol)
 
+<<<<<<<< HEAD:src_transformers/preprocessing/perSymbolETFDataset.py
         # A one-hot vector is added to each entry from the time series,
         # representing to which ETF the transaction belongs.
         numeric_values = np.concatenate(
             (numeric_values, np.tile(one_hot_vec, (numeric_values.shape[0], 1))), axis=1
         )
+========
+        # A one-hot vector is added to each entry in the time series,
+        # indicating the ticker symbol to which the transaction belongs.
+        numeric_values = np.concatenate((numeric_values, np.tile(
+            one_hot_vec, (numeric_values.shape[0], 1))), axis=1)
+>>>>>>>> dev_data_loader:perSymbolDataset.py
 
         # The data of the current transaction is used to predict the data of the next transaction.
         input = numeric_values[:-1]
@@ -81,6 +94,7 @@ class PerSymbolETFDataset(Dataset):
         return self.input_data[idx], self.output_data[idx]
 
 
+<<<<<<<< HEAD:src_transformers/preprocessing/perSymbolETFDataset.py
 # # Code for debugging
 # if __name__ == "__main__":
 #     # Create dataset
@@ -95,3 +109,20 @@ class PerSymbolETFDataset(Dataset):
 #     print(test_sample[0])
 #     print("OUTPUT:")
 #     print(test_sample[1])
+========
+# Code for debugging
+if __name__ == "__main__":
+    # Create dataset
+    txt_reader = DataReader()
+    data = txt_reader.read_next_txt()
+    dataset = PerSymbolDataset(data, txt_reader.symbols)
+    # Create data loader
+    dataloader = DataLoader(
+        dataset, batch_size=config["BATCH_SIZE"], shuffle=False)
+    # Print the first sample.
+    test_sample = next(iter(dataloader))[0]
+    print("INPUT:")
+    print(test_sample[0])
+    print("OUTPUT:")
+    print(test_sample[1])
+>>>>>>>> dev_data_loader:perSymbolDataset.py

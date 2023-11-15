@@ -1,7 +1,9 @@
-python==3.11
-pandas==2.1.1
-pillow==10.0.1
-tensorboard==2.6.0
-pytorch==2.1.0
-matplotlib==3.8.0
-
+python
+pandas
+pillow
+tensorboard
+pytorch
+matplotlib
+numpy
+PyYAML
+torch

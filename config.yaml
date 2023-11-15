@@ -1,0 +1,29 @@
+---
+DEBUG_OUTPUT: false
+BATCH_SIZE: 50
+SHOW_PLOT: false
+VISUALIZE_ALL_DATA: true
+READ_ALL_FILES: false
+SYMBOLS_TO_READ:
+# stocks
+  - "AAPL"
+  - "AAL"
+  - "AMD"
+  - "C"
+  - "MRNA"
+  - "NIO"
+  - "NVDA"
+  - "SNAP"
+  - "SQ"
+  - "TSLA"
+# ETFs
+  - "AAAU"
+  - "ACWI"
+  - "AAXJ"
+  - "ACWI"
+# indices
+  - "COMP"
+  - "DJCIGC"
+  - "DXY"
+  - "SPX"
+  - "W5000"

@@ -1,6 +1,9 @@
 import os
 
 import pandas as pd
+from config import config
+
+type_dict = {"etf-complete": "ETF", "us3000": "stock", "usindex": "index"}
 
 
 class DataReader:
@@ -20,7 +23,8 @@ class DataReader:
         ├───data2 \n
         │   ├───etf-complete_tickers_A-C_1min_w1q7w \n
         │   ├───... \n
-        │   └───etf-complete_tickers_T-Z_1min_mkvx9 \n
+        │   ├───us3000_tickers_Y-Z_1min_v264r \n      
+        │   └───usindex_1min_u8d0l \n
         """
         # The data2 directory must be in the same folder as the reader.
         current_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -46,11 +50,36 @@ class DataReader:
                 # In the subdirectory all files are traversed.
                 for inner_root, inner_dirs, inner_files in os.walk(dir_path):
                     for file in inner_files:
-                        # The paths of all text files are stored in a list.
-                        if file.endswith(".txt"):
-                            txt_files.append(os.path.join(dir_path, file))
-                            symbols.append(file.split("_")[0])
+                        symbol = file.split("_")[0]
+                        if config["READ_ALL_FILES"] or self.root_folder.endswith("test"):
+                            # The paths of all text files are stored in a list.
+                            if file.endswith(".txt"):
+                                txt_files.append(os.path.join(dir_path, file))
+                                symbols.append(symbol)
+                        else:
+                            # The paths of all text files selected via the symbols
+                            # in the configuration file are saved in a list.
+                            if file.endswith(".txt") and symbol in config["SYMBOLS_TO_READ"]:
+                                txt_files.append(os.path.join(dir_path, file))
+                                symbols.append(symbol)
         return txt_files, symbols
+
+    def _get_type(self, file_path: str) -> str:
+        """
+        Returns the type of the data based on the path of the file.
+
+        Args:
+            file_path (str): path of the file
+
+        Returns:
+            str: type of data (EFT, stock, index)
+        """
+        directory = os.path.dirname(file_path)
+        folder_name = os.path.basename(directory)
+        for key in type_dict:
+            if key in folder_name:
+                return type_dict.get(key)
+        return None
 
     def read_next_txt(self) -> pd.DataFrame:
         """
@@ -62,15 +91,26 @@ class DataReader:
         # Check if there are files that have not been read in yet.
         if self.current_file_idx < len(self.txt_files):
             file_to_read = self.txt_files[self.current_file_idx]
+
             # Read in file.
             data = pd.read_csv(
                 file_to_read,
                 names=["timestamp", "open", "high", "low", "close", "volume"],
             )
 
+<<<<<<< HEAD:src_transformers/preprocessing/txtReader.py
             # The ticker symbol to which the data2 belongs is included in the file name.
+=======
+            # Replace Nan vaules in voulme column with 0. Indices do not have a volume.
+            data["volume"] = data["volume"].fillna(0)
+
+            # The ticker symbol to which the data belongs is included in the file name.
+>>>>>>> dev_data_loader:txtReader.py
             filename = os.path.basename(file_to_read)
             data["symbol"] = filename.split("_")[0]
+
+            # The type of the data is determined based on the path of the file.
+            data["type"] = self._get_type(file_to_read)
 
             # Convert timestamp to python timestamp.
             data["timestamp"] = pd.to_datetime(
