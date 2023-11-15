@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import math
 import matplotlib.dates as mdates
 import os
-from data.dataProcessing import lookup_symbol
+from src_transformers.preprocessing.dataProcessing import lookup_symbol
 from config import config
 import pandas as pd
 
@@ -13,7 +13,7 @@ if not os.path.exists("./output"):
 
 def plot_df(df: pd.DataFrame):
     """
-    Creates a plot for the relevant columns of the passed data2 frame.
+    Creates a plot for the relevant columns of the passed data frame.
 
     Args:
         df (pd.DataFrame): Data frame for which a plot is to be created.
@@ -48,7 +48,7 @@ def plot_df(df: pd.DataFrame):
         title = "Symbol " + symbol + " {" + df_type + "}"
     fig.suptitle(title)
 
-    # The desired columns of the data2 frame are visualized in the form of subplots.
+    # The desired columns of the data frame are visualized in the form of subplots.
     i = 0
     for i in range(count):
         row = i // colums

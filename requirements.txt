@@ -1,9 +1,7 @@
-python
-pandas
-pillow
-tensorboard
-pytorch
 matplotlib
 numpy
+pandas
+Pillow
+tensorboard
 PyYAML
 torch

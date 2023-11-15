@@ -5,8 +5,15 @@ import numpy as np
 # If CSV files containing the mapping of symbols to names are available,
 # they are read and dictionaries are created.
 # The dictionaries are expected in the data directory.
-current_file_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir_path = os.path.join(current_file_dir, "data")
+
+# The path of the current file is determined.
+current_file_directory = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the path to the 'data' directory located two levels up from the current file's directory
+data_dir_path = os.path.join(
+    current_file_directory, os.pardir, os.pardir, 'data')
+
+
 # The source of the data is: https://stockanalysis.com/
 etf_dict_path = os.path.join(data_dir_path, "etf_mapping.csv")
 stock_dict_path = os.path.join(data_dir_path, "stock_mapping.csv")

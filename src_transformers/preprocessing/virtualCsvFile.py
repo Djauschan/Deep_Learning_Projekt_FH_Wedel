@@ -1,6 +1,6 @@
 import csv
 from itertools import islice
-from txtReader import DataReader
+from src_transformers.preprocessing.txtReader import DataReader
 
 
 class virtualCsvFile:

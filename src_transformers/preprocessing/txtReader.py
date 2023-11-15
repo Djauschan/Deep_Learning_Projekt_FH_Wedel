@@ -1,35 +1,38 @@
 import os
-
 import pandas as pd
-from config import config
+from src_transformers.preprocessing.config import config
 
 type_dict = {"etf-complete": "ETF", "us3000": "stock", "usindex": "index"}
 
 
-class DataReader:
+class DataReader():
     """
-    The class is used to read the data2 from the files.
+    The class is used to read the data from the files.
     """
 
-    def __init__(self, data_dir_name: str = "data2"):
+    def __init__(self, data_dir_name: str = "data"):
         """
-        Initializes a data2 reader.
+        Initializes a data reader.
 
         Args: \n
-            data_dir_name (str, optional): Directory in which the data2 is located. Defaults to "data2".
+            data_dir_name (str, optional): Directory in which the data is located. Defaults to "data". 
 
-        It is expected that the files containing the data2 are located in subdirectories. \n
+        It is expected that the files containing the data are located in subdirectories. \n
         C:. \n
-        ├───data2 \n
+        ├───data \n
         │   ├───etf-complete_tickers_A-C_1min_w1q7w \n
         │   ├───... \n
         │   ├───us3000_tickers_Y-Z_1min_v264r \n      
         │   └───usindex_1min_u8d0l \n
         """
-        # The data2 directory must be in the same folder as the reader.
-        current_file_dir = os.path.dirname(os.path.abspath(__file__))
-        data_dir_path = os.path.join(current_file_dir, data_dir_name)
-        self.root_folder = data_dir_path
+        # The path of the current file is determined.
+        current_file_directory = os.path.dirname(os.path.abspath(__file__))
+
+        # Construct the path to the 'data' directory located two levels up from the current file's directory
+        data_directory = os.path.join(
+            current_file_directory, os.pardir, os.pardir, 'data')
+
+        self.root_folder = data_directory
         # A list containing all file names and a list containing all symbols are created.
         self.txt_files, self.symbols = self.get_txt_files()
         # Counter, so that one file after the other can be read from the list of file names.
@@ -93,19 +96,13 @@ class DataReader:
             file_to_read = self.txt_files[self.current_file_idx]
 
             # Read in file.
-            data = pd.read_csv(
-                file_to_read,
-                names=["timestamp", "open", "high", "low", "close", "volume"],
-            )
+            data = pd.read_csv(file_to_read, names=[
+                               "timestamp", "open", "high", "low", "close", "volume"])
 
-<<<<<<< HEAD:src_transformers/preprocessing/txtReader.py
-            # The ticker symbol to which the data2 belongs is included in the file name.
-=======
             # Replace Nan vaules in voulme column with 0. Indices do not have a volume.
             data["volume"] = data["volume"].fillna(0)
 
             # The ticker symbol to which the data belongs is included in the file name.
->>>>>>> dev_data_loader:txtReader.py
             filename = os.path.basename(file_to_read)
             data["symbol"] = filename.split("_")[0]
 
@@ -114,8 +111,7 @@ class DataReader:
 
             # Convert timestamp to python timestamp.
             data["timestamp"] = pd.to_datetime(
-                data["timestamp"], format="%Y-%m-%d %H:%M:%S"
-            )
+                data["timestamp"], format="%Y-%m-%d %H:%M:%S")
 
             self.current_file_idx += 1
             return data

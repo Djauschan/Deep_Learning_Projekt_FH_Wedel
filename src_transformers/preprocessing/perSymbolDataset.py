@@ -1,16 +1,11 @@
-import numpy as np
-import pandas as pd
 import torch
-
-# from config import config
-from torch.utils.data import DataLoader, Dataset
-
-from src_transformers.preprocessing.dataProcessing import (
-    add_time_information,
-    create_one_hot_vector,
-    lookup_symbol,
-)
+from torch.utils.data import Dataset
 from src_transformers.preprocessing.txtReader import DataReader
+from src_transformers.preprocessing.dataProcessing import lookup_symbol, add_time_information, create_one_hot_vector
+from torch.utils.data import DataLoader
+import pandas as pd
+from src_transformers.preprocessing.config import config
+import numpy as np
 
 
 class PerSymbolDataset(Dataset):
@@ -41,8 +36,8 @@ class PerSymbolDataset(Dataset):
 
         data_frame = add_time_information(data_frame)
 
-        # if config["DEBUG_OUTPUT"]:
-        #     print(data_frame)
+        if config["DEBUG_OUTPUT"]:
+            print(data_frame)
 
         # Only the numerical data is used for machine learning.
         # columns from position 1 (inclusive) to position 9 (exclusive)
@@ -51,18 +46,10 @@ class PerSymbolDataset(Dataset):
         # Represent symbol as one-hot vector
         one_hot_vec = create_one_hot_vector(symbols, self.symbol)
 
-<<<<<<<< HEAD:src_transformers/preprocessing/perSymbolETFDataset.py
-        # A one-hot vector is added to each entry from the time series,
-        # representing to which ETF the transaction belongs.
-        numeric_values = np.concatenate(
-            (numeric_values, np.tile(one_hot_vec, (numeric_values.shape[0], 1))), axis=1
-        )
-========
         # A one-hot vector is added to each entry in the time series,
         # indicating the ticker symbol to which the transaction belongs.
         numeric_values = np.concatenate((numeric_values, np.tile(
             one_hot_vec, (numeric_values.shape[0], 1))), axis=1)
->>>>>>>> dev_data_loader:perSymbolDataset.py
 
         # The data of the current transaction is used to predict the data of the next transaction.
         input = numeric_values[:-1]
@@ -94,22 +81,6 @@ class PerSymbolDataset(Dataset):
         return self.input_data[idx], self.output_data[idx]
 
 
-<<<<<<<< HEAD:src_transformers/preprocessing/perSymbolETFDataset.py
-# # Code for debugging
-# if __name__ == "__main__":
-#     # Create dataset
-#     txt_reader = DataReader()
-#     data = txt_reader.read_next_txt()
-#     dataset = PerSymbolETFDataset(data, txt_reader.symbols)
-#     # Create data loader
-#     dataloader = DataLoader(dataset, batch_size=config["BATCH_SIZE"], shuffle=False)
-#     # Print the first sample.
-#     test_sample = next(iter(dataloader))[0]
-#     print("INPUT:")
-#     print(test_sample[0])
-#     print("OUTPUT:")
-#     print(test_sample[1])
-========
 # Code for debugging
 if __name__ == "__main__":
     # Create dataset
@@ -125,4 +96,3 @@ if __name__ == "__main__":
     print(test_sample[0])
     print("OUTPUT:")
     print(test_sample[1])
->>>>>>>> dev_data_loader:perSymbolDataset.py

@@ -60,10 +60,11 @@ class NetTrainer():
         #
 
         # Load optimizer
-        #TODO: (Niklas) Tests für beide Fälle schreiben
+        # TODO: (Niklas) Tests für beide Fälle schreiben
         self.optimizer = None
         if optimizer == "sgd":
-            self.optimizer = optim.SGD(self.model.parameters(), lr=learning_rate, momentum=momentum)
+            self.optimizer = optim.SGD(
+                self.model.parameters(), lr=learning_rate, momentum=momentum)
         elif optimizer == "adam":
             self.optimizer = optim.Adam(self.model.parameters())
 
@@ -76,10 +77,11 @@ class NetTrainer():
         self.logger.log_string('Configs_nettrainer', nettrainer_settings_str)
         self.logger.log_string('Configs_model', str(model_parameters))
         self.logger.model_text(self.model)
-        #self.logger.summary("seed", self.seed)
+        # self.logger.summary("seed", self.seed)
 
         # Datenset vorbereiten
-        self.train_loader, self.validation_loader = self.prepare_dataset(0.2, batch_size)
+        self.train_loader, self.validation_loader = self.prepare_dataset(
+            0.2, batch_size)
 
         # Initialize GPU
         self.gpu = gpu and torch.cuda.is_available()
@@ -96,7 +98,8 @@ class NetTrainer():
 
         """
 
-        ts = pd.read_csv(FINAL_PATH, names=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        ts = pd.read_csv(FINAL_PATH, names=[
+                         'timestamp', 'open', 'high', 'low', 'close', 'volume'])
         self.dataset = Dataset_single_stock(ts['close'].iloc[:250], 197)
 
         dataset_size = len(self.dataset)
@@ -129,7 +132,7 @@ class NetTrainer():
         # Log if cpu or gpu is used
         self.logger.log_string("device usage", ("GPU" if self.gpu else "CPU"))
 
-    def train(self, epochs: int, patience: int=0, inflation: int=1) -> None:
+    def train(self, epochs: int, patience: int = 0, inflation: int = 1) -> None:
         """
         Function that runs the training of the model initialized with this class. It calls calc_epoch for each epoch given as a parameter.
         Args:

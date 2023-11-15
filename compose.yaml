@@ -1,8 +1,8 @@
 # Define services for the Docker Compose configuration
 services:
 
-  # Service to visualize data
-  visualize_data:
+  # Service to train a transformer model
+  train_transformer:
     # Specify the build context for this service (current directory)
     build:
       context: .
@@ -16,10 +16,18 @@ services:
       - 5001:5001
 
     # Specify the command to run when the container starts
-    command: [ "python", "./visualize_data.py" ]
+    command:
+      [
+        "python",
+        "-m",
+        "src_transformers.main",
+        "--config",
+        "data/training_configs/training_config.yaml",
+        "train"
+      ]
 
-  # Service for data loader
-  data_loader:
+  # Service to use a trained transformer model to predict
+  predict_transformer:
     # Specify the build context for this service (current directory)
     build:
       context: .
@@ -33,4 +41,12 @@ services:
       - 5002:5002
 
     # Specify the command to run when the container starts
-    command: [ "python", "./perSymbolDataset.py" ]
+    command:
+      [
+        "python",
+        "-m",
+        "src_transformers.main",
+        "--config",
+        "data/model_configs/transfromer_config.yaml",
+        "predict"
+      ]

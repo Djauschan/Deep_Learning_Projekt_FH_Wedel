@@ -2,11 +2,9 @@ from dataclasses import dataclass
 
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
-from src_transformers.preprocessing.perSymbolETFDataset import PerSymbolETFDataset
-from src_transformers.preprocessing.txtReader import DataReader
 
 
 @dataclass
@@ -23,6 +21,7 @@ class Trainer:
         learning_rate: float,
         model_name: str,
         parameters: dict,
+        dataset: Dataset
     ) -> None:
         """_summary_
 
@@ -35,9 +34,6 @@ class Trainer:
         """
         model = MODEL_NAME_MAPPING[model_name](**parameters)
 
-        txt_reader = DataReader()
-        data = txt_reader.read_next_txt()
-        dataset = PerSymbolETFDataset(data, txt_reader.symbols)
         # Create data loader
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
@@ -66,5 +62,3 @@ class Trainer:
             print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
 
         # TODO: Save model
-
-

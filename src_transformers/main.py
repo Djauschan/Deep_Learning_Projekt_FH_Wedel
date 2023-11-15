@@ -1,5 +1,8 @@
 import argparse
 from typing import Final
+from src_transformers.preprocessing.txtReader import DataReader
+from src_transformers.preprocessing.perSymbolDataset import PerSymbolDataset
+import os
 
 import yaml
 
@@ -7,7 +10,8 @@ from src_transformers.pipelines.trainer import Trainer
 from src_transformers.pipelines.old_nettrainer import NetTrainer
 
 TRAIN_COMMAND: Final[str] = "train"
-TRAIN_COMMAND_NK: Final[str] = "train_nk" # Second version to work parallel (niklas / luca) -> to be joint
+# Second version to work parallel (niklas / luca) -> to be joint
+TRAIN_COMMAND_NK: Final[str] = "train_nk"
 PREDICT_COMMAND: Final[str] = "predict"
 
 
@@ -25,7 +29,8 @@ def setup_parser() -> argparse.ArgumentParser:
         required=True,
         help="Path to the configuration file with specified options.",
     )
-    parser.add_argument("pipeline", choices=[TRAIN_COMMAND, TRAIN_COMMAND_NK, PREDICT_COMMAND])
+    parser.add_argument("pipeline", choices=[
+                        TRAIN_COMMAND, TRAIN_COMMAND_NK, PREDICT_COMMAND])
 
     return parser
 
@@ -44,12 +49,22 @@ def main() -> None:
     # TODO: Load dataset (and pass to trainer class?, could also be subconfig in trainer config)
     # TODO: Load Optimizer (could be part of training config)
 
+    # Create dataset
+    txt_reader = DataReader()
+    data = txt_reader.read_next_txt()
+    dataset = PerSymbolDataset(data, txt_reader.symbols)
+    # Create data loader
+    # dataloader = DataLoader( dataset, batch_size=config["BATCH_SIZE"], shuffle=False)
+
+    config["dataset"] = dataset
+    print(config)
+
     if args.pipeline == TRAIN_COMMAND:
         Trainer.start_training(**config)
     if args.pipeline == TRAIN_COMMAND_NK:
         # niklas' version
 
-        #TODO: Put into main function
+        # TODO: Put into main function
         with open("C:/Users/nikla/OneDrive/Uni/23WS/Projekt/Deep_Learning/data/training_configs/training_config.yaml", "r", encoding="utf-8") as f:
             config_tr = yaml.safe_load(f)
         with open("C:/Users/nikla/OneDrive/Uni/23WS/Projekt/Deep_Learning/data/model_configs/slp_config.yaml", "r", encoding="utf-8") as f:
