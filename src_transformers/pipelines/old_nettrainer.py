@@ -1,14 +1,15 @@
-import sys
 import pathlib
+import sys
+
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-import torch.utils.data as torchData
 import torch.optim as optim
+import torch.utils.data as torchData
 
 from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
-from src_transformers.preprocessing.datasets import Dataset_single_stock
+from src_transformers.preprocessing.datasets import SingleStockDataset
 from src_transformers.utils.logger import Logger
 
 # TODO implement correctly
@@ -16,21 +17,22 @@ PATH = pathlib.Path.cwd().parent
 FINAL_PATH = pathlib.Path.joinpath(PATH, "data", "raw_data", "AAPL_1min.txt")
 
 
-class NetTrainer():
+class NetTrainer:
     """
     Trainer class to train and/or evaluate a model
     """
 
-    def __init__(self,
-                 batch_size: int,
-                 criterion: str,
-                 optimizer: str,
-                 learning_rate: float,
-                 momentum: float,
-                 gpu: bool,
-                 model_name: str,
-                 model_parameters: dict
-                 ) -> None:
+    def __init__(
+        self,
+        batch_size: int,
+        criterion: str,
+        optimizer: str,
+        learning_rate: float,
+        momentum: float,
+        gpu: bool,
+        model_name: str,
+        model_parameters: dict,
+    ) -> None:
         """
         Initializes nettrainer instance
         Args:
@@ -64,7 +66,8 @@ class NetTrainer():
         self.optimizer = None
         if optimizer == "sgd":
             self.optimizer = optim.SGD(
-                self.model.parameters(), lr=learning_rate, momentum=momentum)
+                self.model.parameters(), lr=learning_rate, momentum=momentum
+            )
         elif optimizer == "adam":
             self.optimizer = optim.Adam(self.model.parameters())
 
@@ -72,22 +75,27 @@ class NetTrainer():
         self.logger = Logger()
 
         # Log first information for nettrainer initializations
-        nettrainer_settings_str = f"batch_size: {batch_size} - criterion: {criterion} - optimizer: {optimizer} - " \
-                                  f"learning_rate: {learning_rate} - momentum: {momentum}"
-        self.logger.log_string('Configs_nettrainer', nettrainer_settings_str)
-        self.logger.log_string('Configs_model', str(model_parameters))
+        nettrainer_settings_str = (
+            f"batch_size: {batch_size} - criterion: {criterion} - optimizer: {optimizer} - "
+            f"learning_rate: {learning_rate} - momentum: {momentum}"
+        )
+        self.logger.log_string("Configs_nettrainer", nettrainer_settings_str)
+        self.logger.log_string("Configs_model", str(model_parameters))
         self.logger.model_text(self.model)
         # self.logger.summary("seed", self.seed)
 
         # Datenset vorbereiten
         self.train_loader, self.validation_loader = self.prepare_dataset(
-            0.2, batch_size)
+            0.2, batch_size
+        )
 
         # Initialize GPU
         self.gpu = gpu and torch.cuda.is_available()
         self.gpu_setup()
 
-    def prepare_dataset(self, validation_split: float, batch_size: int) -> tuple[torchData.DataLoader, torchData.DataLoader]:
+    def prepare_dataset(
+        self, validation_split: float, batch_size: int
+    ) -> tuple[torchData.DataLoader, torchData.DataLoader]:
         """
         Function to read the data and prepare it as a torch dataset. Also, generates the data loader for the train and test set.
         Args:
@@ -98,23 +106,25 @@ class NetTrainer():
 
         """
 
-        ts = pd.read_csv(FINAL_PATH, names=[
-                         'timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        self.dataset = Dataset_single_stock(ts['close'].iloc[:250], 197)
+        ts = pd.read_csv(
+            FINAL_PATH, names=["timestamp", "open", "high", "low", "close", "volume"]
+        )
+        self.dataset = SingleStockDataset(ts["close"].iloc[:250], 197)
 
         dataset_size = len(self.dataset)
         validation_size = int(np.floor(validation_split * dataset_size))
         train_size = dataset_size - validation_size
 
-        train_dataset, validation_dataset = torchData.random_split(self.dataset,
-                                                                   [train_size,
-                                                                    validation_size])
+        train_dataset, validation_dataset = torchData.random_split(
+            self.dataset, [train_size, validation_size]
+        )
 
-        train_loader = torchData.DataLoader(train_dataset, batch_size=batch_size,
-                                            shuffle=False)
-        validation_loader = torchData.DataLoader(validation_dataset,
-                                                 batch_size=batch_size,
-                                                 shuffle=False)
+        train_loader = torchData.DataLoader(
+            train_dataset, batch_size=batch_size, shuffle=False
+        )
+        validation_loader = torchData.DataLoader(
+            validation_dataset, batch_size=batch_size, shuffle=False
+        )
 
         return train_loader, validation_loader
 
@@ -126,8 +136,8 @@ class NetTrainer():
         """
         if self.gpu:
             print("[TRAINER]: Write model and criterion on GPU")
-            self.model.to('cuda')
-            self.criterion.to('cuda')
+            self.model.to("cuda")
+            self.criterion.to("cuda")
 
         # Log if cpu or gpu is used
         self.logger.log_string("device usage", ("GPU" if self.gpu else "CPU"))
@@ -159,7 +169,6 @@ class NetTrainer():
         for epoch in range(epochs):
             # Try block to be able to stop the training with CTRL + C
             try:
-
                 train_loss = self.calc_epoch()
                 # Log train loss
                 self.logger.train_loss(train_loss, epoch)
@@ -190,10 +199,10 @@ class NetTrainer():
 
             except KeyboardInterrupt:
                 # Give reason if Training was interrupted by user
-                finish_reason = 'Training interrupted by user'
+                finish_reason = "Training interrupted by user"
                 break
             else:
-                finish_reason = 'Training finished normally'
+                finish_reason = "Training finished normally"
 
         # Log finish
         self.logger.train_end(finish_reason)
@@ -221,7 +230,7 @@ class NetTrainer():
             epoch_loss += self.calc_step(batch)
             step_count += 1
 
-        return (epoch_loss / step_count)
+        return epoch_loss / step_count
 
     def calc_step(self, batch: torchData.BatchSampler) -> float:
         """
@@ -237,13 +246,13 @@ class NetTrainer():
 
         # If required load data to gpu
         if self.gpu:
-            batch = batch.to('cuda')
+            batch = batch.to("cuda")
 
         # Forward step
-        prediction = self.model.forward(batch['input'])
+        prediction = self.model.forward(batch["input"])
 
         # Loss calculation
-        loss = self.criterion(prediction, batch['target'].float())
+        loss = self.criterion(prediction, batch["target"].float())
 
         # Backpropagation
         loss.backward()
@@ -274,10 +283,10 @@ class NetTrainer():
             for batch in self.validation_loader:
                 # If required load data to gpu
                 if self.gpu:
-                    batch = batch.to('cuda')
+                    batch = batch.to("cuda")
 
-                prediction = self.model.forward(batch['input'])
-                loss = self.criterion(prediction, batch['target'].float())
+                prediction = self.model.forward(batch["input"])
+                loss = self.criterion(prediction, batch["target"].float())
 
                 valid_loss += loss.sum().item()
 
@@ -290,4 +299,4 @@ class NetTrainer():
         # self.dataset.data_input,
         # self.dataset.data_output)
 
-        return (valid_loss / steps)
+        return valid_loss / steps

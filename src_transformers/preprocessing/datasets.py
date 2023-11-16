@@ -1,10 +1,9 @@
+import pandas as pd
 import torch
 from torch.utils.data import Dataset
-import csv
-import pandas as pd
 
 
-class Dataset_single_stock(Dataset):
+class SingleStockDataset(Dataset):
     """
     A dataset class that extends the generic
     torch dataset and contains just one time series
@@ -36,8 +35,8 @@ class Dataset_single_stock(Dataset):
 
         # Wrap as item of tensors
         item = {
-            'input': torch.tensor(input, dtype=torch.float),
-            'target': torch.tensor(target, dtype=torch.float)
+            "input": torch.tensor(input, dtype=torch.float),
+            "target": torch.tensor(target, dtype=torch.float),
         }
 
         return item
