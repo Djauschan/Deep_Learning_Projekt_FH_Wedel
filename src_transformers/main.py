@@ -51,7 +51,7 @@ def main() -> None:
         config = yaml.safe_load(f)
 
     if args.pipeline == TRAIN_COMMAND:
-        trainer = Trainer.create_trainer(**config)
+        trainer = Trainer.create_trainer_from_config(**config)
         trainer.start_training()
     else:
         print("placeholder for predict")

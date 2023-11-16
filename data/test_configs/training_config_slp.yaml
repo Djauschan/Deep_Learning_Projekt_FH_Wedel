@@ -2,6 +2,7 @@ source_data: ./data/input/2021_AA_1min.txt
 batch_size: 8
 epochs: 10
 learning_rate: 0.0001
+validation_split: 0.2
 use_gpu: True
 single_layer_perceptron:
   input_length: 197
