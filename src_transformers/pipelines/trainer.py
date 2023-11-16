@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from typing import Optional
 
+import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import BatchSampler, DataLoader, Dataset
@@ -17,6 +19,9 @@ class Trainer:
     batch_size: int
     epochs: int
     learning_rate: float
+    loss: nn.MSELoss | nn.CrossEntropyLoss
+    optimizer: optim.SGD | optim.Adam
+    gpu_activated: bool
     model: any
     logger: Logger
 
@@ -26,6 +31,10 @@ class Trainer:
         batch_size: int,
         epochs: int,
         learning_rate: float,
+        loss: Optional[str] = "mse",
+        optimizer: Optional[str] = "adam",
+        momentum: Optional[float] = 0,
+        use_gpu: Optional[bool] = True,
         **kwargs,
     ) -> "Trainer":
         """_summary_
@@ -37,7 +46,18 @@ class Trainer:
             model_name (str): _description_
             parameters (dict): _description_
         """
+        # Setting up the loss
+        if loss == "mse":
+            loss_instance = nn.MSELoss()
+        elif loss == "crossentropy":
+            loss_instance = nn.CrossEntropyLoss()
+        else:
+            print(
+                f"Trainer initialization: Loss {loss} is not valid, defaulting to MSELoss"
+            )
+            loss_instance = nn.MSELoss()
 
+        # Setting up the model from the model name and parameters in the config
         try:
             model_name, model_parameters = kwargs.popitem()
             model = MODEL_NAME_MAPPING[model_name](**model_parameters)
@@ -52,13 +72,34 @@ class Trainer:
                 )
             ) from model_error
 
+        # Setting up the optimizer
+        if optimizer == "adam":
+            optimizer_instance = optim.Adam(model.parameters())
+            if momentum != 0:
+                print(
+                    f"Trainer initialization: Momentum {momentum} is not used since the optimizer is set to Adam"
+                )
+        if optimizer == "sgd":
+            optimizer_instance = optim.SGD(
+                model.parameters(), lr=learning_rate, momentum=momentum
+            )
+
+        # Check GPU availability and usage preference
+        gpu_activated = use_gpu and torch.cuda.is_available()
+
         instance = cls(
             batch_size=batch_size,
             epochs=epochs,
             learning_rate=learning_rate,
+            loss=loss_instance,
+            optimizer=optimizer_instance,
+            gpu_activated=gpu_activated,
             model=model,
             logger=Logger(),
         )
+
+        print(instance)
+
         return instance
 
         # # Create data loader
@@ -95,6 +136,9 @@ class Trainer:
         #     print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
 
         # # TODO: Save model
+
+    def start_training(self) -> None:
+        print("training started")
 
     def prepare_dataset(self, validation_split) -> tuple[DataLoader, DataLoader]:
         return _, _

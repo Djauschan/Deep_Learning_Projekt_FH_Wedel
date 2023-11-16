@@ -69,7 +69,8 @@ def main() -> None:
     # print(config)
 
     if args.pipeline == TRAIN_COMMAND:
-        Trainer.start_training(**config)
+        trainer = Trainer.create_trainer(**config)
+        trainer.start_training()
     if args.pipeline == TRAIN_COMMAND_NK:
         # niklas' version
 
