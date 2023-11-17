@@ -1,6 +1,6 @@
 from src_transformers.preprocessing.txtReader import DataReader
-from plot import plot_df
-from config import config
+from src_transformers.preprocessing.plot import plot_df
+from src_transformers.preprocessing.config import config
 
 # Code to visualize the data.
 if __name__ == "__main__":

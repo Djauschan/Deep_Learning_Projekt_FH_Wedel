@@ -48,7 +48,7 @@ services:
         "-m",
         "src_transformers.main",
         "-c",
-        "data/model_configs/transfromer_config.yaml",
+        "data/test_configs/training_config_slp.yaml",
         "-p",
         "predict"
       ]

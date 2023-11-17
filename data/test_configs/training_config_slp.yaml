@@ -1,4 +1,4 @@
-source_data: ./data/input/2021_AA_1min.txt
+source_data: ./data/etf-complete_tickers_A-C_1min_w1q7w/AAAU_1min.txt
 batch_size: 8
 epochs: 10
 learning_rate: 0.0001

@@ -3,12 +3,18 @@ import math
 import matplotlib.dates as mdates
 import os
 from src_transformers.preprocessing.dataProcessing import lookup_symbol
-from config import config
+from src_transformers.preprocessing.config import config
 import pandas as pd
 
-# If there is no output directory yet, one will be created.
-if not os.path.exists("./output"):
-    os.makedirs("./output")
+# The path of the current file is determined.
+current_file_directory = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the path to the 'data' directory located two levels up from the current file's directory
+data_dir_path = os.path.join(
+    current_file_directory, os.pardir, os.pardir, 'data')
+
+# Construct the path to the 'output' directory located in the 'data' directory
+output_dir_path = os.path.join(data_dir_path, 'output')
 
 
 def plot_df(df: pd.DataFrame):
@@ -74,7 +80,7 @@ def plot_df(df: pd.DataFrame):
 
     # The created plot is saved to a file.
     title = title.replace("/", "_")  # Replace "/" with "_"
-    path = "./output/" + title + ".png"
+    path = os.path.join(output_dir_path, title + ".png")
     plt.savefig(path, bbox_inches='tight', dpi=400)
     print(title + ".png" + " saved")
 
