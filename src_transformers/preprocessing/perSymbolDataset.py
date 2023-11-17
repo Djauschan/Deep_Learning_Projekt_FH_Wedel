@@ -64,6 +64,11 @@ class PerSymbolDataset(Dataset):
         self.input_data = torch.tensor(input, dtype=torch.float32)
         self.output_data = torch.tensor(output, dtype=torch.float32)
 
+        # The dimensions of the input and output data are required
+        # to dimension the input and output layers of the model.
+        self.input_dim = self.input_data.shape[1]
+        self.output_dim = self.output_data.shape[1]
+
     def __len__(self) -> int:
         """
         Returns the number of samples in the dataset

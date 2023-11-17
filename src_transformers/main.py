@@ -1,9 +1,6 @@
 import argparse
 from typing import Final
-from torch.utils.data import DataLoader
-
 import yaml
-
 from src_transformers.pipelines.trainer import Trainer
 from src_transformers.preprocessing.perSymbolDataset import PerSymbolDataset
 from src_transformers.preprocessing.txtReader import DataReader
@@ -66,19 +63,20 @@ def main() -> None:
     txt_reader = DataReader(data_config)
     data = txt_reader.read_next_txt()
     dataset = PerSymbolDataset(data, txt_reader.symbols, data_config)
-    # Create data loader
-    dataloader = DataLoader(
-        dataset, batch_size=dataset.config["BATCH_SIZE"], shuffle=False)
-    # Print the first sample.
-    test_sample = next(iter(dataloader))[0]
-    print("INPUT:")
-    print(test_sample[0])
-    print("OUTPUT:")
-    print(test_sample[1])
+
+    # Pop the last key-value pair
+    last_key, inner_dict = config.popitem()
+
+    # Add new key-value pairs to the inner dictionary
+    inner_dict['input_dim'] = dataset.input_dim
+    inner_dict['output_dim'] = dataset.output_dim
+
+    # Add the modified inner dictionary back to the outer dictionary
+    config[last_key] = inner_dict
 
     if args.pipeline == TRAIN_COMMAND:
         trainer = Trainer.create_trainer_from_config(**config)
-        trainer.start_training()
+        trainer.start_training(dataset)
     else:
         print("placeholder for predict")
 

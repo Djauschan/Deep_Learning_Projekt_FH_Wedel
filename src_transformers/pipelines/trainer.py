@@ -4,17 +4,13 @@ This module contains the Trainer class which is used to train a PyTorch model.
 
 from dataclasses import dataclass
 from typing import Optional
-
 import numpy as np
-import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, Dataset, random_split
 from tqdm import tqdm
-
 from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
-from src_transformers.preprocessing.datasets import SingleStockDataset
 from src_transformers.utils.logger import Logger
 
 
@@ -29,7 +25,6 @@ class Trainer:
     and training the model for a specified number of epochs.
 
     Attributes:
-        source_data (str): The path to the source data file.
         batch_size (int): The batch size for training.
         epochs (int): The number of epochs to train for.
         learning_rate (float): The learning rate for the optimizer.
@@ -40,8 +35,6 @@ class Trainer:
         model (nn.Module): The PyTorch model to train.
         logger (Logger): The logger to use for logging training information.
     """
-
-    source_data: str
     batch_size: int
     epochs: int
     learning_rate: float
@@ -55,7 +48,6 @@ class Trainer:
     @classmethod
     def create_trainer_from_config(
         cls: type["Trainer"],
-        source_data: str,
         batch_size: int,
         epochs: int,
         learning_rate: float,
@@ -74,7 +66,6 @@ class Trainer:
         The other parameters from the config are simply passed through to the Trainer instance.
 
         Args:
-            source_data (str): The path to the source data file.
             batch_size (int): The batch size for training.
             epochs (int): The number of epochs to train for.
             learning_rate (float): The learning rate for the optimizer.
@@ -118,7 +109,8 @@ class Trainer:
 
         # Setting up the optimizer
         if optimizer == "adam":
-            optimizer_instance = optim.Adam(model.parameters(), lr=learning_rate)
+            optimizer_instance = optim.Adam(
+                model.parameters(), lr=learning_rate)
             if momentum != 0:
                 print(
                     f"Trainer initialization: Momentum {momentum} is not used since the optimizer is set to Adam"
@@ -132,7 +124,6 @@ class Trainer:
         gpu_activated = use_gpu and torch.cuda.is_available()
 
         instance = cls(
-            source_data=source_data,
             batch_size=batch_size,
             epochs=epochs,
             learning_rate=learning_rate,
@@ -146,7 +137,7 @@ class Trainer:
 
         return instance
 
-    def start_training(self) -> None:
+    def start_training(self, dataset: Dataset) -> None:
         """
         This is the entrypoint method to start the training process for the model.
 
@@ -156,13 +147,16 @@ class Trainer:
         method. Afterwards, it starts the actual training using the `train_model` method and
         logs the reason for finishing the training. After the training process is finished,
         the method closes the logger.
+
+        Args:
+            dataset (Dataset): Dataset to be used for training, optimizing and validating the model.
         """
+
         if self.gpu_activated:
             self.model.to("cuda")
             self.loss.to("cuda")
 
-        config_str = f"source_data: {self.source_data}\
-            batch_size: {self.batch_size}\
+        config_str = f"batch_size: {self.batch_size}\
             epochs: {self.epochs}\
             learning rate: {self.learning_rate}\
             loss: {self.loss}\
@@ -172,7 +166,7 @@ class Trainer:
         self.logger.model_text(self.model)
 
         # Creating training and validation data loaders from the given data source
-        self.setup_dataloaders()
+        self.setup_dataloaders(dataset)
 
         # Perform model training
         self.logger.train_start()
@@ -181,23 +175,19 @@ class Trainer:
 
         self.logger.close()
 
-    def setup_dataloaders(self) -> None:
+    def setup_dataloaders(self, dataset: Dataset) -> None:
         """
         Sets up the training and validation data loaders.
 
-        This method reads the source data file and creates a dataset from it. Furthermore,
-        it splits the dataset into training and validation sets based on the
+        This function creates data loaders from the passed dataset.
+        It splits the dataset into training and validation sets based on the
         `self.validation_split` attribute, and creates data loaders for both of these sets.
         The data loaders are stored in the `self.train_loader` and `self.validation_loader`
         attributes, respectively.
+
+        Args:
+            dataset (Dataset): Dataset to be used for training, optimizing and validating the model.
         """
-        # TODO: Generalize this dataset code
-        # Setting up the dataset
-        time_series = pd.read_csv(
-            self.source_data,
-            names=["timestamp", "open", "high", "low", "close", "volume"],
-        )
-        dataset = SingleStockDataset(time_series["close"].iloc[:250], 197)
 
         dataset_size = len(dataset)
         validation_size = int(np.floor(self.validation_split * dataset_size))
@@ -290,15 +280,15 @@ class Trainer:
         train_loss: float = 0
         step_count: int = 0
 
-        for batch in self.train_loader:
+        for input, target in self.train_loader:
             # Reset optimizer
             self.optimizer.zero_grad()
 
             if self.gpu_activated:
                 batch = batch.to("cuda")
 
-            prediction = self.model.forward(batch["input"])
-            loss = self.loss(prediction, batch["target"].float())
+            prediction = self.model.forward(input)
+            loss = self.loss(prediction, target.float())
 
             loss.backward()
             self.optimizer.step()
@@ -328,12 +318,12 @@ class Trainer:
         step_count: int = 0
 
         with torch.no_grad():
-            for batch in self.validation_loader:
+            for input, target in self.validation_loader:
                 if self.gpu_activated:
                     batch = batch.to("cuda")
 
-                prediction = self.model.forward(batch["input"])
-                loss = self.loss(prediction, batch["target"].float())
+                prediction = self.model.forward(input)
+                loss = self.loss(prediction, target.float())
 
                 validation_loss += loss.sum().item()
                 step_count += 1
