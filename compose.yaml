@@ -21,8 +21,9 @@ services:
         "python",
         "-m",
         "src_transformers.main",
-        "--config",
-        "data/training_configs/training_config.yaml",
+        "-c",
+        "data/test_configs/training_config_slp.yaml",
+        "-p",
         "train"
       ]
 
@@ -46,7 +47,8 @@ services:
         "python",
         "-m",
         "src_transformers.main",
-        "--config",
+        "-c",
         "data/model_configs/transfromer_config.yaml",
+        "-p",
         "predict"
       ]

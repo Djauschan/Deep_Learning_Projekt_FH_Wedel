@@ -5,3 +5,4 @@ Pillow
 tensorboard
 PyYAML
 torch
+tqdm
