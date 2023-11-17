@@ -3,7 +3,6 @@ import math
 import matplotlib.dates as mdates
 import os
 from src_transformers.preprocessing.dataProcessing import lookup_symbol
-from src_transformers.preprocessing.config import config
 import pandas as pd
 
 # The path of the current file is determined.
@@ -17,12 +16,13 @@ data_dir_path = os.path.join(
 output_dir_path = os.path.join(data_dir_path, 'output')
 
 
-def plot_df(df: pd.DataFrame):
+def plot_df(df: pd.DataFrame, config: dict):
     """
     Creates a plot for the relevant columns of the passed data frame.
 
     Args:
         df (pd.DataFrame): Data frame for which a plot is to be created.
+        config (dict): Dictionary for the configuration of data preprocessing.
     """
 
     # The type of the ticker symbol is read out.

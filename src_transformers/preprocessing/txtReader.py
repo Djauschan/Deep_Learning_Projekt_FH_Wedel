@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-from src_transformers.preprocessing.config import config
 
 type_dict = {"etf-complete": "ETF", "us3000": "stock", "usindex": "index"}
 
@@ -10,12 +9,13 @@ class DataReader():
     The class is used to read the data from the files.
     """
 
-    def __init__(self, data_dir_name: str = "data"):
+    def __init__(self, config: dict, data_dir_name: str = "data"):
         """
         Initializes a data reader.
 
-        Args: \n
-            data_dir_name (str, optional): Directory in which the data is located. Defaults to "data". 
+        Args:
+            config (dict): Dictionary for the configuration of data preprocessing.
+            data_dir_name (str, optional): Directory in which the data is located. Defaults to "data".
 
         It is expected that the files containing the data are located in subdirectories. \n
         C:. \n
@@ -25,14 +25,11 @@ class DataReader():
         │   ├───us3000_tickers_Y-Z_1min_v264r \n      
         │   └───usindex_1min_u8d0l \n
         """
-        # The path of the current file is determined.
-        current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
-        # Construct the path to the 'data' directory located two levels up from the current file's directory
-        data_directory = os.path.join(
-            current_file_directory, os.pardir, os.pardir, 'data')
+        # Dictionary for the configuration of data preprocessing is saved.
+        self.config = config
 
-        self.root_folder = data_directory
+        self.root_folder = data_dir_name
         # A list containing all file names and a list containing all symbols are created.
         self.txt_files, self.symbols = self.get_txt_files()
         # Counter, so that one file after the other can be read from the list of file names.
@@ -54,7 +51,7 @@ class DataReader():
                 for inner_root, inner_dirs, inner_files in os.walk(dir_path):
                     for file in inner_files:
                         symbol = file.split("_")[0]
-                        if config["READ_ALL_FILES"] or self.root_folder.endswith("test"):
+                        if self.config["READ_ALL_FILES"] or self.root_folder.endswith("test"):
                             # The paths of all text files are stored in a list.
                             if file.endswith(".txt"):
                                 txt_files.append(os.path.join(dir_path, file))
@@ -62,7 +59,7 @@ class DataReader():
                         else:
                             # The paths of all text files selected via the symbols
                             # in the configuration file are saved in a list.
-                            if file.endswith(".txt") and symbol in config["SYMBOLS_TO_READ"]:
+                            if file.endswith(".txt") and symbol in self.config["SYMBOLS_TO_READ"]:
                                 txt_files.append(os.path.join(dir_path, file))
                                 symbols.append(symbol)
         return txt_files, symbols

@@ -1,10 +1,11 @@
 import torch
+import sys
+import yaml
 from torch.utils.data import Dataset
 from src_transformers.preprocessing.txtReader import DataReader
 from src_transformers.preprocessing.dataProcessing import lookup_symbol, add_time_information, create_one_hot_vector
 from torch.utils.data import DataLoader
 import pandas as pd
-from src_transformers.preprocessing.config import config
 import numpy as np
 
 
@@ -14,14 +15,18 @@ class PerSymbolDataset(Dataset):
     Pytorch uses the 3 functions [__init__, __len__, __getitem__]
     """
 
-    def __init__(self, data_frame: pd.DataFrame, symbols: list):
+    def __init__(self, data_frame: pd.DataFrame, symbols: list, config: dict):
         """
         Initializes the Pytorch data set.
 
         Args:
             data_frame (pd.DataFrame): Data frame that contains the data for the dataset.
             symbols (list): List that contains all symbols.
+            config (dict): Dictionary for the configuration of data preprocessing.
         """
+        # Dictionary for the configuration of data preprocessing is saved.
+        self.config = config
+
         # The type of the ticker symbol is read out.
         self.type = data_frame["type"][1]
         # Then it is removed from the data frame, since it is the same for all lines.
@@ -36,7 +41,7 @@ class PerSymbolDataset(Dataset):
 
         data_frame = add_time_information(data_frame)
 
-        if config["DEBUG_OUTPUT"]:
+        if self.config["DEBUG_OUTPUT"]:
             print(data_frame)
 
         # Only the numerical data is used for machine learning.
@@ -83,13 +88,22 @@ class PerSymbolDataset(Dataset):
 
 # Code for debugging
 if __name__ == "__main__":
+
+    # Check if the path to the configuration file was passed as an argument.
+    assert len(sys.argv) == 2
+
+    # Read in the configuration file.
+    config_file_path = sys.argv[1]
+    with open(config_file_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+
     # Create dataset
-    txt_reader = DataReader()
+    txt_reader = DataReader(config)
     data = txt_reader.read_next_txt()
-    dataset = PerSymbolDataset(data, txt_reader.symbols)
+    dataset = PerSymbolDataset(data, txt_reader.symbols, config)
     # Create data loader
     dataloader = DataLoader(
-        dataset, batch_size=config["BATCH_SIZE"], shuffle=False)
+        dataset, batch_size=dataset.config["BATCH_SIZE"], shuffle=False)
     # Print the first sample.
     test_sample = next(iter(dataloader))[0]
     print("INPUT:")
