@@ -1,5 +1,5 @@
 from src_transformers.preprocessing.txtReader import DataReader
-from src_transformers.preprocessing.plot import plot_df
+from src_transformers.utils.plot import plot_df
 from src_transformers.preprocessing.config import config
 
 # Code to visualize the data.

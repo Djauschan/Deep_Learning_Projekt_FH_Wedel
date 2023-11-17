@@ -78,7 +78,7 @@ services:
       [
         "python",
         "-m",
-        "src_transformers.preprocessing.visualize_data"
+        "src_transformers.utils.visualize_data"
       ]
 
   test_data:
