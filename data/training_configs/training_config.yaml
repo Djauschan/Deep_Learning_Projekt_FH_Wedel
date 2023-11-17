@@ -1,8 +1,0 @@
-epochs: 2
-trainer_parameters:
-  optimizer: sgd
-  learning_rate: 0.0001
-  momentum: 0.99
-  criterion: mse
-  batch_size: 8
-  gpu: True
