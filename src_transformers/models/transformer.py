@@ -129,44 +129,91 @@ class PositionalEncoding(nn.Module):
         return x + self.pe[:, : x.size(1)]
 
 
+# Building Encoder Blocks
+# Klasse definiert einen einzelnen Layer des Encoders 
 class EncoderLayer(nn.Module):
+
+    # num_heads: Anzahl der attention heads im multi-head-attention
+    # d_ff: Dimensionalität d. inneren Layer im position-wise feed forward network
+    # dropout: dropout rate für Regularisierung 
     def __init__(self, d_model, num_heads, d_ff, dropout):
         super(EncoderLayer, self).__init__()
+
+        # Multihead Attention Mechanismus
         self.self_attn = MultiHeadAttention(d_model, num_heads)
+        # Position-wise feed-forward NN
         self.feed_forward = PositionWiseFeedForward(d_model, d_ff)
+        # norm1 und 2: Layer normalisation -> Glättung vom Layerinput
         self.norm1 = nn.LayerNorm(d_model)
         self.norm2 = nn.LayerNorm(d_model)
+        # Dropout Layer -> random Aktivierungen auf null setzen -> Overfitting reduzieren
         self.dropout = nn.Dropout(dropout)
 
+
+
     def forward(self, x, mask):
+        # Input x durch multi-head self-attention geleitet
         attn_output = self.self_attn(x, x, x, mask)
+        # Add & Normalize nach Attention: 
+        # Attention Output zum ursprünglichen Input hinzufügen (residual connection)
+        # anschließend Dropout und Normalisierung mit norm1
         x = self.norm1(x + self.dropout(attn_output))
+        # Feed-Forward Network: Output aus vorherigem Schritt durch position-wise feed-forward network leiten
         ff_output = self.feed_forward(x)
+        # Add & Normalize nach Feed Forward:
+        # Feed Forward Output zum Input hinzufügen (residual connection)
+        # anschließend Dropout und Normalisierung mit norm2
         x = self.norm2(x + self.dropout(ff_output))
+        # verarbeiteter Tensor wird als Output des Encoder Layer zurückgegeben
         return x
 
-
+# Building Decoder Blocks
 class DecoderLayer(nn.Module):
+
+    # 
     def __init__(self, d_model, num_heads, d_ff, dropout):
         super(DecoderLayer, self).__init__()
+        # Multihead Attention wie im Encoder 
         self.self_attn = MultiHeadAttention(d_model, num_heads)
+        # Multi-head Attention der Output des Encoder berücksichtigt
         self.cross_attn = MultiHeadAttention(d_model, num_heads)
+        # Feed-Forward Network:
         self.feed_forward = PositionWiseFeedForward(d_model, d_ff)
+        # Layer Normalization
         self.norm1 = nn.LayerNorm(d_model)
         self.norm2 = nn.LayerNorm(d_model)
         self.norm3 = nn.LayerNorm(d_model)
+        #Dropout Layer für Regularisierung
         self.dropout = nn.Dropout(dropout)
 
+    # x: Input für Decoder Layer
+    # enc_output: Ausgabe des entsprechenden Decoders (für cross-attention Schritt)
+    # src_mask: Source mask -> Teile des Encoder Outputs maskieren
+    # tgt_mask: Target mask -> Teile des Decorder Input ignorieren
     def forward(self, x, enc_output, src_mask, tgt_mask):
+        # Self-Attention auf Target Sequenz: Input x durch self-attention Mechanismus verarbeitet
         attn_output = self.self_attn(x, x, x, tgt_mask)
+        # Add & Normalize nach self-attention: 
+        # Attention Output zum ursprünglichen Input hinzufügen (residual connection)
+        # anschließend Dropout und Normalisierung mit norm1
         x = self.norm1(x + self.dropout(attn_output))
+        # Cross-attention mit Encoder Output: Normalisierter Output aus vorherigem Schritt
+        # durch cross-attention Mechanismus verarbeitet, der Output enc_output des Encoders berücksichtigt
         attn_output = self.cross_attn(x, enc_output, enc_output, src_mask)
+        # Add & Normalize nach cross-attention: 
+        # cross-attention Output zum Input dieser Stufe hinzugefügt
+        # anschließend Dropout und Normalisierung mit norm2
         x = self.norm2(x + self.dropout(attn_output))
+        # Feed-Forward network: Output aus vorherigem Schritt durch feed-forward netz geleitet
         ff_output = self.feed_forward(x)
+        # Add & Normalize nach Feed-forward: Feed forward Output zum Input dieser Stufe hinzugefügt
+        # anschließend Dropout und Normalisierung mit norm3
         x = self.norm3(x + self.dropout(ff_output))
+        # Output des Decoder-Layer: verarbeiteter Tensor
         return x
 
 
+# Encoder und Decoder kombinieren, um komplettes Transformer Network zu erhalten
 class Transformer(nn.Module):
     def __init__(
         self,
