@@ -27,58 +27,88 @@ class MultiHeadAttention(nn.Module):
         self.W_v = nn.Linear(d_model, d_model)  # Value transformation
         self.W_o = nn.Linear(d_model, d_model)  # Output transformation
 
-        # 
+        # Attention mit Vektoren berechnen
     def scaled_dot_product_attention(self, Q, K, V, mask=None):
         # Calculate attention scores
+        # Attention scores berechnet: Produkt aus Querys und Keys 
+        # Skaliert mit Wurzel der Key-Dimension d_k 
         attn_scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
 
         # Apply mask if provided (useful for preventing attention to certain parts like padding)
+        # Masked Attention, wenn angegeben: Aus Attention Score angewendet, maskiert best. Werte
         if mask is not None:
             attn_scores = attn_scores.masked_fill(mask == 0, -1e9)
 
+        # Attention Werte durch Softmax geben -> in Wahrscheinlichkeiten transformierten die sich zu 1 addieren 
         # Softmax is applied to obtain attention probabilities
         attn_probs = torch.softmax(attn_scores, dim=-1)
 
+        Finaler Output: Attention weights mit Output multiplizieren
         # Multiply by values to obtain the final output
         output = torch.matmul(attn_probs, V)
         return output
 
+        # Formt Eingabe x um -> Ermöglicht Modell meheree Attention Heads gleichzeitig zu verarbeiten
     def split_heads(self, x):
         # Reshape the input to have num_heads for multi-head attention
         batch_size, seq_length, d_model = x.size()
         return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2)
 
+        # Anschließend Ergebnisse wieder zu einem Tensor der Form batch_size, seq_length, d_model zusammenfügen
     def combine_heads(self, x):
         # Combine the multiple heads back to original shape
         batch_size, _, seq_length, d_k = x.size()
         return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_model)
 
+        # Forward Funktion -> Berechnung an sich wird vorgenommen
     def forward(self, Q, K, V, mask=None):
+
+        # lineare Transformation auf Q,K,V mit der in Intitialisierung festgelegten Gewichte
+        # dann die transformierten Q,K,V mit in mehrere Heads aufteilen 
         # Apply linear transformations and split heads
         Q = self.split_heads(self.W_q(Q))
         K = self.split_heads(self.W_k(K))
         V = self.split_heads(self.W_v(V))
 
         # Perform scaled dot-product attention
+        # Scaled dot product attention auf die Split heads anwenden
         attn_output = self.scaled_dot_product_attention(Q, K, V, mask)
 
         # Combine heads and apply output transformation
+        # Ergebnisse jedes Heads wieder zu einem Gesamt-Tensor zusammenfügen
+        # und urch output linear Transformation leiten
         output = self.W_o(self.combine_heads(attn_output))
         return output
 
-
+# definiert position-wise feed forward NN mit 2 linearen Layern und ReLU Funktion 
 class PositionWiseFeedForward(nn.Module):
+
+    # d_model = Dimensionen der Ein- und Ausgabe des Modells
+    # d_ff = Dimensionen des inner Layser im Feed-forward netword
+    # self.fc1 und 2 = Zwei fully connected linear layers mit Input und Output Dimensionen wie in d_model und d_ff definiert
+    # Mit ReLu nichtlinearität zwischen den beiden linearen Schichten 
     def __init__(self, d_model, d_ff):
         super(PositionWiseFeedForward, self).__init__()
         self.fc1 = nn.Linear(d_model, d_ff)
         self.fc2 = nn.Linear(d_ff, d_model)
         self.relu = nn.ReLU()
 
+    # x = Eingabe für das Feed Forward Netz
+    # self.fc1 = Eingabe wird durch erste lineare Schicht (fc1) geleitet
+    # self.relu = Ausgabe von fc1 wird durch ReLu geleitet (alle negativen Werte werden durch 0 ersetzt)
+    # self.fc2 = aktivierte Ausgabe wird durch zweite lineare Schicht (fc2) geleitet und erzeugt endgültige Ausgabe
     def forward(self, x):
         return self.fc2(self.relu(self.fc1(x)))
 
-
+# Positionsinfo jedes Token in Inputsequenz bringen 
+# dafür Sinus und Kosinusfunktionen unterschiedl. Frequenzen verwendet um Positionskodierung zu erzeugen
 class PositionalEncoding(nn.Module):
+
+    # d_model: Die Dimension der Eingabe des Modells.
+    # max_seq_length: Die maximale Länge der Sequenz, für die positional encodings vorberechnet werden.
+    # pe: Mit Nullen gefüllter Tensor, der mit positional encodings aufgefüllt wird.
+    # position: Ein Tensor, der die Positionsindizes für jede Position in der Sequenz enthält.
+    # div_term: Ein Term, der verwendet wird, um die Positionsindizes auf eine bestimmte Weise zu skalieren.
     def __init__(self, d_model, max_seq_length):
         super(PositionalEncoding, self).__init__()
 
@@ -88,9 +118,11 @@ class PositionalEncoding(nn.Module):
             torch.arange(0, d_model, 2).float() * -(math.log(10000.0) / d_model)
         )
 
+        # Sinusfunktion wird auf die geraden Indizes und  Kosinusfunktion auf die ungeraden Indizes von pe angewendet.
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
 
+        # pe als Puffer registriert, d. h. er ist Teil des Modulstatus, wird aber nicht als trainierbarer Parameter betrachtet
         self.register_buffer("pe", pe.unsqueeze(0))
 
     def forward(self, x):
