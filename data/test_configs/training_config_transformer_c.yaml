@@ -1,13 +1,13 @@
 source_data: C:\Users\nikla\OneDrive\Uni\23WS\Projekt\Deep_Learning\data\input\AAPL_1min.txt
 batch_size: 8
-epochs: 10
+epochs: 100
 learning_rate: 0.0001
 validation_split: 0.1
 use_gpu: True
 transformer_c:
   src_vocab_size: 5000
   tgt_vocab_size: 5000
-  output_seq_length: 20
+  output_dim: 2
   d_model: 2
   num_heads: 1
   num_layers: 2

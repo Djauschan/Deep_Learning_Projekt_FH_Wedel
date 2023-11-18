@@ -299,8 +299,8 @@ class Trainer:
 
             # TODO implement batch training in Transformer
             # TODO implement shift in decoder batch input
-            prediction = self.model.forward(batch["input"][0], batch["input"][0])
-            loss = self.loss(prediction, batch["input"][:, :-1].float())
+            prediction = self.model.forward(batch["input"], batch["input"].roll(1, dims=1))
+            loss = self.loss(prediction, batch["input"].float())
 
             loss.backward()
             self.optimizer.step()
@@ -334,8 +334,8 @@ class Trainer:
                 if self.gpu_activated:
                     batch = batch.to("cuda")
 
-                prediction = self.model.forward(batch["input"])
-                loss = self.loss(prediction, batch["target"].float())
+                prediction = self.model.forward(batch["input"], batch["input"])
+                loss = self.loss(prediction, batch["input"].float())
 
                 validation_loss += loss.sum().item()
                 step_count += 1

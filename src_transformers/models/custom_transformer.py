@@ -124,10 +124,10 @@ class PositionalEncoding(nn.Module):
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
 
-        self.register_buffer("pe", pe.unsqueeze(0))
+        self.register_buffer("pe", pe) #.unsqueeze(0))
 
     def forward(self, x):
-        return x + self.pe[:, : x.size(1)] #TODO, Old: 1
+        return x + self.pe[:, : x.size(0)] #TODO, Old: 1
 
 
 class EncoderLayer(nn.Module):
@@ -198,7 +198,7 @@ class Transformer_C(nn.Module):
         self,
         src_vocab_size,
         tgt_vocab_size,
-        output_seq_length,
+        output_dim,
         d_model,
         num_heads,
         num_layers,
@@ -220,18 +220,19 @@ class Transformer_C(nn.Module):
             [DecoderLayer(d_model, num_heads, d_ff, dropout) for _ in range(num_layers)]
         )
 
-        self.fc = nn.Linear(d_model, output_seq_length)
+        self.fc = nn.Linear(d_model, output_dim)
         self.dropout = nn.Dropout(dropout)
 
     def generate_mask(self, src, tgt):
-        src_mask = (src != 0).unsqueeze(1).unsqueeze(2)
-        tgt_mask = (tgt != 0).unsqueeze(1).unsqueeze(2)
+        src_mask = (src != 0).unsqueeze(1).unsqueeze(3)
+        tgt_mask = (tgt != 0).unsqueeze(1).unsqueeze(3)
         seq_length = tgt.size(1)
         nopeak_mask = (
             1 - torch.triu(torch.ones(1, seq_length, seq_length), diagonal=1)
         ).bool()
-        tgt_mask = tgt_mask & nopeak_mask
-        return src_mask, tgt_mask
+        tgt_mask = tgt_mask & nopeak_mask.unsqueeze(3)
+        src_mask = src_mask & nopeak_mask.unsqueeze(3)
+        return src_mask[:,:,:,:,0], tgt_mask[:,:,:,:,0]
 
     def forward(self, src, tgt):
         # Generate masks for Inputs (src) and Targets (tgt)
@@ -247,10 +248,12 @@ class Transformer_C(nn.Module):
             self.positional_encoding(tgt)
         )
 
+        test = src_mask.numpy()
+
         # Forward encoder layers
         enc_output = src_embedded
         for enc_layer in self.encoder_layers:
-            enc_output = enc_layer(enc_output, src_mask)
+            enc_output = enc_layer(enc_output, mask=None) #TODO: src_mask required?
 
         # Forward decoder layers
         dec_output = tgt_embedded
