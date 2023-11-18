@@ -197,7 +197,7 @@ class Trainer:
             self.source_data,
             names=["timestamp", "open", "high", "low", "close", "volume"],
         )
-        dataset = SingleStockDataset(time_series["close"].iloc[:250], 197)
+        dataset = SingleStockDataset(time_series[["close", "volume"]].iloc[:250], 197, 20)
 
         dataset_size = len(dataset)
         validation_size = int(np.floor(self.validation_split * dataset_size))
@@ -297,8 +297,10 @@ class Trainer:
             if self.gpu_activated:
                 batch = batch.to("cuda")
 
-            prediction = self.model.forward(batch["input"])
-            loss = self.loss(prediction, batch["target"].float())
+            # TODO implement batch training in Transformer
+            # TODO implement shift in decoder batch input
+            prediction = self.model.forward(batch["input"][0], batch["input"][0])
+            loss = self.loss(prediction, batch["input"][:, :-1].float())
 
             loss.backward()
             self.optimizer.step()
