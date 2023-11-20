@@ -43,7 +43,7 @@ class MultiHeadAttention(nn.Module):
         # Softmax is applied to obtain attention probabilities
         attn_probs = torch.softmax(attn_scores, dim=-1)
 
-        Finaler Output: Attention weights mit Output multiplizieren
+        # Finaler Output: Attention weights mit Output multiplizieren
         # Multiply by values to obtain the final output
         output = torch.matmul(attn_probs, V)
         return output
