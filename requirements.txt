@@ -4,5 +4,6 @@ pandas
 Pillow
 tensorboard
 PyYAML
-torch
 tqdm
+fastapi
+uvicorn[standard]

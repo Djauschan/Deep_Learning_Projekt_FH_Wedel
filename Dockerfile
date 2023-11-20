@@ -34,6 +34,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
+RUN --mount=type=cache,target=/root/.cache/pip \
+    --mount=type=bind,source=requirements_torch.txt,target=requirements_torch.txt \
+    python -m pip install -r requirements_torch.txt
 # Switch to the non-privileged user to run the application.
 USER appuser
 
