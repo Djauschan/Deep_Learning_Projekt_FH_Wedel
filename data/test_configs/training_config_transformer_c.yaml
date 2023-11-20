@@ -1,4 +1,4 @@
-source_data: C:\Users\nikla\OneDrive\Uni\23WS\Projekt\Deep_Learning\data\input\AAPL_1min.txt
+source_data: data\us3000_tickers_A-B_1min_iqksn\AAPL_1min.txt
 batch_size: 8
 epochs: 100
 learning_rate: 0.0001
