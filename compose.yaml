@@ -20,9 +20,9 @@ services:
     extends:
       service: base_service
 
-    # Map port 5001 on the host to port 5001 in the container
+    # Map port 5001 on the host to port 5000 in the container
     ports:
-      - 5001:5001
+      - 5001:5000
 
     # Specify the command to run when the container starts
     # This command starts the training process
@@ -46,9 +46,9 @@ services:
     extends:
       service: base_service
 
-    # Map port 5002 on the host to port 5002 in the container
+    # Map port 5002 on the host to port 5000 in the container
     ports:
-      - 5002:5002
+      - 5002:5000
 
     # Specify the command to run when the container starts
     # This command starts the prediction process
@@ -72,9 +72,9 @@ services:
     extends:
       service: base_service
 
-    # Map port 5003 on the host to port 5003 in the container
+    # Map port 5003 on the host to port 5000 in the container
     ports:
-      - 5003:5003
+      - 5003:5000
 
     # Specify the command to run when the container starts
     # This command starts the visualization process
@@ -92,9 +92,9 @@ services:
     extends:
       service: base_service
 
-    # Map port 5004 on the host to port 5004 in the container
+    # Map port 5004 on the host to port 5000 in the container
     ports:
-      - 5004:5004
+      - 5004:5000
 
     # Specify the command to run when the container starts
     # This command tests if the dataloader and the dataset are working as expected
