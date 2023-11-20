@@ -1,9 +1,13 @@
 import argparse
 from typing import Final
 import yaml
+import torch
+from torch.utils.data import DataLoader
 from src_transformers.pipelines.trainer import Trainer
 from src_transformers.preprocessing.perSymbolDataset import PerSymbolDataset
 from src_transformers.preprocessing.txtReader import DataReader
+from src_transformers.utils.model_io import save_model, load_newest_model
+from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
 
 TRAIN_COMMAND: Final[str] = "train"
 PREDICT_COMMAND: Final[str] = "predict"
@@ -77,8 +81,19 @@ def main() -> None:
     if args.pipeline == TRAIN_COMMAND:
         trainer = Trainer.create_trainer_from_config(**config)
         trainer.start_training(dataset)
+        save_model(trainer.model)
+
     else:
-        print("placeholder for predict")
+        dataloader = DataLoader(dataset, shuffle=False)
+        model_class = MODEL_NAME_MAPPING[last_key]
+        model = load_newest_model(model_class)
+        with torch.no_grad():
+            # During development, a prediction is only made for one sample.
+            data = next(iter(dataloader))
+            inputs = data[0]
+            outputs = model(inputs)
+            print(model_class.__name__, "predictions:")
+            print(outputs)
 
 
 if __name__ == "__main__":
