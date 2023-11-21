@@ -1,15 +1,16 @@
-source_data: ./data/input/2021_AA_1min.txt
+source_data: ./data/input/AAPL_1min.txt
 batch_size: 8
-epochs: 10
-learning_rate: 0.0001
+epochs: 100
+learning_rate: 0.01
 validation_split: 0.1
 use_gpu: True
 transformer:
   src_vocab_size: 5000
   tgt_vocab_size: 5000
-  d_model: 512
-  num_heads: 8
-  num_layers: 6
-  d_ff: 2048
-  max_seq_length: 100
+  output_dim: 2
+  d_model: 2
+  num_heads: 1
+  num_layers: 2
+  d_ff: 200
+  max_seq_length: 197
   dropout: 0.1
