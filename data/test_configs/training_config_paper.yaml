@@ -1,0 +1,16 @@
+source_data: ./data/input/AAPL_1min.txt
+batch_size: 8
+epochs: 100
+learning_rate: 0.01
+validation_split: 0.1
+use_gpu: True
+transformer:
+  src_vocab_size: 5000
+  tgt_vocab_size: 5000
+  output_dim: 2
+  d_model: 2
+  num_heads: 1
+  num_layers: 2
+  d_ff: 200
+  max_seq_length: 197
+  dropout: 0.1
