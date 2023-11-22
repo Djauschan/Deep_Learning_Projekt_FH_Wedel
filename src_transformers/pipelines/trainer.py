@@ -286,9 +286,11 @@ class Trainer:
             self.optimizer.zero_grad()
 
             if self.gpu_activated:
-                batch = batch.to("cuda")
+                input = input.to("cuda")
+                target = target.to("cuda")
 
-            prediction = self.model.forward(input)
+
+            prediction = self.model.forward(input, target)
             loss = self.loss(prediction, target.float())
 
             loss.backward()
@@ -323,7 +325,7 @@ class Trainer:
                 if self.gpu_activated:
                     batch = batch.to("cuda")
 
-                prediction = self.model.forward(input)
+                prediction = self.model.forward(input, target)
                 loss = self.loss(prediction, target.float())
 
                 validation_loss += loss.sum().item()

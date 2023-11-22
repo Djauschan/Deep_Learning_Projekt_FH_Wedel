@@ -46,7 +46,8 @@ class PerSymbolDataset(Dataset):
 
         # Only the numerical data is used for machine learning.
         # columns from position 1 (inclusive) to position 9 (exclusive)
-        numeric_values = data_frame.iloc[:, 1:9].to_numpy()
+        numeric_values = data_frame.iloc[:, 1:8].to_numpy()
+        #TODO Dimensionen fixen (waren vorher 9) -> müssen gerade sein
 
         # Represent symbol as one-hot vector
         one_hot_vec = create_one_hot_vector(symbols, self.symbol)
@@ -57,8 +58,9 @@ class PerSymbolDataset(Dataset):
             one_hot_vec, (numeric_values.shape[0], 1))), axis=1)
 
         # The data of the current transaction is used to predict the data of the next transaction.
-        input = numeric_values[:-1]
-        output = numeric_values[1:]
+        output = numeric_values[:-1]
+        input = numeric_values[1:]
+        #TODO langfristige Lösung finden
 
         # For the use of pytorch, the data is converted into tensors.
         self.input_data = torch.tensor(input, dtype=torch.float32)

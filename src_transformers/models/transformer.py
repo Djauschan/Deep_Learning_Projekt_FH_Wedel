@@ -199,7 +199,7 @@ class Transformer(nn.Module):
         src_vocab_size,
         tgt_vocab_size,
         output_dim,
-        d_model,
+        input_dim,
         num_heads,
         num_layers,
         d_ff,
@@ -209,18 +209,18 @@ class Transformer(nn.Module):
         super(Transformer, self).__init__()
 
         # Positional encoding
-        self.positional_encoding = PositionalEncoding(d_model, max_seq_length)
+        self.positional_encoding = PositionalEncoding(input_dim, max_seq_length)
 
         px = pd.DataFrame(self.positional_encoding.pe[0].numpy())
 
         self.encoder_layers = nn.ModuleList(
-            [EncoderLayer(d_model, num_heads, d_ff, dropout) for _ in range(num_layers)]
+            [EncoderLayer(input_dim, num_heads, d_ff, dropout) for _ in range(num_layers)]
         )
         self.decoder_layers = nn.ModuleList(
-            [DecoderLayer(d_model, num_heads, d_ff, dropout) for _ in range(num_layers)]
+            [DecoderLayer(input_dim, num_heads, d_ff, dropout) for _ in range(num_layers)]
         )
 
-        self.fc = nn.Linear(d_model, output_dim)
+        self.fc = nn.Linear(input_dim, output_dim)
         self.dropout = nn.Dropout(dropout)
 
     def generate_mask(self, src, tgt):
@@ -232,7 +232,7 @@ class Transformer(nn.Module):
         ).bool()
         tgt_mask = tgt_mask & nopeak_mask.unsqueeze(3)
         src_mask = src_mask & nopeak_mask.unsqueeze(3) #TODO: alles true
-        return src_mask[:,:,:,:,0], tgt_mask[:,:,:,:,0]
+        return  src_mask, tgt_mask #src_mask[:,:,:,:,0], tgt_mask[:,:,:,:,0]
 
     def forward(self, src, tgt):
         # Generate masks for Inputs (src) and Targets (tgt)
