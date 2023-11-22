@@ -5,6 +5,11 @@
 services:
 
   base_service:
+
+    #runtime: nvidia # Specify the NVIDIA runtime for GPU support
+    #environment:
+    #- NVIDIA_VISIBLE_DEVICES=all # Specify which GPUs to use
+
     # Specify the build context for this service (current directory)
     build:
       context: .
