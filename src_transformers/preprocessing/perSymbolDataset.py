@@ -46,8 +46,7 @@ class PerSymbolDataset(Dataset):
 
         # Only the numerical data is used for machine learning.
         # columns from position 1 (inclusive) to position 9 (exclusive)
-        numeric_values = data_frame.iloc[:, 1:8].to_numpy()
-        #TODO Dimensionen fixen (waren vorher 9) -> müssen gerade sein
+        numeric_values = data_frame.iloc[:, 1:9].to_numpy()
 
         # Represent symbol as one-hot vector
         one_hot_vec = create_one_hot_vector(symbols, self.symbol)
@@ -57,10 +56,16 @@ class PerSymbolDataset(Dataset):
         numeric_values = np.concatenate((numeric_values, np.tile(
             one_hot_vec, (numeric_values.shape[0], 1))), axis=1)
 
+        # If the number of columns is odd, a column with zeros is added.
+        # This is necessary because the number of columns must be even for the transformer model.
+        if numeric_values.shape[1] % 2 != 0:
+            zero_column = np.zeros((numeric_values.shape[0], 1))
+            numeric_values = np.concatenate(
+                (numeric_values, zero_column), axis=1)
+
         # The data of the current transaction is used to predict the data of the next transaction.
-        output = numeric_values[:-1]
-        input = numeric_values[1:]
-        #TODO langfristige Lösung finden
+        input = numeric_values[:-1]
+        output = numeric_values[1:]
 
         # For the use of pytorch, the data is converted into tensors.
         self.input_data = torch.tensor(input, dtype=torch.float32)
