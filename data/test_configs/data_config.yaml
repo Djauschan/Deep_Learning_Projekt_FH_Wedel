@@ -29,3 +29,7 @@ SYMBOLS_TO_READ:
   - "DXY"
   - "SPX"
   - "W5000"
+  - "DJCISI"
+  - "DJCIEN"
+  - "DJCIIK"
+  - "DJINET"

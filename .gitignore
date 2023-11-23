@@ -1,5 +1,6 @@
 # Custom
 runs/
+*.deb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

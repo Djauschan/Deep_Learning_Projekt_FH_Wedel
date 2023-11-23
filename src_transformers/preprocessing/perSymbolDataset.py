@@ -136,3 +136,4 @@ if __name__ == "__main__":
     print(test_sample[0])
     print("OUTPUT:")
     print(test_sample[1])
+    print(torch.cuda.is_available())
