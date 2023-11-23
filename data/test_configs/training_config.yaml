@@ -1,15 +1,14 @@
-batch_size: 8
-epochs: 100
+batch_size: 80
+epochs: 10
 learning_rate: 0.01
 validation_split: 0.1
 use_gpu: True
 # The code expects the model to always be the last variable in the configuration file.
 transformer:
-  src_vocab_size: 5000
-  tgt_vocab_size: 5000
   output_dim: 2
   num_heads: 1
   num_layers: 2
   d_ff: 200
-  max_seq_length: 1
+  seq_len_encoder: 197
+  seq_len_decoder: 3
   dropout: 0.1

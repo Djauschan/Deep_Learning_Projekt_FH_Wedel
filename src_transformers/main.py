@@ -64,6 +64,8 @@ def main() -> None:
     with open(args.data_config, "r", encoding="utf-8") as f:
         data_config = yaml.safe_load(f)
 
+    # TODO Niklas: move dataloading in trainer class to avoid loading if not required for other pipelines @Duwe spricht da was gegen?
+
     txt_reader = DataReader(data_config)
     data = txt_reader.read_next_txt()
     dataset = PerSymbolDataset(data, txt_reader.symbols, data_config)
@@ -81,7 +83,7 @@ def main() -> None:
     if args.pipeline == TRAIN_COMMAND:
         trainer = Trainer.create_trainer_from_config(**config)
         trainer.start_training(dataset)
-        save_model(trainer.model)
+        save_model(trainer.model) #TODO raus? Wird durch logger erledigt
 
     else:
         dataloader = DataLoader(dataset, shuffle=False)

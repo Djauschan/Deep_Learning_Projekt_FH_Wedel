@@ -64,8 +64,8 @@ class PerSymbolDataset(Dataset):
                 (numeric_values, zero_column), axis=1)
 
         # The data of the current transaction is used to predict the data of the next transaction.
-        input = numeric_values[:-1]
-        output = numeric_values[1:]
+        input = numeric_values
+        output = numeric_values
 
         # For the use of pytorch, the data is converted into tensors.
         self.input_data = torch.tensor(input, dtype=torch.float32)
@@ -78,16 +78,20 @@ class PerSymbolDataset(Dataset):
 
     def __len__(self) -> int:
         """
-        Returns the number of samples in the dataset
+        Returns the number of samples in the dataset.
+        This is the length of the Input data minus the length of
+        the Input for one sample minus the length of the target for one sample plus one.
 
         Returns:
             int: number of samples in the dataset
         """
-        return len(self.input_data)
+        return len(self.input_data) - self.config['INPUT_LEN'] - self.config['TARGET_LEN'] + 1
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         """
-        Returns sampel (X, Y) at position idx
+        Returns sampel of input and target sequences. The input and target sequences are of the
+        length defined in the config. The start of the target sequence is the first entry after
+        the input sequence.
 
         Args:
             idx (int): position of sample in the tensor
@@ -95,7 +99,17 @@ class PerSymbolDataset(Dataset):
         Returns:
             tuple[torch.Tensor, torch.Tensor]: sampel (X, Y) at position idx
         """
-        return self.input_data[idx], self.output_data[idx]
+        # Get the input data of length INPUT_LEN
+        start_input = idx
+        end_input = idx + self.config['INPUT_LEN']
+        input = self.input_data[start_input:end_input]
+
+        # Get the output target data of length TARGET_LEN after the input period
+        start_target = end_input + 1
+        end_target = start_target + self.config['TARGET_LEN']
+        target = self.output_data[start_target:end_target]
+
+        return input, target
 
 
 # Code for debugging

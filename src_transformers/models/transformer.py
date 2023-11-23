@@ -4,11 +4,14 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
+from src_transformers.utils.viz_transformer import visualize_attention_mask_plotly
+
 
 class MultiHeadAttention(nn.Module):
     """
     This module contains one multi-head attention layer of the transformer model.
     """
+
     def __init__(self, d_model, num_heads):
         """
         Args:
@@ -23,7 +26,7 @@ class MultiHeadAttention(nn.Module):
         self.d_model = d_model  # Model's dimension
         self.num_heads = num_heads  # Number of attention heads
         self.d_k = (
-            d_model // num_heads
+                d_model // num_heads
         )  # Dimension of each head's key, query, and value
 
         # Linear layers for transforming inputs
@@ -81,6 +84,7 @@ class PositionWiseFeedForward(nn.Module):
     are the same and can be specified with init parameters. The hidden dimension is specified
     as d_ff.
     """
+
     def __init__(self, d_model, d_ff):
         """
         Args:
@@ -100,19 +104,20 @@ class PositionalEncoding(nn.Module):
     """
     This class produces a positional encoding for a transformer model.
     """
-    def __init__(self, d_model:int, max_seq_length:int):
+
+    def __init__(self, d_model: int, seq_length: int):
         """
         Args:
             d_model (int): The model's dimension (number of features in one timestep).
-            max_seq_length (int): The maximum sequence length (number of timesteps).
+            seq_length (int): The maximum sequence length (number of timesteps).
         """
         super(PositionalEncoding, self).__init__()
 
-        # Create a positional encoding matrix with shape (max_seq_length, d_model)
-        pe = torch.zeros(max_seq_length, d_model)
+        # Create a positional encoding matrix with shape (seq_len_encoder, d_model)
+        pe = torch.zeros(seq_length, d_model)
 
         # Creates postitional encoding for one timestep of the length of the max sequence
-        position = torch.arange(0, max_seq_length, dtype=torch.float).unsqueeze(1)
+        position = torch.arange(0, seq_length, dtype=torch.float).unsqueeze(1)
 
         # Creates a divisor for the positional encoding along the model's dimension
         # This is to make the positional encoding's values decay along the model's dimension
@@ -127,13 +132,14 @@ class PositionalEncoding(nn.Module):
         self.register_buffer("pe", pe)
 
     def forward(self, x):
-        return x + self.pe[:, : x.size(0)] #Old: 1
+        return x + self.pe[:, : x.size(2)]  # Old: 1
 
 
 class EncoderLayer(nn.Module):
     """
     This module contains one encoder layer of the transformer model.
     """
+
     def __init__(self, d_model, num_heads, d_ff, dropout):
         """
         Args:
@@ -154,7 +160,7 @@ class EncoderLayer(nn.Module):
         attn_output = self.self_attn(x, x, x, mask)
 
         # Add + normalize + dropout
-        x = self.norm1(x + self.dropout(attn_output)) #TODO: Norm lieber vorher?
+        x = self.norm1(x + self.dropout(attn_output))  # TODO: Norm lieber vorher?
 
         # Forward feed forward layer
         ff_output = self.feed_forward(x)
@@ -176,7 +182,6 @@ class DecoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, enc_output, src_mask, tgt_mask):
-
         # Forward self attention layer for tgt inputs
         attn_output = self.self_attn(x, x, x, tgt_mask)
         x = self.norm1(x + self.dropout(attn_output))
@@ -195,23 +200,23 @@ class DecoderLayer(nn.Module):
 
 class Transformer(nn.Module):
     def __init__(
-        self,
-        src_vocab_size,
-        tgt_vocab_size,
-        output_dim,
-        input_dim,
-        num_heads,
-        num_layers,
-        d_ff,
-        max_seq_length,
-        dropout,
+            self,
+            output_dim,
+            input_dim,
+            num_heads,
+            num_layers,
+            d_ff,
+            seq_len_encoder,
+            seq_len_decoder,
+            dropout,
     ):
         super(Transformer, self).__init__()
 
         # Positional encoding
-        self.positional_encoding = PositionalEncoding(input_dim, max_seq_length)
+        self.positional_encoding_encoder = PositionalEncoding(input_dim, seq_len_encoder)
+        self.positional_encoding_decoder = PositionalEncoding(input_dim, seq_len_decoder)
 
-        px = pd.DataFrame(self.positional_encoding.pe[0].numpy())
+        px = pd.DataFrame(self.positional_encoding_encoder.pe[0].numpy())
 
         self.encoder_layers = nn.ModuleList(
             [EncoderLayer(input_dim, num_heads, d_ff, dropout) for _ in range(num_layers)]
@@ -223,29 +228,49 @@ class Transformer(nn.Module):
         self.fc = nn.Linear(input_dim, output_dim)
         self.dropout = nn.Dropout(dropout)
 
-    def generate_mask(self, src, tgt):
-        src_mask = (src != 0).unsqueeze(1).unsqueeze(3) #Old:2
-        tgt_mask = (tgt != 0).unsqueeze(1).unsqueeze(3)
-        seq_length = tgt.size(1)
-        nopeak_mask = (
-            1 - torch.triu(torch.ones(1, seq_length, seq_length), diagonal=1)
-        ).bool()
-        tgt_mask = tgt_mask & nopeak_mask.unsqueeze(3)
-        src_mask = src_mask & nopeak_mask.unsqueeze(3) #TODO: alles true
-        return  src_mask, tgt_mask #src_mask[:,:,:,:,0], tgt_mask[:,:,:,:,0]
+    def generate_mask(self, seq, no_peak: bool):
+        """
+        Generates an attention Mask for the Attention Layer The mask will be
+        a square of the sequence with boolean values.
+        Args:
+            seq: sequence of samples that need to be masked
+            no_peak: true, if the attention should be masked diagonally
+
+        Returns: Attention Mask as torch tensor.
+
+        """
+        mask = (seq != 0).unsqueeze(1).unsqueeze(3)
+        seq_length = seq.size(1)
+
+        # generate squared tensor from sequence
+        nopeak_mask = torch.ones(1, seq_length, seq_length)
+
+        # add diagonal no peak mask if required
+        if no_peak:
+            nopeak_mask = 1 - torch.triu(nopeak_mask, diagonal=1)
+
+        nopeak_mask = nopeak_mask.bool()
+
+        # some formating for dimensionality (no clue why, just dont touch it)
+        mask = mask & nopeak_mask.unsqueeze(3)
+        mask = mask[:,:,:,:,0]
+
+        return mask
 
     def forward(self, src, tgt):
         # Generate masks for Inputs (src) and Targets (tgt)
-        src_mask, tgt_mask = self.generate_mask(src, tgt)
+        src_mask = self.generate_mask(src, no_peak=False)
+        tgt_mask = self.generate_mask(tgt, no_peak=True)
+        dec_mask = torch.ones(tgt_mask.size(0), tgt_mask.size(1), tgt_mask.size(2), src_mask.size(3)).bool()
 
         # Embed inputs and apply positional encoding
         src_embedded = self.dropout(
-            self.positional_encoding(src)
+            self.positional_encoding_encoder(src)
         )
 
         # Embed target and apply positional encoding
         tgt_embedded = self.dropout(
-            self.positional_encoding(tgt)
+            self.positional_encoding_decoder(tgt)
         )
 
         test = src_mask.numpy()
@@ -253,15 +278,14 @@ class Transformer(nn.Module):
         # Forward encoder layers
         enc_output = src_embedded
         for enc_layer in self.encoder_layers:
-            enc_output = enc_layer(enc_output, mask=src_mask) #TODO: src_mask required?
+            enc_output = enc_layer(enc_output, mask=src_mask)
 
         # Forward decoder layers
         dec_output = tgt_embedded
         for dec_layer in self.decoder_layers:
-            dec_output = dec_layer(dec_output, enc_output, src_mask, tgt_mask)
+            dec_output = dec_layer(dec_output, enc_output, dec_mask, tgt_mask)
 
         output = self.fc(dec_output)
         return output
 
-
-#test = Transformer(max_seq_length=200, d_model=10, num_heads=2, num_layers=3, d_ff=2048, dropout=0.1, src_vocab_size=10000, tgt_vocab_size=10000)
+# test = Transformer(seq_len_encoder=200, d_model=10, num_heads=2, num_layers=3, d_ff=2048, dropout=0.1, src_vocab_size=10000, tgt_vocab_size=10000)
