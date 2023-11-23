@@ -190,14 +190,16 @@ class Trainer:
             dataset (Dataset): Dataset to be used for training, optimizing and validating the model.
         """
 
+        # determine train and val set size
         dataset_size = len(dataset)
         validation_size = int(np.floor(self.validation_split * dataset_size))
         train_size = dataset_size - validation_size
 
-        train_dataset, validation_dataset = random_split(
-            dataset, [train_size, validation_size]
-        )
+        # Split dataset by index not random
+        train_dataset = torch.utils.data.Subset(dataset, range(train_size))
+        validation_dataset = torch.utils.data.Subset(dataset, range(train_size, train_size + train_size))
 
+        # create data torch loader
         self.train_loader = DataLoader(
             train_dataset, batch_size=self.batch_size, shuffle=False
         )
@@ -298,6 +300,8 @@ class Trainer:
 
             train_loss += loss.item()
             step_count += 1
+
+            print(f'Batch {step_count} loss: {loss.item}')
 
         return train_loss / step_count
 
