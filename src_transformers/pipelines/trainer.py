@@ -287,12 +287,16 @@ class Trainer:
             # Reset optimizer
             self.optimizer.zero_grad()
 
+            # Create the input for the decoder
+            # Targets are shifted one to the right and last entry of targets is filled on idx 0
+            dec_input = torch.cat((input[:, -1, :].unsqueeze(1), target[:, :-1, :]), dim=1)
+
             if self.gpu_activated:
                 input = input.to("cuda")
                 target = target.to("cuda")
+                dec_input = dec_input.to("cuda")
 
-
-            prediction = self.model.forward(input, target)
+            prediction = self.model.forward(input, dec_input)
             loss = self.loss(prediction, target.float())
 
             loss.backward()
@@ -326,10 +330,16 @@ class Trainer:
 
         with torch.no_grad():
             for input, target in self.validation_loader:
-                if self.gpu_activated:
-                    batch = batch.to("cuda")
 
-                prediction = self.model.forward(input, target)
+                # prepare decoder input
+                dec_input = torch.cat((input[:, -1, :].unsqueeze(1), target[:, :-1, :]), dim=1)
+
+                if self.gpu_activated:
+                    input = input.to("cuda")
+                    target = target.to("cuda")
+                    dec_input = dec_input.to("cuda")
+
+                prediction = self.model.forward(input, dec_input)
                 loss = self.loss(prediction, target.float())
 
                 validation_loss += loss.sum().item()
