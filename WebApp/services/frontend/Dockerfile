@@ -5,11 +5,11 @@ FROM node:18.12
 WORKDIR /app
 
 # install app dependencies
-COPY ./package*.json ./
+COPY ./services/frontend/package*.json ./
 RUN npm install
 
 # add app
-COPY . .
+COPY ./services/frontend .
 
 # build app
 RUN npm run build

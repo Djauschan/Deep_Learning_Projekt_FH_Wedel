@@ -35,15 +35,15 @@ def get_db():
         db.close()
 
 
-# # test method to get Microsoft Stock 
-# @app.post("/createStock/{stock_name}")
-# def create_stock(stock_name: str, db: Session = Depends(get_db)):
-#     return crud.create_stock(stock_name=stock_name, db=db)
+# test method to get Microsoft Stock 
+@app.post("/createStock/{stock_name}")
+def create_stock(stock_name: str, db: Session = Depends(get_db)):
+    return crud.create_stock(stock_name=stock_name, db=db)
 
-# # method to get all stock entries
-# @app.get("/getStocks", response_model=list[schemas.Stock])
-# async def get_stocks(db: Session = Depends(get_db)):
-#     return crud.get_stocks(db)
+# method to get all stock entries
+@app.get("/getStocks", response_model=list[schemas.Stock])
+async def get_stocks(db: Session = Depends(get_db)):
+    return crud.get_stocks(db)
 
 # post method to delete table "users"
 @app.post("/deleteUsers/")
