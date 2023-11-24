@@ -26,7 +26,7 @@ class MultiHeadAttention(nn.Module):
         self.d_model = d_model  # Model's dimension
         self.num_heads = num_heads  # Number of attention heads
         self.d_k = (
-                d_model // num_heads
+            d_model // num_heads
         )  # Dimension of each head's key, query, and value
 
         # Linear layers for transforming inputs
@@ -40,7 +40,8 @@ class MultiHeadAttention(nn.Module):
         This function calculates the Self-Attention for one head.
         """
         # Calculate attention scores (i.e. similarity scores between query and keys)
-        attn_scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
+        attn_scores = torch.matmul(
+            Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
 
         # Apply mask if provided (useful for preventing attention to certain parts like padding)
         if mask is not None:
@@ -122,7 +123,8 @@ class PositionalEncoding(nn.Module):
         # Creates a divisor for the positional encoding along the model's dimension
         # This is to make the positional encoding's values decay along the model's dimension
         div_term = torch.exp(
-            torch.arange(0, d_model, 2).float() * -(math.log(10000.0) / d_model)
+            torch.arange(0, d_model, 2).float() * -
+            (math.log(10000.0) / d_model)
         )
 
         # Apply the div term to the positionoal encoding to create the positional encoding matrix
@@ -160,7 +162,8 @@ class EncoderLayer(nn.Module):
         attn_output = self.self_attn(x, x, x, mask)
 
         # Add + normalize + dropout
-        x = self.norm1(x + self.dropout(attn_output))  # TODO: Norm lieber vorher?
+        # TODO: Norm lieber vorher?
+        x = self.norm1(x + self.dropout(attn_output))
 
         # Forward feed forward layer
         ff_output = self.feed_forward(x)
@@ -209,20 +212,27 @@ class Transformer(nn.Module):
             seq_len_encoder,
             seq_len_decoder,
             dropout,
+            use_gpu
     ):
         super(Transformer, self).__init__()
 
+        self.use_gpu = use_gpu
+
         # Positional encoding
-        self.positional_encoding_encoder = PositionalEncoding(input_dim, seq_len_encoder)
-        self.positional_encoding_decoder = PositionalEncoding(input_dim, seq_len_decoder)
+        self.positional_encoding_encoder = PositionalEncoding(
+            input_dim, seq_len_encoder)
+        self.positional_encoding_decoder = PositionalEncoding(
+            input_dim, seq_len_decoder)
 
         px = pd.DataFrame(self.positional_encoding_encoder.pe[0].numpy())
 
         self.encoder_layers = nn.ModuleList(
-            [EncoderLayer(input_dim, num_heads, d_ff, dropout) for _ in range(num_layers)]
+            [EncoderLayer(input_dim, num_heads, d_ff, dropout)
+             for _ in range(num_layers)]
         )
         self.decoder_layers = nn.ModuleList(
-            [DecoderLayer(input_dim, num_heads, d_ff, dropout) for _ in range(num_layers)]
+            [DecoderLayer(input_dim, num_heads, d_ff, dropout)
+             for _ in range(num_layers)]
         )
 
         self.fc = nn.Linear(input_dim, output_dim)
@@ -245,6 +255,9 @@ class Transformer(nn.Module):
         # generate squared tensor from sequence
         nopeak_mask = torch.ones(1, seq_length, seq_length)
 
+        if self.use_gpu:
+            nopeak_mask = nopeak_mask.to('cuda')
+
         # add diagonal no peak mask if required
         if no_peak:
             nopeak_mask = 1 - torch.triu(nopeak_mask, diagonal=1)
@@ -253,7 +266,10 @@ class Transformer(nn.Module):
 
         # some formating for dimensionality (no clue why, just dont touch it)
         mask = mask & nopeak_mask.unsqueeze(3)
-        mask = mask[:,:,:,:,0]
+        mask = mask[:, :, :, :, 0]
+
+        if self.use_gpu:
+            mask = mask.to('cuda')
 
         return mask
 
@@ -261,7 +277,13 @@ class Transformer(nn.Module):
         # Generate masks for Inputs (src) and Targets (tgt)
         src_mask = self.generate_mask(src, no_peak=False)
         tgt_mask = self.generate_mask(tgt, no_peak=True)
-        dec_mask = torch.ones(tgt_mask.size(0), tgt_mask.size(1), tgt_mask.size(2), src_mask.size(3)).bool()
+        dec_mask = torch.ones(tgt_mask.size(0), tgt_mask.size(
+            1), tgt_mask.size(2), src_mask.size(3)).bool()
+
+        if self.use_gpu:
+            dec_mask = dec_mask.to('cuda')
+            src_mask = src_mask.to('cuda')
+            tgt_mask = tgt_mask.to('cuda')
 
         # Embed inputs and apply positional encoding
         src_embedded = self.dropout(
@@ -272,8 +294,6 @@ class Transformer(nn.Module):
         tgt_embedded = self.dropout(
             self.positional_encoding_decoder(tgt)
         )
-
-        test = src_mask.numpy()
 
         # Forward encoder layers
         enc_output = src_embedded

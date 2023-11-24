@@ -78,6 +78,7 @@ def main() -> None:
     inner_dict['output_dim'] = dataset.output_dim
     inner_dict['seq_len_encoder'] = dataset.seq_len_encoder
     inner_dict['seq_len_decoder'] = dataset.seq_len_decoder
+    inner_dict['use_gpu'] = config['use_gpu']
 
     # Add the modified inner dictionary back to the outer dictionary
     config[last_key] = inner_dict
