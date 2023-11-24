@@ -105,7 +105,7 @@ class PerSymbolDataset(Dataset):
         input = self.input_data[start_input:end_input]
 
         # Get the output target data of length TARGET_LEN after the input period
-        start_target = end_input + 1
+        start_target = end_input
         end_target = start_target + self.config['TARGET_LEN']
         target = self.output_data[start_target:end_target]
 

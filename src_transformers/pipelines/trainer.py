@@ -197,7 +197,8 @@ class Trainer:
 
         # Split dataset by index not random
         train_dataset = torch.utils.data.Subset(dataset, range(train_size))
-        validation_dataset = torch.utils.data.Subset(dataset, range(train_size, train_size + train_size))
+        validation_dataset = torch.utils.data.Subset(
+            dataset, range(train_size, train_size + validation_size))
 
         # create data torch loader
         self.train_loader = DataLoader(
@@ -289,7 +290,8 @@ class Trainer:
 
             # Create the input for the decoder
             # Targets are shifted one to the right and last entry of targets is filled on idx 0
-            dec_input = torch.cat((input[:, -1, :].unsqueeze(1), target[:, :-1, :]), dim=1)
+            dec_input = torch.cat(
+                (input[:, -1, :].unsqueeze(1), target[:, :-1, :]), dim=1)
 
             if self.gpu_activated:
                 input = input.to("cuda")
@@ -305,7 +307,7 @@ class Trainer:
             train_loss += loss.item()
             step_count += 1
 
-            print(f'Batch {step_count} loss: {loss.item}')
+            print(f'Batch {step_count} loss: {loss.item()}')
 
         return train_loss / step_count
 
@@ -332,7 +334,8 @@ class Trainer:
             for input, target in self.validation_loader:
 
                 # prepare decoder input
-                dec_input = torch.cat((input[:, -1, :].unsqueeze(1), target[:, :-1, :]), dim=1)
+                dec_input = torch.cat(
+                    (input[:, -1, :].unsqueeze(1), target[:, :-1, :]), dim=1)
 
                 if self.gpu_activated:
                     input = input.to("cuda")
