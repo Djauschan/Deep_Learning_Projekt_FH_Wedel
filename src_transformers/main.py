@@ -76,6 +76,8 @@ def main() -> None:
     # Add new key-value pairs to the inner dictionary
     inner_dict['input_dim'] = dataset.input_dim
     inner_dict['output_dim'] = dataset.output_dim
+    inner_dict['seq_len_encoder'] = dataset.seq_len_encoder
+    inner_dict['seq_len_decoder'] = dataset.seq_len_decoder
 
     # Add the modified inner dictionary back to the outer dictionary
     config[last_key] = inner_dict
@@ -83,7 +85,7 @@ def main() -> None:
     if args.pipeline == TRAIN_COMMAND:
         trainer = Trainer.create_trainer_from_config(**config)
         trainer.start_training(dataset)
-        save_model(trainer.model) #TODO raus? Wird durch logger erledigt
+        save_model(trainer.model)  # TODO raus? Wird durch logger erledigt
 
     else:
         dataloader = DataLoader(dataset, shuffle=False)

@@ -76,6 +76,10 @@ class PerSymbolDataset(Dataset):
         self.input_dim = self.input_data.shape[1]
         self.output_dim = self.output_data.shape[1]
 
+        # Define Sequence length for encoder and decoder
+        self.seq_len_encoder = config['INPUT_LEN']
+        self.seq_len_decoder = config['TARGET_LEN']
+
     def __len__(self) -> int:
         """
         Returns the number of samples in the dataset.

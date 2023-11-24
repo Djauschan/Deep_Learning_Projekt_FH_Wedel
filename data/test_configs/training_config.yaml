@@ -9,6 +9,4 @@ transformer:
   num_heads: 1
   num_layers: 2
   d_ff: 200
-  seq_len_encoder: 100
-  seq_len_decoder: 100
   dropout: 0.1
