@@ -208,7 +208,7 @@ class Trainer:
             validation_dataset, batch_size=self.batch_size, shuffle=False
         )
 
-    def train_model(self, patience: int = 0, inflation: int = 1) -> str:
+    def train_model(self, patience: int = 10, inflation: int = 1) -> str:
         """
         Trains the model for a specified number of epochs. For each epoch, the method calculates
         the training loss and validation loss, logs these losses, and saves the current state
@@ -220,7 +220,7 @@ class Trainer:
 
         Args:
             patience (int): The number of epochs to wait for improvement before stopping training.
-                            Defaults to 0.
+                            Defaults to 10.
             inflation (int): The factor by which to inflate the number of epochs. Defaults to 1.
 
         Returns:
@@ -228,8 +228,8 @@ class Trainer:
         """
         # self.inflation = inflation
         # Daten fuer Early stopping
-        # min_loss = float('inf')
-        # cur_patience = 0
+        min_loss = float('inf')
+        cur_patience = 0
 
         for epoch in tqdm(range(self.epochs)):
             try:
@@ -242,17 +242,15 @@ class Trainer:
 
                 # TODO: Implement early stopping
                 # Early stopping
-                # if (min_loss > validation_loss):
-                #     min_loss = validation_loss
-                #     cur_patience = 0
-                #     # Speicher das aktuell beste Netz
-                #     self.logger.save_net(self.model)
-                # else:
-                #     if (patience > 0):
-                #         cur_patience += 1
-                #         if (cur_patience == patience):
-                #             finish_reason = 'Training finished because of early stopping'
-                #             break
+                if (min_loss > validation_loss):
+                    min_loss = validation_loss
+                    cur_patience = 0
+                else:
+                    if (patience > 0):
+                        cur_patience += 1
+                        if (cur_patience == patience):
+                            finish_reason = 'Training finished because of early stopping'
+                            break
 
                 # TODO: Move this method to this class (breach of logger competencies)
                 self.logger.save_net(self.model)
@@ -307,7 +305,7 @@ class Trainer:
             train_loss += loss.item()
             step_count += 1
 
-            print(f'Batch {step_count} loss: {loss.item()}')
+            # print(f'Batch {step_count} loss: {loss.item()}')
 
         return train_loss / step_count
 
