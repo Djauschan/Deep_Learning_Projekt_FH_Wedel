@@ -8,5 +8,6 @@ test= DataReader({"READ_ALL_FILES":"READ_ALL_FILES"})
 
 txt_files, symbols=test.get_txt_files()
 
+#Test for-Schleife später löschen
 for i in symbols: 
     print(i)
