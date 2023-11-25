@@ -7,3 +7,4 @@ tqdm
 statsmodels
 pmdarima
 torch
+scikit-learn
