@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 from src_transformers.pipelines.trainer import Trainer
 from src_transformers.preprocessing.perSymbolDataset import PerSymbolDataset
+from src_transformers.preprocessing.multiSymbolDataset import MultiSymbolDataset
 from src_transformers.preprocessing.txtReader import DataReader
 from src_transformers.utils.model_io import save_model, load_newest_model
 from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
@@ -67,6 +68,9 @@ def main() -> None:
     # TODO Niklas: move dataloading in trainer class to avoid loading if not required for other pipelines @Duwe spricht da was gegen?
 
     txt_reader = DataReader(data_config)
+    test = MultiSymbolDataset(txt_reader, data_config)
+
+    txt_reader.reset_index()
     data = txt_reader.read_next_txt()
     dataset = PerSymbolDataset(data, txt_reader.symbols, data_config)
 
@@ -92,13 +96,7 @@ def main() -> None:
         dataloader = DataLoader(dataset, shuffle=False)
         model_class = MODEL_NAME_MAPPING[last_key]
         model = load_newest_model(model_class)
-        with torch.no_grad():
-            # During development, a prediction is only made for one sample.
-            data = next(iter(dataloader))
-            inputs = data[0]
-            outputs = model(inputs)
-            print(model_class.__name__, "predictions:")
-            print(outputs)
+
 
 
 if __name__ == "__main__":

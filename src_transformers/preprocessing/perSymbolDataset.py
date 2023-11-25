@@ -132,12 +132,8 @@ if __name__ == "__main__":
     data = txt_reader.read_next_txt()
     dataset = PerSymbolDataset(data, txt_reader.symbols, config)
     # Create data loader
-    dataloader = DataLoader(
-        dataset, batch_size=dataset.config["BATCH_SIZE"], shuffle=False)
+    dataloader = DataLoader(dataset, shuffle=False, batch_size=1)
     # Print the first sample.
     test_sample = next(iter(dataloader))[0]
-    print("INPUT:")
-    print(test_sample[0])
-    print("OUTPUT:")
-    print(test_sample[1])
-    print(torch.cuda.is_available())
+    print("TEST SAMPLE:")
+    print(test_sample)

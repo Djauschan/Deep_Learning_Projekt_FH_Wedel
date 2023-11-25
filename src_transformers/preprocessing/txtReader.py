@@ -115,3 +115,9 @@ class DataReader():
         else:
             # No more files to read
             return None
+
+    def reset_index(self):
+        """
+        Resets the index to start reading the files from the beginning again.
+        """
+        self.current_file_idx = 0

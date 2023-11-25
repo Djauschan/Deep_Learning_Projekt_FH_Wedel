@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+from src_transformers.preprocessing.txtReader import DataReader
 
 # If CSV files containing the mapping of symbols to names are available,
 # they are read and dictionaries are created.
@@ -96,3 +97,67 @@ def create_one_hot_vector(symbols: list, symbol: str) -> np.array:
         return one_hot_vector
     else:
         raise ValueError(f"Symbol: '{symbol}' not found!")
+
+
+def get_all_dates(reader: DataReader) -> pd.DataFrame:
+    """
+    Reads in all files that are to be imported and creates a data frame that contains the union of all timestamps of all read-in files.
+
+    Args:
+        reader (DataReader): DataReader object that reads in the files.
+
+    Returns:
+        pd.DataFrame: Data frame that contains the union of all timestamps of all read-in files.
+    """
+    all_timestamps = set()
+
+    df = reader.read_next_txt()
+    while df is not None:
+        all_timestamps.update(df['timestamp'])
+        # Explicitly delete the data frame to free up memory.
+        del df
+        df = reader.read_next_txt()
+
+    reader.reset_index()
+
+    # Create an empty DataFrame with timestamps
+    return pd.DataFrame({'timestamp': sorted(list(all_timestamps))})
+
+
+def fill_dataframe(all_dates: pd.DataFrame, reader: DataReader) -> pd.DataFrame:
+    """
+    A data frame is created that contains the values required for training for all files that are to be read in. 
+    The columns are filled so that values are available for all files for all timestamps.
+    For stocks and ETFs, the closing price and the volume per minute are loaded. 
+    For indices, only the closing price per minute is taken into account.
+
+    Args:
+        all_dates (pd.DataFrame): Data frame that contains the union of all timestamps of all read-in files.
+        reader (DataReader): DataReader object that reads in the files.
+
+    Returns:
+        pd.DataFrame: Data frame that contains the values required for training for all files that are to be read in.
+    """
+    df = reader.read_next_txt()
+    while df is not None:
+        symbol = df['symbol'].iloc[0]
+        type = df['type'].iloc[0]
+
+        if type == 'index':
+            merged_df = pd.merge(all_dates, df[['timestamp', 'close']],
+                                 how='left', on='timestamp', suffixes=('', f'_{symbol}'))
+            # ffill: forward fill, bfill: backward fill
+            all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
+
+        if type == 'stock' or type == 'ETF':
+            merged_df = pd.merge(all_dates, df[['timestamp', 'close', 'volume']],
+                                 how='left', on='timestamp', suffixes=('', f'_{symbol}'))
+            # ffill: forward fill, bfill: backward fill
+            all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
+            all_dates[f'volume {symbol}'] = merged_df['volume'].ffill().bfill()
+
+        # Explicitly delete the data frame to free up memory.
+        del df
+        df = reader.read_next_txt()
+
+    return all_dates
