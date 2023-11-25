@@ -6,6 +6,7 @@ from src_transformers.preprocessing.txtReader import DataReader
 from src_transformers.preprocessing.dataProcessing import add_time_information, get_all_dates, fill_dataframe
 from torch.utils.data import DataLoader
 from src_transformers.preprocessing.csv_io import read_csv_chunk, count_rows, get_column_count
+import numpy as np
 
 
 class MultiSymbolDataset(Dataset):
@@ -66,8 +67,9 @@ class MultiSymbolDataset(Dataset):
         else:
             # The existing file with input data is used.
             self.length = count_rows(self.config["DATA_FILE_PATH"])
-            self.input_dim = get_column_count(self.config["DATA_FILE_PATH"])
             self.output_dim = 1
+            self.input_dim = get_column_count(
+                self.config["DATA_FILE_PATH"]) - self.output_dim
 
         # Define Sequence length for encoder and decoder
         self.seq_len_encoder = config['INPUT_LEN']
@@ -110,6 +112,9 @@ class MultiSymbolDataset(Dataset):
         target_data = data.iloc[:, -1].to_numpy()
         data.pop(data.columns[-1])
 
+        # The target data must be a 2D array.
+        target_data = [np.array([element]) for element in target_data]
+
         # The other columns contain the input data.
         input_data = data.to_numpy()
 
@@ -141,6 +146,6 @@ if __name__ == "__main__":
     dataset = MultiSymbolDataset(txt_reader, config)
     dataloader = DataLoader(dataset, shuffle=False, batch_size=1)
     # Print the first sample.
-    test_sample = next(iter(dataloader))
+    test_sample = next(iter(dataloader))[1]
     print("TEST SAMPLE:")
     print(test_sample)

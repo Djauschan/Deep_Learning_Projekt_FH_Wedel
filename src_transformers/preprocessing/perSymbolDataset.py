@@ -134,6 +134,6 @@ if __name__ == "__main__":
     # Create data loader
     dataloader = DataLoader(dataset, shuffle=False, batch_size=1)
     # Print the first sample.
-    test_sample = next(iter(dataloader))[0]
+    test_sample = next(iter(dataloader))[1]
     print("TEST SAMPLE:")
     print(test_sample)

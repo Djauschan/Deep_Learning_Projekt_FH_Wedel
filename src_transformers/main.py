@@ -68,7 +68,7 @@ def main() -> None:
     # TODO Niklas: move dataloading in trainer class to avoid loading if not required for other pipelines @Duwe spricht da was gegen?
 
     txt_reader = DataReader(data_config)
-    test = MultiSymbolDataset(txt_reader, data_config)
+    # dataset = MultiSymbolDataset(txt_reader, data_config) #TODO Make this work
 
     txt_reader.reset_index()
     data = txt_reader.read_next_txt()

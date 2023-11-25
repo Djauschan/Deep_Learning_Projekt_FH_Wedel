@@ -21,8 +21,6 @@ def read_csv_chunk(file_path: str, start_index: int, stop_index: int) -> pd.Data
     # Read the specified range from the CSV file, starting from the header
     df = pd.read_csv(file_path, skiprows=start_index,
                      nrows=num_rows_to_read)
-
-    print("Shape of the read data: ", df.shape)
     return df
 
 

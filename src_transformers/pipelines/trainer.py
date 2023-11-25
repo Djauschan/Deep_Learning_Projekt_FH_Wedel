@@ -286,6 +286,9 @@ class Trainer:
             # Reset optimizer
             self.optimizer.zero_grad()
 
+            # print("input[:, -1, :].unsqueeze(1) shape:", input[:, -1, :].unsqueeze(1).shape)
+            # print("target[:, :-1, :] shape:", target[:, :-1, :].shape)
+
             # Create the input for the decoder
             # Targets are shifted one to the right and last entry of targets is filled on idx 0
             dec_input = torch.cat(
