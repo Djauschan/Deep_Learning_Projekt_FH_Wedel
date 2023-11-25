@@ -1,0 +1,34 @@
+---
+DEBUG_OUTPUT: false
+INPUT_LEN: 200
+TARGET_LEN: 3
+SHOW_PLOT: false
+VISUALIZE_ALL_DATA: true
+READ_ALL_FILES: false
+CREATE_NEW_FILE: true
+DATA_FILE_PATH: "data/output/Multi_Symbol.csv"
+SYMBOLS_TO_READ:
+# stocks
+  # - "AAPL"
+  # - "AAL"
+  # - "AMD"
+  # - "C"
+  - "MRNA"
+  - "NIO"
+  # - "NVDA"
+  # - "SNAP"
+  # - "SQ"
+  # - "TSLA"
+# ETFs
+  # - "ACWI"
+# indices
+  # - "DXY"
+  # - "SPX"
+  # - "DJCIGC"
+  - "DJCISI"
+  # - "DJCIEN"
+  # - "DJCIIK"
+  # - "DJI"
+  # - "DJINET"
+  # - "COMP"
+  # - "W5000"

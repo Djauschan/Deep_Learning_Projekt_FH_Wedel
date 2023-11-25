@@ -41,7 +41,7 @@ services:
         "-p",
         "train",
         "-d",
-        "data/test_configs/data_config.yaml"
+        "data/test_configs/data_config_multivariat.yaml"
       ]
 
   # Service to use a trained transformer model to predict
@@ -67,7 +67,7 @@ services:
         "-p",
         "predict",
         "-d",
-        "data/test_configs/data_config.yaml"
+        "data/test_configs/data_config_multivariat.yaml"
       ]
 
   # Service to visualize data
@@ -88,7 +88,7 @@ services:
         "python",
         "-m",
         "src_transformers.utils.visualize_data",
-        "data/test_configs/data_config.yaml"
+        "data/test_configs/data_config_multivariat.yaml"
       ]
 
   test_data:
@@ -108,5 +108,5 @@ services:
         "python",
         "-m",
         "src_transformers.preprocessing.perSymbolDataset",
-        "data/test_configs/data_config.yaml"
+        "data/test_configs/data_config_multivariat.yaml"
       ]
