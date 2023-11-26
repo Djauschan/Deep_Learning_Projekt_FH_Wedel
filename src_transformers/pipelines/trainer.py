@@ -1,17 +1,18 @@
 """
 This module contains the Trainer class which is used to train a PyTorch model.
 """
-
 from dataclasses import dataclass
-from typing import Optional
-import pandas as pd
+
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import DataLoader
 from tqdm import tqdm
+
 from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
+from src_transformers.pipelines.dataset_creation import create_dataset_from_config
+from src_transformers.pipelines.model_io import save_model
 from src_transformers.utils.logger import Logger
 
 
@@ -53,10 +54,11 @@ class Trainer:
         epochs: int,
         learning_rate: float,
         validation_split: float,
-        loss: Optional[str] = "mse",
-        optimizer: Optional[str] = "adam",
-        momentum: Optional[float] = 0,
-        use_gpu: Optional[bool] = True,
+        data_config: str,
+        loss: str = "mse",
+        optimizer: str = "adam",
+        momentum: float = 0,
+        use_gpu: bool = True,
         **kwargs,
     ) -> "Trainer":
         """
@@ -71,16 +73,18 @@ class Trainer:
             epochs (int): The number of epochs to train for.
             learning_rate (float): The learning rate for the optimizer.
             validation_split (float): The fraction of the data to use for validation.
-            loss (str, optional): The name of the loss function to use. Defaults to "mse".
-            optimizer (str, optional): The name of the optimizer to use. Defaults to "adam".
-            momentum (float, optional): The momentum for the "sgd" optimizer. Defaults to 0.
-            use_gpu (bool, optional): Whether to use a GPU for training. Defaults to True.
+            loss (str): The name of the loss function to use. Defaults to "mse".
+            optimizer (str): The name of the optimizer to use. Defaults to "adam".
+            momentum (float): The momentum for the "sgd" optimizer. Defaults to 0.
+            use_gpu (bool): Whether to use a GPU for training. Defaults to True.
             **kwargs: Additional keyword arguments.
                       These should include the model name and model parameters.
 
         Returns:
             Trainer: A Trainer instance with the specified configuration.
         """
+        # Setting up GPU based on availability and usage preference
+        gpu_activated = use_gpu and torch.cuda.is_available()
 
         # Setting up the loss
         if loss == "mse":
@@ -89,14 +93,21 @@ class Trainer:
             loss_instance = nn.CrossEntropyLoss()
         else:
             print(
-                f"Trainer initialization: Loss {loss} is not valid, defaulting to MSELoss"
+                f"[TRAINER]: Loss {loss} is not valid, defaulting to MSELoss"
             )
             loss_instance = nn.MSELoss()
 
         # Setting up the model from the model name and parameters in the config
+        # TODO: (for Luca) Revise this after I know more about the datasets
+        model_name = None
         try:
             model_name, model_parameters = kwargs.popitem()
-            model = MODEL_NAME_MAPPING[model_name](**model_parameters)
+            dataset = create_dataset_from_config(
+                data_config, model_name, model_parameters)
+
+            # NOTE: Regarding input & output dim: What to do for other models?
+            model = MODEL_NAME_MAPPING[model_name](
+                **model_parameters, input_dim=dataset.input_dim, output_dim=dataset.output_dim, gpu_activated=gpu_activated)
         except KeyError as parse_error:
             raise (
                 KeyError(f"The model '{model_name}' does not exist!")
@@ -104,7 +115,7 @@ class Trainer:
         except TypeError as model_error:
             raise (
                 TypeError(
-                    f"The creation of the {model_name} model failed with the following error message {model_error}"
+                    f"The creation of the {model_name} model failed with the following error message {model_error}."
                 )
             ) from model_error
 
@@ -114,15 +125,18 @@ class Trainer:
                 model.parameters(), lr=learning_rate)
             if momentum != 0:
                 print(
-                    f"Trainer initialization: Momentum {momentum} is not used since the optimizer is set to Adam"
+                    f"[TRAINER]: Momentum {momentum} is not used since the optimizer is set to Adam"
                 )
-        if optimizer == "sgd":
+        elif optimizer == "sgd":
             optimizer_instance = optim.SGD(
                 model.parameters(), lr=learning_rate, momentum=momentum
             )
-
-        # Setting up GPU based on availability and usage preference
-        gpu_activated = use_gpu and torch.cuda.is_available()
+        else:
+            print(
+                f"[TRAINER]: Optimizer {optimizer} is not valid, defaulting to Adam"
+            )
+            optimizer_instance = optim.Adam(
+                model.parameters(), lr=learning_rate)
 
         instance = cls(
             batch_size=batch_size,
@@ -136,9 +150,12 @@ class Trainer:
             logger=Logger(),
         )
 
+        cls._dataset = dataset
+        print("[TRAINER]: Trainer was successfully set up.")
+
         return instance
 
-    def start_training(self, dataset: Dataset) -> None:
+    def start_training(self) -> None:
         """
         This is the entrypoint method to start the training process for the model.
 
@@ -163,20 +180,18 @@ class Trainer:
             loss: {self.loss}\
             optimizer: {self.optimizer}\
             gpu activated: {self.gpu_activated}"
-        self.logger.log_string("Trainer configuration", config_str)
-        self.logger.model_text(self.model)
+        self.logger.write_text("Trainer configuration", config_str)
+        self.logger.write_model(self.model)
 
         # Creating training and validation data loaders from the given data source
-        self.setup_dataloaders(dataset)
+        train_loader, validation_loader = self.setup_dataloaders()
 
         # Perform model training
-        self.logger.train_start()
-        finish_reason = self.train_model()
-        self.logger.train_end(finish_reason)
+        self.logger.write_training_start()
+        finish_reason = self.train_model(train_loader, validation_loader)
+        self.logger.write_training_end(finish_reason)
 
-        self.logger.close()
-
-    def setup_dataloaders(self, dataset: Dataset) -> None:
+    def setup_dataloaders(self) -> tuple[DataLoader, DataLoader]:
         """
         Sets up the training and validation data loaders.
 
@@ -191,24 +206,27 @@ class Trainer:
         """
 
         # determine train and val set size
-        dataset_size = len(dataset)
+        dataset_size = len(self._dataset)
         validation_size = int(np.floor(self.validation_split * dataset_size))
         train_size = dataset_size - validation_size
 
         # Split dataset by index not random
-        train_dataset = torch.utils.data.Subset(dataset, range(train_size))
+        train_dataset = torch.utils.data.Subset(
+            self._dataset, range(train_size))
         validation_dataset = torch.utils.data.Subset(
-            dataset, range(train_size, train_size + validation_size))
+            self._dataset, range(train_size, train_size + validation_size))
 
-        # create data torch loader
-        self.train_loader = DataLoader(
+        # Create torch data loaders
+        train_loader = DataLoader(
             train_dataset, batch_size=self.batch_size, shuffle=False
         )
-        self.validation_loader = DataLoader(
+        validation_loader = DataLoader(
             validation_dataset, batch_size=self.batch_size, shuffle=False
         )
 
-    def train_model(self, patience: int = 10, inflation: int = 1) -> str:
+        return train_loader, validation_loader
+
+    def train_model(self, train_loader, validation_loader, patience: int = 10) -> str:
         """
         Trains the model for a specified number of epochs. For each epoch, the method calculates
         the training loss and validation loss, logs these losses, and saves the current state
@@ -221,48 +239,48 @@ class Trainer:
         Args:
             patience (int): The number of epochs to wait for improvement before stopping training.
                             Defaults to 10.
-            inflation (int): The factor by which to inflate the number of epochs. Defaults to 1.
 
         Returns:
             str: The reason the training ended.
         """
-        # self.inflation = inflation
-        # Daten fuer Early stopping
+        # Setup for early stopping
         min_loss = float('inf')
         cur_patience = 0
 
+        finish_reason = "Training terminated before training loop ran through."
         for epoch in tqdm(range(self.epochs)):
             try:
-                # for _ in range(self.inflation):
-                train_loss = self.calculate_train_loss()
-                self.logger.train_loss(train_loss, epoch)
+                train_loss = self.calculate_train_loss(train_loader)
+                self.logger.log_training_loss(train_loss, epoch)
 
-                validation_loss = self.calculate_validation_loss()
-                self.logger.val_loss(validation_loss, epoch)
+                validation_loss = self.calculate_validation_loss(
+                    validation_loader)
+                self.logger.log_validation_loss(validation_loss, epoch)
 
-                # TODO: Implement early stopping
                 # Early stopping
-                if (min_loss > validation_loss):
+                if min_loss > validation_loss:
                     min_loss = validation_loss
                     cur_patience = 0
                 else:
-                    if (patience > 0):
+                    if patience > 0:
                         cur_patience += 1
-                        if (cur_patience == patience):
-                            finish_reason = 'Training finished because of early stopping'
+                        if cur_patience == patience:
+                            finish_reason = "Training finished because of early stopping."
+                            self.save_model()
                             break
 
-                # TODO: Move this method to this class (breach of logger competencies)
-                self.logger.save_net(self.model)
+                self.save_model()
             except KeyboardInterrupt:
-                finish_reason = "Training interrupted by user."
+                finish_reason = "Training interrupted by user input."
                 break
-            else:
-                finish_reason = "Training finished normally."
+
+        # Overwrite finish reason if training was not finished due to early stopping or user input
+        if finish_reason == "Training terminated before training loop ran through.":
+            finish_reason = "Training was normally completed."
 
         return finish_reason
 
-    def calculate_train_loss(self) -> float:
+    def calculate_train_loss(self, train_loader) -> float:
         """
         Calculates the training loss for the model. This method is called during each epoch.
 
@@ -282,7 +300,7 @@ class Trainer:
         train_loss: float = 0
         step_count: int = 0
 
-        for input, target in self.train_loader:
+        for input, target in train_loader:
             # Reset optimizer
             self.optimizer.zero_grad()
 
@@ -312,7 +330,7 @@ class Trainer:
 
         return train_loss / step_count
 
-    def calculate_validation_loss(self) -> float:
+    def calculate_validation_loss(self, validation_loader) -> float:
         """
         Calculates the validation loss for the model. This method is called during each epoch.
 
@@ -332,7 +350,7 @@ class Trainer:
         step_count: int = 0
 
         with torch.no_grad():
-            for input, target in self.validation_loader:
+            for input, target in validation_loader:
 
                 # prepare decoder input
                 dec_input = torch.cat(
@@ -350,3 +368,11 @@ class Trainer:
                 step_count += 1
 
         return validation_loss / step_count
+
+    def save_model(self) -> None:
+        """
+        This method uses the `save_model` function to save the trained model to a file.
+        After the model is saved, the method logs a message to the console with the path to the file.
+        """
+        path = save_model(self.model)
+        print(f"[TRAINER]: Model saved to '{path}'")
