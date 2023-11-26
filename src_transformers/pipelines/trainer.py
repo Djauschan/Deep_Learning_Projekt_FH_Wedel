@@ -179,16 +179,16 @@ class Trainer:
             loss: {self.loss}\
             optimizer: {self.optimizer}\
             gpu activated: {self.gpu_activated}"
-        self.logger.log_text("Trainer configuration", config_str)
-        self.logger.log_model_string(self.model)
+        self.logger.write_text("Trainer configuration", config_str)
+        self.logger.write_model(self.model)
 
         # Creating training and validation data loaders from the given data source
         train_loader, validation_loader = self.setup_dataloaders()
 
         # Perform model training
-        self.logger.log_training_start()
+        self.logger.write_training_start()
         finish_reason = self.train_model(train_loader, validation_loader)
-        self.logger.log_training_end(finish_reason)
+        self.logger.write_training_end(finish_reason)
 
     def setup_dataloaders(self) -> tuple[DataLoader, DataLoader]:
         """
@@ -225,7 +225,7 @@ class Trainer:
 
         return train_loader, validation_loader
 
-    def train_model(self, train_loader, validation_loader, patience: int = 10, inflation: int = 1) -> str:
+    def train_model(self, train_loader, validation_loader, patience: int = 10) -> str:
         """
         Trains the model for a specified number of epochs. For each epoch, the method calculates
         the training loss and validation loss, logs these losses, and saves the current state
@@ -238,21 +238,17 @@ class Trainer:
         Args:
             patience (int): The number of epochs to wait for improvement before stopping training.
                             Defaults to 10.
-            inflation (int): The factor by which to inflate the number of epochs. Defaults to 1.
 
         Returns:
             str: The reason the training ended.
         """
-        # self.inflation = inflation
-        # Daten fuer Early stopping
+        # Setup for early stopping
         min_loss = float('inf')
         cur_patience = 0
 
         finish_reason = "Training terminated before training loop ran through."
-        user_interrupted = False
         for epoch in tqdm(range(self.epochs)):
             try:
-                # for _ in range(self.inflation):
                 train_loss = self.calculate_train_loss(train_loader)
                 self.logger.log_training_loss(train_loss, epoch)
 
@@ -260,28 +256,27 @@ class Trainer:
                     validation_loader)
                 self.logger.log_validation_loss(validation_loss, epoch)
 
-                # TODO: Implement early stopping
                 # Early stopping
-                if (min_loss > validation_loss):
+                if min_loss > validation_loss:
                     min_loss = validation_loss
                     cur_patience = 0
                 else:
-                    if (patience > 0):
+                    if patience > 0:
                         cur_patience += 1
-                        if (cur_patience == patience):
-                            finish_reason = 'Training finished because of early stopping'
+                        if cur_patience == patience:
+                            finish_reason = "Training finished because of early stopping."
+                            self.save_model()
                             break
 
-                # TODO: Move this method to this class (breach of logger competencies)
-                # self.logger.save_net(self.model)
+                self.save_model()
             except KeyboardInterrupt:
-                user_interrupted = True
+                finish_reason = "Training interrupted by user input."
                 break
 
-        if user_interrupted:
-            finish_reason = "Training interrupted by user input."
-        else:
+        # Overwrite finish reason if training was not finished due to early stopping or user input
+        if finish_reason == "Training terminated before training loop ran through.":
             finish_reason = "Training was normally completed."
+
         return finish_reason
 
     def calculate_train_loss(self, train_loader) -> float:

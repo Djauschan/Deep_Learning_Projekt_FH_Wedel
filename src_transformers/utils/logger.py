@@ -1,46 +1,78 @@
+"""
+This module contains the Logger class which is used to log training information.
+"""
+
 from datetime import datetime
 from typing import Optional
 
+import torch.nn as nn
 from torch.utils.tensorboard.writer import SummaryWriter
 from tqdm import tqdm
 
 
 class Logger():
     """
-    Class that enables logging.
-    This saves all information in the Summarywrite of pytorch.
+    A class used to log training information.
+
+    This class handles logging of training information to the console and to a TensorBoard log file. 
+    It logs the start and end times of the training, the training and validation losses for each
+    epoch, and the model architecture. Additionally, it handles closing the logger after training is
+    finished.
     """
 
     def __init__(self) -> None:
         """
-        Initializer of the Logger class.
-        Args:
-            name: Name of the logger/the run
-            locdir: Directory where the logs are saved
-            time_stamp: [True] if a time stamp should be added to the name
+        Initializes the Logger.
+
+        This init method sets up the TensorBoard writer with the name of the target directory set
+        to the current date and time. It also initializes the training start time to None.
         """
         current_time_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self._logger = SummaryWriter(f"runs/{current_time_string}")
+        self._summary_writer = SummaryWriter(f"runs/{current_time_string}")
         self._training_start: Optional[datetime] = None
 
-    def log_text(self, tag: str, text: str) -> None:
+    def write_text(self, tag: str, text: str) -> None:
         """
-        Logges a string TEXT in the token DESC
-        """
-        self._logger.add_text(tag, text)
+        Writes a custom text to a custom tag in the TensorBoard log file.
 
-    def log_training_start(self) -> None:
+        Args:
+            tag (str): The tag for the text.
+            text (str): The text to write.
         """
-        Logges the start time of the training
+        self._summary_writer.add_text(tag, text)
+
+    def write_model(self, model: nn.Module) -> None:
         """
-        tqdm.write("[LOG]: Training was started.")
+        Writes the model architecture formatted as text to the TensorBoard log file.
+
+        Args:
+            model (nn.Module): The model.
+        """
+        self._summary_writer.add_text("model", str(model))
+
+    def write_training_start(self) -> None:
+        """
+        Logs the start time of the training.
+
+        This method writes a message to the console, sets the training start time to the current
+        time, and writes the start time to the TensorBoard log file.
+        """
+        tqdm.write("[LOGGER]: Training was started.")
+
         self._training_start = datetime.now()
-        self._logger.add_text(
+        self._summary_writer.add_text(
             "training_duration/start_time", str(self._training_start))
 
-    def log_training_end(self, reason: str) -> None:
+    def write_training_end(self, reason: str) -> None:
         """
-        Logges the end time and duration of the training
+        Logs the end time of the training and the reason the training finished.
+
+        This method calculates the training duration, writes a message to the console, 
+        and writes the end time, training duration, and finish reason to the TensorBoard log file. 
+        It also closes the TensorBoard writer.
+
+        Args:
+            reason (str): The reason the training finished.
         """
         training_end = datetime.now()
 
@@ -49,33 +81,42 @@ class Logger():
             training_duration = None
         else:
             training_duration = training_end - self._training_start
-
-        self._logger.add_text("training_duration/end_time", str(training_end))
-        self._logger.add_text("training_duration/duration",
-                              str(training_duration))
-        self._logger.add_text("training_duration/reason", reason)
-
         tqdm.write(
-            f"[LOG]: Training finished with a runtime of {training_duration}. Finish reason: {reason}")
-        tqdm.write("[LOG]: Closing logger.")
-        self._logger.close()
+            f"[LOGGER]: Training finished with a runtime of {training_duration}. Finish reason: {reason}")
 
-    def log_validation_loss(self, value: float, step: int) -> None:
-        """
-        Logges the loss of the validation
-        """
-        tqdm.write(f"[LOG]: Validation Step {step} logged. Loss {value}")
-        self._logger.add_scalar("loss/val", value, step)
+        self._summary_writer.add_text(
+            "training_duration/end_time", str(training_end))
+        self._summary_writer.add_text("training_duration/duration",
+                                      str(training_duration))
+        self._summary_writer.add_text("training_duration/reason", reason)
 
-    def log_training_loss(self, value: float, step: int):
-        """
-        Logges the loss of the training
-        """
-        tqdm.write(f"[LOG]: Training Step {step} logged. Loss {value}")
-        self._logger.add_scalar("loss/train", value, step)
+        tqdm.write("[LOGGER]: Closing logger.")
+        self._summary_writer.close()
 
-    def log_model_string(self, model) -> None:
+    def log_training_loss(self, value: float, epoch: int):
         """
-        Logges the model in textual form
+        Logs the training loss for an epoch.
+
+        This method writes a message to the console and writes the training loss to the
+        TensorBoard log file.
+
+        Args:
+            value (float): The training loss.
+            epoch (int): The epoch number.
         """
-        self._logger.add_text("model", str(model))
+        tqdm.write(f"[LOGGER]: Epoch {epoch}: Training Loss = {value}")
+        self._summary_writer.add_scalar("loss/train", value, epoch)
+
+    def log_validation_loss(self, value: float, epoch: int) -> None:
+        """
+        Logs the validation loss for an epoch.
+
+        This method writes a message to the console and writes the validation loss to the
+        TensorBoard log file.
+
+        Args:
+            value (float): The validation loss.
+            epoch (int): The epoch number.
+        """
+        tqdm.write(f"[LOGGER]: Epoch {epoch}: Validation Loss = {value}")
+        self._summary_writer.add_scalar("loss/val", value, epoch)

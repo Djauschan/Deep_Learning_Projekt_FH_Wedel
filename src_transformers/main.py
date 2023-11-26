@@ -41,8 +41,8 @@ def main() -> None:
     and starts the training or prediction process based on the provided pipeline argument.
 
     Usage examples:
-        python -m src_transformers.main --config data/test_configs/training_config.yaml --pipeline train --data_config data/test_configs/data_config_multivariat.yaml
-        python -m src_transformers.main -c data/test_configs/training_config.yaml -p train -d data/test_configs/data_config_multivariat.yaml
+        python -m src_transformers.main --config data/test_configs/training_config.yaml --pipeline train
+        python -m src_transformers.main -c data/test_configs/training_config.yaml -p train
     """
     parser = setup_parser()
     args, _ = parser.parse_known_args()
@@ -58,7 +58,7 @@ def main() -> None:
         # dataloader = DataLoader(dataset, shuffle=False)
         # model_class = MODEL_NAME_MAPPING[last_key]
         # model = load_newest_model(model_class
-        print("placehoalder")
+        print("placeholder")
 
 
 if __name__ == "__main__":
