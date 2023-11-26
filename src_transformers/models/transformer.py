@@ -216,7 +216,7 @@ class Transformer(nn.Module):
     ):
         super(Transformer, self).__init__()
 
-        self.use_gpu = use_gpu
+        self.use_gpu = use_gpu and torch.cuda.is_available()
 
         # Positional encoding
         self.positional_encoding_encoder = PositionalEncoding(

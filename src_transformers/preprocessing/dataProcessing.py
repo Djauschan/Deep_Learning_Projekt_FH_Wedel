@@ -158,7 +158,7 @@ def fill_dataframe(all_dates: pd.DataFrame, reader: DataReader) -> tuple[list, p
                                  how='left', on='timestamp', suffixes=('', f'_{symbol}'))
             # ffill: forward fill, bfill: backward fill
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
-            all_dates[f'volume {symbol}'] = merged_df['volume'].ffill().bfill()
+            all_dates[f'volume {symbol}'] = merged_df['volume'].fillna(0)
             # The symbols of all stocks are saved in a list as they are used as target variables.
             if type == 'stock':
                 stocks.append(symbol)
