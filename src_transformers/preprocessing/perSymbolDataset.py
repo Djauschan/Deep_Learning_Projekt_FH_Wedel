@@ -1,13 +1,17 @@
+import sys
+
 import numpy as np
 import pandas as pd
 import torch
-from torch.utils.data import Dataset
+import yaml
+from torch.utils.data import DataLoader, Dataset
 
 from src_transformers.preprocessing.dataProcessing import (
     add_time_information,
     create_one_hot_vector,
     lookup_symbol,
 )
+from src_transformers.preprocessing.txtReader import DataReader
 
 
 class PerSymbolDataset(Dataset):
@@ -113,3 +117,26 @@ class PerSymbolDataset(Dataset):
         target = self.output_data[start_target:end_target]
 
         return input, target
+
+
+# Code for debugging
+if __name__ == "__main__":
+
+    # Check if the path to the configuration file was passed as an argument.
+    assert len(sys.argv) == 2
+
+    # Read in the configuration file.
+    config_file_path = sys.argv[1]
+    with open(config_file_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+
+    # Create dataset
+    txt_reader = DataReader(config)
+    data = txt_reader.read_next_txt()
+    dataset = PerSymbolDataset(data, txt_reader.symbols, config, 200, 3)
+    # Create data loader
+    dataloader = DataLoader(dataset, shuffle=False, batch_size=1)
+    # Print the first sample.
+    test_sample = next(iter(dataloader))[1]
+    print("TEST SAMPLE:")
+    print(test_sample)
