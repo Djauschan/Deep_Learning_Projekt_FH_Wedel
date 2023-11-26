@@ -93,7 +93,7 @@ class Trainer:
             loss_instance = nn.CrossEntropyLoss()
         else:
             print(
-                f"Trainer initialization: Loss {loss} is not valid, defaulting to MSELoss"
+                f"[TRAINER]: Loss {loss} is not valid, defaulting to MSELoss"
             )
             loss_instance = nn.MSELoss()
 
@@ -125,7 +125,7 @@ class Trainer:
                 model.parameters(), lr=learning_rate)
             if momentum != 0:
                 print(
-                    f"[TRAINER INITIALIZATION]: Momentum {momentum} is not used since the optimizer is set to Adam"
+                    f"[TRAINER]: Momentum {momentum} is not used since the optimizer is set to Adam"
                 )
         elif optimizer == "sgd":
             optimizer_instance = optim.SGD(
@@ -133,7 +133,7 @@ class Trainer:
             )
         else:
             print(
-                f"[TRAINER INITIALIZATION]: Optimizer {optimizer} is not valid, defaulting to Adam"
+                f"[TRAINER]: Optimizer {optimizer} is not valid, defaulting to Adam"
             )
             optimizer_instance = optim.Adam(
                 model.parameters(), lr=learning_rate)
@@ -151,6 +151,7 @@ class Trainer:
         )
 
         cls._dataset = dataset
+        print("[TRAINER]: Trainer was successfully set up.")
 
         return instance
 
@@ -369,5 +370,9 @@ class Trainer:
         return validation_loss / step_count
 
     def save_model(self) -> None:
-        path = save_model(self.model, )
+        """
+        This method uses the `save_model` function to save the trained model to a file.
+        After the model is saved, the method logs a message to the console with the path to the file.
+        """
+        path = save_model(self.model)
         print(f"[TRAINER]: Model saved to '{path}'")

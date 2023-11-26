@@ -1,76 +1,79 @@
-import os
+"""
+This module contains functions for saving and loading PyTorch models.
+"""
+
+from pathlib import Path
+from typing import Final
 
 import torch
+import torch.nn as nn
 
-# The path of the current file is determined.
-current_file_directory = os.path.dirname(os.path.abspath(__file__))
-
-# Construct the path to the 'data' directory located two levels up from the current file's directory
-data_dir_path = os.path.join(
-    current_file_directory, os.pardir, os.pardir, 'data')
-
-# Construct the path to the "models" directory which is located in the "output" directory
-# which is located in the "data" directory
-models_dir_path = os.path.join(data_dir_path, 'output', "models")
+MODEL_OUTPUT_PATH: Final[Path] = Path("./data/output/models")
 
 
-def get_latest_version(name: str, directory: str = models_dir_path) -> int:
+def get_latest_version(name: str) -> int:
     """
-    Returns the highest version number of a model with the specified name in the specified directory.
+    Returns the highest version number of a model with the specified name.
+
+    This method looks for files in the MODEL_OUTPUT_PATH directory that start with the
+    specified name followed by '_v', and returns the highest version number found.
+    If no such files are found, it returns 0.
 
     Args:
         name (str): The name of the model.
-        directory (str, optional): Directory in which the models are saved. Defaults to models_dir_path.
 
     Returns:
-        int: The highest version number of a model with the specified name in the specified directory or 0 if there is no version yet.
+        int: The highest version number of the specified model, or 0 if no model is found.
     """
+    relevant_file_names = list(map(lambda f: f.name, filter(lambda f: f.name.startswith(
+        f'{name}_v'), MODEL_OUTPUT_PATH.iterdir())))
 
-    # Determines the parts of the file names after the version identifier 'v'.
-    versions = [f.split(f'{name}_v')[1] for f in os.listdir(
-        directory) if f.startswith(f'{name}_v')]
+    # Split off the substrings before the v and after the . in the file name
+    version_numbers = list(
+        map(lambda f: int(f.split('v')[1].split('.')[0]), relevant_file_names))
 
-    # Determines the version numbers and converts them into int values.
-    versions = [int(f.split('.')[0]) for f in versions]
+    if version_numbers:
+        return max(version_numbers)
 
-    # Returns the highest version number or 0 if there is no version yet.
-    if versions:
-        return max(versions)
-    else:
-        return 0
+    return 0
 
 
-def save_model(model: torch.nn.Module, directory: str = models_dir_path) -> str:
+def save_model(model: nn.Module) -> str:
     """
-    Saves the specified model in the specified directory.
-    The new model saved receives the highest version number.
+    Saves the specified model to the MODEL_OUTPUT_PATH directory.
+
+    This method saves the model to a file with the name of the model's class followed by '_v'
+    and the next available version number. The file is saved in the MODEL_OUTPUT_PATH directory
+    and has the extension '.pt'.
 
     Args:
-        model (torch.nn.Module): The model to be saved.
-        directory (str, optional): Directory in which the model is saved. Defaults to models_dir_path.
+        model (nn.Module): The model to be saved.
+
+    Returns:
+        str: The absolute path to the saved model file.
     """
+    # Get the class name of the model as string
+    model_class_name = type(model).__name__
+    new_version = get_latest_version(model_class_name) + 1
 
-    # Get the class name of the model as sting
-    name = model.__class__.__name__
-
-    current_version = get_latest_version(name)
-    version = current_version + 1
-
-    # save the model in the passed direcotry in the format <name>_v<version>.pt
-    path = os.path.join(directory, f'{name}_v{version}.pt')
+    path = Path(MODEL_OUTPUT_PATH, f'{model_class_name}_v{new_version}.pt')
     torch.save(model, path)
-    return path
+
+    return str(path.absolute())
 
 
-def load_newest_model(model_class: torch.nn.Module) -> torch.nn.Module:
+def load_newest_model(model_class: nn.Module) -> nn.Module:
     """
-    Loads the newest model of the specified class from the models directory.
+    Loads the newest model of the specified class from the MODEL_OUTPUT_PATH directory.
+
+    This method loads the model file with the highest version number for the specified class. 
+    The model is loaded in evaluation mode.
 
     Args:
-        model_class (torch.nn.Module): The class of the model to be loaded.
+        model_class (nn.Module): The class of the model to be loaded.
 
     Raises:
-        ValueError: If no model of the specified class is found in the models directory.
+        ValueError: If no model of the specified class is found in the MODEL_OUTPUT_PATH directory.
 
     Returns:
         torch.nn.Module: The loaded model.
@@ -78,8 +81,10 @@ def load_newest_model(model_class: torch.nn.Module) -> torch.nn.Module:
     version = get_latest_version(model_class.__name__)
     if version == 0:
         raise ValueError(
-            f'No model of class {model_class.__name__} found in {models_dir_path}')
-    model = torch.load(os.path.join(
-        models_dir_path, f'{model_class.__name__}_v{version}.pt'))
+            f'No model of class {model_class.__name__} found in {MODEL_OUTPUT_PATH}')
+
+    model = torch.load(
+        Path(MODEL_OUTPUT_PATH, f"{model_class.__name__}_v{version}.pt"))
     model.eval()
+
     return model
