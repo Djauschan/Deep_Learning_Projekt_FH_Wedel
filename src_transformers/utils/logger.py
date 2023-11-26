@@ -56,7 +56,7 @@ class Logger():
         self._logger.add_text("training_duration/reason", reason)
 
         tqdm.write(
-            f"[LOG]: Training finished with a runtime of {training_duration}. Finish reason: {reason}.")
+            f"[LOG]: Training finished with a runtime of {training_duration}. Finish reason: {reason}")
         tqdm.write("[LOG]: Closing logger.")
         self._logger.close()
 

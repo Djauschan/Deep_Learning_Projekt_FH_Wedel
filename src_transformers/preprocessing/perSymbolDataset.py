@@ -1,12 +1,13 @@
-import torch
-import sys
-import yaml
-from torch.utils.data import Dataset
-from src_transformers.preprocessing.txtReader import DataReader
-from src_transformers.preprocessing.dataProcessing import lookup_symbol, add_time_information, create_one_hot_vector
-from torch.utils.data import DataLoader
-import pandas as pd
 import numpy as np
+import pandas as pd
+import torch
+from torch.utils.data import Dataset
+
+from src_transformers.preprocessing.dataProcessing import (
+    add_time_information,
+    create_one_hot_vector,
+    lookup_symbol,
+)
 
 
 class PerSymbolDataset(Dataset):
@@ -15,7 +16,7 @@ class PerSymbolDataset(Dataset):
     Pytorch uses the 3 functions [__init__, __len__, __getitem__]
     """
 
-    def __init__(self, data_frame: pd.DataFrame, symbols: list, config: dict):
+    def __init__(self, data_frame: pd.DataFrame, symbols: list, config: dict, input_length: int, target_length: int):
         """
         Initializes the Pytorch data set.
 
@@ -26,6 +27,8 @@ class PerSymbolDataset(Dataset):
         """
         # Dictionary for the configuration of data preprocessing is saved.
         self.config = config
+        self.input_length = input_length
+        self.target_length = target_length
 
         # The type of the ticker symbol is read out.
         self.type = data_frame["type"][1]
@@ -76,10 +79,6 @@ class PerSymbolDataset(Dataset):
         self.input_dim = self.input_data.shape[1]
         self.output_dim = self.output_data.shape[1]
 
-        # Define Sequence length for encoder and decoder
-        self.seq_len_encoder = config['INPUT_LEN']
-        self.seq_len_decoder = config['TARGET_LEN']
-
     def __len__(self) -> int:
         """
         Returns the number of samples in the dataset.
@@ -89,7 +88,7 @@ class PerSymbolDataset(Dataset):
         Returns:
             int: number of samples in the dataset
         """
-        return len(self.input_data) - self.config['INPUT_LEN'] - self.config['TARGET_LEN'] + 1
+        return len(self.input_data) - self.input_length - self.target_length + 1
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -105,35 +104,12 @@ class PerSymbolDataset(Dataset):
         """
         # Get the input data of length INPUT_LEN
         start_input = idx
-        end_input = idx + self.config['INPUT_LEN']
+        end_input = idx + self.input_length
         input = self.input_data[start_input:end_input]
 
         # Get the output target data of length TARGET_LEN after the input period
         start_target = end_input
-        end_target = start_target + self.config['TARGET_LEN']
+        end_target = start_target + self.target_length
         target = self.output_data[start_target:end_target]
 
         return input, target
-
-
-# Code for debugging
-if __name__ == "__main__":
-
-    # Check if the path to the configuration file was passed as an argument.
-    assert len(sys.argv) == 2
-
-    # Read in the configuration file.
-    config_file_path = sys.argv[1]
-    with open(config_file_path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-
-    # Create dataset
-    txt_reader = DataReader(config)
-    data = txt_reader.read_next_txt()
-    dataset = PerSymbolDataset(data, txt_reader.symbols, config)
-    # Create data loader
-    dataloader = DataLoader(dataset, shuffle=False, batch_size=1)
-    # Print the first sample.
-    test_sample = next(iter(dataloader))[0]
-    print("TEST SAMPLE:")
-    print(test_sample)
