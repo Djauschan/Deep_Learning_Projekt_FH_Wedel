@@ -1,5 +1,6 @@
-import torch
 import os
+
+import torch
 
 # The path of the current file is determined.
 current_file_directory = os.path.dirname(os.path.abspath(__file__))
@@ -39,7 +40,7 @@ def get_latest_version(name: str, directory: str = models_dir_path) -> int:
         return 0
 
 
-def save_model(model: torch.nn.Module, directory: str = models_dir_path) -> None:
+def save_model(model: torch.nn.Module, directory: str = models_dir_path) -> str:
     """
     Saves the specified model in the specified directory.
     The new model saved receives the highest version number.
@@ -58,7 +59,7 @@ def save_model(model: torch.nn.Module, directory: str = models_dir_path) -> None
     # save the model in the passed direcotry in the format <name>_v<version>.pt
     path = os.path.join(directory, f'{name}_v{version}.pt')
     torch.save(model, path)
-    print("Model saved to:", path)
+    return path
 
 
 def load_newest_model(model_class: torch.nn.Module) -> torch.nn.Module:
