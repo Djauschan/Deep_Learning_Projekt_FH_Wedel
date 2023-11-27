@@ -15,17 +15,20 @@ class MultiSymbolDataset(Dataset):
     Pytorch uses the 3 functions [__init__, __len__, __getitem__]
     """
 
-    def __init__(self, reader: DataReader, config: dict):
+    def __init__(self, reader: DataReader, config: dict, input_length: int, target_length: int):
         """
         Initializes the Pytorch data set.
 
         Args:
             reader (DataReader): Data Reader to read the files specified in the configuration file.
             config (dict): Dictionary for the configuration of data preprocessing.
+            input_length (int): Length of the input sequence.
+            target_length (int): Length of the target sequence.
         """
         self.config = config
         # A new file with input data is created.
         if self.config['CREATE_NEW_FILE']:
+            print("Data Preprocessing started")
             date_df = get_all_dates(reader)
             stocks, date_df = fill_dataframe(date_df, reader)
             # Sort the stock symbols alphabetically to ensure that the order is always the same.
@@ -50,7 +53,7 @@ class MultiSymbolDataset(Dataset):
                 # Add a column with ones for each stock symbol.
                 data = date_df.copy()
                 data.loc[:, stock] = 1
-                data.loc[:, 'Target'] = data[f'volume {stock}']
+                data.loc[:, 'Target'] = data[f'close {stock}']
 
                 if i == 0:
                     # The first stock is written to the file with the header.
@@ -64,6 +67,7 @@ class MultiSymbolDataset(Dataset):
                     # The other stocks are appended to the file without a header.
                     data.to_csv(self.config["DATA_FILE_PATH"],
                                 mode='a', header=False)
+            print("File: \"" + self.config["DATA_FILE_PATH"] + "\" created.")
         else:
             # The existing file with input data is used.
             self.length = count_rows(self.config["DATA_FILE_PATH"])
@@ -72,8 +76,8 @@ class MultiSymbolDataset(Dataset):
                 self.config["DATA_FILE_PATH"]) - self.output_dim
 
         # Define Sequence length for encoder and decoder
-        self.seq_len_encoder = config['INPUT_LEN']
-        self.seq_len_decoder = config['TARGET_LEN']
+        self.seq_len_encoder = input_length
+        self.seq_len_decoder = target_length
 
     def __len__(self) -> int:
         """
@@ -84,7 +88,9 @@ class MultiSymbolDataset(Dataset):
         Returns:
             int: number of samples in the dataset
         """
-        return 8 #self.length - self.config['INPUT_LEN'] - self.config['TARGET_LEN'] + 1
+
+        return self.length - self.seq_len_encoder - self.seq_len_decoder + 1
+
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -99,11 +105,11 @@ class MultiSymbolDataset(Dataset):
             tuple[torch.Tensor, torch.Tensor]: sampel (X, Y) at position idx
         """
         start_input = idx
-        end_input = idx + self.config['INPUT_LEN']
+        end_input = idx + self.seq_len_encoder
         start_target = end_input
-        end_target = start_target + self.config['TARGET_LEN']
-        input_length = self.config['INPUT_LEN']
-        target_length = self.config['TARGET_LEN']
+        end_target = start_target + self.seq_len_decoder
+        input_length = self.seq_len_encoder
+        target_length = self.seq_len_decoder
 
         data = read_csv_chunk(
             self.config["DATA_FILE_PATH"], start_input, end_target)

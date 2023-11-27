@@ -10,6 +10,8 @@ import torch.nn as nn
 
 MODEL_OUTPUT_PATH: Final[Path] = Path("./data/output/models")
 
+first_run = True
+
 
 def get_latest_version(name: str) -> int:
     """
@@ -52,11 +54,19 @@ def save_model(model: nn.Module) -> str:
     Returns:
         str: The absolute path to the saved model file.
     """
+    # Use the global variable to determine if this is the first run of the program.
+    global first_run
+
     # Get the class name of the model as string
     model_class_name = type(model).__name__
-    new_version = get_latest_version(model_class_name) + 1
+    version = get_latest_version(model_class_name)
 
-    path = Path(MODEL_OUTPUT_PATH, f'{model_class_name}_v{new_version}.pt')
+    if first_run:
+        # create a new version number if this is the first run of the program
+        version = version + 1
+        first_run = False
+
+    path = Path(MODEL_OUTPUT_PATH, f'{model_class_name}_v{version}.pt')
     torch.save(model, path)
 
     return str(path.absolute())

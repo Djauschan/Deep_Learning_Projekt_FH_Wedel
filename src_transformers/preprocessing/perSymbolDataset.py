@@ -28,6 +28,8 @@ class PerSymbolDataset(Dataset):
             data_frame (pd.DataFrame): Data frame that contains the data for the dataset.
             symbols (list): List that contains all symbols.
             config (dict): Dictionary for the configuration of data preprocessing.
+            input_length (int): Length of the input sequence.
+            target_length (int): Length of the target sequence.
         """
         # Dictionary for the configuration of data preprocessing is saved.
         self.config = config
