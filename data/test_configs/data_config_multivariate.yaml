@@ -7,11 +7,11 @@ CREATE_NEW_FILE: true
 DATA_FILE_PATH: "data/output/Multi_Symbol.csv"
 SYMBOLS_TO_READ:
 # stocks
-  # - "AAPL"
-  # - "AAL"
+  - "AAPL"
+  - "AAL"
   # - "AMD"
   # - "C"
-  - "MRNA"
+  # - "MRNA"
   - "NIO"
   # - "NVDA"
   # - "SNAP"
