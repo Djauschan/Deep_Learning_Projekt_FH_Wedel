@@ -24,7 +24,7 @@ def create_dataset_from_config(config_path: str, model_name: str, model_paramete
         input_length = 200
         target_length = 3
 
-    dataset = PerSymbolDataset(
-        data, txt_reader.symbols, data_config, input_length, target_length)
+    # TODO: Adjust for both dataset and use config to determine which dataset to use
+    dataset = MultiSymbolDataset(txt_reader, data_config, input_length, target_length)
 
     return dataset

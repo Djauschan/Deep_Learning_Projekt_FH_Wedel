@@ -107,7 +107,7 @@ class Trainer:
 
             # NOTE: Regarding input & output dim: What to do for other models?
             model = MODEL_NAME_MAPPING[model_name](
-                **model_parameters, input_dim=dataset.input_dim, output_dim=dataset.output_dim, gpu_activated=gpu_activated)
+                **model_parameters, dim_encoder=dataset.input_dim, dim_decoder=dataset.output_dim, gpu_activated=gpu_activated)
         except KeyError as parse_error:
             raise (
                 KeyError(f"The model '{model_name}' does not exist!")
@@ -300,6 +300,8 @@ class Trainer:
         train_loss: float = 0
         step_count: int = 0
 
+        loder_len = len(train_loader)
+
         for input, target in train_loader:
             # Reset optimizer
             self.optimizer.zero_grad()
@@ -310,8 +312,8 @@ class Trainer:
             # Create the input for the decoder
             # Targets are shifted one to the right and last entry of targets is filled on idx 0
             dec_input = torch.cat(
-                (input[:, -1, :].unsqueeze(1), target[:, :-1, :]), dim=1)
-
+                (input[:, -1, -1].unsqueeze(1).unsqueeze(1), target[:, :-1, :]), dim=1)
+            #
             if self.gpu_activated:
                 input = input.to("cuda")
                 target = target.to("cuda")
@@ -326,7 +328,8 @@ class Trainer:
             train_loss += loss.item()
             step_count += 1
 
-            # print(f'Batch {step_count} loss: {loss.item()}')
+            if step_count % 50 == 0:
+                print(f'Batch {step_count}/{loder_len} loss: {loss.item()}')
 
         return train_loss / step_count
 
