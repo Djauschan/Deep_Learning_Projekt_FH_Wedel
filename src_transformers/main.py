@@ -6,6 +6,7 @@ import yaml
 from src_transformers.pipelines.trainer import Trainer
 
 TRAIN_COMMAND: Final[str] = "train"
+EVAL_COMMAND: Final[str] = "evaluate"
 PREDICT_COMMAND: Final[str] = "predict"
 
 
@@ -28,7 +29,7 @@ def setup_parser() -> argparse.ArgumentParser:
         "--pipeline",
         "-p",
         required=True,
-        choices=[TRAIN_COMMAND, PREDICT_COMMAND],
+        choices=[TRAIN_COMMAND, PREDICT_COMMAND, EVAL_COMMAND],
         help="Pipeline to be started",
     )
 
@@ -54,6 +55,11 @@ def main() -> None:
         trainer = Trainer.create_trainer_from_config(**config)
         trainer.start_training()
         trainer.save_model()
+    if args.pipeline == EVAL_COMMAND:
+        # Validation split = 1 as the model will not be trained
+        config['validation_split'] = 1
+        trainer = Trainer.create_trainer_from_config(**config, eval_mode=True)
+        trainer.evaluate()
     else:
         # dataloader = DataLoader(dataset, shuffle=False)
         # model_class = MODEL_NAME_MAPPING[last_key]

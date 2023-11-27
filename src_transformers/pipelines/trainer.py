@@ -36,6 +36,7 @@ class Trainer:
         gpu_activated (bool): Whether to use a GPU for training.
         model (nn.Module): The PyTorch model to train.
         logger (Logger): The logger to use for logging training information.
+        eval_mode (bool): Is set to True, if the evaluation function is called.
     """
     batch_size: int
     epochs: int
@@ -46,6 +47,7 @@ class Trainer:
     gpu_activated: bool
     model: nn.Module
     logger: Logger
+    eval_mode: bool
 
     @classmethod
     def create_trainer_from_config(
@@ -59,6 +61,7 @@ class Trainer:
         optimizer: str = "adam",
         momentum: float = 0,
         use_gpu: bool = True,
+        eval_mode: bool = False,
         **kwargs,
     ) -> "Trainer":
         """
@@ -77,6 +80,7 @@ class Trainer:
             optimizer (str): The name of the optimizer to use. Defaults to "adam".
             momentum (float): The momentum for the "sgd" optimizer. Defaults to 0.
             use_gpu (bool): Whether to use a GPU for training. Defaults to True.
+            eval_mode (bool): should be set to true for evaluation.
             **kwargs: Additional keyword arguments.
                       These should include the model name and model parameters.
 
@@ -112,12 +116,12 @@ class Trainer:
             raise (
                 KeyError(f"The model '{model_name}' does not exist!")
             ) from parse_error
-        except TypeError as model_error:
-            raise (
-                TypeError(
-                    f"The creation of the {model_name} model failed with the following error message {model_error}."
-                )
-            ) from model_error
+        # except TypeError as model_error:
+        #     raise (
+        #         TypeError(
+        #             f"The creation of the {model_name} model failed with the following error message {model_error}."
+        #         )
+        #     ) from model_error
 
         # Setting up the optimizer
         if optimizer == "adam":
@@ -148,6 +152,7 @@ class Trainer:
             gpu_activated=gpu_activated,
             model=model,
             logger=Logger(),
+            eval_mode=eval_mode
         )
 
         cls._dataset = dataset
@@ -253,7 +258,7 @@ class Trainer:
                 train_loss = self.calculate_train_loss(train_loader)
                 self.logger.log_training_loss(train_loss, epoch)
 
-                validation_loss = self.calculate_validation_loss(
+                validation_loss, _ = self.calculate_validation_loss(
                     validation_loader)
                 self.logger.log_validation_loss(validation_loss, epoch)
 
@@ -330,7 +335,7 @@ class Trainer:
 
         return train_loss / step_count
 
-    def calculate_validation_loss(self, validation_loader) -> float:
+    def calculate_validation_loss(self, validation_loader) -> tuple[float, np.array]:
         """
         Calculates the validation loss for the model. This method is called during each epoch.
 
@@ -343,11 +348,23 @@ class Trainer:
         predictions and loss.
 
         Returns:
-            float: The average validation loss per batch.
+            tuple:
+                float: The average validation loss per batch.
+                np.array: Results for predictions (prediction & targets)
         """
         self.model.eval()
         validation_loss: float = 0
         step_count: int = 0
+
+        # create an array to store the predictions and targets of all samples
+        if self.eval_mode:
+            samples = len(validation_loader.dataset)
+            prediction_len = validation_loader.dataset.dataset.target_length
+            dim = validation_loader.dataset.dataset.output_dim
+            results = np.zeros((2, samples, prediction_len, dim))
+        else:
+            results = None
+
 
         with torch.no_grad():
             for input, target in validation_loader:
@@ -364,10 +381,20 @@ class Trainer:
                 prediction = self.model.forward(input, dec_input)
                 loss = self.loss(prediction, target.float())
 
+                if self.eval_mode:
+                    start_idx = step_count * self.batch_size
+                    end_idx = start_idx + self.batch_size
+                    results[0, start_idx:end_idx, :, :] = prediction
+                    results[1, start_idx:end_idx, :, :] = target
+
                 validation_loss += loss.sum().item()
                 step_count += 1
 
-        return validation_loss / step_count
+                print(f'Batch {step_count} loss: {loss.item()}')
+
+        loss = validation_loss / step_count
+
+        return loss, results
 
     def save_model(self) -> None:
         """
@@ -376,3 +403,21 @@ class Trainer:
         """
         path = save_model(self.model)
         print(f"[TRAINER]: Model saved to '{path}'")
+
+    def evaluate(self) -> None:
+        """
+
+
+        """
+        if self.gpu_activated:
+            self.model.to("cuda")
+            self.loss.to("cuda")
+
+        # Creating training and validation data loaders from the given data source
+        train_loader, validation_loader = self.setup_dataloaders()
+
+        self.eval_mode = True
+
+        loss, results = self.calculate_validation_loss(validation_loader)
+
+        print(loss)

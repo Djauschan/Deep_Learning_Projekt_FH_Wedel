@@ -88,7 +88,9 @@ class MultiSymbolDataset(Dataset):
         Returns:
             int: number of samples in the dataset
         """
+
         return self.length - self.seq_len_encoder - self.seq_len_decoder + 1
+
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         """
