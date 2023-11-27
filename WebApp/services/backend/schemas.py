@@ -2,22 +2,22 @@ from pydantic import BaseModel
 from typing import Optional
 
 
-# class StockBase(BaseModel):
-#     name: str
-#     date = ClassVar[str]
-#     open = float
-#     high = float
-#     low = float
-#     close = float
-#     volume = str
-#     class Config:
-#         from_attributes = True
+class StockBase(BaseModel):
+    name: str
+    date: str
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: str
+    class Config:
+        from_attributes = True
 
-# class Stock(StockBase):
-#     id: int
+class Stock(StockBase):
+    id: int
     
-# class StockCreate(StockBase):
-#     pass 
+class StockCreate(StockBase):
+    pass 
 
 class UserBase(BaseModel):
     email: str

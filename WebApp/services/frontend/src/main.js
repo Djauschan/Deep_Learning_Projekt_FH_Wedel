@@ -17,7 +17,7 @@ const app = createApp(App);
 createApp(App);
 
 const routes = [
-    { path: "/", component: HomePage, meta: { requiresAuth: false } },
+    { path: "/", component: HomePage, meta: { requiresAuth: true } },
     { path: "/login", component: LoginPage },
 ];
 

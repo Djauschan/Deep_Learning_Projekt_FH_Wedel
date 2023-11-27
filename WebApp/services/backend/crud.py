@@ -102,19 +102,18 @@ def get_logins_by_user_id(db: Session, owner_id: int):
 def create_stock(db: Session, stock_name: str, ):
     today = DT.date.today()
     return_list = []
-    for i in range(1, 31):
-        if((today - DT.timedelta(days=i)).weekday() < 5):
-            date = today - DT.timedelta(days=i)
-            date2 = today - DT.timedelta(days=i - 1) 
-            stock = get_data(stock_name, start_date=date.strftime("%m/%d/%y"), end_date=date2.strftime("%m/%d/%y"), index_as_date = True, interval="1d")
-            db_stock = models.Stock(name=stock_name, date=date.strftime("%m/%d/%y"), open=stock.open, high=stock.high, low=stock.low, close=stock.close)
-            return_list.append(db_stock)
-            db.add(db_stock)
-            db.refresh(db_stock)
-            
-    db.commit()
-
-    return return_list
+    if((today - DT.timedelta(days=301)).weekday() < 5):
+        date = today - DT.timedelta(days=301)
+        date2 = today - DT.timedelta(days=0) 
+        stock = get_data(stock_name, start_date=date.strftime("%m/%d/%y"), end_date=date2.strftime("%m/%d/%y"), index_as_date = True, interval="1d")
+        db_stock = models.Stock(name=stock_name, date=date.strftime("%m/%d/%y"), open=stock.open, high=stock.high, low=stock.low, close=stock.close)
+        return_list.append(db_stock)
+        print(stock)
+        return return_list
+    else:
+        print("nope")
+        return "it didnt worked"
+    
 
 # method to update stock data in table 'stocks'
         
