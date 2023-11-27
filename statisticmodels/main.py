@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from preprocessing.txtReader import DataReader
 from preprocessing.data_cleaning import DataCleaner
 from models.arima import Arima
-
+from sklearn.model_selection import TimeSeriesSplit
 
 test = DataReader({"READ_ALL_FILES": "READ_ALL_FILES"})
 
@@ -29,8 +29,49 @@ df16Cleaned=clean.df_at_16
 df09Cleaned=clean.df_at_09
 
 arimaData= clean.transformForNixtla(df16Cleaned)
-ArimaModell=Arima(arimaData)
-print(ArimaModell.data.head())
-arimaData.plot()
 
+arimaData['ds'] = pd.to_datetime(arimaData['ds'])
+train=arimaData[arimaData['ds']<="2020-03-23"]['y'].values
+test=arimaData[arimaData['ds']>"2020-03-23"]['y'].values
+
+ArimaModell=Arima(train)
+
+
+forecast= ArimaModell.forecast(len(test))
+
+plt.plot(arimaData['ds'], arimaData['y'], color='red', label='echte Daten')
+plt.plot(arimaData[arimaData['ds']>"2020-03-23"]['ds'], forecast['mean'], color='blue', label='Prognose')
+
+plt.plot(arimaData[arimaData['ds']<="2020-03-23"]['ds'],ArimaModell.fittedValues['fitted'],color='green', label='FIT AMK')
+plt.legend()
+plt.show()
+
+
+
+
+# Extract Closing values and Create TimeSeriesSplit splits
+# X = arimaData['y'].values
+# splits = TimeSeriesSplit(n_splits=3,test_size=100)
+
+
+# plt.figure(1)
+# index = 0
+# # Loop over splits to update train-test splits and models
+# fig,ax=plt.subplots(nrows=3)
+# for train_index, test_index in splits.split(X):
+# 	# Create and update train-test splits
+# 	train = X[train_index]
+# 	test = X[test_index]
+# 	print('Observations: %d' % (len(train) + len(test)))
+# 	print('Training Observations: %d' % (len(train)))
+# 	print('Testing Observations: %d' % (len(test)))
+# 	# Enter model and evaluation technique here
+
+
+# 	# Subplots for each train-test splits
+	
+# 	ax[index].plot(train,'green')
+# 	ax[index].plot([None for i in train] + [x for x in test],'blue')
+# 	index += 1
+# plt.show()
 
