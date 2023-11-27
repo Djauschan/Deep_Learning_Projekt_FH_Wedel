@@ -14,5 +14,5 @@ transformer:
   num_heads: 1
   num_layers: 2
   d_ff: 200
-  max_seq_length: 197
+  seq_len_encoder: 197
   dropout: 0.1

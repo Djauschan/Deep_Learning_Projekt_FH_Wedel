@@ -1,12 +1,17 @@
-import torch
 import sys
-import yaml
-from torch.utils.data import Dataset
-from src_transformers.preprocessing.txtReader import DataReader
-from src_transformers.preprocessing.dataProcessing import lookup_symbol, add_time_information, create_one_hot_vector
-from torch.utils.data import DataLoader
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+import torch
+import yaml
+from torch.utils.data import DataLoader, Dataset
+
+from src_transformers.preprocessing.dataProcessing import (
+    add_time_information,
+    create_one_hot_vector,
+    lookup_symbol,
+)
+from src_transformers.preprocessing.txtReader import DataReader
 
 
 class PerSymbolDataset(Dataset):
@@ -15,7 +20,7 @@ class PerSymbolDataset(Dataset):
     Pytorch uses the 3 functions [__init__, __len__, __getitem__]
     """
 
-    def __init__(self, data_frame: pd.DataFrame, symbols: list, config: dict):
+    def __init__(self, data_frame: pd.DataFrame, symbols: list, config: dict, input_length: int, target_length: int):
         """
         Initializes the Pytorch data set.
 
@@ -26,6 +31,8 @@ class PerSymbolDataset(Dataset):
         """
         # Dictionary for the configuration of data preprocessing is saved.
         self.config = config
+        self.input_length = input_length
+        self.target_length = target_length
 
         # The type of the ticker symbol is read out.
         self.type = data_frame["type"][1]
@@ -64,8 +71,8 @@ class PerSymbolDataset(Dataset):
                 (numeric_values, zero_column), axis=1)
 
         # The data of the current transaction is used to predict the data of the next transaction.
-        input = numeric_values[:-1]
-        output = numeric_values[1:]
+        input = numeric_values
+        output = numeric_values
 
         # For the use of pytorch, the data is converted into tensors.
         self.input_data = torch.tensor(input, dtype=torch.float32)
@@ -78,16 +85,20 @@ class PerSymbolDataset(Dataset):
 
     def __len__(self) -> int:
         """
-        Returns the number of samples in the dataset
+        Returns the number of samples in the dataset.
+        This is the length of the Input data minus the length of
+        the Input for one sample minus the length of the target for one sample plus one.
 
         Returns:
             int: number of samples in the dataset
         """
-        return len(self.input_data)
+        return len(self.input_data) - self.input_length - self.target_length + 1
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         """
-        Returns sampel (X, Y) at position idx
+        Returns sampel of input and target sequences. The input and target sequences are of the
+        length defined in the config. The start of the target sequence is the first entry after
+        the input sequence.
 
         Args:
             idx (int): position of sample in the tensor
@@ -95,7 +106,17 @@ class PerSymbolDataset(Dataset):
         Returns:
             tuple[torch.Tensor, torch.Tensor]: sampel (X, Y) at position idx
         """
-        return self.input_data[idx], self.output_data[idx]
+        # Get the input data of length INPUT_LEN
+        start_input = idx
+        end_input = idx + self.input_length
+        input = self.input_data[start_input:end_input]
+
+        # Get the output target data of length TARGET_LEN after the input period
+        start_target = end_input
+        end_target = start_target + self.target_length
+        target = self.output_data[start_target:end_target]
+
+        return input, target
 
 
 # Code for debugging
@@ -112,14 +133,10 @@ if __name__ == "__main__":
     # Create dataset
     txt_reader = DataReader(config)
     data = txt_reader.read_next_txt()
-    dataset = PerSymbolDataset(data, txt_reader.symbols, config)
+    dataset = PerSymbolDataset(data, txt_reader.symbols, config, 200, 3)
     # Create data loader
-    dataloader = DataLoader(
-        dataset, batch_size=dataset.config["BATCH_SIZE"], shuffle=False)
+    dataloader = DataLoader(dataset, shuffle=False, batch_size=1)
     # Print the first sample.
-    test_sample = next(iter(dataloader))[0]
-    print("INPUT:")
-    print(test_sample[0])
-    print("OUTPUT:")
-    print(test_sample[1])
-    print(torch.cuda.is_available())
+    test_sample = next(iter(dataloader))[1]
+    print("TEST SAMPLE:")
+    print(test_sample)

@@ -1,6 +1,7 @@
 ---
 DEBUG_OUTPUT: false
-BATCH_SIZE: 50
+INPUT_LEN: 200
+TARGET_LEN: 3
 SHOW_PLOT: false
 VISUALIZE_ALL_DATA: true
 READ_ALL_FILES: false
@@ -17,17 +18,15 @@ SYMBOLS_TO_READ:
   - "SQ"
   - "TSLA"
 # ETFs
-  - "AAAU"
-  - "ACWI"
-  - "AAXJ"
   - "ACWI"
 # indices
-  - "COMP"
-  - "DJCIGC"
   - "DXY"
   - "SPX"
-  - "W5000"
+  - "DJCIGC"
   - "DJCISI"
   - "DJCIEN"
   - "DJCIIK"
+  - "DJI"
   - "DJINET"
+  - "COMP"
+  - "W5000"

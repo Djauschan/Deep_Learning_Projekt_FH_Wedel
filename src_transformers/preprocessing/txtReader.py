@@ -9,21 +9,21 @@ class DataReader():
     The class is used to read the data from the files.
     """
 
-    def __init__(self, config: dict, data_dir_name: str = "data"):
+    def __init__(self, config: dict, data_dir_name: str = "data/input"):
         """
         Initializes a data reader.
 
         Args:
             config (dict): Dictionary for the configuration of data preprocessing.
-            data_dir_name (str, optional): Directory in which the data is located. Defaults to "data".
+            data_dir_name (str, optional): Directory in which the data is located. Defaults to "data/input".
 
         It is expected that the files containing the data are located in subdirectories. \n
         C:. \n
         ├───data \n
-        │   ├───etf-complete_tickers_A-C_1min_w1q7w \n
-        │   ├───... \n
-        │   ├───us3000_tickers_Y-Z_1min_v264r \n      
-        │   └───usindex_1min_u8d0l \n
+        │   ├───input \n
+        │   │   ├───etf-complete_tickers_A-C_1min_w1q7w \n
+        │   │   ├───s3000_tickers_A-B_1min_iqksn \n
+        │   │   ├───usindex_1min_u8d0l \n
         """
 
         # Dictionary for the configuration of data preprocessing is saved.
@@ -115,3 +115,9 @@ class DataReader():
         else:
             # No more files to read
             return None
+
+    def reset_index(self):
+        """
+        Resets the index to start reading the files from the beginning again.
+        """
+        self.current_file_idx = 0
