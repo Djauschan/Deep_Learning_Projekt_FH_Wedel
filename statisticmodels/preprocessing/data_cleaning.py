@@ -4,20 +4,22 @@ import numpy as np
 
 class DataCleaner:
     def __init__(self, raw_data: pd.DataFrame):
-        self.raw_data = raw_data.set_index("timestamp").drop(["symbol", "type"], axis=1)
+        self.raw_data = raw_data.set_index("timestamp").drop(["type"], axis=1)
         self.difference = []
         self.nunique_dates = len(np.unique(self.raw_data.index.date))
         self.days_to_remove=[]
-        self.df_at_16 = self.raw_data.between_time("16:00", "16:00")
-        self.df_at_09 = self.raw_data.between_time("09:30", "09:30")
+        self.df_at_16 = self.closeCleanedData()
+        self.df_at_09 = self.openCleanedData()
         
 
-    def calculate_diff(self, data: pd.DataFrame, intervall):
+    def calculate_diff(self, time:str, intervall):
         """
+        time ist ein String der Form "16:00" oder "09:30"
         List mit 2 Strings in Form von: [" 15:00:00", " 16:30:00"]
         """
         #Hier wird die Differenz gebildet aus allen Tagen im Datensatz und die Stempel die wir brauchen!
         #Fehlender Zeitstempel werden hier bemerkbar
+        data = self.raw_data.between_time(time, time)
         small = data.index.date
         big = self.raw_data.index.date
         self.difference = list(set(big) - set(small))
@@ -42,6 +44,8 @@ class DataCleaner:
             self.raw_data.loc[i] = None
 
         self.raw_data = self.raw_data.sort_index()
+        tempTicker= np.array(self.raw_data['symbol'])[0]
+        self.raw_data=self.raw_data.drop(['symbol'], axis=1)
         interCounter, ffCounter, bfCounter = 0,0,0
         #indexing = list(self.raw_data.index)
 
@@ -50,6 +54,8 @@ class DataCleaner:
             lowerBound, upperBound=nullValueIndex - 1,nullValueIndex+2
             temp_df = self.raw_data.iloc[lowerBound: upperBound]
             #nullValueIndex=self.raw_data.index.get_indexer([null_value])[0]  indexing.index(nullValues) 
+            
+
 
             timeDiff = (temp_df.index[-1] - temp_df.index[0]) / pd.Timedelta(minutes=1)
             if timeDiff<=5:
@@ -69,6 +75,7 @@ class DataCleaner:
         print(interCounter)
         print(ffCounter)
         print(bfCounter)
+        self.raw_data= self.raw_data.assign(symbol=tempTicker)
         if fillTime==' 16:00:00':
             return self.raw_data.between_time("16:00", "16:00")
         else:
@@ -76,3 +83,18 @@ class DataCleaner:
             check=self.raw_data.between_time("09:30", "09:30")
             return check.drop([str(i)+' 09:30:00' for i in self.days_to_remove])
 
+    def closeCleanedData(self):
+        self.calculate_diff("16:00", [" 15:00:00", " 16:30:00"])
+        return self.datafiller(" 16:00:00")
+
+    def openCleanedData(self):
+        self.calculate_diff("09:30", [" 08:30:00", " 10:00:00"])
+        return self.datafiller(" 09:30:00")
+
+    def transformForNixtla(self, data:pd.DataFrame):
+        transformedData=pd.DataFrame()
+        transformedData['unique_id']=data['symbol']
+        transformedData['ds']=data.index
+        transformedData['y']=data['close']
+        transformedData.reset_index(drop=True,inplace=True)
+        return transformedData
