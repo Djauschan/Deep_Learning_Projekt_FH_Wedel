@@ -1,0 +1,55 @@
+
+data_config: ./data/test_configs/data_config_multivariate.yaml # brauchen wir dann nicht mehr oder?
+# The code expects the model to always be the last variable in the configuration file.
+training_params:
+  batch_size: 200
+  epochs: 100
+  learning_rate: 0.1
+  validation_split: 0.1
+  use_gpu: true
+data_params:
+    READ_ALL_FILES: false
+    input_feature:
+    # stocks
+        - "AAPL"
+        - "AAL"
+        - "AMD"
+        - "C"
+        - "MRNA"
+        - "NIO"
+        - "NVDA"
+        - "SNAP"
+        - "SQ"
+        - "TSLA"
+    # ETFs
+        - "ACWI"
+    # indices
+        - "DXY"
+        - "SPX"
+        - "DJCIGC"
+        - "DJCISI"
+        - "DJCIEN"
+        - "DJCIIK"
+        - "DJI"
+        - "DJINET"
+        - "COMP"
+        - "W5000"
+    target_feature:
+        - "AAPL"
+        - "AAL"
+        - "AMD"
+        - "C"
+        - "MRNA"
+        - "NIO"
+        - "NVDA"
+        - "SNAP"
+        - "SQ"
+        - "TSLA"
+model_params:
+  transformer:
+    num_heads: 1
+    num_layers: 2
+    d_ff: 200
+    seq_len_encoder: 200
+    seq_len_decoder: 3
+    dropout: 0.1
