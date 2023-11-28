@@ -14,6 +14,7 @@ from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
 from src_transformers.pipelines.dataset_creation import create_dataset_from_config
 from src_transformers.pipelines.model_io import save_model
 from src_transformers.utils.logger import Logger
+from src_transformers.utils.viz_training import plot_evaluation
 
 
 @dataclass
@@ -373,18 +374,20 @@ class Trainer:
         # create an array to store the predictions and targets of all samples
         if self.eval_mode:
             samples = len(validation_loader.dataset)
-            prediction_len = validation_loader.dataset.dataset.target_length
+            prediction_len = validation_loader.dataset.dataset.seq_len_decoder
             dim = validation_loader.dataset.dataset.output_dim
             results = np.zeros((2, samples, prediction_len, dim))
         else:
             results = None
+
+        loder_len = len(validation_loader)
 
         with torch.no_grad():
             for input, target in validation_loader:
 
                 # prepare decoder input
                 dec_input = torch.cat(
-                    (input[:, -1, :].unsqueeze(1), target[:, :-1, :]), dim=1)
+                    (input[:, -1, -1].unsqueeze(1).unsqueeze(1), target[:, :-1, :]), dim=1)
 
                 if self.gpu_activated:
                     input = input.to("cuda")
@@ -403,7 +406,9 @@ class Trainer:
                 validation_loss += loss.sum().item()
                 step_count += 1
 
-                print(f'Batch {step_count} loss: {loss.item()}')
+                if step_count % 10 == 0:
+                    print(
+                        f'Batch {step_count}/{loder_len} loss: {loss.item()}')
 
         loss = validation_loss / step_count
 
@@ -427,10 +432,16 @@ class Trainer:
             self.loss.to("cuda")
 
         # Creating training and validation data loaders from the given data source
+        self.validation_split = 1
         train_loader, validation_loader = self.setup_dataloaders()
 
         self.eval_mode = True
 
         loss, results = self.calculate_validation_loss(validation_loader)
+
+        predictions = results[0]
+        targets = results[1]
+
+        plot_evaluation(targets, predictions)
 
         print(loss)
