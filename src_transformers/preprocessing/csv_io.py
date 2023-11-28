@@ -1,5 +1,6 @@
-import pandas as pd
 import csv
+
+import pandas as pd
 
 
 def read_csv_chunk(file_path: str, start_index: int, stop_index: int) -> pd.DataFrame:
@@ -20,7 +21,7 @@ def read_csv_chunk(file_path: str, start_index: int, stop_index: int) -> pd.Data
 
     # Read the specified range from the CSV file, starting from the header
     df = pd.read_csv(file_path, skiprows=start_index,
-                     nrows=num_rows_to_read)
+                     nrows=num_rows_to_read, index_col=0)
     return df
 
 

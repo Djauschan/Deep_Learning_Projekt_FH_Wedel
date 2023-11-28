@@ -56,7 +56,8 @@ class MultiHeadAttention(nn.Module):
 
     def split_heads(self, x):
         # Reshape the input to have num_heads for multi-head attention
-        batch_size, seq_length, d_model = x.size()
+        print(x.shape)
+        batch_size, seq_length, _, d_model = x.size()
         return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2)
 
     def combine_heads(self, x):
@@ -76,6 +77,7 @@ class MultiHeadAttention(nn.Module):
         # Combine heads and apply output transformation
         output = self.W_o(self.combine_heads(attn_output))
         return output
+
 
 class MultiHeadAttention_Modified(nn.Module):
     """
@@ -249,7 +251,8 @@ class DecoderLayer(nn.Module):
     def __init__(self, dim_encoder, dim_decoder, num_heads, d_ff, dropout):
         super(DecoderLayer, self).__init__()
         self.self_attn = MultiHeadAttention(dim_decoder, num_heads)
-        self.cross_attn = MultiHeadAttention_Modified(dim_encoder, dim_decoder, num_heads)
+        self.cross_attn = MultiHeadAttention_Modified(
+            dim_encoder, dim_decoder, num_heads)
         self.feed_forward = PositionWiseFeedForward(dim_decoder, d_ff)
         self.norm1 = nn.LayerNorm(dim_decoder)
         self.norm2 = nn.LayerNorm(dim_decoder)
@@ -289,7 +292,6 @@ class Transformer(nn.Module):
         super(Transformer, self).__init__()
 
         self.gpu_activated = gpu_activated and torch.cuda.is_available()
-
 
         # Positional encoding
         self.positional_encoding_encoder = PositionalEncoding(

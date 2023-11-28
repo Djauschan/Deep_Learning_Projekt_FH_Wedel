@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 
 type_dict = {"etf-complete": "ETF", "us3000": "stock", "usindex": "index"}
@@ -31,18 +32,18 @@ class DataReader():
 
         self.root_folder = data_dir_name
         # A list containing all file names and a list containing all symbols are created.
-        self.txt_files, self.symbols = self.get_txt_files()
+        self.txt_files, self.input_symbols, self.target_symbols = self.get_txt_files()
         # Counter, so that one file after the other can be read from the list of file names.
         self.current_file_idx = 0
 
-    def get_txt_files(self) -> tuple[list, list]:
+    def get_txt_files(self) -> tuple[list, list, list]:
         """
         Returns a list with the paths of all read txt files and a list with all symbols.
 
         Returns:
             tuple[list, list]: List with paths of all read txt files and list with all symbols
         """
-        txt_files, symbols = [], []
+        txt_files, input_symbols, target_symbols = [], [], []
         # Traverse subdirectories.
         for root, dirs, files in os.walk(self.root_folder):
             for dir in dirs:
@@ -55,14 +56,17 @@ class DataReader():
                             # The paths of all text files are stored in a list.
                             if file.endswith(".txt"):
                                 txt_files.append(os.path.join(dir_path, file))
-                                symbols.append(symbol)
+                                input_symbols.append(symbol)
                         else:
                             # The paths of all text files selected via the symbols
                             # in the configuration file are saved in a list.
-                            if file.endswith(".txt") and symbol in self.config["SYMBOLS_TO_READ"]:
+                            if file.endswith(".txt") and symbol in self.config["input_symbols"]:
                                 txt_files.append(os.path.join(dir_path, file))
-                                symbols.append(symbol)
-        return txt_files, symbols
+                                input_symbols.append(symbol)
+                            elif file.endswith(".txt") and symbol in self.config["target_symbols"]:
+                                txt_files.append(os.path.join(dir_path, file))
+                                target_symbols.append(symbol)
+        return txt_files, input_symbols, target_symbols
 
     def _get_type(self, file_path: str) -> str:
         """

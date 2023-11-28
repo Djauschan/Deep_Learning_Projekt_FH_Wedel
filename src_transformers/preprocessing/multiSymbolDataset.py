@@ -1,12 +1,21 @@
-import torch
 import sys
-import yaml
-from torch.utils.data import Dataset
-from src_transformers.preprocessing.txtReader import DataReader
-from src_transformers.preprocessing.dataProcessing import add_time_information, get_all_dates, fill_dataframe
-from torch.utils.data import DataLoader
-from src_transformers.preprocessing.csv_io import read_csv_chunk, count_rows, get_column_count
+
 import numpy as np
+import torch
+import yaml
+from torch.utils.data import DataLoader, Dataset
+
+from src_transformers.preprocessing.csv_io import (
+    count_rows,
+    get_column_count,
+    read_csv_chunk,
+)
+from src_transformers.preprocessing.dataProcessing import (
+    add_time_information,
+    fill_dataframe,
+    get_all_dates,
+)
+from src_transformers.preprocessing.txtReader import DataReader
 
 
 class MultiSymbolDataset(Dataset):
@@ -31,43 +40,72 @@ class MultiSymbolDataset(Dataset):
             print("[MULTI_SYMBOL_DATASET]: Data Preprocessing started")
             date_df = get_all_dates(reader)
             stocks, date_df = fill_dataframe(date_df, reader)
+
+            print(stocks)
+            print(date_df)
+
             # Sort the stock symbols alphabetically to ensure that the order is always the same.
             stocks.sort()
             self.stocks = stocks
+
             date_df = add_time_information(date_df)
             date_df.set_index('posix_time', inplace=True)
             date_df.drop(columns=['timestamp'], inplace=True)
             # Add a column with zeros for each stock symbol.
-            date_df.loc[:, stocks] = 0
+            # date_df.loc[:, stocks] = 0
 
             # If the number of columns is odd, a column with zeros is added.
             # This is necessary because the number of columns must be even for the transformer model.
             # Check if the number of columns is odd ( + 1 to account for the index column)
-            if (len(date_df.columns) + 1) % 2 != 0:
+            if (len(date_df.columns)) % 2 != 0:
                 # Add a new column 'even' with zeros
                 date_df['even'] = 0
 
-            self.length = len(date_df) * len(stocks)
+            # print(date_df)
 
-            for i, stock in enumerate(stocks):
-                print(f"[MULTI_SYMBOL_DATASET]: Load and process data for {stock}")
-                # Add a column with ones for each stock symbol.
-                data = date_df.copy()
-                data.loc[:, stock] = 1
-                data.loc[:, 'Target'] = data[f'close {stock}']
+            self.length = len(date_df)  # * len(stocks)
 
-                if i == 0:
-                    # The first stock is written to the file with the header.
-                    data.to_csv(self.config["DATA_FILE_PATH"],
-                                mode='w', header=True)
-                    # The dimensions of the input and output data are required
-                    # to dimension the input and output layers of the model.
-                    self.input_dim = data.shape[1]
-                    self.output_dim = 1
-                else:
-                    # The other stocks are appended to the file without a header.
-                    data.to_csv(self.config["DATA_FILE_PATH"],
-                                mode='a', header=False)
+            current_columns = list(date_df.columns.values)
+            target_columns = []
+            targets = 0
+
+            for symbol in self.config["target_symbols"]:
+                current_columns.remove(f'close {symbol}')
+                target_columns.append(f'close {symbol}')
+                targets += 1
+
+            date_df = date_df[current_columns + target_columns]
+
+            print(date_df)
+
+            self.input_dim = date_df.shape[1]
+            self.output_dim = targets
+
+            date_df.to_csv(
+                self.config["DATA_FILE_PATH"], mode='w', header=True)
+
+            # data = date_df.copy()
+            # data.loc[:, 'Target'] = data[f'close {stock}']
+            # for i, stock in enumerate(stocks):
+            #     print(
+            #         f"[MULTI_SYMBOL_DATASET]: Load and process data for {stock}")
+            #     # Add a column with ones for each stock symbol.
+            #     # data = date_df.copy()
+            #     # data.loc[:, stock] = 1
+            #     data.loc[:, 'Target'] = data[f'close {stock}']
+
+            #     if i == 0:
+            #         # The first stock is written to the file with the header.
+            #         data.to_csv(self.config["DATA_FILE_PATH"],
+            #                     mode='w', header=True)
+            #         # The dimensions of the input and output data are required
+            #         # to dimension the input and output layers of the model.
+            #         self.input_dim = data.shape[1]
+            #         self.output_dim = 1
+            #     # else:
+            #         # The other stocks are appended to the file without a header.
+            #         # data.to_csv(self.config["DATA_FILE_PATH"],
+            #         #            mode='a', header=False)
             print("File: \"" + self.config["DATA_FILE_PATH"] + "\" created.")
         else:
             # The existing file with input data is used.
@@ -80,6 +118,11 @@ class MultiSymbolDataset(Dataset):
         self.seq_len_encoder = input_length
         self.seq_len_decoder = target_length
 
+        print(self.input_dim)
+        print(self.output_dim)
+
+        print(date_df.shape)
+
     def __len__(self) -> int:
         """
         Returns the number of samples in the dataset.
@@ -91,7 +134,6 @@ class MultiSymbolDataset(Dataset):
         """
 
         return self.length - self.seq_len_encoder - self.seq_len_decoder + 1
-
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -115,9 +157,19 @@ class MultiSymbolDataset(Dataset):
         data = read_csv_chunk(
             self.config["DATA_FILE_PATH"], start_input, end_target)
 
+        # print(data)
+
         # The last column contains the target data.
-        target_data = data.iloc[:, -1].to_numpy()
-        data.pop(data.columns[-1])
+        target_data = data.iloc[:, -self.output_dim:].to_numpy()
+        print(target_data.shape)
+
+        print("======")
+        print(data)
+
+        # for _ in range(self.output_dim):
+        #     data.pop(data.columns[-1])
+
+        # print(data)
 
         # The target data must be a 2D array.
         target_data = [np.array([element]) for element in target_data]
@@ -127,6 +179,7 @@ class MultiSymbolDataset(Dataset):
 
         # Get the input data of length INPUT_LEN
         input = input_data[0:input_length]
+        # print(input.shape)
         input = torch.tensor(input, dtype=torch.float32)
 
         # Get the output target data of length TARGET_LEN after the input period

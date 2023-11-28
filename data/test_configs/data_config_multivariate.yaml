@@ -5,18 +5,18 @@ VISUALIZE_ALL_DATA: true
 READ_ALL_FILES: false
 CREATE_NEW_FILE: true
 DATA_FILE_PATH: "data/output/Multi_Symbol.csv"
-SYMBOLS_TO_READ:
+input_symbols:
 # stocks
-  - "AAPL"
-  - "AAL"
-  # - "AMD"
+  #- "AAPL"
+  #- "AAL"
+  - "AMD"
   # - "C"
   # - "MRNA"
-  - "NIO"
+  #- "NIO"
   # - "NVDA"
   # - "SNAP"
   # - "SQ"
-  # - "TSLA"
+  - "TSLA"
 # ETFs
   # - "ACWI"
 # indices
@@ -30,3 +30,6 @@ SYMBOLS_TO_READ:
   # - "DJINET"
   # - "COMP"
   # - "W5000"
+target_symbols:
+  - "NIO"
+  - "AAPL"

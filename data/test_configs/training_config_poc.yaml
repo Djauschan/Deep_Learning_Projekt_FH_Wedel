@@ -1,13 +1,13 @@
-
 data_config: ./data/test_configs/data_config_multivariate.yaml # brauchen wir dann nicht mehr oder?
 # The code expects the model to always be the last variable in the configuration file.
 training_params:
-  batch_size: 200
-  epochs: 100
+  batch_size: 1000
+  epochs: 3
   learning_rate: 0.1
   validation_split: 0.1
   use_gpu: true
 data_params:
+    dataset: multisymbol
     READ_ALL_FILES: false
     input_feature:
     # stocks

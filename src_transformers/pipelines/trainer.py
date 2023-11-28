@@ -109,6 +109,8 @@ class Trainer:
             dataset = create_dataset_from_config(
                 data_config, model_name, model_parameters)
 
+            # print(dataset)
+
             # NOTE: Regarding input & output dim: What to do for other models?
             model = MODEL_NAME_MAPPING[model_name](
                 **model_parameters, dim_encoder=dataset.input_dim, dim_decoder=dataset.output_dim, gpu_activated=gpu_activated)
@@ -308,16 +310,25 @@ class Trainer:
         loder_len = len(train_loader)
 
         for input, target in train_loader:
+            # print(input)
+            # print(target)
+
             # Reset optimizer
             self.optimizer.zero_grad()
 
             # print("input[:, -1, :].unsqueeze(1) shape:", input[:, -1, :].unsqueeze(1).shape)
             # print("target[:, :-1, :] shape:", target[:, :-1, :].shape)
 
+            print(input.shape)
+            print(target.shape)
+
+            x = target.shape[3]
+
             # Create the input for the decoder
             # Targets are shifted one to the right and last entry of targets is filled on idx 0
             dec_input = torch.cat(
-                (input[:, -1, -1].unsqueeze(1).unsqueeze(1), target[:, :-1, :]), dim=1)
+                (input[:, -1, -x:].unsqueeze(1).unsqueeze(1), target[:, :-1, :]), dim=1)
+
             #
             if self.gpu_activated:
                 input = input.to("cuda")
@@ -367,7 +378,6 @@ class Trainer:
             results = np.zeros((2, samples, prediction_len, dim))
         else:
             results = None
-
 
         with torch.no_grad():
             for input, target in validation_loader:
