@@ -1,3 +1,7 @@
+# Für die Ausführung in Google Colab (Verfügbarkein von T4 GPU und TPU) muss folgender pip Befehl ausgeführt werden: 
+# !pip install keras-tuner -q
+# Alle anderen Pakete sind bereits in Colab verfügbar
+
 import os
 import pandas as pd
 import numpy as np
