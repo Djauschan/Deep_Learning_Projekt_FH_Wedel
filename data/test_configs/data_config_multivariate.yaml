@@ -8,8 +8,8 @@ DATA_FILE_PATH: "data/output/Multi_Symbol.csv"
 SYMBOLS_TO_READ:
 # stocks
   - "AAPL"
-  - "AAL"
-  # - "AMD"
+  # - "AAL"
+  - "AMD"
   # - "C"
   # - "MRNA"
   - "NIO"

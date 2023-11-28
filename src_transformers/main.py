@@ -56,9 +56,11 @@ def main() -> None:
         trainer.start_training()
         trainer.save_model()
     if args.pipeline == EVAL_COMMAND:
+        trainer = Trainer.create_trainer_from_config(**config)
+        trainer.start_training()
         # Validation split = 1 as the model will not be trained
         config['validation_split'] = 1
-        trainer = Trainer.create_trainer_from_config(**config, eval_mode=True)
+        #trainer = Trainer.create_trainer_from_config(**config, eval_mode=True)
         trainer.evaluate()
     else:
         # dataloader = DataLoader(dataset, shuffle=False)
