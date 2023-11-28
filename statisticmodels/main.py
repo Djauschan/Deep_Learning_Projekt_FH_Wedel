@@ -20,7 +20,7 @@ txt_files, symbols = test.get_txt_files()
 for i in symbols:
     print(i)
  
-test.current_file_idx = 1
+test.current_file_idx = 0
  
 df = test.read_next_txt()
 clean = DataCleaner(df)
@@ -46,7 +46,7 @@ yWerte=arimaData['y'].values
  
 crossValidierung=Evaluation(30,3,yWerte)
  
-testarray, Resultdic= crossValidierung.CrossValidation('arima')
+testarray, Resultdic= crossValidierung.CrossValidation('ets')
  
 print(Resultdic.keys())
 print(Resultdic.values())
@@ -55,10 +55,10 @@ print(testarray)
  
  
  
-# for keys,value in Resultdic.items():
-#     print('Das sind die Metriken für ',keys)
-#     temp=crossValidierung.metricsCalculation(testarray,value)
-#     print(temp)
+for keys,value in Resultdic.items():
+    print('Das sind die Metriken für ',keys)
+    temp=crossValidierung.metricsCalculation(testarray,value)
+    print(temp)
  
 viz=VisualizeStatsModel(arimaData,testarray,testarray,testarray)
  

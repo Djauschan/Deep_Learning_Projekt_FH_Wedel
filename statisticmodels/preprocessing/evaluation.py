@@ -3,7 +3,8 @@ import numpy as np
 from sklearn.model_selection import TimeSeriesSplit
 from models.arima import Arima
 from sklearn import metrics
- 
+from models.exponentialsmoothing import Exponentialsmoothing
+from models.exponentialsmoothing import Theta
  
  
 class Evaluation:
@@ -45,6 +46,22 @@ class Evaluation:
  
                 log_shift = statsModell.shift_logTransformer(self.testlength, data[train_index])
                 prognoseDic['log_shift'] = np.append(prognoseDic['log_shift'], log_shift)
+        
+        elif model=='ets':
+            etsmodel=Exponentialsmoothing()
+            prognoseDic={'ets': np.array([])}
+            for train_index, test_index in self.splitter.split(data):
+                testArray = np.append(testArray, data[test_index])
+                etsResult= etsmodel.forecast(self.testlength,data[train_index])
+                prognoseDic['ets']=np.append(prognoseDic['ets'], etsResult)
+        
+        elif model=='theta':
+            thetamodel=Theta()
+            prognoseDic={'theta': np.array([])}
+            for train_index, test_index in self.splitter.split(data):
+                testArray = np.append(testArray, data[test_index])
+                etsResult= thetamodel.forecast(self.testlength,data[train_index])
+                prognoseDic['theta']=np.append(prognoseDic['theta'], etsResult)
  
         return testArray, prognoseDic
  
