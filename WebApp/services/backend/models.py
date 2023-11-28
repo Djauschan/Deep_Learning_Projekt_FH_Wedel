@@ -29,9 +29,10 @@ class Stock(Base):
     __tablename__="stocks"
 
     name = Column(String, primary_key=True)
-    date = Column(String, primary_key=True)
+    start_date = Column(String, primary_key=True)
+    end_date = Column(String, primary_key=True)
     open = Column(Float)
     high = Column(Float)
     low = Column(Float)
     close = Column(Float)
-    volume = Column(String)
+    volume = Column(Integer)

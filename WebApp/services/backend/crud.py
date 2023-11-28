@@ -8,6 +8,9 @@ from datetime import datetime
 import socket
 import datetime as DT
 from yahoo_fin.stock_info import get_data
+import pandas_market_calendars as mcal
+import yfinance as yf
+import pandas as pd
 
 # method to delete the table "users"
 def delete_users(db: Session):
@@ -98,27 +101,17 @@ def check_login(db: Session, user: schemas.User, pw: str):
 def get_logins_by_user_id(db: Session, owner_id: int):
     return db.query(models.Login).filter(models.Login.user_id == owner_id).all()
 
-# method to add stock to table 'stocks'
-def create_stock(db: Session, stock_name: str, ):
-    today = DT.date.today()
-    return_list = []
-    if((today - DT.timedelta(days=301)).weekday() < 5):
-        date = today - DT.timedelta(days=301)
-        date2 = today - DT.timedelta(days=0) 
-        stock = get_data(stock_name, start_date=date.strftime("%m/%d/%y"), end_date=date2.strftime("%m/%d/%y"), index_as_date = True, interval="1d")
-        db_stock = models.Stock(name=stock_name, date=date.strftime("%m/%d/%y"), open=stock.open, high=stock.high, low=stock.low, close=stock.close)
-        return_list.append(db_stock)
-        print(stock)
-        return return_list
-    else:
-        print("nope")
-        return "it didnt worked"
+# method to get stock data of specific stock symbol for n days
+def get_stock_days(db: Session, stock_symbol: str, n: int):
+    # Download historical data from Yahoo Finance
+    stock_data = yf.download(stock_symbol, period=f"{n}d")
+
+    first_day = stock_data.index.date[0].strftime('%m/%d/%y')
+    last_day = stock_data.index.date[-1].strftime('%m/%d/%y')
+
+    print(stock_data)
+
+    db_stock = models.Stock(name=stock_symbol, start_date=first_day, end_date=last_day, open=stock_data.Open, high=stock_data.High, low=stock_data.Low, close=stock_data.Close)
+    print("rows: " + str(stock_data.shape[0]))
     
-
-# method to update stock data in table 'stocks'
-        
-
-# method to return all stocks in table 'stocks'
-def get_stocks(db: Session):
-    stocks = db.query(models.Stock).filter(models.Stock.name.like(f"%{''}%")).limit(100).all()
-    return [u.__dict__ for u in stocks]
+    return db_stock

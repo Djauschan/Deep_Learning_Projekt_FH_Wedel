@@ -4,7 +4,6 @@ import crud, models, schemas
 from database import SessionLocal, engine
 import bcrypt
 from fastapi.middleware.cors import CORSMiddleware
-from yahoo_fin.stock_info import get_data
 import datetime as DT
 
 # Create tables in the database based on the model definitions
@@ -35,15 +34,10 @@ def get_db():
         db.close()
 
 
-# test method to get Microsoft Stock 
-@app.post("/createStock/{stock_name}")
-def create_stock(stock_name: str, db: Session = Depends(get_db)):
-    return crud.create_stock(stock_name=stock_name, db=db)
-
-# method to get all stock entries
-@app.get("/getStocks", response_model=list[schemas.Stock])
-async def get_stocks(db: Session = Depends(get_db)):
-    return crud.get_stocks(db)
+# test method to get Stock data for n days
+@app.get("/getStock/{stock_symbol}/{days_back}")
+def get_stock_days(stock_symbol: str, days_back: int, db: Session = Depends(get_db)):
+    return crud.get_stock_days(stock_symbol=stock_symbol, n=days_back, db=db)
 
 # post method to delete table "users"
 @app.post("/deleteUsers/")
