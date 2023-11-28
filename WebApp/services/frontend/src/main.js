@@ -6,10 +6,6 @@ import LottieVuePlayer from "@lottiefiles/vue-lottie-player";
 
 Vue.use(VueRouter);
 
-const router = new VueRouter({
-  routes,
-});
-
 Vue.use(LottieVuePlayer);
 Vue.config.productionTip = false;
 

@@ -13,6 +13,16 @@
     <button @click="update">update xAxis Categories</button>
     <button @click="remove">remove Series</button>
     <button @click="add">add Series</button>
+    <input
+                      type="text"
+                      placeholder="Name Aktie"
+                      class="statistik-textinput input"
+                    />
+     <input
+                      type="text"
+                      placeholder="Zeitraum"
+                      class="statistik-textinput input"
+     />
   </section>
 </template>
 <script>
