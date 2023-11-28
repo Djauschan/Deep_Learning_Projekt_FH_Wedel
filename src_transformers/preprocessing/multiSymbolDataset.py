@@ -28,7 +28,7 @@ class MultiSymbolDataset(Dataset):
         self.config = config
         # A new file with input data is created.
         if self.config['CREATE_NEW_FILE']:
-            print("Data Preprocessing started")
+            print("[MULTI_SYMBOL_DATASET]: Data Preprocessing started")
             date_df = get_all_dates(reader)
             stocks, date_df = fill_dataframe(date_df, reader)
             # Sort the stock symbols alphabetically to ensure that the order is always the same.
@@ -50,6 +50,7 @@ class MultiSymbolDataset(Dataset):
             self.length = len(date_df) * len(stocks)
 
             for i, stock in enumerate(stocks):
+                print(f"[MULTI_SYMBOL_DATASET]: Load and process data for {stock}")
                 # Add a column with ones for each stock symbol.
                 data = date_df.copy()
                 data.loc[:, stock] = 1
