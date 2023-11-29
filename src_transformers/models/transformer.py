@@ -50,7 +50,6 @@ class MultiHeadAttention(nn.Module):
         # Softmax is applied to obtain attention probabilities (i.e. Attention weights)
         attn_probs = torch.softmax(attn_scores, dim=-1)
         # TODO: cheken warum das alles null ergibt
-        test2 = attn_scores.detach().numpy()
 
         # Multiply by values to obtain the final output
         output = torch.matmul(attn_probs, V)
@@ -176,7 +175,6 @@ class PositionWiseFeedForward(nn.Module):
         return self.fc2(self.relu(self.fc1(x)))
 
 
-
 class PositionalEncoding(nn.Module):
     """
     This class produces a positional encoding for a transformer model.
@@ -264,19 +262,19 @@ class DecoderLayer(nn.Module):
     def forward(self, x, enc_output, src_mask, tgt_mask):
         # Forward self attention layer for tgt inputs
         attn_output = self.self_attn(x, x, x, tgt_mask)
-        #x = self.norm1(x + self.dropout(attn_output))
+        # x = self.norm1(x + self.dropout(attn_output))
         x = x + self.dropout(attn_output)
 
         # Forward cross attention layer for encoder outputs
         # Encoders outputs are used as keys and values
         # The decoder's outputs are used as queries
         attn_output = self.cross_attn(x, enc_output, enc_output, src_mask)
-        #x = self.norm2(x + self.dropout(attn_output))
+        # x = self.norm2(x + self.dropout(attn_output))
         x = x + self.dropout(attn_output)
 
         # Forward feed forward layer
         ff_output = self.feed_forward(x)
-        #x = self.norm3(x + self.dropout(ff_output))
+        # x = self.norm3(x + self.dropout(ff_output))
         x = x + self.dropout(ff_output)
         return x
 
@@ -359,8 +357,6 @@ class Transformer(nn.Module):
         tgt_mask = self.generate_mask(tgt, no_peak=True)
         dec_mask = torch.ones(tgt_mask.size(0), tgt_mask.size(
             1), tgt_mask.size(2), src_mask.size(3)).bool()
-
-        test = src_mask.numpy()
 
         if self.gpu_activated:
             dec_mask = dec_mask.to('cuda')
