@@ -2,6 +2,9 @@
 This module contains the Trainer class which is used to train a PyTorch model.
 """
 from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Final
 
 import numpy as np
 import torch
@@ -16,6 +19,7 @@ from src_transformers.pipelines.model_io import save_model
 from src_transformers.utils.logger import Logger
 from src_transformers.utils.viz_training import plot_evaluation
 
+FIG_OUTPUT_PATH: Final[Path] = Path("./data/output/eval_plot")
 
 @dataclass
 class Trainer:
@@ -435,6 +439,17 @@ class Trainer:
         predictions = results[0]
         targets = results[1]
 
-        plot_evaluation(targets, predictions)
+        plot = plot_evaluation(targets, predictions)
+        plot.show()
+
+        now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+        # TODO @duwe: hier deinen Pfad einfügen
+        #path = f'C:/Users/nikla/OneDrive/Uni/23WS/Projekt/Deep_Learning/data/output/eval_plot/plot{now}.png'
+        path = Path(FIG_OUTPUT_PATH, f'plot{now}.png')
+
+        plot.savefig(path)
+
+        print(f"[TRAINER]: Evaluation plot saved to '{path}'")
 
         print(loss)

@@ -24,4 +24,4 @@ def plot_evaluation(targets: np.array, predictions: np.array):
         axes[feature_idx].plot(predictions[:, 0, feature_idx], c=colors[color_idx+1])
         #ax.plot(predictions[:, 1, feature_idx], c=colors[color_idx+1])
 
-    fig.show()
+    return fig
