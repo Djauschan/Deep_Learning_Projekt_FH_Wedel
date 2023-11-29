@@ -902,7 +902,7 @@ export default {
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  background-color: #grey400 (secondary);
+  background-color: #d9d9d9;
 }
 .home-container26 {
   width: 100%;
