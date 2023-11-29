@@ -11,17 +11,17 @@ def plot_evaluation(targets: np.array, predictions: np.array):
         predictions (np.array): predictions
     """
 
-    fig, ax = plt.subplots(figsize=(20, 10))
+    n_target_features = targets.shape[2]
 
-    colors = cm.tab20(np.linspace(0, 1, targets.shape[2]*2))
+    fig, axes = plt.subplots(ncols=1, nrows=n_target_features, figsize=(20, 10))
 
-    for feature_idx in range(targets.shape[2]):
+    colors = cm.tab20(np.linspace(0, 1, n_target_features*2))
+
+    for feature_idx in range(n_target_features):
         color_idx = feature_idx*2
-        ax.plot(targets[:, 0, feature_idx], c='r')
+        axes[feature_idx].plot(targets[:, 0, feature_idx], c=colors[color_idx])
         #ax.plot(targets[:, 1, feature_idx], c=colors[color_idx])
-        ax.plot(predictions[:, 0, feature_idx], c='b')
+        axes[feature_idx].plot(predictions[:, 0, feature_idx], c=colors[color_idx+1])
         #ax.plot(predictions[:, 1, feature_idx], c=colors[color_idx+1])
 
     fig.show()
-
-    fig.close()

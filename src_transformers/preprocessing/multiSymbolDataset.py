@@ -41,9 +41,6 @@ class MultiSymbolDataset(Dataset):
             date_df = get_all_dates(reader)
             stocks, date_df = fill_dataframe(date_df, reader)
 
-            print(stocks)
-            print(date_df)
-
             # Sort the stock symbols alphabetically to ensure that the order is always the same.
             stocks.sort()
             self.stocks = stocks
@@ -61,22 +58,19 @@ class MultiSymbolDataset(Dataset):
                 # Add a new column 'even' with zeros
                 date_df['even'] = 0
 
-            # print(date_df)
-
             self.length = len(date_df)  # * len(stocks)
 
             current_columns = list(date_df.columns.values)
             target_columns = []
             targets = 0
 
+            # Tread edge case: File is not available
             for symbol in self.config["target_symbols"]:
                 current_columns.remove(f'close {symbol}')
                 target_columns.append(f'close {symbol}')
                 targets += 1
 
             date_df = date_df[current_columns + target_columns]
-
-            print(date_df)
 
             self.input_dim = date_df.shape[1]
             self.output_dim = targets
@@ -118,10 +112,6 @@ class MultiSymbolDataset(Dataset):
         self.seq_len_encoder = input_length
         self.seq_len_decoder = target_length
 
-        print(self.input_dim)
-        print(self.output_dim)
-
-        print(date_df.shape)
 
     def __len__(self) -> int:
         """
@@ -157,29 +147,21 @@ class MultiSymbolDataset(Dataset):
         data = read_csv_chunk(
             self.config["DATA_FILE_PATH"], start_input, end_target)
 
-        # print(data)
 
         # The last column contains the target data.
         target_data = data.iloc[:, -self.output_dim:].to_numpy()
-        print(target_data.shape)
-
-        print("======")
-        print(data)
 
         # for _ in range(self.output_dim):
         #     data.pop(data.columns[-1])
 
-        # print(data)
-
         # The target data must be a 2D array.
-        target_data = [np.array([element]) for element in target_data]
+        target_data = [np.array(element) for element in target_data]
 
         # The other columns contain the input data.
         input_data = data.to_numpy()
 
         # Get the input data of length INPUT_LEN
         input = input_data[0:input_length]
-        # print(input.shape)
         input = torch.tensor(input, dtype=torch.float32)
 
         # Get the output target data of length TARGET_LEN after the input period
@@ -205,7 +187,5 @@ if __name__ == "__main__":
 
     dataset = MultiSymbolDataset(txt_reader, config)
     dataloader = DataLoader(dataset, shuffle=False, batch_size=1)
-    # Print the first sample.
     test_sample = next(iter(dataloader))[1]
-    print("TEST SAMPLE:")
-    print(test_sample)
+

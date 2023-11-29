@@ -36,15 +36,15 @@ data_params:
         - "W5000"
     target_feature:
         - "AAPL"
-        - "AAL"
+#        - "AAL"
         - "AMD"
-        - "C"
-        - "MRNA"
-        - "NIO"
-        - "NVDA"
-        - "SNAP"
-        - "SQ"
-        - "TSLA"
+#        - "C"
+#        - "MRNA"
+#        - "NIO"
+#        - "NVDA"
+#        - "SNAP"
+#        - "SQ"
+#        - "TSLA"
 model_params:
   transformer:
     num_heads: 1

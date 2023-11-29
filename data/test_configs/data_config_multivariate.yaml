@@ -7,7 +7,7 @@ CREATE_NEW_FILE: true
 DATA_FILE_PATH: "data/output/Multi_Symbol.csv"
 input_symbols:
 # stocks
-  #- "AAPL"
+  - "AAPL"
   #- "AAL"
   - "AMD"
   # - "C"
@@ -16,14 +16,14 @@ input_symbols:
   # - "NVDA"
   # - "SNAP"
   # - "SQ"
-  - "TSLA"
+  #- "TSLA"
 # ETFs
   # - "ACWI"
 # indices
   # - "DXY"
   # - "SPX"
   # - "DJCIGC"
-  - "DJCISI"
+  #- "DJCISI"
   # - "DJCIEN"
   # - "DJCIIK"
   # - "DJI"
@@ -31,5 +31,5 @@ input_symbols:
   # - "COMP"
   # - "W5000"
 target_symbols:
-  - "NIO"
+  - "AMD"
   - "AAPL"
