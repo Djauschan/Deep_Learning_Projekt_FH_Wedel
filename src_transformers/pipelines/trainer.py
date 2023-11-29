@@ -21,6 +21,10 @@ from src_transformers.utils.viz_training import plot_evaluation
 
 FIG_OUTPUT_PATH: Final[Path] = Path("./data/output/eval_plot")
 
+# create directory if it does not exist
+FIG_OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
+
+
 @dataclass
 class Trainer:
     """
@@ -236,7 +240,7 @@ class Trainer:
 
         return train_loader, validation_loader
 
-    def train_model(self, train_loader, validation_loader, patience: int = 10) -> str:
+    def train_model(self, train_loader, validation_loader, patience: int = 500) -> str:
         """
         Trains the model for a specified number of epochs. For each epoch, the method calculates
         the training loss and validation loss, logs these losses, and saves the current state
@@ -379,7 +383,6 @@ class Trainer:
         with torch.no_grad():
             for input, target in validation_loader:
 
-
                 # Create the input for the decoder
                 # Targets are shifted one to the right and last entry of targets is filled on idx 0
                 n_tgt_feature = target.shape[2]
@@ -397,8 +400,8 @@ class Trainer:
                 if self.eval_mode:
                     start_idx = step_count * self.batch_size
                     end_idx = start_idx + self.batch_size
-                    results[0, start_idx:end_idx, :, :] = prediction
-                    results[1, start_idx:end_idx, :, :] = target
+                    results[0, start_idx:end_idx, :, :] = prediction.cpu()
+                    results[1, start_idx:end_idx, :, :] = target.cpu()
 
                 validation_loss += loss.sum().item()
                 step_count += 1
@@ -445,7 +448,7 @@ class Trainer:
         now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         # TODO @duwe: hier deinen Pfad einfügen
-        #path = f'C:/Users/nikla/OneDrive/Uni/23WS/Projekt/Deep_Learning/data/output/eval_plot/plot{now}.png'
+        # path = f'C:/Users/nikla/OneDrive/Uni/23WS/Projekt/Deep_Learning/data/output/eval_plot/plot{now}.png'
         path = Path(FIG_OUTPUT_PATH, f'plot{now}.png')
 
         plot.savefig(path)

@@ -112,7 +112,6 @@ class MultiSymbolDataset(Dataset):
         self.seq_len_encoder = input_length
         self.seq_len_decoder = target_length
 
-
     def __len__(self) -> int:
         """
         Returns the number of samples in the dataset.
@@ -147,7 +146,6 @@ class MultiSymbolDataset(Dataset):
         data = read_csv_chunk(
             self.config["DATA_FILE_PATH"], start_input, end_target)
 
-
         # The last column contains the target data.
         target_data = data.iloc[:, -self.output_dim:].to_numpy()
 
@@ -155,7 +153,7 @@ class MultiSymbolDataset(Dataset):
         #     data.pop(data.columns[-1])
 
         # The target data must be a 2D array.
-        target_data = [np.array(element) for element in target_data]
+        target_data = np.array([np.array(element) for element in target_data])
 
         # The other columns contain the input data.
         input_data = data.to_numpy()
@@ -188,4 +186,3 @@ if __name__ == "__main__":
     dataset = MultiSymbolDataset(txt_reader, config)
     dataloader = DataLoader(dataset, shuffle=False, batch_size=1)
     test_sample = next(iter(dataloader))[1]
-
