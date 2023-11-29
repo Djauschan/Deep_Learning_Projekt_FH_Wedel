@@ -6,3 +6,5 @@ pydantic==1.10.7
 bcrypt
 requests
 yahoo_fin
+yfinance
+pandas_market_calendars
