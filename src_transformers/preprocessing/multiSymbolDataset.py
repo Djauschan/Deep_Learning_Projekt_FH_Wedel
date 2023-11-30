@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from pathlib import Path
 
 import torch
 from torch.utils.data import Dataset
@@ -21,9 +20,12 @@ class MultiSymbolDataset(Dataset):
     Pytorch uses the 3 functions [__init__, __len__, __getitem__]
     """
 
+    length: int
+    encoder_dimensions: int
+    decoder_dimensions: int
     encoder_input_length: int
     decoder_input_length: int
-    data_file: Path
+    data_file: str
 
     @classmethod
     def create_from_config(cls,
@@ -48,8 +50,8 @@ class MultiSymbolDataset(Dataset):
             Logger.log_text(
                 "Loading pre-processed data from file for the multi symbol dataset.")
 
-            cls.length, cls.encoder_dimensions = get_csv_shape(data_file)
-            cls.decoder_dimensions = len(decoder_symbols)
+            length, encoder_dimensions = get_csv_shape(data_file)
+            decoder_dimensions = len(decoder_symbols)
         else:
             Logger.log_text(
                 "Data pre-processing for the multi symbol dataset has started.")
@@ -57,24 +59,24 @@ class MultiSymbolDataset(Dataset):
             data_reader = DataReader(
                 read_all_files, encoder_symbols, decoder_symbols)
 
-            date_df = get_all_dates(data_reader)
-            cls.stocks, date_df = fill_dataframe(date_df, data_reader)
+            data_df = get_all_dates(data_reader)
+            cls.stocks, data_df = fill_dataframe(data_df, data_reader)
             Logger.log_text(
                 "Added the time stamps from all loaded files and filled missing values to the pre-processed data.")
 
-            date_df = add_time_information(date_df)
-            date_df.set_index('posix_time', inplace=True)
-            date_df.drop(columns=['timestamp'], inplace=True)
+            data_df = add_time_information(data_df)
+            data_df.set_index('posix_time', inplace=True)
+            data_df.drop(columns=['timestamp'], inplace=True)
             Logger.log_text(
                 "Added more precise time information to the pre-processed data.")
 
             # If the number of columns is odd, a column with zeros is added.
             # This is necessary because the number of columns must be even for the
             # positional encoding of the transformer model.
-            if len(date_df.columns) % 2 != 0:
-                date_df['even'] = 0
+            if len(data_df.columns) % 2 != 0:
+                data_df['even'] = 0
 
-            current_columns = list(date_df.columns.values)
+            current_columns = list(data_df.columns.values)
             target_columns = []
 
             for symbol in decoder_symbols:
@@ -82,19 +84,22 @@ class MultiSymbolDataset(Dataset):
                 target_columns.append(f'close {symbol}')
 
             # Re-ordering the target columns to be at the end
-            date_df = date_df[current_columns + target_columns]
+            data_df = data_df[current_columns + target_columns]
 
-            cls.length = len(date_df)
-            cls.encoder_dimensions = date_df.shape[1]
-            cls.decoder_dimensions = len(decoder_symbols)
+            length = len(data_df)
+            encoder_dimensions = data_df.shape[1]
+            decoder_dimensions = len(decoder_symbols)
 
-            date_df.to_csv(data_file, mode='w', header=True)
+            data_df.to_csv(data_file, mode='w', header=True)
             Logger.log_text(
                 f"Pre-processed data was stored in the file '{data_file}'.")
 
-        return cls(encoder_input_length=encoder_input_length,
+        return cls(length=length,
+                   encoder_dimensions=encoder_dimensions,
+                   decoder_dimensions=decoder_dimensions,
+                   encoder_input_length=encoder_input_length,
                    decoder_input_length=decoder_input_length,
-                   data_file=Path(data_file))
+                   data_file=data_file)
 
     def __len__(self) -> int:
         """
@@ -119,11 +124,12 @@ class MultiSymbolDataset(Dataset):
         Returns:
             tuple[torch.Tensor, torch.Tensor]: sampel (X, Y) at position idx
         """
-        input_start, input_end = index, index + self.encoder_input_length
-        target_end = input_end + self.decoder_input_length
+        encoder_input_start, encoder_input_end = index, index + self.encoder_input_length
+        decoder_input_end = encoder_input_end + self.decoder_input_length
 
         # Load the data from the file, offset by the given index
-        data = read_csv_chunk(self.data_file, input_start, target_end)
+        data = read_csv_chunk(
+            self.data_file, encoder_input_start, decoder_input_end)
 
         encoder_input = data.to_numpy()
         # Get the encoder input from 0 to self.input_length

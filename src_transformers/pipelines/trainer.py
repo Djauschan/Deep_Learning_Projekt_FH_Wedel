@@ -13,7 +13,6 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
 from src_transformers.pipelines.model_io import save_model
 from src_transformers.preprocessing.multiSymbolDataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
@@ -62,6 +61,7 @@ class Trainer:
     def create_trainer_from_config(
         cls: type["Trainer"],
         dataset: MultiSymbolDataset,
+        model: nn.Module,
         batch_size: int,
         epochs: int,
         learning_rate: float,
@@ -70,8 +70,7 @@ class Trainer:
         optimizer: str = "adam",
         momentum: float = 0,
         gpu_activated: bool = True,
-        eval_mode: bool = False,
-        **kwargs,
+        eval_mode: bool = False
     ) -> "Trainer":
         """
         Creates a Trainer instance from an unpacked configuration file.
@@ -101,26 +100,6 @@ class Trainer:
                 f"[TRAINER]: Loss {loss} is not valid, defaulting to MSELoss"
             )
             loss_instance = nn.MSELoss()
-
-        # Setting up the model from the model name and parameters in the config
-        # TODO: (for Luca) Revise this after I know more about the datasets
-        model_name = None
-        try:
-            model_name, model_parameters = kwargs.popitem()
-
-            # NOTE: Regarding input & output dim: What to do for other models?
-            model = MODEL_NAME_MAPPING[model_name](
-                **model_parameters, dim_encoder=dataset.encoder_dimensions, dim_decoder=dataset.decoder_dimensions, gpu_activated=gpu_activated)
-        except KeyError as parse_error:
-            raise (
-                KeyError(f"The model '{model_name}' does not exist!")
-            ) from parse_error
-        # except TypeError as model_error:
-        #     raise (
-        #         TypeError(
-        #             f"The creation of the {model_name} model failed with the following error message {model_error}."
-        #         )
-        #     ) from model_error
 
         # Setting up the optimizer
         if optimizer == "adam":
@@ -155,7 +134,7 @@ class Trainer:
         )
 
         cls._dataset = dataset
-        print("[TRAINER]: Trainer was successfully set up.")
+        Logger.log_text("Trainer was successfully set up.")
 
         return instance
 

@@ -8,9 +8,34 @@ from typing import Final
 import torch
 import torch.nn as nn
 
-MODEL_OUTPUT_PATH: Final[Path] = Path("./data/output/models")
+from src_transformers.models.transformer import Transformer
+from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
 
-first_run = True
+MODEL_OUTPUT_PATH: Final[Path] = Path("data", "output", "models")
+
+
+def create_model(gpu_activated: bool,
+                 encoder_dimensions: int,
+                 decoder_dimensions: int,
+                 model_name: str,
+                 model_attributes: dict) -> Transformer:
+    try:
+        model = MODEL_NAME_MAPPING[model_name](**model_attributes,
+                                               dim_encoder=encoder_dimensions,
+                                               dim_decoder=decoder_dimensions,
+                                               gpu_activated=gpu_activated)
+    except KeyError as parse_error:
+        raise (
+            KeyError(f"The model '{model_name}' does not exist!")
+        ) from parse_error
+    except TypeError as model_error:
+        raise (
+            TypeError(
+                f"The creation of the {model_name} model failed with the following error message {model_error}."
+            )
+        ) from model_error
+
+    return model
 
 
 def get_latest_version(name: str) -> int:
@@ -54,17 +79,12 @@ def save_model(model: nn.Module) -> str:
     Returns:
         str: The absolute path to the saved model file.
     """
-    # Use the global variable to determine if this is the first run of the program.
-    global first_run
-
     # Get the class name of the model as string
     model_class_name = type(model).__name__
     version = get_latest_version(model_class_name)
 
-    if first_run:
-        # create a new version number if this is the first run of the program
-        version = version + 1
-        first_run = False
+    if version == 0:
+        version = 1
 
     path = Path(MODEL_OUTPUT_PATH, f'{model_class_name}_v{version}.pt')
     torch.save(model, path)
