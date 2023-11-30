@@ -7,6 +7,7 @@ from torch import cuda
 from src_transformers.pipelines.model_service import ModelService
 from src_transformers.pipelines.trainer import Trainer
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
+from src_transformers.utils.logger import Logger
 
 TRAIN_COMMAND: Final[str] = "train"
 EVAL_COMMAND: Final[str] = "evaluate"
@@ -56,6 +57,9 @@ def main() -> None:
 
     # Setting up GPU based on availability and usage preference
     gpu_activated = config.pop("use_gpu") and cuda.is_available()
+    # TODO @Luca: Fix this code (set device to CPU or GPU depending on gpu_activated)
+    Logger.log_text(
+        f"Using the device '{cuda.get_device_name()}' for the started pipeline.")
 
     model_parameters = config.pop("model_parameters")
     model_name, model_attributes = model_parameters.popitem()

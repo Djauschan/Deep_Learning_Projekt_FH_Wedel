@@ -382,10 +382,11 @@ class Trainer:
     def save_model(self) -> None:
         """
         This method uses the `save_model` function to save the trained model to a file.
-        After the model is saved, the method logs a message to the console with the path to the file.
+        After the model is saved, the method logs a message to the console with the path
+        to the file.
         """
         path = ModelService.save_model(self.model)
-        print(f"[TRAINER]: Model saved to '{path}'")
+        Logger.log_text(f"Model saved to '{path}'.")
 
     def evaluate(self) -> None:
         """
@@ -418,6 +419,6 @@ class Trainer:
 
         plot.savefig(path)
 
-        print(f"[TRAINER]: Evaluation plot saved to '{path}'")
+        Logger.log_text(f"Evaluation plot saved to '{path}'.")
 
         print(loss)
