@@ -1,10 +1,13 @@
+"""
+This module contains the MultiSymbolDataset class which is used to handle multi-symbol financial data.
+"""
 from dataclasses import dataclass
 
 import torch
 from torch.utils.data import Dataset
 
 from src_transformers.preprocessing.csv_io import get_csv_shape, read_csv_chunk
-from src_transformers.preprocessing.dataProcessing import (
+from src_transformers.preprocessing.data_processing import (
     add_time_information,
     fill_dataframe,
     get_all_dates,
@@ -16,8 +19,19 @@ from src_transformers.utils.logger import Logger
 @dataclass
 class MultiSymbolDataset(Dataset):
     """
-    Data stored as tensors
-    Pytorch uses the 3 functions [__init__, __len__, __getitem__]
+    A PyTorch Dataset for multi-symbol financial data.
+
+    This class handles multi-symbol financial data. It supports creating a new dataset
+    from a configuration file and loading existing data from a csv file, if set to do so
+    in the configuration file. The dataset is designed to deliver data for a Transformer.
+
+    Attributes:
+        length (int): The number of samples in the dataset.
+        encoder_dimensions (int): The number of dimensions in the encoder input.
+        decoder_dimensions (int): The number of dimensions in the decoder input.
+        encoder_input_length (int): The length of the encoder input sequence.
+        decoder_input_length (int): The length of the decoder input sequence.
+        data_file (str): The path to the file to store the data in or to load the data from.
     """
 
     length: int
@@ -37,14 +51,23 @@ class MultiSymbolDataset(Dataset):
                            encoder_input_length: int,
                            decoder_input_length: int):
         """
-        Initializes the Pytorch data set.
+        This method either creates a new MultiSymbolDataset by preprocessing financial data for
+        multiple symbols (using information from the configuration file) or creates the dataset
+        using existing data from a csv file. If data is preprocessed using the configuration file,
+        the preprocessed data is stored for later use.
 
         Args:
-            config (dict): Dictionary for the configuration of data preprocessing.
-            input_length (int): Length of the input sequence.
-            target_length (int): Length of the target sequence.
-        """
+            read_all_files (bool): Whether to read all files in the data directory.
+            create_new_file (bool): Whether to create a new file for the preprocessed data.
+            data_file (str): The path to the file to store the data in or to load the data from.
+            encoder_symbols (list[str]): The symbols to use for the encoder input.
+            decoder_symbols (list[str]): The symbols to use for the decoder input.
+            encoder_input_length (int): The length of the encoder input sequence.
+            decoder_input_length (int): The length of the decoder input sequence.
 
+        Returns:
+            MultiSymbolDataset: The created or loaded dataset.
+        """
         if not create_new_file:
             # Read the existing file if the user wants to skip creating a new file
             Logger.log_text(
@@ -104,25 +127,34 @@ class MultiSymbolDataset(Dataset):
     def __len__(self) -> int:
         """
         Returns the number of samples in the dataset.
-        This is the length of the Input data minus the length of
-        the Input for one sample minus the length of the target for one sample plus one.
+
+        The number of samples is calculated as the total length of the data minus
+        the length of the encoder and decoder input sequences plus one.
 
         Returns:
-            int: number of samples in the dataset
+            int: The number of samples in the dataset.
         """
         return self.length - self.encoder_input_length - self.decoder_input_length + 1
 
     def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
         """
-        Returns sample of input and target sequences. The input and target sequences are of the
-        length defined in the config. The start of the target sequence is the first entry after
-        the input sequence.
+        Returns time series sequences as input for the encoder and decoder from the dataset
+        starting at the specified index.
+
+        The encoder input sequence starts at the specified index and has a length of
+        `self.encoder_input_length`. The decoder input sequence starts immediately after the
+        input sequence and has a length of `self.decoder_input_length`.
+
+        The method reads a chunk of data from the data file, starting at `encoder_input_start`
+        and ending at `decoder_input_end`. It then extracts the encoder and decoder inputs
+        from this chunk and converts them to PyTorch tensors.
 
         Args:
-            idx (int): position of sample in the tensor
+            index (int): The index of the sample in the dataset.
 
         Returns:
-            tuple[torch.Tensor, torch.Tensor]: sampel (X, Y) at position idx
+            tuple[torch.Tensor, torch.Tensor]: Time series sequences as input for the encoder
+                and decoder startingat the specified index.
         """
         encoder_input_start, encoder_input_end = index, index + self.encoder_input_length
         decoder_input_end = encoder_input_end + self.decoder_input_length

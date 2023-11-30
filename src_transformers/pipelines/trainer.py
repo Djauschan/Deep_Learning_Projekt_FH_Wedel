@@ -13,8 +13,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from src_transformers.pipelines.model_io import save_model
-from src_transformers.preprocessing.multiSymbolDataset import MultiSymbolDataset
+from src_transformers.pipelines.model_service import ModelService
+from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
 from src_transformers.utils.viz_training import plot_evaluation
 
@@ -96,9 +96,7 @@ class Trainer:
         elif loss == "crossentropy":
             loss_instance = nn.CrossEntropyLoss()
         else:
-            print(
-                f"[TRAINER]: Loss {loss} is not valid, defaulting to MSELoss"
-            )
+            Logger.log_text(f"Loss {loss} is not valid, defaulting to MSELoss")
             loss_instance = nn.MSELoss()
 
         # Setting up the optimizer
@@ -106,17 +104,15 @@ class Trainer:
             optimizer_instance = optim.Adam(
                 model.parameters(), lr=learning_rate)
             if momentum != 0:
-                print(
-                    f"[TRAINER]: Momentum {momentum} is not used since the optimizer is set to Adam"
-                )
+                Logger.log_text(
+                    f"Momentum {momentum} is not used since the optimizer is set to Adam")
         elif optimizer == "sgd":
             optimizer_instance = optim.SGD(
                 model.parameters(), lr=learning_rate, momentum=momentum
             )
         else:
-            print(
-                f"[TRAINER]: Optimizer {optimizer} is not valid, defaulting to Adam"
-            )
+            Logger.log_text(
+                f"Optimizer {optimizer} is not valid, defaulting to Adam")
             optimizer_instance = optim.Adam(
                 model.parameters(), lr=learning_rate)
 
@@ -388,7 +384,7 @@ class Trainer:
         This method uses the `save_model` function to save the trained model to a file.
         After the model is saved, the method logs a message to the console with the path to the file.
         """
-        path = save_model(self.model)
+        path = ModelService.save_model(self.model)
         print(f"[TRAINER]: Model saved to '{path}'")
 
     def evaluate(self) -> None:

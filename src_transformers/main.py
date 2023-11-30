@@ -4,9 +4,9 @@ from typing import Final
 import yaml
 from torch import cuda
 
-from src_transformers.pipelines.model_io import create_model
+from src_transformers.pipelines.model_service import ModelService
 from src_transformers.pipelines.trainer import Trainer
-from src_transformers.preprocessing.multiSymbolDataset import MultiSymbolDataset
+from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 
 TRAIN_COMMAND: Final[str] = "train"
 EVAL_COMMAND: Final[str] = "evaluate"
@@ -65,11 +65,11 @@ def main() -> None:
         decoder_input_length=model_attributes.get("seq_len_decoder"),
         **config.pop("dataset_parameters"))
 
-    model = create_model(gpu_activated=gpu_activated,
-                         encoder_dimensions=dataset.encoder_dimensions,
-                         decoder_dimensions=dataset.decoder_dimensions,
-                         model_name=model_name,
-                         model_attributes=model_attributes)
+    model = ModelService.create_model(gpu_activated=gpu_activated,
+                                      encoder_dimensions=dataset.encoder_dimensions,
+                                      decoder_dimensions=dataset.decoder_dimensions,
+                                      model_name=model_name,
+                                      model_attributes=model_attributes)
 
     if args.pipeline == TRAIN_COMMAND:
         trainer = Trainer.create_trainer_from_config(
