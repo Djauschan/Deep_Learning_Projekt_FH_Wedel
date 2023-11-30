@@ -16,6 +16,7 @@ from src_transformers.preprocessing.dataProcessing import (
     get_all_dates,
 )
 from src_transformers.preprocessing.txtReader import DataReader
+from src_transformers.utils.logger import Logger
 
 
 class MultiSymbolDataset(Dataset):
@@ -37,19 +38,15 @@ class MultiSymbolDataset(Dataset):
         self.config = config
         # A new file with input data is created.
         if self.config['CREATE_NEW_FILE']:
-            print("[MULTI_SYMBOL_DATASET]: Data Preprocessing started")
-            date_df = get_all_dates(reader)
-            stocks, date_df = fill_dataframe(date_df, reader)
+            Logger.log_text(
+                "Data pre-processing in the multi symbol dataset has started.")
 
-            # Sort the stock symbols alphabetically to ensure that the order is always the same.
-            stocks.sort()
-            self.stocks = stocks
+            date_df = get_all_dates(reader)
+            self.stocks, date_df = fill_dataframe(date_df, reader)
 
             date_df = add_time_information(date_df)
             date_df.set_index('posix_time', inplace=True)
             date_df.drop(columns=['timestamp'], inplace=True)
-            # Add a column with zeros for each stock symbol.
-            # date_df.loc[:, stocks] = 0
 
             # If the number of columns is odd, a column with zeros is added.
             # This is necessary because the number of columns must be even for the transformer model.
@@ -78,28 +75,6 @@ class MultiSymbolDataset(Dataset):
             date_df.to_csv(
                 self.config["DATA_FILE_PATH"], mode='w', header=True)
 
-            # data = date_df.copy()
-            # data.loc[:, 'Target'] = data[f'close {stock}']
-            # for i, stock in enumerate(stocks):
-            #     print(
-            #         f"[MULTI_SYMBOL_DATASET]: Load and process data for {stock}")
-            #     # Add a column with ones for each stock symbol.
-            #     # data = date_df.copy()
-            #     # data.loc[:, stock] = 1
-            #     data.loc[:, 'Target'] = data[f'close {stock}']
-
-            #     if i == 0:
-            #         # The first stock is written to the file with the header.
-            #         data.to_csv(self.config["DATA_FILE_PATH"],
-            #                     mode='w', header=True)
-            #         # The dimensions of the input and output data are required
-            #         # to dimension the input and output layers of the model.
-            #         self.input_dim = data.shape[1]
-            #         self.output_dim = 1
-            #     # else:
-            #         # The other stocks are appended to the file without a header.
-            #         # data.to_csv(self.config["DATA_FILE_PATH"],
-            #         #            mode='a', header=False)
             print("File: \"" + self.config["DATA_FILE_PATH"] + "\" created.")
         else:
             # The existing file with input data is used.
@@ -121,12 +96,11 @@ class MultiSymbolDataset(Dataset):
         Returns:
             int: number of samples in the dataset
         """
-
         return self.length - self.seq_len_encoder - self.seq_len_decoder + 1
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         """
-        Returns sampel of input and target sequences. The input and target sequences are of the
+        Returns sample of input and target sequences. The input and target sequences are of the
         length defined in the config. The start of the target sequence is the first entry after
         the input sequence.
 
@@ -146,11 +120,8 @@ class MultiSymbolDataset(Dataset):
         data = read_csv_chunk(
             self.config["DATA_FILE_PATH"], start_input, end_target)
 
-        # The last column contains the target data.
+        # The last X columns contain the target data where X is the amount of output dimensions
         target_data = data.iloc[:, -self.output_dim:].to_numpy()
-
-        # for _ in range(self.output_dim):
-        #     data.pop(data.columns[-1])
 
         # The target data must be a 2D array.
         target_data = np.array([np.array(element) for element in target_data])
@@ -167,22 +138,3 @@ class MultiSymbolDataset(Dataset):
         target = torch.tensor(target, dtype=torch.float32)
 
         return input, target
-
-
-# Code for debugging
-if __name__ == "__main__":
-
-    # Check if the path to the configuration file was passed as an argument.
-    assert len(sys.argv) == 2
-
-    # Read in the configuration file.
-    config_file_path = sys.argv[1]
-    with open(config_file_path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-
-    # Create dataset
-    txt_reader = DataReader(config)
-
-    dataset = MultiSymbolDataset(txt_reader, config)
-    dataloader = DataLoader(dataset, shuffle=False, batch_size=1)
-    test_sample = next(iter(dataloader))[1]

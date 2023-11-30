@@ -1,11 +1,12 @@
 import yaml
 
 from src_transformers.preprocessing.multiSymbolDataset import MultiSymbolDataset
-from src_transformers.preprocessing.perSymbolDataset import PerSymbolDataset
+
+# from src_transformers.preprocessing.perSymbolDataset import PerSymbolDataset
 from src_transformers.preprocessing.txtReader import DataReader
 
 
-def create_dataset_from_config(config_path: str, model_name: str, model_parameters: dict) -> PerSymbolDataset:
+def create_dataset_from_config(config_path: str, model_name: str, model_parameters: dict) -> MultiSymbolDataset:
     # test = MultiSymbolDataset(txt_reader, config)
 
     with open(config_path, "r", encoding="utf-8") as f:
@@ -25,6 +26,7 @@ def create_dataset_from_config(config_path: str, model_name: str, model_paramete
         target_length = 3
 
     # TODO: Adjust for both dataset and use config to determine which dataset to use
-    dataset = MultiSymbolDataset(txt_reader, data_config, input_length, target_length)
+    dataset = MultiSymbolDataset(
+        txt_reader, data_config, input_length, target_length)
 
     return dataset

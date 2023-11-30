@@ -20,6 +20,10 @@ class Logger():
     finished.
     """
 
+    @staticmethod
+    def log_text(text: str):
+        print(f"[LOGGER]: {text}")
+
     def __init__(self) -> None:
         """
         Initializes the Logger.
