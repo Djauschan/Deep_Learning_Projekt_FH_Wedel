@@ -35,8 +35,9 @@ class MultiSymbolDataset(Dataset):
             # Read the existing file if the user wants to skip creating a new file
             Logger.log_text(
                 "Loading pre-processed data from file for the multi symbol dataset.")
-Logger.log_text(
-                "Added more precise time information to the pre-processed data.")
+
+            self.length, self.encoder_dimensions = get_csv_shape(
+                self.config["DATA_FILE_PATH"])
             self.decoder_dimensions = len(self.config["target_symbols"])
         else:
             Logger.log_text(
