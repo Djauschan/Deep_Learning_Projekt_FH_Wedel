@@ -1,5 +1,6 @@
 """
-This module contains the MultiSymbolDataset class which is used to handle multi-symbol financial data.
+This module contains the MultiSymbolDataset class which is used to handle multi-symbol
+financial data.
 """
 from dataclasses import dataclass
 
