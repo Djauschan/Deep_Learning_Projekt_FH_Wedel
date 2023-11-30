@@ -83,6 +83,7 @@ def get_all_dates(reader: DataReader) -> pd.DataFrame:
         file_df = reader.read_next_txt()
         if file_df is None:
             break
+
         all_timestamps.update(file_df['timestamp'])
         # Explicitly delete the data frame to free up memory.
         del file_df
@@ -109,31 +110,34 @@ def fill_dataframe(all_dates: pd.DataFrame, reader: DataReader) -> tuple[list, p
         tuple[list, pd.DataFrame]: Symbols of all stocks in the data frame, data frame containing the values required for training.
     """
     stocks = []
-    df = reader.read_next_txt()
-    while df is not None:
-        symbol = df['symbol'].iloc[0]
-        type = df['type'].iloc[0]
 
-        if type == 'index':
+    while True:
+        file_df = reader.read_next_txt()
+        if file_df is None:
+            break
+
+        symbol = file_df['symbol'].iloc[0]
+        symbol_type = file_df['type'].iloc[0]
+
+        if symbol_type == 'index':
             # Only the closing price is used for indices.
-            merged_df = pd.merge(all_dates, df[['timestamp', 'close']],
+            merged_df = pd.merge(all_dates, file_df[['timestamp', 'close']],
                                  how='left', on='timestamp', suffixes=('', f'_{symbol}'))
             # ffill: forward fill, bfill: backward fill
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
 
-        if type == 'stock' or type == 'ETF':
+        if symbol_type == 'stock' or symbol_type == 'ETF':
             # The closing price and the volume are used for stocks and ETFs.
-            merged_df = pd.merge(all_dates, df[['timestamp', 'close', 'volume']],
+            merged_df = pd.merge(all_dates, file_df[['timestamp', 'close', 'volume']],
                                  how='left', on='timestamp', suffixes=('', f'_{symbol}'))
             # ffill: forward fill, bfill: backward fill
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
             all_dates[f'volume {symbol}'] = merged_df['volume'].fillna(0)
             # The symbols of all stocks are saved in a list as they are used as target variables.
-            if type == 'stock':
+            if symbol_type == 'stock':
                 stocks.append(symbol)
 
         # Explicitly delete the data frame to free up memory.
-        del df
-        df = reader.read_next_txt()
+        del file_df
 
     return stocks, all_dates

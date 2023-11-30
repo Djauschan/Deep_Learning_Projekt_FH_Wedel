@@ -3,7 +3,7 @@ DEBUG_OUTPUT: false
 SHOW_PLOT: false
 VISUALIZE_ALL_DATA: true
 READ_ALL_FILES: false
-CREATE_NEW_FILE: true
+CREATE_NEW_FILE: false
 DATA_FILE_PATH: "data/output/Multi_Symbol.csv"
 input_symbols:
 # stocks

@@ -25,7 +25,7 @@ def read_csv_chunk(file_path: str, start_index: int, stop_index: int) -> pd.Data
     return df
 
 
-def count_rows(csv_file_path: str) -> int:
+def get_csv_shape(csv_file: str) -> tuple[int, int]:
     """
     Counts the number of rows in the CSV file.
 
@@ -35,24 +35,9 @@ def count_rows(csv_file_path: str) -> int:
     Returns:
         int: Number of rows in the CSV file.
     """
-    with open(csv_file_path, 'r', newline='', encoding='utf-8') as file:
+    with open(csv_file, 'r', newline='', encoding='utf-8') as file:
         csv_reader = csv.reader(file)
-        header = next(csv_reader)  # skip the header
-        row_count = sum(1 for row in csv_reader)
-    return row_count
-
-
-def get_column_count(csv_file_path: str) -> int:
-    """
-    Counts the number of columns in the CSV file.
-
-    Args:
-        csv_file_path (str): Path of the CSV file.
-
-    Returns:
-        int: Number of columns in the CSV file.
-    """
-    with open(csv_file_path, 'r', newline='', encoding='utf-8') as csvfile:
-        csv_reader = csv.reader(csvfile)
+        # Get the column names of the csv file (includes posix_time)
         header = next(csv_reader)
-        return len(header)
+        row_count = sum(1 for _ in csv_reader)
+    return row_count, len(header) - 1

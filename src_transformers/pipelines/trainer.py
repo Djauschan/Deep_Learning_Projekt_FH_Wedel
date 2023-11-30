@@ -116,11 +116,11 @@ class Trainer:
         try:
             model_name, model_parameters = kwargs.popitem()
             dataset = create_dataset_from_config(
-                data_config, model_name, model_parameters)
+                data_config, model_parameters)
 
             # NOTE: Regarding input & output dim: What to do for other models?
             model = MODEL_NAME_MAPPING[model_name](
-                **model_parameters, dim_encoder=dataset.input_dim, dim_decoder=dataset.output_dim, gpu_activated=gpu_activated)
+                **model_parameters, dim_encoder=dataset.encoder_dimensions, dim_decoder=dataset.decoder_dimensions, gpu_activated=gpu_activated)
         except KeyError as parse_error:
             raise (
                 KeyError(f"The model '{model_name}' does not exist!")
