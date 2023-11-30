@@ -14,8 +14,8 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
-from src_transformers.pipelines.dataset_creation import create_dataset_from_config
 from src_transformers.pipelines.model_io import save_model
+from src_transformers.preprocessing.multiSymbolDataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
 from src_transformers.utils.viz_training import plot_evaluation
 
@@ -61,15 +61,15 @@ class Trainer:
     @classmethod
     def create_trainer_from_config(
         cls: type["Trainer"],
+        dataset: MultiSymbolDataset,
         batch_size: int,
         epochs: int,
         learning_rate: float,
         validation_split: float,
-        data_config: str,
         loss: str = "mse",
         optimizer: str = "adam",
         momentum: float = 0,
-        use_gpu: bool = True,
+        gpu_activated: bool = True,
         eval_mode: bool = False,
         **kwargs,
     ) -> "Trainer":
@@ -81,13 +81,7 @@ class Trainer:
         The other parameters from the config are simply passed through to the Trainer instance.
 
         Args:
-            batch_size (int): The batch size for training.
-            epochs (int): The number of epochs to train for.
-            learning_rate (float): The learning rate for the optimizer.
-            validation_split (float): The fraction of the data to use for validation.
-            loss (str): The name of the loss function to use. Defaults to "mse".
-            optimizer (str): The name of the optimizer to use. Defaults to "adam".
-            momentum (float): The momentum for the "sgd" optimizer. Defaults to 0.
+            batch_size (int): The batch size for tra*"sgd" optimizer. Defaults to 0.
             use_gpu (bool): Whether to use a GPU for training. Defaults to True.
             eval_mode (bool): should be set to true for evaluation.
             **kwargs: Additional keyword arguments.
@@ -96,8 +90,6 @@ class Trainer:
         Returns:
             Trainer: A Trainer instance with the specified configuration.
         """
-        # Setting up GPU based on availability and usage preference
-        gpu_activated = use_gpu and torch.cuda.is_available()
 
         # Setting up the loss
         if loss == "mse":
@@ -115,8 +107,6 @@ class Trainer:
         model_name = None
         try:
             model_name, model_parameters = kwargs.popitem()
-            dataset = create_dataset_from_config(
-                data_config, model_parameters)
 
             # NOTE: Regarding input & output dim: What to do for other models?
             model = MODEL_NAME_MAPPING[model_name](

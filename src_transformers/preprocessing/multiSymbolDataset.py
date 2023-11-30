@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+from pathlib import Path
+
 import torch
 from torch.utils.data import Dataset
 
@@ -11,13 +14,26 @@ from src_transformers.preprocessing.txtReader import DataReader
 from src_transformers.utils.logger import Logger
 
 
+@dataclass
 class MultiSymbolDataset(Dataset):
     """
     Data stored as tensors
     Pytorch uses the 3 functions [__init__, __len__, __getitem__]
     """
 
-    def __init__(self, config: dict, encoder_input_length: int, decoder_input_length: int):
+    encoder_input_length: int
+    decoder_input_length: int
+    data_file: Path
+
+    @classmethod
+    def create_from_config(cls,
+                           read_all_files: bool,
+                           create_new_file: bool,
+                           data_file: str,
+                           encoder_symbols: list[str],
+                           decoder_symbols: list[str],
+                           encoder_input_length: int,
+                           decoder_input_length: int):
         """
         Initializes the Pytorch data set.
 
@@ -27,26 +43,22 @@ class MultiSymbolDataset(Dataset):
             target_length (int): Length of the target sequence.
         """
 
-        self.config = config
-        self.encoder_input_length = encoder_input_length
-        self.decoder_input_length = decoder_input_length
-
-        if not self.config['CREATE_NEW_FILE']:
+        if not create_new_file:
             # Read the existing file if the user wants to skip creating a new file
             Logger.log_text(
                 "Loading pre-processed data from file for the multi symbol dataset.")
 
-            self.length, self.encoder_dimensions = get_csv_shape(
-                self.config["DATA_FILE_PATH"])
-            self.decoder_dimensions = len(self.config["target_symbols"])
+            cls.length, cls.encoder_dimensions = get_csv_shape(data_file)
+            cls.decoder_dimensions = len(decoder_symbols)
         else:
             Logger.log_text(
                 "Data pre-processing for the multi symbol dataset has started.")
 
-            data_reader = DataReader(self.config)
+            data_reader = DataReader(
+                read_all_files, encoder_symbols, decoder_symbols)
 
             date_df = get_all_dates(data_reader)
-            self.stocks, date_df = fill_dataframe(date_df, data_reader)
+            cls.stocks, date_df = fill_dataframe(date_df, data_reader)
             Logger.log_text(
                 "Added the time stamps from all loaded files and filled missing values to the pre-processed data.")
 
@@ -64,24 +76,25 @@ class MultiSymbolDataset(Dataset):
 
             current_columns = list(date_df.columns.values)
             target_columns = []
-            targets = 0
 
-            for symbol in self.config["target_symbols"]:
+            for symbol in decoder_symbols:
                 current_columns.remove(f'close {symbol}')
                 target_columns.append(f'close {symbol}')
-                targets += 1
 
             # Re-ordering the target columns to be at the end
             date_df = date_df[current_columns + target_columns]
 
-            self.length = len(date_df)
-            self.encoder_dimensions = date_df.shape[1]
-            self.decoder_dimensions = targets
+            cls.length = len(date_df)
+            cls.encoder_dimensions = date_df.shape[1]
+            cls.decoder_dimensions = len(decoder_symbols)
 
-            file = self.config["DATA_FILE_PATH"]
-            date_df.to_csv(file, mode='w', header=True)
+            date_df.to_csv(data_file, mode='w', header=True)
             Logger.log_text(
-                f"Pre-processed data was stored in the file '{file}'.")
+                f"Pre-processed data was stored in the file '{data_file}'.")
+
+        return cls(encoder_input_length=encoder_input_length,
+                   decoder_input_length=decoder_input_length,
+                   data_file=Path(data_file))
 
     def __len__(self) -> int:
         """
@@ -110,8 +123,7 @@ class MultiSymbolDataset(Dataset):
         target_end = input_end + self.decoder_input_length
 
         # Load the data from the file, offset by the given index
-        data = read_csv_chunk(
-            self.config["DATA_FILE_PATH"], input_start, target_end)
+        data = read_csv_chunk(self.data_file, input_start, target_end)
 
         encoder_input = data.to_numpy()
         # Get the encoder input from 0 to self.input_length

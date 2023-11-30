@@ -10,7 +10,11 @@ class DataReader():
     The class is used to read the data from the files.
     """
 
-    def __init__(self, config: dict, data_dir_name: str = "data/input"):
+    def __init__(self,
+                 read_all_files: bool,
+                 encoder_symbols: list[str],
+                 decoder_symbols: list[str],
+                 data_dir_name: str = "data/input"):
         """
         Initializes a data reader.
 
@@ -28,7 +32,9 @@ class DataReader():
         """
 
         # Dictionary for the configuration of data preprocessing is saved.
-        self.config = config
+        self.read_all_files = read_all_files
+        self.encoder_symbols = encoder_symbols
+        self.decoder_symbols = decoder_symbols
 
         self.root_folder = data_dir_name
         # A list containing all file names and a list containing all symbols are created.
@@ -52,7 +58,7 @@ class DataReader():
                 for inner_root, inner_dirs, inner_files in os.walk(dir_path):
                     for file in inner_files:
                         symbol = file.split("_")[0]
-                        if self.config["READ_ALL_FILES"] or self.root_folder.endswith("test"):
+                        if self.read_all_files or self.root_folder.endswith("test"):
                             # The paths of all text files are stored in a list.
                             if file.endswith(".txt"):
                                 txt_files.append(os.path.join(dir_path, file))
@@ -60,10 +66,10 @@ class DataReader():
                         else:
                             # The paths of all text files selected via the symbols
                             # in the configuration file are saved in a list.
-                            if file.endswith(".txt") and symbol in self.config["input_symbols"]:
+                            if file.endswith(".txt") and symbol in self.encoder_symbols:
                                 txt_files.append(os.path.join(dir_path, file))
                                 input_symbols.append(symbol)
-                            elif file.endswith(".txt") and symbol in self.config["target_symbols"]:
+                            elif file.endswith(".txt") and symbol in self.decoder_symbols:
                                 txt_files.append(os.path.join(dir_path, file))
                                 target_symbols.append(symbol)
         return txt_files, input_symbols, target_symbols
