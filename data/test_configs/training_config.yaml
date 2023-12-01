@@ -9,8 +9,8 @@ model_parameters:
     dropout: 0.1
 training_parameters:
   batch_size: 1000
-  epochs: 500
-  learning_rate: 0.007
+  epochs: 1000
+  learning_rate: 0.001
   validation_split: 0.1
 dataset_parameters:
   read_all_files: false

@@ -285,19 +285,10 @@ class Trainer:
             # Reset optimizer
             self.optimizer.zero_grad()
 
-            n_tgt_feature = target.shape[2]
-
-            # Create the input for the decoder
-            # Targets are shifted one to the right and last entry of targets is filled on idx 0
-            dec_input = torch.cat(
-                (input[:, -1, -n_tgt_feature:].unsqueeze(1), target[:, :-1, :]), dim=1)
-            # TODO shift in Transformer model
-
             input = input.to(self.device)
             target = target.to(self.device)
-            dec_input = dec_input.to(self.device)
 
-            prediction = self.model.forward(input, dec_input)
+            prediction = self.model.forward(input, target)
             loss = self.loss(prediction, target.float())
 
             loss.backward()
@@ -344,17 +335,10 @@ class Trainer:
         with torch.no_grad():
             for input, target in validation_loader:
 
-                # Create the input for the decoder
-                # Targets are shifted one to the right and last entry of targets is filled on idx 0
-                n_tgt_feature = target.shape[2]
-                dec_input = torch.cat(
-                    (input[:, -1, -n_tgt_feature:].unsqueeze(1), target[:, :-1, :]), dim=1)
-
                 input = input.to(self.device)
                 target = target.to(self.device)
-                dec_input = dec_input.to(self.device)
 
-                prediction = self.model.forward(input, dec_input)
+                prediction = self.model.forward(input, target)
                 loss = self.loss(prediction, target.float())
 
 

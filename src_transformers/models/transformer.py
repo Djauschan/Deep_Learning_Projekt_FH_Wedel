@@ -348,7 +348,14 @@ class Transformer(nn.Module):
         dec_mask = torch.ones(tgt_mask.size(0), tgt_mask.size(
             1), tgt_mask.size(2), src_mask.size(3)).bool()
 
+        # Create the input for the decoder
+        # Targets are shifted one to the right and last entry of targets is filled on idx 0
+        n_tgt_feature = tgt.shape[2]
+        dec_input = torch.cat(
+            (src[:, -1, -n_tgt_feature:].unsqueeze(1), tgt[:, :-1, :]), dim=1)
+
         dec_mask.to(self.device)
+        dec_input.to(self.device)
 
         # Embed inputs and apply positional encoding
         src_embedded = self.dropout(
@@ -357,7 +364,7 @@ class Transformer(nn.Module):
 
         # Embed target and apply positional encoding
         tgt_embedded = self.dropout(
-            self.positional_encoding_decoder(tgt)
+            self.positional_encoding_decoder(dec_input)
         )
 
         # Forward encoder layers
