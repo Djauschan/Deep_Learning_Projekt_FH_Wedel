@@ -12,6 +12,9 @@ from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
 
 MODEL_OUTPUT_PATH: Final[Path] = Path("data", "output", "models")
 
+first_save = True
+path: str = ""
+
 
 class ModelService():
     """
@@ -112,6 +115,8 @@ class ModelService():
         Returns:
             str: The absolute path to the saved model file.
         """
+        # Use the global variable to determine if this is the first run of the program.
+        global first_save, path
         # Get the class name of the model as string
         model_class_name = type(model).__name__
         version = cls.get_latest_version(model_class_name)
@@ -119,7 +124,10 @@ class ModelService():
         if version is None:
             version = 1
 
-        path = Path(MODEL_OUTPUT_PATH, f'{model_class_name}_v{version + 1}.pt')
+        if first_save:
+            path = Path(MODEL_OUTPUT_PATH,
+                        f'{model_class_name}_v{version + 1}.pt')
+            first_save = False
         torch.save(model, path)
 
         return str(path.absolute())
