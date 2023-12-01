@@ -337,8 +337,8 @@ class Trainer:
 
         # create an array to store the predictions and targets of all samples
         samples = len(validation_loader.dataset)
-        prediction_len = validation_loader.dataset.dataset.seq_len_decoder
-        dim = validation_loader.dataset.dataset.output_dim
+        prediction_len = validation_loader.dataset.dataset.decoder_input_length
+        dim = validation_loader.dataset.dataset.decoder_dimensions
         results = np.zeros((2, samples, prediction_len, dim))
 
 

@@ -260,20 +260,20 @@ class DecoderLayer(nn.Module):
     def forward(self, x, enc_output, src_mask, tgt_mask):
         # Forward self attention layer for tgt inputs
         attn_output = self.self_attn(x, x, x, tgt_mask)
-        # x = self.norm1(x + self.dropout(attn_output))
-        x = x + self.dropout(attn_output)
+        x = self.norm1(x + self.dropout(attn_output))
+        # x = x + self.dropout(attn_output)
 
         # Forward cross attention layer for encoder outputs
         # Encoders outputs are used as keys and values
         # The decoder's outputs are used as queries
         attn_output = self.cross_attn(x, enc_output, enc_output, src_mask)
-        # x = self.norm2(x + self.dropout(attn_output))
-        x = x + self.dropout(attn_output)
+        x = self.norm2(x + self.dropout(attn_output))
+        #x = x + self.dropout(attn_output)
 
         # Forward feed forward layer
         ff_output = self.feed_forward(x)
-        # x = self.norm3(x + self.dropout(ff_output))
-        x = x + self.dropout(ff_output)
+        x = self.norm3(x + self.dropout(ff_output))
+        #x = x + self.dropout(ff_output)
         return x
 
 
