@@ -1,8 +1,0 @@
-batch_size: 8
-epochs: 10
-learning_rate: 0.0001
-validation_split: 0.2
-use_gpu: True
-# The code expects the model to always be the last variable in the configuration file.
-single_layer_perceptron:
-  layers: 1
