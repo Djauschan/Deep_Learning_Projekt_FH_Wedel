@@ -1,13 +1,22 @@
 """
 This module contains the Logger class which is used to log training information.
 """
-
+import io
+import os
 from datetime import datetime
 from typing import Optional
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import cm
+from PIL import Image
+
+from torchvision.transforms import ToTensor
 
 import torch.nn as nn
 from torch.utils.tensorboard.writer import SummaryWriter
 from tqdm import tqdm
+
+from src_transformers.utils.viz_training import plot_evaluation
 
 
 class Logger():
@@ -120,3 +129,41 @@ class Logger():
         """
         tqdm.write(f"[LOGGER]: Epoch {epoch}: Validation Loss = {value}")
         self._summary_writer.add_scalar("loss/val", value, epoch)
+
+    def save_loss_chart(self, targets: np.array, predictions: np.array, epoch: int):
+        """
+        Logged ein Bild der atkuellen Klassifiezierung
+        """
+        fig = plot_evaluation(targets, predictions)
+
+        os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+        # Save image in Logger
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image = Image.open(buf)
+        image = ToTensor()(image)
+        self._summary_writer.add_image("image/ts_chart", image, epoch)
+
+        print("[Logger]: Charts saved.")
+        plt.close('all')
+
+    def save_model(self, targets: np.array, predictions: np.array, epoch: int):
+        """
+        Logged ein Bild der atkuellen Klassifiezierung
+        """
+        fig = plot_evaluation(targets, predictions)
+
+        os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+        # Save image in Logger
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image = Image.open(buf)
+        image = ToTensor()(image)
+        self._summary_writer.add_image("image/ts_chart", image, epoch)
+
+        print("[Logger]: Charts saved.")
+        plt.close('all')

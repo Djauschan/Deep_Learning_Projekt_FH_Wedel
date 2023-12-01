@@ -263,9 +263,10 @@ class Trainer:
                 train_loss = self.calculate_train_loss(train_loader)
                 self.logger.log_training_loss(train_loss, epoch)
 
-                validation_loss, _ = self.calculate_validation_loss(
+                validation_loss, results = self.calculate_validation_loss(
                     validation_loader)
                 self.logger.log_validation_loss(validation_loss, epoch)
+                self.logger.save_loss_chart(predictions=results[0], targets=results[1], epoch=epoch)
 
                 # Early stopping
                 if min_loss > validation_loss:
@@ -366,13 +367,11 @@ class Trainer:
         step_count: int = 0
 
         # create an array to store the predictions and targets of all samples
-        if self.eval_mode:
-            samples = len(validation_loader.dataset)
-            prediction_len = validation_loader.dataset.dataset.seq_len_decoder
-            dim = validation_loader.dataset.dataset.output_dim
-            results = np.zeros((2, samples, prediction_len, dim))
-        else:
-            results = None
+        samples = len(validation_loader.dataset)
+        prediction_len = validation_loader.dataset.dataset.seq_len_decoder
+        dim = validation_loader.dataset.dataset.output_dim
+        results = np.zeros((2, samples, prediction_len, dim))
+
 
         loder_len = len(validation_loader)
 
@@ -394,11 +393,11 @@ class Trainer:
                 prediction = self.model.forward(input, dec_input)
                 loss = self.loss(prediction, target.float())
 
-                if self.eval_mode:
-                    start_idx = step_count * self.batch_size
-                    end_idx = start_idx + self.batch_size
-                    results[0, start_idx:end_idx, :, :] = prediction
-                    results[1, start_idx:end_idx, :, :] = target
+
+                start_idx = step_count * self.batch_size
+                end_idx = start_idx + self.batch_size
+                results[0, start_idx:end_idx, :, :] = prediction
+                results[1, start_idx:end_idx, :, :] = target
 
                 validation_loss += loss.sum().item()
                 step_count += 1
@@ -432,8 +431,6 @@ class Trainer:
         self.validation_split = 1
         train_loader, validation_loader = self.setup_dataloaders()
 
-        self.eval_mode = True
-
         loss, results = self.calculate_validation_loss(validation_loader)
 
         predictions = results[0]
@@ -444,8 +441,6 @@ class Trainer:
 
         now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-        # TODO @duwe: hier deinen Pfad einfügen
-        #path = f'C:/Users/nikla/OneDrive/Uni/23WS/Projekt/Deep_Learning/data/output/eval_plot/plot{now}.png'
         path = Path(FIG_OUTPUT_PATH, f'plot{now}.png')
 
         plot.savefig(path)

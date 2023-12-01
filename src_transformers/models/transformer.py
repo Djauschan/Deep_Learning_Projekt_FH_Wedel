@@ -4,7 +4,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
-from src_transformers.utils.viz_transformer import visualize_attention_mask_plotly
+
 
 
 class MultiHeadAttention(nn.Module):
