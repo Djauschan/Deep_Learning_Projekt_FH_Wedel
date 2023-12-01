@@ -122,7 +122,6 @@ class MultiHeadAttention_Modified(nn.Module):
         if mask is not None:
             mask = mask.to(self.device)
             attn_scores = attn_scores.masked_fill(mask == 0, -1e9)
-            attn_scores = attn_scores.to(self.device)
 
         # Softmax is applied to obtain attention probabilities (i.e. Attention weights)
         attn_probs = torch.softmax(attn_scores, dim=-1)
