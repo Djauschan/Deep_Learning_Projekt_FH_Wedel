@@ -86,6 +86,10 @@ class ModelService():
         Returns:
             int: The highest version number of the specified model, or 0 if no model is found.
         """
+        # create output directory if it does not exist
+        if not MODEL_OUTPUT_PATH.exists():
+            MODEL_OUTPUT_PATH.mkdir(parents=True)
+
         relevant_file_names = list(map(lambda f: f.name, filter(lambda f: f.name.startswith(
             f'{name}_v'), MODEL_OUTPUT_PATH.iterdir())))
 
@@ -122,7 +126,7 @@ class ModelService():
         version = cls.get_latest_version(model_class_name)
 
         if version is None:
-            version = 1
+            version = 0
 
         if first_save:
             path = Path(MODEL_OUTPUT_PATH,

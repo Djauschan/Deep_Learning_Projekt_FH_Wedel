@@ -82,7 +82,7 @@ class MultiHeadAttention_Modified(nn.Module):
     This module contains one multi-head attention layer of the transformer model.
     """
 
-    def __init__(self, dim_encoder, dim_decoder, num_heads):
+    def __init__(self, dim_encoder, dim_decoder, num_heads, device):
         """
         Args:
             d_model (int): The model's dimension (number of features in one timestep).
@@ -107,6 +107,8 @@ class MultiHeadAttention_Modified(nn.Module):
         self.W_v = nn.Linear(dim_encoder, dim_decoder)  # Value transformation
         self.W_o = nn.Linear(dim_decoder, dim_decoder)  # Output transformation
 
+        self.device = device
+
     def scaled_dot_product_attention(self, Q, K, V, mask=None):
         """
         This function calculates the Self-Attention for one head.
@@ -114,10 +116,13 @@ class MultiHeadAttention_Modified(nn.Module):
         # Calculate attention scores (i.e. similarity scores between query and keys)
         attn_scores = torch.matmul(
             Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
+        attn_scores = attn_scores.to(self.device)
 
         # Apply mask if provided (useful for preventing attention to certain parts like padding)
         if mask is not None:
+            mask = mask.to(self.device)
             attn_scores = attn_scores.masked_fill(mask == 0, -1e9)
+            attn_scores = attn_scores.to(self.device)
 
         # Softmax is applied to obtain attention probabilities (i.e. Attention weights)
         attn_probs = torch.softmax(attn_scores, dim=-1)
@@ -246,11 +251,11 @@ class EncoderLayer(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self, dim_encoder, dim_decoder, num_heads, d_ff, dropout):
+    def __init__(self, dim_encoder, dim_decoder, num_heads, d_ff, dropout, device):
         super(DecoderLayer, self).__init__()
         self.self_attn = MultiHeadAttention(dim_decoder, num_heads)
         self.cross_attn = MultiHeadAttention_Modified(
-            dim_encoder, dim_decoder, num_heads)
+            dim_encoder, dim_decoder, num_heads, device)
         self.feed_forward = PositionWiseFeedForward(dim_decoder, d_ff)
         self.norm1 = nn.LayerNorm(dim_decoder)
         self.norm2 = nn.LayerNorm(dim_decoder)
@@ -268,12 +273,12 @@ class DecoderLayer(nn.Module):
         # The decoder's outputs are used as queries
         attn_output = self.cross_attn(x, enc_output, enc_output, src_mask)
         x = self.norm2(x + self.dropout(attn_output))
-        #x = x + self.dropout(attn_output)
+        # x = x + self.dropout(attn_output)
 
         # Forward feed forward layer
         ff_output = self.feed_forward(x)
         x = self.norm3(x + self.dropout(ff_output))
-        #x = x + self.dropout(ff_output)
+        # x = x + self.dropout(ff_output)
         return x
 
 
@@ -305,7 +310,7 @@ class Transformer(nn.Module):
              for _ in range(num_layers)]
         )
         self.decoder_layers = nn.ModuleList(
-            [DecoderLayer(dim_encoder, dim_decoder, num_heads, d_ff, dropout)
+            [DecoderLayer(dim_encoder, dim_decoder, num_heads, d_ff, dropout, self.device)
              for _ in range(num_layers)]
         )
 
@@ -334,6 +339,7 @@ class Transformer(nn.Module):
             nopeak_mask = 1 - torch.triu(nopeak_mask, diagonal=1)
 
         nopeak_mask = nopeak_mask.bool()
+        nopeak_mask = nopeak_mask.to(self.device)
 
         # some formating for dimensionality (no clue why, just dont touch it)
         mask = mask & nopeak_mask.unsqueeze(3)
