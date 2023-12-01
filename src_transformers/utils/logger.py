@@ -29,6 +29,19 @@ class Logger():
     finished.
     """
 
+    @classmethod
+    def log_text(cls, text: str) -> None:
+        """
+        This method prints a text message to the console. The message is prefixed with "[LOGGER]".
+
+        Args:
+            text (str): The text message to log.
+
+        Returns:
+            None
+        """
+        print(f"[LOGGER]: {text}")
+
     def __init__(self) -> None:
         """
         Initializes the Logger.

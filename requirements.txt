@@ -6,4 +6,5 @@ tensorboard
 PyYAML
 tqdm
 fastapi
+plotly
 uvicorn[standard]

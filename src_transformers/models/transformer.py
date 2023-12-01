@@ -5,8 +5,6 @@ import torch
 import torch.nn as nn
 
 
-
-
 class MultiHeadAttention(nn.Module):
     """
     This module contains one multi-head attention layer of the transformer model.
@@ -385,5 +383,3 @@ class Transformer(nn.Module):
 
         output = self.fc(dec_output)
         return output
-
-# test = Transformer(seq_len_encoder=200, d_model=10, num_heads=2, num_layers=3, d_ff=2048, dropout=0.1, src_vocab_size=10000, tgt_vocab_size=10000)

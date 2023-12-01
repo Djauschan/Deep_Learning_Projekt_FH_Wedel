@@ -13,13 +13,16 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
-from src_transformers.pipelines.dataset_creation import create_dataset_from_config
-from src_transformers.pipelines.model_io import save_model
+from src_transformers.pipelines.model_service import ModelService
+from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
 from src_transformers.utils.viz_training import plot_evaluation
 
 FIG_OUTPUT_PATH: Final[Path] = Path("./data/output/eval_plot")
+
+# create directory if it does not exist
+FIG_OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
+
 
 @dataclass
 class Trainer:
@@ -57,17 +60,17 @@ class Trainer:
     @classmethod
     def create_trainer_from_config(
         cls: type["Trainer"],
+        dataset: MultiSymbolDataset,
+        model: nn.Module,
         batch_size: int,
         epochs: int,
         learning_rate: float,
         validation_split: float,
-        data_config: str,
         loss: str = "mse",
         optimizer: str = "adam",
         momentum: float = 0,
-        use_gpu: bool = True,
-        eval_mode: bool = False,
-        **kwargs,
+        gpu_activated: bool = True,
+        eval_mode: bool = False
     ) -> "Trainer":
         """
         Creates a Trainer instance from an unpacked configuration file.
@@ -77,13 +80,7 @@ class Trainer:
         The other parameters from the config are simply passed through to the Trainer instance.
 
         Args:
-            batch_size (int): The batch size for training.
-            epochs (int): The number of epochs to train for.
-            learning_rate (float): The learning rate for the optimizer.
-            validation_split (float): The fraction of the data to use for validation.
-            loss (str): The name of the loss function to use. Defaults to "mse".
-            optimizer (str): The name of the optimizer to use. Defaults to "adam".
-            momentum (float): The momentum for the "sgd" optimizer. Defaults to 0.
+            batch_size (int): The batch size for tra*"sgd" optimizer. Defaults to 0.
             use_gpu (bool): Whether to use a GPU for training. Defaults to True.
             eval_mode (bool): should be set to true for evaluation.
             **kwargs: Additional keyword arguments.
@@ -92,8 +89,6 @@ class Trainer:
         Returns:
             Trainer: A Trainer instance with the specified configuration.
         """
-        # Setting up GPU based on availability and usage preference
-        gpu_activated = use_gpu and torch.cuda.is_available()
 
         # Setting up the loss
         if loss == "mse":
@@ -101,49 +96,23 @@ class Trainer:
         elif loss == "crossentropy":
             loss_instance = nn.CrossEntropyLoss()
         else:
-            print(
-                f"[TRAINER]: Loss {loss} is not valid, defaulting to MSELoss"
-            )
+            Logger.log_text(f"Loss {loss} is not valid, defaulting to MSELoss")
             loss_instance = nn.MSELoss()
-
-        # Setting up the model from the model name and parameters in the config
-        # TODO: (for Luca) Revise this after I know more about the datasets
-        model_name = None
-        try:
-            model_name, model_parameters = kwargs.popitem()
-            dataset = create_dataset_from_config(
-                data_config, model_name, model_parameters)
-
-            # NOTE: Regarding input & output dim: What to do for other models?
-            model = MODEL_NAME_MAPPING[model_name](
-                **model_parameters, dim_encoder=dataset.input_dim, dim_decoder=dataset.output_dim, gpu_activated=gpu_activated)
-        except KeyError as parse_error:
-            raise (
-                KeyError(f"The model '{model_name}' does not exist!")
-            ) from parse_error
-        # except TypeError as model_error:
-        #     raise (
-        #         TypeError(
-        #             f"The creation of the {model_name} model failed with the following error message {model_error}."
-        #         )
-        #     ) from model_error
 
         # Setting up the optimizer
         if optimizer == "adam":
             optimizer_instance = optim.Adam(
                 model.parameters(), lr=learning_rate)
             if momentum != 0:
-                print(
-                    f"[TRAINER]: Momentum {momentum} is not used since the optimizer is set to Adam"
-                )
+                Logger.log_text(
+                    f"Momentum {momentum} is not used since the optimizer is set to Adam")
         elif optimizer == "sgd":
             optimizer_instance = optim.SGD(
                 model.parameters(), lr=learning_rate, momentum=momentum
             )
         else:
-            print(
-                f"[TRAINER]: Optimizer {optimizer} is not valid, defaulting to Adam"
-            )
+            Logger.log_text(
+                f"Optimizer {optimizer} is not valid, defaulting to Adam")
             optimizer_instance = optim.Adam(
                 model.parameters(), lr=learning_rate)
 
@@ -161,7 +130,7 @@ class Trainer:
         )
 
         cls._dataset = dataset
-        print("[TRAINER]: Trainer was successfully set up.")
+        Logger.log_text("Trainer was successfully set up.")
 
         return instance
 
@@ -236,7 +205,7 @@ class Trainer:
 
         return train_loader, validation_loader
 
-    def train_model(self, train_loader, validation_loader, patience: int = 10) -> str:
+    def train_model(self, train_loader, validation_loader, patience: int = 500) -> str:
         """
         Trains the model for a specified number of epochs. For each epoch, the method calculates
         the training loss and validation loss, logs these losses, and saves the current state
@@ -378,7 +347,6 @@ class Trainer:
         with torch.no_grad():
             for input, target in validation_loader:
 
-
                 # Create the input for the decoder
                 # Targets are shifted one to the right and last entry of targets is filled on idx 0
                 n_tgt_feature = target.shape[2]
@@ -413,10 +381,11 @@ class Trainer:
     def save_model(self) -> None:
         """
         This method uses the `save_model` function to save the trained model to a file.
-        After the model is saved, the method logs a message to the console with the path to the file.
+        After the model is saved, the method logs a message to the console with the path
+        to the file.
         """
-        path = save_model(self.model)
-        print(f"[TRAINER]: Model saved to '{path}'")
+        path = ModelService.save_model(self.model)
+        Logger.log_text(f"Model saved to '{path}'.")
 
     def evaluate(self) -> None:
         """
@@ -445,6 +414,6 @@ class Trainer:
 
         plot.savefig(path)
 
-        print(f"[TRAINER]: Evaluation plot saved to '{path}'")
+        Logger.log_text(f"Evaluation plot saved to '{path}'.")
 
         print(loss)

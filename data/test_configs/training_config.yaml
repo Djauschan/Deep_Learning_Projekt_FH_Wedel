@@ -1,14 +1,46 @@
-batch_size: 200
-epochs: 50
-learning_rate: 0.05
-validation_split: 0.1
 use_gpu: true
-data_config: ./data/test_configs/data_config_multivariate.yaml
-# The code expects the model to always be the last variable in the configuration file.
-transformer:
-  num_heads: 1
-  num_layers: 2
-  d_ff: 200
-  seq_len_encoder: 200
-  seq_len_decoder: 3
-  dropout: 0.1
+model_parameters:
+  transformer:
+    num_heads: 1
+    num_layers: 2
+    d_ff: 200
+    seq_len_encoder: 200
+    seq_len_decoder: 3
+    dropout: 0.1
+training_parameters:
+  batch_size: 1000
+  epochs: 3
+  learning_rate: 0.1
+  validation_split: 0.1
+dataset_parameters:
+  read_all_files: false
+  create_new_file: false
+  data_file: "data/output/Multi_Symbol.csv"
+  encoder_symbols:
+  # stocks
+    - "AAPL"
+    #- "AAL"
+    - "AMD"
+    # - "C"
+    # - "MRNA"
+    #- "NIO"
+    # - "NVDA"
+    # - "SNAP"
+    # - "SQ"
+    #- "TSLA"
+  # ETFs
+    # - "ACWI"
+  # indices
+    # - "DXY"
+    # - "SPX"
+    # - "DJCIGC"
+    #- "DJCISI"
+    # - "DJCIEN"
+    # - "DJCIIK"
+    # - "DJI"
+    # - "DJINET"
+    # - "COMP"
+    # - "W5000"
+  decoder_symbols:
+    - "AMD"
+    - "AAPL"
