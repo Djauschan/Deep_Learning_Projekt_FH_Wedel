@@ -291,6 +291,7 @@ class Trainer:
             # Targets are shifted one to the right and last entry of targets is filled on idx 0
             dec_input = torch.cat(
                 (input[:, -1, -n_tgt_feature:].unsqueeze(1), target[:, :-1, :]), dim=1)
+            # TODO shift in Transformer model
 
             input = input.to(self.device)
             target = target.to(self.device)

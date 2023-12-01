@@ -174,5 +174,6 @@ class MultiSymbolDataset(Dataset):
         decoder_input = decoder_input[self.encoder_input_length:self.encoder_input_length +
                                       self.decoder_input_length]
         decoder_input = torch.tensor(decoder_input, dtype=torch.float32)
+        # TODO decoder_input umbennen in decoder_target
 
         return encoder_input, decoder_input
