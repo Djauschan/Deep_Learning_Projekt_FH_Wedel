@@ -288,19 +288,17 @@ class Transformer(nn.Module):
             seq_len_encoder,
             seq_len_decoder,
             dropout,
-            gpu_activated
+            device: torch.device
     ):
         super(Transformer, self).__init__()
 
-        self.gpu_activated = gpu_activated and torch.cuda.is_available()
+        self.device = device
 
         # Positional encoding
         self.positional_encoding_encoder = PositionalEncoding(
             dim_encoder, seq_len_encoder)
         self.positional_encoding_decoder = PositionalEncoding(
             dim_encoder, seq_len_decoder)
-
-        px = pd.DataFrame(self.positional_encoding_encoder.pe.numpy())
 
         self.encoder_layers = nn.ModuleList(
             [EncoderLayer(dim_encoder, num_heads, d_ff, dropout)
@@ -331,9 +329,6 @@ class Transformer(nn.Module):
         # generate squared tensor from sequence
         nopeak_mask = torch.ones(1, seq_length, seq_length)
 
-        if self.gpu_activated:
-            nopeak_mask = nopeak_mask.to('cuda')
-
         # add diagonal no peak mask if required
         if no_peak:
             nopeak_mask = 1 - torch.triu(nopeak_mask, diagonal=1)
@@ -344,10 +339,7 @@ class Transformer(nn.Module):
         mask = mask & nopeak_mask.unsqueeze(3)
         mask = mask[:, :, :, :, 0]
 
-        if self.gpu_activated:
-            mask = mask.to('cuda')
-
-        return mask
+        return mask.to(self.device)
 
     def forward(self, src, tgt):
         # Generate masks for Inputs (src) and Targets (tgt)
@@ -356,10 +348,7 @@ class Transformer(nn.Module):
         dec_mask = torch.ones(tgt_mask.size(0), tgt_mask.size(
             1), tgt_mask.size(2), src_mask.size(3)).bool()
 
-        if self.gpu_activated:
-            dec_mask = dec_mask.to('cuda')
-            src_mask = src_mask.to('cuda')
-            tgt_mask = tgt_mask.to('cuda')
+        dec_mask.to(self.device)
 
         # Embed inputs and apply positional encoding
         src_embedded = self.dropout(

@@ -1,6 +1,7 @@
 import argparse
 from typing import Final
 
+import torch
 import yaml
 from torch import cuda
 
@@ -57,9 +58,14 @@ def main() -> None:
 
     # Setting up GPU based on availability and usage preference
     gpu_activated = config.pop("use_gpu") and cuda.is_available()
-    # TODO @Luca: Fix this code (set device to CPU or GPU depending on gpu_activated)
-    Logger.log_text(
-        f"Using the device '{cuda.get_device_name()}' for the started pipeline.")
+    if gpu_activated:
+        device = torch.device('cuda')
+        Logger.log_text(
+            f"Using the device '{cuda.get_device_name(device)}' for the started pipeline.")
+    else:
+        device = torch.device('cpu')
+        Logger.log_text(
+            "GPU was either deactivated or is not available, using the CPU for the started pipeline.")
 
     model_parameters = config.pop("model_parameters")
     model_name, model_attributes = model_parameters.popitem()
@@ -69,7 +75,7 @@ def main() -> None:
         decoder_input_length=model_attributes.get("seq_len_decoder"),
         **config.pop("dataset_parameters"))
 
-    model = ModelService.create_model(gpu_activated=gpu_activated,
+    model = ModelService.create_model(device=device,
                                       encoder_dimensions=dataset.encoder_dimensions,
                                       decoder_dimensions=dataset.decoder_dimensions,
                                       model_name=model_name,
@@ -79,7 +85,7 @@ def main() -> None:
         trainer = Trainer.create_trainer_from_config(
             dataset=dataset,
             model=model,
-            gpu_activated=gpu_activated,
+            device=device,
             **config.pop("training_parameters"))
 
         trainer.start_training()
@@ -88,7 +94,7 @@ def main() -> None:
         trainer = Trainer.create_trainer_from_config(
             dataset=dataset,
             model=model,
-            gpu_activated=gpu_activated,
+            device=device,
             **config.pop("training_parameters"))
 
         trainer.start_training()

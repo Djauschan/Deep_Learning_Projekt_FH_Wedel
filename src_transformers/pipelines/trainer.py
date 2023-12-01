@@ -52,7 +52,7 @@ class Trainer:
     validation_split: float
     loss: nn.MSELoss | nn.CrossEntropyLoss
     optimizer: optim.SGD | optim.Adam
-    gpu_activated: bool
+    device: torch.device
     model: nn.Module
     logger: Logger
     eval_mode: bool
@@ -66,10 +66,10 @@ class Trainer:
         epochs: int,
         learning_rate: float,
         validation_split: float,
+        device: torch.device,
         loss: str = "mse",
         optimizer: str = "adam",
         momentum: float = 0,
-        gpu_activated: bool = True,
         eval_mode: bool = False
     ) -> "Trainer":
         """
@@ -123,7 +123,7 @@ class Trainer:
             validation_split=validation_split,
             loss=loss_instance,
             optimizer=optimizer_instance,
-            gpu_activated=gpu_activated,
+            device=device,
             model=model,
             logger=Logger(),
             eval_mode=eval_mode
@@ -148,17 +148,15 @@ class Trainer:
         Args:
             dataset (Dataset): Dataset to be used for training, optimizing and validating the model.
         """
-
-        if self.gpu_activated:
-            self.model.to("cuda")
-            self.loss.to("cuda")
+        self.model.to(self.device)
+        self.loss.to(self.device)
 
         config_str = f"batch_size: {self.batch_size}\
             epochs: {self.epochs}\
             learning rate: {self.learning_rate}\
             loss: {self.loss}\
             optimizer: {self.optimizer}\
-            gpu activated: {self.gpu_activated}"
+            device: {self.device}"
         self.logger.write_text("Trainer configuration", config_str)
         self.logger.write_model(self.model)
 
@@ -293,11 +291,9 @@ class Trainer:
             dec_input = torch.cat(
                 (input[:, -1, -n_tgt_feature:].unsqueeze(1), target[:, :-1, :]), dim=1)
 
-            #
-            if self.gpu_activated:
-                input = input.to("cuda")
-                target = target.to("cuda")
-                dec_input = dec_input.to("cuda")
+            input = input.to(self.device)
+            target = target.to(self.device)
+            dec_input = dec_input.to(self.device)
 
             prediction = self.model.forward(input, dec_input)
             loss = self.loss(prediction, target.float())
@@ -354,10 +350,9 @@ class Trainer:
                 dec_input = torch.cat(
                     (input[:, -1, -n_tgt_feature:].unsqueeze(1), target[:, :-1, :]), dim=1)
 
-                if self.gpu_activated:
-                    input = input.to("cuda")
-                    target = target.to("cuda")
-                    dec_input = dec_input.to("cuda")
+                input = input.to(self.device)
+                target = target.to(self.device)
+                dec_input = dec_input.to(self.device)
 
                 prediction = self.model.forward(input, dec_input)
                 loss = self.loss(prediction, target.float())
@@ -393,9 +388,8 @@ class Trainer:
 
 
         """
-        if self.gpu_activated:
-            self.model.to("cuda")
-            self.loss.to("cuda")
+        self.model.to(self.device)
+        self.loss.to(self.device)
 
         # Creating training and validation data loaders from the given data source
         self.validation_split = 1

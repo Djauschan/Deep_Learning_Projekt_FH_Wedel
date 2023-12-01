@@ -3,12 +3,11 @@ This module contains the ModelService class which provides methods for creating,
 """
 
 from pathlib import Path
-from typing import Final
+from typing import Final, Optional
 
 import torch
 import torch.nn as nn
 
-from src_transformers.models.transformer import Transformer
 from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
 
 MODEL_OUTPUT_PATH: Final[Path] = Path("data", "output", "models")
@@ -26,7 +25,7 @@ class ModelService():
 
     @classmethod
     def create_model(cls,
-                     gpu_activated: bool,
+                     device: torch.device,
                      encoder_dimensions: int,
                      decoder_dimensions: int,
                      model_name: str,
@@ -55,7 +54,7 @@ class ModelService():
             model = MODEL_NAME_MAPPING[model_name](**model_attributes,
                                                    dim_encoder=encoder_dimensions,
                                                    dim_decoder=decoder_dimensions,
-                                                   gpu_activated=gpu_activated)
+                                                   device=device)
         except KeyError as parse_error:
             raise (
                 KeyError(f"The model '{model_name}' does not exist!")
@@ -70,7 +69,7 @@ class ModelService():
         return model
 
     @classmethod
-    def get_latest_version(cls, name: str) -> int:
+    def get_latest_version(cls, name: str) -> Optional[int]:
         """
         Returns the highest version number of a model with the specified name.
 
@@ -94,7 +93,7 @@ class ModelService():
         if version_numbers:
             return max(version_numbers)
 
-        return 0
+        return None
 
     @classmethod
     def save_model(cls, model: nn.Module) -> str:
@@ -117,10 +116,10 @@ class ModelService():
         model_class_name = type(model).__name__
         version = cls.get_latest_version(model_class_name)
 
-        if version == 0:
+        if version is None:
             version = 1
 
-        path = Path(MODEL_OUTPUT_PATH, f'{model_class_name}_v{version}.pt')
+        path = Path(MODEL_OUTPUT_PATH, f'{model_class_name}_v{version + 1}.pt')
         torch.save(model, path)
 
         return str(path.absolute())
