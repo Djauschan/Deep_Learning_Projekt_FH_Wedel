@@ -8,13 +8,14 @@ model_parameters:
     seq_len_decoder: 3
     dropout: 0.1
 training_parameters:
-  batch_size: 1000
-  epochs: 1000
+  batch_size: 100
+  epochs: 10
   learning_rate: 0.001
   validation_split: 0.1
 dataset_parameters:
   read_all_files: false
-  create_new_file: false
+  # This parameter must be set to true if the symbols to be read in are changed.
+  create_new_file: true
   data_file: "data/output/Multi_Symbol.csv"
   encoder_symbols:
   # stocks
@@ -27,11 +28,11 @@ dataset_parameters:
     # - "NVDA"
     # - "SNAP"
     # - "SQ"
-    #- "TSLA"
+    - "TSLA"
   # ETFs
-    # - "ACWI"
+    - "ACWI"
   # indices
-    # - "DXY"
+    - "DXY"
     # - "SPX"
     # - "DJCIGC"
     #- "DJCISI"
@@ -44,3 +45,4 @@ dataset_parameters:
   decoder_symbols:
     - "AMD"
     - "AAPL"
+    - "TSLA"

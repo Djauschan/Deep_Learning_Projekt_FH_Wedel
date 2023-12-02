@@ -233,7 +233,8 @@ class Trainer:
                 validation_loss, results = self.calculate_validation_loss(
                     validation_loader)
                 self.logger.log_validation_loss(validation_loss, epoch)
-                self.logger.save_loss_chart(predictions=results[0], targets=results[1], epoch=epoch)
+                self.logger.save_loss_chart(
+                    predictions=results[0], targets=results[1], epoch=epoch)
 
                 # Early stopping
                 if min_loss > validation_loss:
@@ -329,7 +330,6 @@ class Trainer:
         dim = validation_loader.dataset.dataset.decoder_dimensions
         results = np.zeros((2, samples, prediction_len, dim))
 
-
         loder_len = len(validation_loader)
 
         with torch.no_grad():
@@ -340,7 +340,6 @@ class Trainer:
 
                 prediction = self.model.forward(input, target)
                 loss = self.loss(prediction, target.float())
-
 
                 start_idx = step_count * self.batch_size
                 end_idx = start_idx + self.batch_size
