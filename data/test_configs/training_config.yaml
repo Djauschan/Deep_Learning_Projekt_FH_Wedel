@@ -2,15 +2,16 @@ use_gpu: true
 model_parameters:
   transformer:
     num_heads: 1
-    num_layers: 2
+    num_layers: 1
     d_ff: 200
     seq_len_encoder: 200
     seq_len_decoder: 3
     dropout: 0.1
+    viz_model_rate: 0.1 # Here you can set the random rate of visualizing the tensors in the model
 training_parameters:
   batch_size: 1000
   epochs: 1000
-  learning_rate: 0.001
+  learning_rate: 0.05
   validation_split: 0.1
 dataset_parameters:
   read_all_files: false
@@ -19,15 +20,15 @@ dataset_parameters:
   encoder_symbols:
   # stocks
     - "AAPL"
-    #- "AAL"
+    - "AAL"
     - "AMD"
     # - "C"
     # - "MRNA"
-    #- "NIO"
+    - "NIO"
     # - "NVDA"
     # - "SNAP"
     # - "SQ"
-    #- "TSLA"
+    - "TSLA"
   # ETFs
     # - "ACWI"
   # indices
@@ -44,3 +45,6 @@ dataset_parameters:
   decoder_symbols:
     - "AMD"
     - "AAPL"
+    - "AAL"
+    - "NIO"
+    - "TSLA"

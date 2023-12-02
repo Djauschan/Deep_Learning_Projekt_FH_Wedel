@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
 import numpy as np
 
-
 def plot_evaluation(targets: np.array, predictions: np.array):
     """
     Plots the predictions and targets for the evaluation.
@@ -30,3 +29,6 @@ def plot_evaluation(targets: np.array, predictions: np.array):
         axes[feature_idx].legend()
 
     return fig
+
+
+

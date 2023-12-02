@@ -1,5 +1,9 @@
+import os
+
 import plotly.graph_objects as go
 import torch
+import numpy as np
+import matplotlib.pyplot as plt
 
 def visualize_attention_mask_plotly(attention_mask):
     """
@@ -58,3 +62,53 @@ def visualize_attention_mask_plotly(attention_mask):
 
     # Show the plot
     fig.show(renderer="browser")
+
+
+def plot_tensor(tensor: torch.tensor, title: str=None, viz:bool = False):
+    """
+    Plots a 3D tensor as a 3D bar chart.
+
+    Args:
+        tensor (torch.tensor): tensor to plot
+        title (str): title of the plot
+        viz (bool): if True, the plot is shown in a new window
+    """
+    if viz:
+        os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+        if tensor.requires_grad:
+            data = tensor.detach()
+        else:
+            data = tensor
+        data = data.numpy()[0]
+
+
+        axes=[None, None]
+
+        fig = plt.figure(figsize=(12, 5))
+        axes[0] = fig.add_subplot(121, projection='3d')
+        axes[1] = fig.add_subplot(122, projection='3d')
+
+        # Create a meshgrid for x and y coordinates
+        y, x = np.meshgrid(np.arange(data.shape[1]), np.arange(data.shape[0]))
+
+        # Flatten the tensor values for z coordinates
+        z = data.flatten()
+
+        # Create a 3D bar chart
+        axes[0].bar3d(x.flatten(), y.flatten(), np.ones_like(z)*np.min(z), 1, 0.1, z, shade=True)
+        axes[0].set_xlabel('Timeline')
+        axes[0].set_ylabel('Feature')
+
+        axes[1].bar3d(y.flatten(), x.flatten(), np.ones_like(z) * np.min(z), 0.1, 1, z, shade=True)
+        axes[1].set_xlabel('Feature')
+        axes[1].set_ylabel('Timeline')
+
+        # Set axis labels
+        for ax in axes:
+            ax.set_zlabel('Value')
+
+        fig.suptitle(title)
+
+        # Show the plot
+        plt.show()
