@@ -47,8 +47,9 @@ class TransformerModel(nn.Module):
         src = src * math.sqrt(self.d_model)
         src = self.pos_encoder(src)
         if src_mask is None:
-            # src_mask = nn.Transformer.generate_square_subsequent_mask(len(src)).to(self.device)
-            src_mask = zeros_tensor = torch.zeros((50, 50)).to(self.device)
+            src_mask = nn.Transformer.generate_square_subsequent_mask(
+                len(src)).to(self.device)
+            # src_mask = zeros_tensor = torch.zeros((50, 50)).to(self.device)
         # TODO all values NaN after one epoch
         output = self.transformer_encoder(src, src_mask)
         output = self.linear(output)
