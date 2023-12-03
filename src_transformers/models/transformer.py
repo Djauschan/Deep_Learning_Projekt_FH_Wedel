@@ -3,6 +3,9 @@ import math
 import pandas as pd
 import torch
 import torch.nn as nn
+import numpy as np
+
+from src_transformers.utils.viz_transformer import plot_tensor
 
 
 class MultiHeadAttention(nn.Module):
@@ -292,11 +295,14 @@ class Transformer(nn.Module):
             seq_len_encoder,
             seq_len_decoder,
             dropout,
-            device: torch.device
+            device: torch.device,
+            viz_model_rate: float = 0.0
     ):
         super(Transformer, self).__init__()
 
         self.device = device
+        self.viz_rate = viz_model_rate
+        self.show_plot = False
 
         # Positional encoding
         self.positional_encoding_encoder = PositionalEncoding(
@@ -346,7 +352,15 @@ class Transformer(nn.Module):
 
         return mask.to(self.device)
 
-    def forward(self, src, tgt):
+    def forward(self, src, tgt, viz_rate: float = 0):
+
+        self.show_plot = False
+        if np.random.rand() < viz_rate:
+            self.show_plot = True
+
+        plot_tensor(src, "SRC", self.show_plot)
+        plot_tensor(tgt, "TGT", self.show_plot)
+
         # Generate masks for Inputs (src) and Targets (tgt)
         src_mask = self.generate_mask(src, no_peak=False)
         tgt_mask = self.generate_mask(tgt, no_peak=True)
@@ -358,6 +372,8 @@ class Transformer(nn.Module):
         n_tgt_feature = tgt.shape[2]
         dec_input = torch.cat(
             (src[:, -1, -n_tgt_feature:].unsqueeze(1), tgt[:, :-1, :]), dim=1)
+
+        plot_tensor(dec_input, "dec_input", self.show_plot)
 
         dec_mask.to(self.device)
         dec_input.to(self.device)
@@ -372,15 +388,28 @@ class Transformer(nn.Module):
             self.positional_encoding_decoder(dec_input)
         )
 
+        plot_tensor(src_embedded, "src_embedded", self.show_plot)
+        plot_tensor(tgt_embedded, "tgt_embedded", self.show_plot)
+
         # Forward encoder layers
         enc_output = src_embedded
         for enc_layer in self.encoder_layers:
             enc_output = enc_layer(enc_output, mask=src_mask)
+
+        plot_tensor(enc_output, "enc_output", self.show_plot)
 
         # Forward decoder layers
         dec_output = tgt_embedded
         for dec_layer in self.decoder_layers:
             dec_output = dec_layer(dec_output, enc_output, dec_mask, tgt_mask)
 
+        plot_tensor(dec_output, "dec_output", self.show_plot)
+
         output = self.fc(dec_output)
+
+        plot_tensor(output, "output", self.show_plot)
+
+        if self.show_plot:
+            input("Press Enter to continue...")
+
         return output
