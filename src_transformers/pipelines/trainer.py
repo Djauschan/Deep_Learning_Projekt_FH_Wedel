@@ -41,7 +41,7 @@ class Trainer:
         validation_split (float): The fraction of the data to use for validation.
         loss (nn.MSELoss | nn.CrossEntropyLoss): The loss function to use.
         optimizer (optim.SGD | optim.Adam): The optimizer to use.
-        gpu_activated (bool): Whether to use a GPU for training.
+        device (torch.device): Whether to use the CPU or the GPU.
         model (nn.Module): The PyTorch model to train.
         logger (Logger): The logger to use for logging training information.
         eval_mode (bool): Is set to True, if the evaluation function is called.
@@ -74,17 +74,22 @@ class Trainer:
     ) -> "Trainer":
         """
         Creates a Trainer instance from an unpacked configuration file.
-
         This method sets up the loss function, model, and optimizer based on the provided
-        parameters. It also checks if a GPU is available and if it should be used for training.
-        The other parameters from the config are simply passed through to the Trainer instance.
+        parameters. The other parameters from the config are simply passed through to the Trainer instance.
 
         Args:
-            batch_size (int): The batch size for tra*"sgd" optimizer. Defaults to 0.
-            use_gpu (bool): Whether to use a GPU for training. Defaults to True.
-            eval_mode (bool): should be set to true for evaluation.
-            **kwargs: Additional keyword arguments.
-                      These should include the model name and model parameters.
+            cls (type[&quot;Trainer&quot;]): The class itself.
+            dataset (MultiSymbolDataset): Dataset to be used for training, optimizing and validating the model.
+            model (nn.Module): Model to be trained.
+            batch_size (int): Batch size for training.
+            epochs (int): Number of epochs to train for.
+            learning_rate (float): Learning rate for the optimizer.
+            validation_split (float): Fraction of the data to use for validation.
+            device (torch.device): Whether to use the CPU or the GPU for training.
+            loss (str, optional): Loss function to use. Defaults to "mse".
+            optimizer (str, optional): Optimizer to use. Defaults to "adam".
+            momentum (float, optional): Momentum for the optimizer. Defaults to 0.
+            eval_mode (bool, optional): If the model is evaluated, the validation split is set to 1.
 
         Returns:
             Trainer: A Trainer instance with the specified configuration.
@@ -141,12 +146,9 @@ class Trainer:
         This method first moves the model and loss function to the GPU if `gpu_activated`
         is True. It then logs the trainer configuration and the model architecture. The
         method sets up the training and validation data loaders using the `setup_dataloaders`
-        method. Afterwards, it starts the actual training using the `train_model` method and
+        method. Afterward, it starts the actual training using the `train_model` method and
         logs the reason for finishing the training. After the training process is finished,
         the method closes the logger.
-
-        Args:
-            dataset (Dataset): Dataset to be used for training, optimizing and validating the model.
         """
         self.model.to(self.device)
         self.loss.to(self.device)
@@ -172,14 +174,11 @@ class Trainer:
         """
         Sets up the training and validation data loaders.
 
-        This function creates data loaders from the passed dataset.
+        This function creates data loaders from the dataset.
         It splits the dataset into training and validation sets based on the
         `self.validation_split` attribute, and creates data loaders for both of these sets.
         The data loaders are stored in the `self.train_loader` and `self.validation_loader`
         attributes, respectively.
-
-        Args:
-            dataset (Dataset): Dataset to be used for training, optimizing and validating the model.
         """
 
         # determine train and val set size
@@ -203,7 +202,7 @@ class Trainer:
 
         return train_loader, validation_loader
 
-    def train_model(self, train_loader, validation_loader, patience: int = 500) -> str:
+    def train_model(self, train_loader: DataLoader, validation_loader: DataLoader, patience: int = 50) -> str:
         """
         Trains the model for a specified number of epochs. For each epoch, the method calculates
         the training loss and validation loss, logs these losses, and saves the current state
@@ -214,8 +213,9 @@ class Trainer:
         interruption, the finish reason is set to `"Training finished normally"`.
 
         Args:
-            patience (int): The number of epochs to wait for improvement before stopping training.
-                            Defaults to 10.
+            train_loader (DataLoader): DataLoader for the training set.
+            validation_loader (DataLoader): DataLoader for the validation set.
+            patience (int, optional): Number of epochs to wait for improvement before stopping. Defaults to 50.
 
         Returns:
             str: The reason the training ended.
@@ -281,21 +281,22 @@ class Trainer:
 
         loder_len = len(train_loader)
 
-        for input, target in train_loader:
+        for input_data, target in train_loader:
 
             # Reset optimizer
             self.optimizer.zero_grad()
 
-            input = input.to(self.device)
+            input_data = input_data.to(self.device)
             target = target.to(self.device)
 
-            prediction = self.model.forward(input, target)
+            prediction = self.model.forward(input_data, target)
             loss = self.loss(prediction, target.float())
 
             loss.backward()
 
             # Clip gradients to prevent exploding gradients
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1, error_if_nonfinite=True)
+            torch.nn.utils.clip_grad_norm_(
+                self.model.parameters(), max_norm=1, error_if_nonfinite=True)
 
             self.optimizer.step()
 
@@ -337,12 +338,12 @@ class Trainer:
         loder_len = len(validation_loader)
 
         with torch.no_grad():
-            for input, target in validation_loader:
+            for input_data, target in validation_loader:
 
-                input = input.to(self.device)
+                input_data = input_data.to(self.device)
                 target = target.to(self.device)
 
-                prediction = self.model.forward(input, target)
+                prediction = self.model.forward(input_data, target)
                 loss = self.loss(prediction, target.float())
 
                 start_idx = step_count * self.batch_size

@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Final
-
+from typing import Optional
 import pandas as pd
 
 from src_transformers.preprocessing.txtReader import DataReader
@@ -21,14 +21,14 @@ for file, symbol_type in [(INDEX_MAPPING_FILE, "index"), (ETF_MAPPING_FILE, "ETF
             dict(zip(dict_file.iloc[:, 0], dict_file.iloc[:, 1])))
 
 
-def lookup_symbol(symbol: str, symbol_type: str) -> str:
+def lookup_symbol(symbol: str, symbol_type: str) -> Optional[str]:
     """
     Looks up the name of the passed symbol in the dictionary of the passed type.
     Returns the name of the symbol or None if the symbol is not in the dictionary or the dictionary does not exist.
 
     Args:
-        key (str): Symbol for which the name is to be looked up.
-        type (str): Type of the symbol.
+        symbol (str): Symbol for which the name is to be looked up.
+        symbol_type (str): Type of the symbol.
 
     Returns:
         str: Name of the symbol or None if the symbol is not in the dictionary or the dictionary does not exist.
@@ -69,7 +69,8 @@ def add_time_information(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_all_dates(reader: DataReader) -> pd.DataFrame:
     """
-    Reads in all files that are to be imported and creates a data frame that contains the union of all timestamps of all read-in files.
+    Reads in all files that are to be imported and creates a data frame 
+    that contains the union of all timestamps of all read-in files.
 
     Args:
         reader (DataReader): DataReader object that reads in the files.
@@ -107,7 +108,8 @@ def fill_dataframe(all_dates: pd.DataFrame, reader: DataReader) -> tuple[list, p
         reader (DataReader): DataReader object that reads in the files.
 
     Returns:
-        tuple[list, pd.DataFrame]: Symbols of all stocks in the data frame, data frame containing the values required for training.
+        tuple[list, pd.DataFrame]: 
+        Symbols of all stocks in the data frame, data frame containing the values required for training.
     """
     stocks = []
 

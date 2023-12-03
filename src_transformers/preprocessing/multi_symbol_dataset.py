@@ -100,7 +100,7 @@ class MultiSymbolDataset(Dataset):
             if len(data_df.columns) % 2 != 0:
                 data_df['even'] = 0
 
-            current_columns = list(data_df.columns.values)
+            current_columns = data_df.columns.to_list()
             target_columns = []
 
             for symbol in decoder_symbols:
@@ -155,7 +155,7 @@ class MultiSymbolDataset(Dataset):
 
         Returns:
             tuple[torch.Tensor, torch.Tensor]: Time series sequences as input for the encoder
-                and decoder startingat the specified index.
+                and decoder starting at the specified index.
         """
         encoder_input_start, encoder_input_end = index, index + self.encoder_input_length
         decoder_input_end = encoder_input_end + self.decoder_input_length

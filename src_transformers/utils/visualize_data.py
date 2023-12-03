@@ -6,7 +6,7 @@ from src_transformers.utils.plot import plot_df
 # Code to visualize the data.
 
 
-def vizualize_data(config: dict) -> None:
+def visualize_data(config: dict) -> None:
     """
     Visualizes the files and saves the result in the directory data/output
 
@@ -21,7 +21,7 @@ def vizualize_data(config: dict) -> None:
     txt_reader = DataReader(**data_parameters)
     data = txt_reader.read_next_txt()
     # As long as there is data and the user does not stop, data will be visualized.
-    while (data is not None):
+    while data is not None:
         plot_df(data)
         data = txt_reader.read_next_txt()
 
@@ -37,4 +37,4 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
 
     # Visualize data.
-    vizualize_data(config)
+    visualize_data(config)

@@ -1,20 +1,18 @@
 """
 This module contains the Logger class which is used to log training information.
 """
+import inspect
 import io
 import os
 from datetime import datetime
 from typing import Optional
-import numpy as np
+
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import cm
-from PIL import Image
-import inspect
-
-from torchvision.transforms import ToTensor
-
+import numpy as np
 import torch.nn as nn
+from PIL import Image
 from torch.utils.tensorboard.writer import SummaryWriter
+from torchvision.transforms import ToTensor
 from tqdm import tqdm
 
 from src_transformers.utils.viz_training import plot_evaluation
@@ -147,7 +145,7 @@ class Logger():
 
     def save_loss_chart(self, targets: np.array, predictions: np.array, epoch: int):
         """
-        Logged ein Bild der atkuellen Klassifiezierung
+        Logged ein Bild der aktuellen Klassifizierung
         """
         fig = plot_evaluation(targets, predictions)
 

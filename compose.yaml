@@ -68,7 +68,7 @@ services:
       ]
 
   # Service to visualize data
-  vizualize_data:
+  visualize_data:
 
     # This service extends the base_service
     extends:

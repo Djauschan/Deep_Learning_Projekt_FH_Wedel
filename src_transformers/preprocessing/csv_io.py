@@ -30,7 +30,7 @@ def get_csv_shape(csv_file: str) -> tuple[int, int]:
     Counts the number of rows in the CSV file.
 
     Args:
-        csv_file_path (str): Path of the CSV file.
+        csv_file (str): Path of the CSV file.
 
     Returns:
         int: Number of rows in the CSV file.

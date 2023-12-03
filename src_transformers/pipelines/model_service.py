@@ -40,7 +40,7 @@ class ModelService():
         The model is moved to the GPU if `gpu_activated` is True.
 
         Args:
-            gpu_activated (bool): Whether to move the model to the GPU.
+            device (torch.device): Whether to use the GPU or CPU.
             encoder_dimensions (int): The number of dimensions in the encoder input.
             decoder_dimensions (int): The number of dimensions in the decoder input.
             model_name (str): The name of the model to create.

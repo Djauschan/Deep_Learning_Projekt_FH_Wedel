@@ -37,17 +37,17 @@ def plot_df(df: pd.DataFrame) -> None:
     # Determine the number of rows and columns in the plot needed to visualize the desired columns.
     count: int = len(df.columns)-1
     rows: int = 2
-    colums: int = math.ceil(count / 2)
+    columns: int = math.ceil(count / 2)
 
     # Create plot
-    fig, axes = plt.subplots(rows, colums, figsize=(
-        colums*6, rows*4))
+    fig, axes = plt.subplots(rows, columns, figsize=(
+        columns*6, rows*4))
 
     # Determine the title of the plot.
     # If possible, the name of the ETF is used as the title.
     symbol_name: str = lookup_symbol(symbol, df_type)
-    title: str = ""
-    if (symbol_name is not None):
+
+    if symbol_name is not None:
         title = symbol_name + " [" + symbol + "]" + " {" + df_type + "}"
     else:
         title = "Symbol " + symbol + " {" + df_type + "}"
@@ -56,8 +56,8 @@ def plot_df(df: pd.DataFrame) -> None:
     # The desired columns of the data frame are visualized in the form of subplots.
     i = 0
     for i in range(count):
-        row = i // colums
-        col = i % colums
+        row = i // columns
+        col = i % columns
         axes[row, col].plot(df.iloc[:, 0], df.iloc[:, i+1])
         axes[row, col].set_title(df.columns[i+1])
 
@@ -69,9 +69,9 @@ def plot_df(df: pd.DataFrame) -> None:
         plt.setp(axes[row, col].get_xticklabels(), rotation=45)
 
     # The subplots that are not used are hidden.
-    for z in range(i+1, rows*colums):
-        row = z // colums
-        col = z % colums
+    for z in range(i+1, rows*columns):
+        row = z // columns
+        col = z % columns
         axes[row, col].set_axis_off()
 
     # Add some space between subplots for readability

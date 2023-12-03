@@ -1,5 +1,5 @@
 import os
-
+from typing import Optional
 import pandas as pd
 
 type_dict = {"etf-complete": "ETF", "us3000": "stock", "usindex": "index"}
@@ -19,8 +19,10 @@ class DataReader():
         Initializes a data reader.
 
         Args:
-            config (dict): Dictionary for the configuration of data preprocessing.
-            data_dir_name (str, optional): Directory in which the data is located. Defaults to "data/input".
+            read_all_files (bool): Boolean whether all files should be processed.
+            encoder_symbols (list[str]): Symbols that are to be used as input features
+            decoder_symbols (list[str]): Symbols that are to be predicted.
+            data_dir_name (str, optional): Directory in which the data is located.
 
         It is expected that the files containing the data are located in subdirectories. \n
         C:. \n
@@ -52,8 +54,8 @@ class DataReader():
         txt_files, input_symbols, target_symbols = [], [], []
         # Traverse subdirectories.
         for root, dirs, files in os.walk(self.root_folder):
-            for dir in dirs:
-                dir_path = os.path.join(root, dir)
+            for directory in dirs:
+                dir_path = os.path.join(root, directory)
                 # In the subdirectory all files are traversed.
                 for inner_root, inner_dirs, inner_files in os.walk(dir_path):
                     for file in inner_files:
@@ -74,7 +76,8 @@ class DataReader():
                                 target_symbols.append(symbol)
         return txt_files, input_symbols, target_symbols
 
-    def _get_type(self, file_path: str) -> str:
+    @classmethod
+    def _get_type(cls, file_path: str) -> Optional[str]:
         """
         Returns the type of the data based on the path of the file.
 
@@ -91,7 +94,7 @@ class DataReader():
                 return type_dict.get(key)
         return None
 
-    def read_next_txt(self) -> pd.DataFrame:
+    def read_next_txt(self) -> Optional[pd.DataFrame]:
         """
         Reads in the next file if there are files that have not yet been read in.
 
@@ -114,7 +117,7 @@ class DataReader():
             data["symbol"] = filename.split("_")[0]
 
             # The type of the data is determined based on the path of the file.
-            data["type"] = self._get_type(file_to_read)
+            data["type"] = DataReader._get_type(file_to_read)
 
             # Convert timestamp to python timestamp.
             data["timestamp"] = pd.to_datetime(

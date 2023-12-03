@@ -11,7 +11,8 @@ torch.autograd.set_detect_anomaly(True)
 
 class TransformerModel(nn.Module):
 
-    def __init__(self, dim_encoder: int, dim_decoder: int, num_heads: int, num_layers: int, d_ff: int, seq_len_encoder: int, seq_len_decoder: int, dropout: float, device: torch.device):
+    def __init__(self, dim_encoder: int, dim_decoder: int, num_heads: int, num_layers: int, d_ff: int,
+                 seq_len_encoder: int, seq_len_decoder: int, dropout: float, device: torch.device):
 
         super().__init__()
         self.model_type = 'Transformer'
