@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import math
 import matplotlib.dates as mdates
 import os
-from src_transformers.preprocessing.dataProcessing import lookup_symbol
+from src_transformers.preprocessing.data_processing import lookup_symbol
 import pandas as pd
 
 # The path of the current file is determined.
@@ -16,13 +16,12 @@ data_dir_path = os.path.join(
 output_dir_path = os.path.join(data_dir_path, 'output')
 
 
-def plot_df(df: pd.DataFrame, config: dict):
+def plot_df(df: pd.DataFrame) -> None:
     """
     Creates a plot for the relevant columns of the passed data frame.
 
     Args:
         df (pd.DataFrame): Data frame for which a plot is to be created.
-        config (dict): Dictionary for the configuration of data preprocessing.
     """
 
     # The type of the ticker symbol is read out.
@@ -46,10 +45,10 @@ def plot_df(df: pd.DataFrame, config: dict):
 
     # Determine the title of the plot.
     # If possible, the name of the ETF is used as the title.
-    etf_name: str = lookup_symbol(symbol, df_type)
+    symbol_name: str = lookup_symbol(symbol, df_type)
     title: str = ""
-    if (etf_name is not None):
-        title = etf_name + " [" + symbol + "]" + " {" + df_type + "}"
+    if (symbol_name is not None):
+        title = symbol_name + " [" + symbol + "]" + " {" + df_type + "}"
     else:
         title = "Symbol " + symbol + " {" + df_type + "}"
     fig.suptitle(title)
@@ -83,9 +82,6 @@ def plot_df(df: pd.DataFrame, config: dict):
     path = os.path.join(output_dir_path, title + ".png")
     plt.savefig(path, bbox_inches='tight', dpi=400)
     print(title + ".png" + " saved")
-
-    if config["SHOW_PLOT"]:
-        plt.show()
 
     # Close plot to reduce memory usage
     plt.close()

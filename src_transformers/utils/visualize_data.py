@@ -13,21 +13,17 @@ def vizualize_data(config: dict) -> None:
     Args:
         config (dict): Dictionary for the configuration of data preprocessing.
     """
-
-    # Read in data.
-    txt_reader = DataReader(config)
+    # Get the parameters for the data set.
+    data_parameters = config["dataset_parameters"]
+    # Remove parameter that the datareader does not need.
+    data_parameters.pop("create_new_file")
+    data_parameters.pop("data_file")
+    txt_reader = DataReader(**data_parameters)
     data = txt_reader.read_next_txt()
-    choice = ""
     # As long as there is data and the user does not stop, data will be visualized.
-    while (data is not None) and (choice != "e"):
-        if config["DEBUG_OUTPUT"]:
-            print(data)
-        plot_df(data, config)
-        # If all data is to be visualized, the user does not have to confirm.
-        if not config["VISUALIZE_ALL_DATA"]:
-            choice = input("exit (e) or continue (other key)?").strip().lower()
-        if choice != "e":
-            data = txt_reader.read_next_txt()
+    while (data is not None):
+        plot_df(data)
+        data = txt_reader.read_next_txt()
 
 
 if __name__ == "__main__":

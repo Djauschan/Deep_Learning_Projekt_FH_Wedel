@@ -88,25 +88,5 @@ services:
         "python",
         "-m",
         "src_transformers.utils.visualize_data",
-        "data/test_configs/data_config_multivariat.yaml"
-      ]
-
-  test_data:
-
-    # This service extends the base_service
-    extends:
-      service: base_service
-
-    # Map port 5004 on the host to port 5000 in the container
-    ports:
-      - 5004:5000
-
-    # Specify the command to run when the container starts
-    # This command tests if the dataloader and the dataset are working as expected
-    command:
-      [
-        "python",
-        "-m",
-        "src_transformers.preprocessing.perSymbolDataset",
-        "data/test_configs/data_config_multivariat.yaml"
+        "data/test_configs/training_config.yaml"
       ]
