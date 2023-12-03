@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
 from PIL import Image
+import inspect
 
 from torchvision.transforms import ToTensor
 
@@ -40,7 +41,8 @@ class Logger():
         Returns:
             None
         """
-        print(f"[LOGGER]: {text}")
+        file_name = os.path.basename(inspect.stack()[1].filename)
+        print(f"[LOGGER]: {text} ({file_name})")
 
     def __init__(self) -> None:
         """
