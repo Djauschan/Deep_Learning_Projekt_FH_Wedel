@@ -1,36 +1,36 @@
 use_gpu: true
 model_parameters:
-  transformer:
-    num_heads: 1
-    num_layers: 1
-    d_ff: 200
-    seq_len_encoder: 200
-    seq_len_decoder: 3
-    dropout: 0.1
+  torch_transformer:
+    num_heads: 2
+    num_layers: 2
+    d_ff: 100
+    seq_len_encoder: 50
+    seq_len_decoder: 50
+    dropout: 0.5
 training_parameters:
   batch_size: 50
-  epochs: 1000
-  learning_rate: 0.001
+  epochs: 100
+  learning_rate: 0.000001
   validation_split: 0.1
 dataset_parameters:
   read_all_files: false
   # This parameter must be set to true if the symbols to be read in are changed.
-  create_new_file: true
+  create_new_file: false
   data_file: "data/output/Multi_Symbol.csv"
   encoder_symbols:
   # stocks
     - "AAPL"
-    - "AAL"
-    - "AMD"
+    # - "AAL"
+    # - "AMD"
     # - "C"
     # - "MRNA"
-    - "NIO"
+    # - "NIO"
     # - "NVDA"
     # - "SNAP"
     # - "SQ"
     - "TSLA"
   # ETFs
-    - "ACWI"
+    # - "ACWI"
   # indices
     - "DXY"
     # - "SPX"
@@ -43,8 +43,8 @@ dataset_parameters:
     # - "COMP"
     # - "W5000"
   decoder_symbols:
-    - "AMD"
+    # - "AMD"
     - "AAPL"
-    - "AAL"
-    - "NIO"
+    # - "AAL"
+    # - "NIO"
     - "TSLA"

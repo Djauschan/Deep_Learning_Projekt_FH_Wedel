@@ -293,6 +293,10 @@ class Trainer:
             loss = self.loss(prediction, target.float())
 
             loss.backward()
+
+            # Clip gradients to prevent exploding gradients
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1, error_if_nonfinite=True)
+
             self.optimizer.step()
 
             train_loss += loss.item()
