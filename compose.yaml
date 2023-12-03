@@ -5,10 +5,11 @@
 services:
 
   base_service:
-
-    #runtime: nvidia # Specify the NVIDIA runtime for GPU support
-    #environment:
-    #- NVIDIA_VISIBLE_DEVICES=all # Specify which GPUs to use
+    # Specify the NVIDIA runtime for GPU support
+    runtime: nvidia
+    environment:
+      # Specify which GPUs to use
+      - NVIDIA_VISIBLE_DEVICES=all
 
     # Specify the build context for this service (current directory)
     build:
@@ -37,11 +38,9 @@ services:
         "-m",
         "src_transformers.main",
         "-c",
-        "data/test_configs/training_config_slp.yaml",
+        "data/test_configs/training_config.yaml",
         "-p",
-        "train",
-        "-d",
-        "data/test_configs/data_config_multivariat.yaml"
+        "train"
       ]
 
   # Service to use a trained transformer model to predict
@@ -63,11 +62,9 @@ services:
         "-m",
         "src_transformers.main",
         "-c",
-        "data/test_configs/training_config_slp.yaml",
+        "data/test_configs/training_config.yaml",
         "-p",
-        "predict",
-        "-d",
-        "data/test_configs/data_config_multivariat.yaml"
+        "predict"
       ]
 
   # Service to visualize data
