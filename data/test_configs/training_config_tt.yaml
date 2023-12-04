@@ -6,11 +6,11 @@ model_parameters:
     d_ff: 100
     seq_len_encoder: 50
     seq_len_decoder: 50
-    dropout: 0
+    dropout: 0.5
 training_parameters:
   batch_size: 50
   epochs: 100
-  learning_rate: 0.001
+  learning_rate: 0.005
   validation_split: 0.1
 dataset_parameters:
   read_all_files: false

@@ -294,18 +294,6 @@ class Trainer:
 
             loss.backward()
 
-            # Debugging: Check for NaN values in gradients and parameters
-            for name, param in self.model.named_parameters():
-                if torch.isnan(param.grad).any() or torch.isinf(param.grad).any():
-                    print(f'NaN values in parameter gradients {name}')
-
-                if torch.isnan(param).any() or torch.isinf(param).any():
-                    print(f'NaN values in parameter {name}')
-
-            # Clip gradients to prevent exploding gradients
-            torch.nn.utils.clip_grad_norm_(
-                self.model.parameters(), max_norm=1, error_if_nonfinite=False)
-
             self.optimizer.step()
 
             train_loss += loss.item()
