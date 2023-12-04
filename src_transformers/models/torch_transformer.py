@@ -6,7 +6,22 @@ from torch.nn import TransformerEncoder, TransformerEncoderLayer
 # Source: https://pytorch.org/tutorials/beginner/transformer_tutorial.html
 
 # Enable anomaly detection to detect invalid gradients
-torch.autograd.set_detect_anomaly(True)
+# torch.autograd.set_detect_anomaly(True)
+
+
+def handle_nan_gradients(grad: torch.Tensor) -> torch.Tensor:
+    """
+    Replace NaN gradients with zero gradients.
+
+    Args:
+        grad (torch.Tensor): Gradient tensor
+
+    Returns:
+        torch.Tensor: Gradient tensor or zero tensor if NaN
+    """
+    if torch.isnan(grad).any():
+        return torch.zeros_like(grad)
+    return grad
 
 
 class TransformerModel(nn.Module):
@@ -27,7 +42,19 @@ class TransformerModel(nn.Module):
         self.linear = nn.Linear(dim_encoder, dim_decoder)
         self.device = device
 
+        # Initialize the weights of the first layer's self-attention module
+        nn.init.xavier_uniform_(
+            self.transformer_encoder.layers[0].self_attn.in_proj_weight)
+        nn.init.constant_(
+            self.transformer_encoder.layers[0].self_attn.in_proj_bias, val=0.0)
+
         self.init_weights()
+
+        # Register a hook to handle NaN gradients in the first layer's self-attention module
+        self.transformer_encoder.layers[0].self_attn.in_proj_weight.register_hook(
+            handle_nan_gradients)
+        self.transformer_encoder.layers[0].self_attn.in_proj_bias.register_hook(
+            handle_nan_gradients)
 
     def init_weights(self) -> None:
         initrange = 0.1
