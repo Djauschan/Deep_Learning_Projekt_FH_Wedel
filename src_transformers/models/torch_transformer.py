@@ -32,7 +32,7 @@ class TransformerModel(nn.Module):
         super().__init__()
         self.model_type = 'Transformer'
         self.pos_encoder = PositionalEncoding(
-            dim_encoder, dropout, seq_len_encoder)
+            dim_encoder, dropout, max(seq_len_encoder, seq_len_decoder))
         encoder_layers = TransformerEncoderLayer(
             dim_encoder, num_heads, d_ff, dropout)
         encoder_layers.self_attn.batch_first = True
@@ -86,7 +86,7 @@ class TransformerModel(nn.Module):
 
 class PositionalEncoding(nn.Module):
 
-    def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5000):
+    def __init__(self, d_model: int, dropout: float, max_len: int):
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
 
