@@ -1,6 +1,6 @@
 import math
 import torch
-from torch import nn, Tensor
+from torch import nn
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
 
 # Source: https://pytorch.org/tutorials/beginner/transformer_tutorial.html
@@ -13,6 +13,20 @@ class TransformerModel(nn.Module):
 
     def __init__(self, dim_encoder: int, dim_decoder: int, num_heads: int, num_layers: int, d_ff: int,
                  seq_len_encoder: int, seq_len_decoder: int, dropout: float, device: torch.device):
+        """
+        Transformer model for time series forecasting based on PyTorch's TransformerEncoder.
+
+        Args:
+            dim_encoder (int): Input dimension of the encoder.
+            dim_decoder (int): Output dimension of the decoder.
+            num_heads (int): Number of attention heads.
+            num_layers (int): Number of encoder layers.
+            d_ff (int): Dimension of the feed forward layer.
+            seq_len_encoder (int): Length of the input sequence.
+            seq_len_decoder (int): Length of the output sequence.
+            dropout (float): Dropout probability.
+            device (torch.device): Whether to use GPU or CPU.
+        """
 
         super().__init__()
         self.model_type = 'Transformer'
@@ -31,19 +45,24 @@ class TransformerModel(nn.Module):
         self.init_weights()
 
     def init_weights(self) -> None:
+        """
+        Initialize weights of the model.
+        """
         initrange = 0.2
         self.embedding.weight.data.uniform_(-initrange, initrange)
         self.linear.bias.data.zero_()
         self.linear.weight.data.uniform_(-initrange, initrange)
 
-    def forward(self, src: Tensor, src_mask: Tensor = None) -> Tensor:
+    def forward(self, src: torch.Tensor, src_mask: torch.Tensor = None) -> torch.Tensor:
         """
-        Arguments:
-            src: Tensor, shape ``[seq_len, batch_size]``
-            src_mask: Tensor, shape ``[seq_len, seq_len]``
+        Forward pass of the model.
+
+        Args:
+            src (torch.Tensor): Input tensor of shape (seq_len, batch_size, dim_encoder).
+            src_mask (torch.Tensor, optional): Mask tensor of shape (seq_len, seq_len). Defaults to None.
 
         Returns:
-            output Tensor of shape ``[seq_len, batch_size, dim_decoder]``
+            torch.Tensor: Output tensor of shape (seq_len, batch_size, dim_decoder).
         """
         src_mask = None  # TODO find proper solution
 
@@ -59,7 +78,7 @@ class TransformerModel(nn.Module):
         output = self.transformer_encoder(src, src_mask)
         output = self.linear(output)
 
-        # Scaling back
+        # Scaling back Min-max scaling
         output = (output - output.min()) / (output.max() - output.min())
 
         return output
@@ -68,6 +87,14 @@ class TransformerModel(nn.Module):
 class PositionalEncoding(nn.Module):
 
     def __init__(self, d_model: int, dropout: float, max_len: int):
+        """
+        Positional encoding for the transformer model.
+
+        Args:
+            d_model (int): Dimension of the model.
+            dropout (float): Dropout probability.
+            max_len (int): Maximum length of the input sequence.
+        """
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
 
@@ -80,10 +107,15 @@ class PositionalEncoding(nn.Module):
 
         self.register_buffer('pe', pe)
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Arguments:
-            x: Tensor, shape ``[seq_len, batch_size, embedding_dim]``
+        Forward pass of the positional encoding.
+
+        Args:
+            x (torch.Tensor): Input tensor of shape (seq_len, batch_size, dim_encoder).
+
+        Returns:
+            torch.Tensor: Output tensor of shape (seq_len, batch_size, dim_encoder).
         """
         x = x + self.pe[:x.size(0)]
         return self.dropout(x)
