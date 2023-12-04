@@ -73,7 +73,7 @@ class TransformerModel(nn.Module):
         src = self.pos_encoder(src)
         if src_mask is None:
             src_mask = nn.Transformer.generate_square_subsequent_mask(
-                len(src)).to(self.device)
+                src.size(1)).to(self.device)
         # TODO all values NaN after one epoch
         output = self.transformer_encoder(src, src_mask)
         output = self.linear(output)
@@ -105,7 +105,7 @@ class PositionalEncoding(nn.Module):
         pe[:, 0, 0::2] = torch.sin(position * div_term)
         pe[:, 0, 1::2] = torch.cos(position * div_term)
 
-        self.register_buffer('pe', pe)
+        self.register_buffer('pe', pe.squeeze())
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -117,5 +117,5 @@ class PositionalEncoding(nn.Module):
         Returns:
             torch.Tensor: Output tensor of shape (seq_len, batch_size, dim_encoder).
         """
-        x = x + self.pe[:x.size(0)]
+        x = x + self.pe[:x.size(0), :]
         return self.dropout(x)

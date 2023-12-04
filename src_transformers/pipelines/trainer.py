@@ -300,7 +300,8 @@ class Trainer:
             step_count += 1
 
             if step_count % 50 == 0:
-                print(f'Batch {step_count}/{loder_len} loss: {loss.item()}')
+                print(
+                    f'Batch {step_count}/{loder_len} loss: {round(loss.item(), 2)}')
 
         return train_loss / step_count
 
