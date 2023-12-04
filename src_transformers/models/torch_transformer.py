@@ -20,6 +20,7 @@ def handle_nan_gradients(grad: torch.Tensor) -> torch.Tensor:
         torch.Tensor: Gradient tensor or zero tensor if NaN
     """
     if torch.isnan(grad).any():
+        print("NaN Gradients")
         return torch.zeros_like(grad)
     return grad
 
@@ -38,9 +39,12 @@ class TransformerModel(nn.Module):
         encoder_layers.self_attn.batch_first = True
         self.transformer_encoder = TransformerEncoder(
             encoder_layers, num_layers)
+        self.embedding = nn.Linear(dim_encoder, dim_encoder)
         self.d_model = dim_encoder
         self.linear = nn.Linear(dim_encoder, dim_decoder)
         self.device = device
+
+        self.init_weights()
 
         # Initialize the weights of the first layer's self-attention module
         nn.init.xavier_uniform_(
@@ -48,16 +52,17 @@ class TransformerModel(nn.Module):
         nn.init.constant_(
             self.transformer_encoder.layers[0].self_attn.in_proj_bias, val=0.0)
 
-        self.init_weights()
-
         # Register a hook to handle NaN gradients in the first layer's self-attention module
         self.transformer_encoder.layers[0].self_attn.in_proj_weight.register_hook(
             handle_nan_gradients)
         self.transformer_encoder.layers[0].self_attn.in_proj_bias.register_hook(
             handle_nan_gradients)
+        self.embedding.weight.register_hook(handle_nan_gradients)
+        self.embedding.bias.register_hook(handle_nan_gradients)
 
     def init_weights(self) -> None:
-        initrange = 0.1
+        initrange = 0.2
+        self.embedding.weight.data.uniform_(-initrange, initrange)
         self.linear.bias.data.zero_()
         self.linear.weight.data.uniform_(-initrange, initrange)
 
@@ -72,7 +77,10 @@ class TransformerModel(nn.Module):
         """
         src_mask = None  # TODO find proper solution
 
-        src = src * math.sqrt(self.d_model)
+        # Min-max scaling
+        src = (src - src.min()) / (src.max() - src.min())
+
+        src = self.embedding(src) * math.sqrt(self.d_model)
         src = self.pos_encoder(src)
         if src_mask is None:
             src_mask = nn.Transformer.generate_square_subsequent_mask(
@@ -81,6 +89,8 @@ class TransformerModel(nn.Module):
         # TODO all values NaN after one epoch
         output = self.transformer_encoder(src, src_mask)
         output = self.linear(output)
+        # Scaling back
+        output = (output - output.min()) / (output.max() - output.min())
         return output
 
 
