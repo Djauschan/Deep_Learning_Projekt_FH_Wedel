@@ -14,6 +14,7 @@ training_parameters:
   validation_split: 0.1
 dataset_parameters:
   read_all_files: false
+  data_usage_ratio: 0.5 # Only the last 50% of the read data are used in the dataset
   # This parameter must be set to true if the symbols to be read in are changed.
   create_new_file: true
   data_file: "data/output/Multi_Symbol.csv"

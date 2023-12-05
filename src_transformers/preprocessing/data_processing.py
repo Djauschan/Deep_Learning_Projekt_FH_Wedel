@@ -1,9 +1,10 @@
 from pathlib import Path
-from typing import Final
-from typing import Optional
+from typing import Final, Optional
+
 import pandas as pd
 
 from src_transformers.preprocessing.txtReader import DataReader
+from src_transformers.utils.logger import Logger
 
 # If CSV files containing the mapping of symbols to names are available,
 # they are read and dictionaries are created. The files are expected in the data directory.
@@ -64,10 +65,13 @@ def add_time_information(df: pd.DataFrame) -> pd.DataFrame:
     df['posix_time'] = df['timestamp'].apply(
         lambda x: x.timestamp())
 
+    df.set_index('posix_time', inplace=True)
+    df.drop(columns=['timestamp'], inplace=True)
+
     return df
 
 
-def get_all_dates(reader: DataReader) -> pd.DataFrame:
+def get_all_dates(reader: DataReader, data_usage_ratio: float) -> pd.DataFrame:
     """
     Reads in all files that are to be imported and creates a data frame 
     that contains the union of all timestamps of all read-in files.
@@ -79,6 +83,7 @@ def get_all_dates(reader: DataReader) -> pd.DataFrame:
         pd.DataFrame: Data frame that contains the union of all timestamps of all read-in files.
     """
     all_timestamps = set()
+    read_files = 0
 
     while True:
         file_df = reader.read_next_txt()
@@ -89,10 +94,21 @@ def get_all_dates(reader: DataReader) -> pd.DataFrame:
         # Explicitly delete the data frame to free up memory.
         del file_df
 
+        read_files += 1
+        Logger.log_text(
+            f"Read {read_files} file(s), totalling {len(all_timestamps)} timestamps.")
+
     reader.reset_index()
 
-    # Create an empty DataFrame with timestamps
-    return pd.DataFrame({'timestamp': sorted(list(all_timestamps))})
+    all_timestamps = sorted(all_timestamps)
+    all_timestamps_length = len(all_timestamps)
+    used_timestamps_length = int(all_timestamps_length * data_usage_ratio)
+    start_index = all_timestamps_length - used_timestamps_length - 1
+
+    used_timestamps = all_timestamps[start_index:all_timestamps_length - 1]
+    used_timestamps_df = pd.DataFrame({'timestamp': used_timestamps})
+
+    return used_timestamps_df
 
 
 def fill_dataframe(all_dates: pd.DataFrame, reader: DataReader) -> tuple[list, pd.DataFrame]:

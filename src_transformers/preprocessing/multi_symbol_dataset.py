@@ -45,6 +45,7 @@ class MultiSymbolDataset(Dataset):
     @classmethod
     def create_from_config(cls,
                            read_all_files: bool,
+                           data_usage_ratio: float,
                            create_new_file: bool,
                            data_file: str,
                            encoder_symbols: list[str],
@@ -78,21 +79,21 @@ class MultiSymbolDataset(Dataset):
             decoder_dimensions = len(decoder_symbols)
         else:
             Logger.log_text(
-                "Data pre-processing for the multi symbol dataset has started.")
+                "Data pre-processing for the multi symbol dataset was started.")
 
             data_reader = DataReader(
                 read_all_files, encoder_symbols, decoder_symbols)
 
-            data_df = get_all_dates(data_reader)
+            data_df = get_all_dates(data_reader, data_usage_ratio)
+            Logger.log_text(
+                f"Created a dataframe from the selected {len(data_df)} timestamps, "
+                + f"since the user specified a data usage ratio of {data_usage_ratio}.")
             cls.stocks, data_df = fill_dataframe(data_df, data_reader)
             Logger.log_text(
-                "Added the time stamps from all loaded files and filled missing values to the pre-processed data.")
-
+                "Filled the timestamp dataframe with data from the selected stocks and symbols.")
             data_df = add_time_information(data_df)
-            data_df.set_index('posix_time', inplace=True)
-            data_df.drop(columns=['timestamp'], inplace=True)
             Logger.log_text(
-                "Added more precise time information to the pre-processed data.")
+                "Added more precise time information to the dataframe.")
 
             # If the number of columns is odd, a column with zeros is added.
             # This is necessary because the number of columns must be even for the
@@ -116,7 +117,7 @@ class MultiSymbolDataset(Dataset):
 
             data_df.to_csv(data_file, mode='w', header=True)
             Logger.log_text(
-                f"Pre-processed data was stored in the file '{data_file}'.")
+                f"Dataframe holding the preprocessed data was stored to the file '{data_file}'.")
 
         return cls(length=length,
                    encoder_dimensions=encoder_dimensions,
