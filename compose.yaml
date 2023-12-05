@@ -91,14 +91,13 @@ services:
   # Service to monitor training with tensorboard
   tensorboard:
 
-    # This service extends the base_service
-    extends:
-      service: base_service
+    # Use the latest tensorflow image
+    image: tensorflow/tensorflow:latest
 
-    # Map port 5006 on the host to port 5000 in the container
+    # Map port 6006 on the host to port 6006 in the container (default TensorBoard port)
     ports:
-      - 5006:5000
+      - 6006:6006
 
-    # Specify the command to run when the container starts
-    # This command starts the tensorboard process
-    command: [ "tensorboard", "--logdir=./runs/" ]
+    volumes:
+      - ./runs:/runs/ # Mount the 'runs' directory in the current directory to '/runs' in the container
+    command: [ "tensorboard", "--logdir=./runs/", "--bind_all" ]

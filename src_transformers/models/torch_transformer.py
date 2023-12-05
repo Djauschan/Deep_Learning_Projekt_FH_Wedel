@@ -112,10 +112,13 @@ class PositionalEncoding(nn.Module):
         Forward pass of the positional encoding.
 
         Args:
-            x (torch.Tensor): Input tensor of shape (seq_len, batch_size, dim_encoder).
+            x (torch.Tensor): Input tensor of shape (batch_size, seq_len, dim_encoder).
 
         Returns:
-            torch.Tensor: Output tensor of shape (seq_len, batch_size, dim_encoder).
+            torch.Tensor: Output tensor of shape (batch_size, seq_len, dim_encoder).
         """
-        x = x + self.pe[:x.size(0), :]
+        # self.pe is sliced not only by seq_len but also by dim_encoder before it's added to x.
+        # This ensures that the dimensions of self.pe match those of x.
+        # The unsqueeze(0) is used to add an extra dimension to self.pe to match the batch size dimension of x.
+        x = x + self.pe[:x.size(1), :x.size(2)].unsqueeze(0)
         return self.dropout(x)
