@@ -231,7 +231,7 @@ class Trainer:
                 self.logger.log_training_loss(train_loss, epoch)
 
                 validation_loss, results = self.calculate_validation_loss(
-                    validation_loader)
+                    train_loader)
                 self.logger.log_validation_loss(validation_loss, epoch)
                 self.logger.save_loss_chart(
                     predictions=results[0], targets=results[1], epoch=epoch)

@@ -4,13 +4,14 @@ model_parameters:
     num_heads: 1
     num_layers: 1
     d_ff: 200
-    seq_len_encoder: 200
-    seq_len_decoder: 3
+    seq_len_encoder: 50
+    seq_len_decoder: 30
     dropout: 0.1
+    viz_model_rate: 0.01
 training_parameters:
   batch_size: 1000
   epochs: 1000
-  learning_rate: 0.001
+  learning_rate: 0.01
   validation_split: 0.1
 dataset_parameters:
   read_all_files: false
@@ -19,11 +20,13 @@ dataset_parameters:
   data_file: "data/output/Multi_Symbol.csv"
   encoder_symbols:
   # stocks
+    - "art1"
+    - "art2"
     - "AAPL"
     - "AAL"
     - "AMD"
-    # - "C"
-    # - "MRNA"
+#    - "C"
+#    - "MRNA"
     - "NIO"
     # - "NVDA"
     # - "SNAP"
@@ -43,6 +46,8 @@ dataset_parameters:
     # - "COMP"
     # - "W5000"
   decoder_symbols:
+    - "art1"
+    - "art2"
     - "AMD"
     - "AAPL"
     - "AAL"
