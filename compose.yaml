@@ -87,3 +87,18 @@ services:
         "src_transformers.utils.visualize_data",
         "data/test_configs/training_config.yaml"
       ]
+
+  # Service to monitor training with tensorboard
+  tensorboard:
+
+    # This service extends the base_service
+    extends:
+      service: base_service
+
+    # Map port 5006 on the host to port 5000 in the container
+    ports:
+      - 5006:5000
+
+    # Specify the command to run when the container starts
+    # This command starts the tensorboard process
+    command: [ "tensorboard", "--logdir=./runs/" ]
