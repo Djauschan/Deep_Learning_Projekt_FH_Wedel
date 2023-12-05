@@ -3,6 +3,7 @@ This module contains the MultiSymbolDataset class which is used to handle multi-
 financial data.
 """
 from dataclasses import dataclass
+from tracemalloc import start
 
 import torch
 from torch.utils.data import Dataset
@@ -36,6 +37,8 @@ class MultiSymbolDataset(Dataset):
     """
 
     length: int
+    subseries_amount: int
+    validation_split: float
     encoder_dimensions: int
     decoder_dimensions: int
     encoder_input_length: int
@@ -46,6 +49,8 @@ class MultiSymbolDataset(Dataset):
     def create_from_config(cls,
                            read_all_files: bool,
                            data_usage_ratio: float,
+                           subseries_amount: int,
+                           validation_split: float,
                            create_new_file: bool,
                            data_file: str,
                            encoder_symbols: list[str],
@@ -120,6 +125,8 @@ class MultiSymbolDataset(Dataset):
                 f"Dataframe holding the preprocessed data was stored to the file '{data_file}'.")
 
         return cls(length=length,
+                   subseries_amount=subseries_amount,
+                   validation_split=validation_split,
                    encoder_dimensions=encoder_dimensions,
                    decoder_dimensions=decoder_dimensions,
                    encoder_input_length=encoder_input_length,
@@ -178,3 +185,33 @@ class MultiSymbolDataset(Dataset):
         # TODO decoder_input umbennen in decoder_target
 
         return encoder_input, decoder_input
+
+    def get_subset_indices(self) -> tuple[list[int], list[int]]:
+        subseries_length = int(self.length / self.subseries_amount)
+
+        validation_length = int(subseries_length * self.validation_split)
+        training_length = subseries_length - validation_length
+
+        training_indices = []
+        validation_indices = []
+        # Set start index for the first training subseries to the remainder (X) of the modulo
+        # This is done to skip the first X elements which we cannot allocate to a subseries
+        training_start = self.length % subseries_length
+
+        for _ in range(self.subseries_amount):
+            validation_start = training_start + training_length
+            training_end = validation_start - \
+                self.decoder_input_length - self.encoder_input_length + 1
+
+            subseries_training_indices = range(training_start, training_end)
+            training_indices.extend(subseries_training_indices)
+
+            training_start = validation_start + validation_length
+            validation_end = training_start - \
+                self.decoder_input_length - self.encoder_input_length + 1
+
+            subseries_validation_indices = range(
+                validation_start, validation_end)
+            validation_indices.extend(subseries_validation_indices)
+
+        return training_indices, validation_indices
