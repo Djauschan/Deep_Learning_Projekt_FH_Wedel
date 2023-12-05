@@ -78,8 +78,8 @@ class TransformerModel(nn.Module):
         output = self.transformer_encoder(src, src_mask)
         output = self.linear(output)
 
-        # Scaling back Min-max scaling
-        output = (output - output.min()) / (output.max() - output.min())
+        # Reverse min-max scaling
+        output = output * (src.max() - src.min()) + src.min()
 
         return output
 
