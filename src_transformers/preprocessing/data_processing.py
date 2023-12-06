@@ -143,16 +143,26 @@ def fill_dataframe(all_dates: pd.DataFrame,
             # Only the closing price is used for indices.
             merged_df = pd.merge(all_dates, file_df[['timestamp', 'close']],
                                  how='left', on='timestamp', suffixes=('', f'_{symbol}'))
+
             # ffill: forward fill, bfill: backward fill
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
+
+            # Apply differencing on close and volume colums to get the change between timestamps.
+            all_dates[f'close {symbol}'] = all_dates[f'close {symbol}'].diff()
 
         if symbol_type == 'stock' or symbol_type == 'ETF':
             # The closing price and the volume are used for stocks and ETFs.
             merged_df = pd.merge(all_dates, file_df[['timestamp', 'close', 'volume']],
                                  how='left', on='timestamp', suffixes=('', f'_{symbol}'))
+
             # ffill: forward fill, bfill: backward fill
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
             all_dates[f'volume {symbol}'] = merged_df['volume'].fillna(0)
+
+            # Apply differencing on close and volume colums to get the change between timestamps.
+            all_dates[f'close {symbol}'] = all_dates[f'close {symbol}'].diff()
+            all_dates[f'volume {symbol}'] = all_dates[f'volume {symbol}'].diff()
+
             # The symbols of all stocks are saved in a list as they are used as
             # target variables.
             if symbol_type == 'stock':
@@ -160,5 +170,8 @@ def fill_dataframe(all_dates: pd.DataFrame,
 
         # Explicitly delete the data frame to free up memory.
         del file_df
+
+    # Drop the first row, because it contains NaN values due to the differencing.
+    all_dates = all_dates.drop(all_dates.index[0]).reset_index(drop=True)
 
     return stocks, all_dates
