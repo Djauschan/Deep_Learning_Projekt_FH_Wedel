@@ -112,7 +112,7 @@ class MultiHeadAttention_Modified(nn.Module):
 
         self.device = device
 
-    def scaled_dot_product_attention(self, Q, K, V, mask=None):
+    def scaled_dot_product_attention(self, Q, K, V, mask=None, show_plot: bool = False):
         """
         This function calculates the Self-Attention for one head.
         """
@@ -121,16 +121,23 @@ class MultiHeadAttention_Modified(nn.Module):
             Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
         attn_scores = attn_scores.to(self.device)
 
+        plot_tensor(attn_scores[0], "mod. multihead: Attention scores", show_plot)
+
         # Apply mask if provided (useful for preventing attention to certain parts like padding)
         if mask is not None:
             mask = mask.to(self.device)
             attn_scores = attn_scores.masked_fill(mask == 0, -1e9)
 
+        plot_tensor(attn_scores[0], "mod. multihead: Attention scores masked", show_plot)
+
         # Softmax is applied to obtain attention probabilities (i.e. Attention weights)
         attn_probs = torch.softmax(attn_scores, dim=-1)
 
+        plot_tensor(attn_probs[0], "mod. multihead: Attention probs masked", show_plot)
+
         # Multiply by values to obtain the final output
         output = torch.matmul(attn_probs, V)
+        plot_tensor(attn_probs[0], "mod. multihead: output", show_plot)
         return output
 
     def split_heads(self, x):
@@ -143,14 +150,24 @@ class MultiHeadAttention_Modified(nn.Module):
         batch_size, _, seq_length, d_k = x.size()
         return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.dim_decoder)
 
-    def forward(self, Q, K, V, mask=None):
+    def forward(self, Q, K, V, mask=None, show_plot: bool = False):
         # Apply linear transformations and split heads
+
+
+        plot_tensor(Q, "mod. multihead: Q Input", show_plot)
+        plot_tensor(K, "mod. multihead: K Input", show_plot)
+        plot_tensor(V, "mod. multihead: V Input", show_plot)
+
         Q = self.split_heads(self.W_q(Q))
         K = self.split_heads(self.W_k(K))
         V = self.split_heads(self.W_v(V))
 
+        plot_tensor(Q[0], "mod. multihead: Q", show_plot)
+        plot_tensor(K[0], "mod. multihead: K", show_plot)
+        plot_tensor(V[0], "mod. multihead: V", show_plot)
+
         # Perform scaled dot-product attention
-        attn_output = self.scaled_dot_product_attention(Q, K, V, mask)
+        attn_output = self.scaled_dot_product_attention(Q, K, V, mask, show_plot)
 
         # Combine heads and apply output transformation
         output = self.W_o(self.combine_heads(attn_output))
@@ -281,7 +298,7 @@ class DecoderLayer(nn.Module):
         # The decoder's outputs are used as queries
         x = self.norm2(x)
         plot_tensor(x, "Decoder: att output normed", show_plot)
-        attn_output = self.cross_attn(x, enc_output, enc_output, src_mask)
+        attn_output = self.cross_attn(x, enc_output, enc_output, src_mask, show_plot)
         plot_tensor(attn_output, "Decoder: cross att output", show_plot)
         x = x + self.dropout(attn_output)
         # x = x + self.dropout(attn_output)
@@ -372,8 +389,6 @@ class Transformer(nn.Module):
         plot_tensor(src, "SRC", self.show_plot)
         plot_tensor(tgt, "TGT", self.show_plot)
 
-        test = tgt[0].numpy()
-
         # Generate masks for Inputs (src) and Targets (tgt)
         src_mask = self.generate_mask(src, no_peak=False)
         tgt_mask = self.generate_mask(tgt, no_peak=True)
@@ -385,6 +400,20 @@ class Transformer(nn.Module):
         n_tgt_feature = tgt.shape[2]
         dec_input = torch.cat(
             (src[:, -1, -n_tgt_feature:].unsqueeze(1), tgt[:, :-1, :]), dim=1)
+
+        for idx_ft in range(src.shape[2]):
+            if src.shape[0] > 1:
+                src[:][:][idx_ft] = (src[:][:][idx_ft] - src[:][:][idx_ft].min())/ (src[:][:][idx_ft].max() - src[:][:][idx_ft].min())
+            elif src.shape[0] == 1:
+                src[0][:][idx_ft] = (src[0][:][idx_ft] - src[0][:][idx_ft].min()) / (
+                            src[0][:][idx_ft].max() - src[0][:][idx_ft].min())
+
+        for idx_ft in range(dec_input.shape[2]):
+            if dec_input.shape[0] > 1:
+                dec_input[:][:][idx_ft] = (dec_input[:][:][idx_ft] - dec_input[:][:][idx_ft].min())/ (dec_input[:][:][idx_ft].max() - dec_input[:][:][idx_ft].min())
+            elif dec_input.shape[0] == 1:
+                dec_input[0][:][idx_ft] = (dec_input[0][:][idx_ft] - dec_input[0][:][idx_ft].min())/ (dec_input[0][:][idx_ft].max() - dec_input[0][:][idx_ft].min())
+
 
         plot_tensor(dec_input, "dec_input", self.show_plot)
 

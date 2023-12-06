@@ -2,7 +2,9 @@ import torch
 
 def test_inference():
     # Laod model
-    model = torch.load("../../data/output/models/Transformer_v6.pt")
+    model = torch.load("../../data/output/models/Transformer_v17.pt")
+
+
 
     # get model dimensions
     encoder_dimensions = model.positional_encoding_encoder.pe.shape[1]
@@ -13,28 +15,33 @@ def test_inference():
     output_dimensions = model.fc.out_features
     output_seq_len = decoder_seq_len
 
+    torch.manual_seed(69)
+    src_tensor = torch.rand((encoder_seq_len, encoder_dimensions))
+    torch.manual_seed(68)
+    tgt_tensor = torch.rand((decoder_seq_len, decoder_dimensions))
+
     # generate random input
     ts = []
     ts.append(
         {
-            'src': torch.ones((encoder_seq_len, encoder_dimensions)),
-            'tgt': torch.ones((decoder_seq_len, decoder_dimensions))
+            'src': src_tensor.clone(),
+            'tgt': tgt_tensor.clone()
         }
     )
     ts.append(
         {
-            'src': torch.ones((encoder_seq_len, encoder_dimensions)) * 1000,
-            'tgt': torch.ones((decoder_seq_len, decoder_dimensions)) * 1000
+            'src': torch.mul(src_tensor.clone(),1000),
+            'tgt': torch.mul(tgt_tensor.clone(),1000)
         }
     )
     ts.append(
         {
-            'src': torch.ones((encoder_seq_len, encoder_dimensions)),
-            'tgt': torch.ones((decoder_seq_len, decoder_dimensions))
+            'src': src_tensor.clone(),
+            'tgt': tgt_tensor.clone()
         }
     )
-    ts[2]['src'][0] = 1000
-    ts[2]['tgt'][0] = 1000
+    ts[2]['src'][0] = torch.mul(ts[2]['src'][0], 1000)
+    ts[2]['tgt'][0] = torch.mul(ts[2]['tgt'][0], 1000)
 
     for t in ts:
         t['src'] = t['src'].unsqueeze(0)
