@@ -3,7 +3,7 @@ import torch
 
 def test_inference():
     # Laod model
-    model = torch.load("../../data/output/models/Transformer_v17.pt")
+    model = torch.load("../data/output/models/Transformer_v17.pt")
 
     # get model dimensions
     encoder_dimensions = model.positional_encoding_encoder.pe.shape[1]
