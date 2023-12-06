@@ -7,12 +7,14 @@ import torch.nn as nn
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, num_heads):
         super(MultiHeadAttention, self).__init__()
-        # Ensure that the model dimension (d_model) is divisible by the number of heads
+        # Ensure that the model dimension (d_model) is divisible by the number
+        # of heads
         assert d_model % num_heads == 0, "d_model must be divisible by num_heads"
 
         # Initialize dimensions
         # d_model: Inputdimensionen
-        # num_heads = Anzahl der Attention heads, auf die Input aufgeteilt werden soll
+        # num_heads = Anzahl der Attention heads, auf die Input aufgeteilt
+        # werden soll
         self.d_model = d_model  # Model's dimension
         self.num_heads = num_heads  # Number of attention heads
         # Prüfung: d_model durch Anzahl attention heads teilbar?
@@ -36,7 +38,8 @@ class MultiHeadAttention(nn.Module):
             Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
 
         # Apply mask if provided (useful for preventing attention to certain parts like padding)
-        # Masked Attention, wenn angegeben: Aus Attention Score angewendet, maskiert best. Werte
+        # Masked Attention, wenn angegeben: Aus Attention Score angewendet,
+        # maskiert best. Werte
         if mask is not None:
             attn_scores = attn_scores.masked_fill(mask == 0, -1e9)
 
@@ -49,17 +52,21 @@ class MultiHeadAttention(nn.Module):
         output = torch.matmul(attn_probs, V)
         return output
 
-        # Formt Eingabe x um -> Ermöglicht Modell meheree Attention Heads gleichzeitig zu verarbeiten
+        # Formt Eingabe x um -> Ermöglicht Modell meheree Attention Heads
+        # gleichzeitig zu verarbeiten
     def split_heads(self, x):
         # Reshape the input to have num_heads for multi-head attention
         batch_size, seq_length, d_model = x.size()
-        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2)
+        return x.view(batch_size, seq_length, self.num_heads,
+                      self.d_k).transpose(1, 2)
 
-        # Anschließend Ergebnisse wieder zu einem Tensor der Form batch_size, seq_length, d_model zusammenfügen
+        # Anschließend Ergebnisse wieder zu einem Tensor der Form batch_size,
+        # seq_length, d_model zusammenfügen
     def combine_heads(self, x):
         # Combine the multiple heads back to original shape
         batch_size, _, seq_length, d_k = x.size()
-        return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_model)
+        return x.transpose(1, 2).contiguous().view(
+            batch_size, seq_length, self.d_model)
 
         # Forward Funktion -> Berechnung an sich wird vorgenommen
     def forward(self, Q, K, V, mask=None):
@@ -81,7 +88,8 @@ class MultiHeadAttention(nn.Module):
         output = self.W_o(self.combine_heads(attn_output))
         return output
 
-# definiert position-wise feed forward NN mit 2 linearen Layern und ReLU Funktion
+# definiert position-wise feed forward NN mit 2 linearen Layern und ReLU
+# Funktion
 
 
 class PositionWiseFeedForward(nn.Module):
@@ -99,12 +107,14 @@ class PositionWiseFeedForward(nn.Module):
     # x = Eingabe für das Feed Forward Netz
     # self.fc1 = Eingabe wird durch erste lineare Schicht (fc1) geleitet
     # self.relu = Ausgabe von fc1 wird durch ReLu geleitet (alle negativen Werte werden durch 0 ersetzt)
-    # self.fc2 = aktivierte Ausgabe wird durch zweite lineare Schicht (fc2) geleitet und erzeugt endgültige Ausgabe
+    # self.fc2 = aktivierte Ausgabe wird durch zweite lineare Schicht (fc2)
+    # geleitet und erzeugt endgültige Ausgabe
     def forward(self, x):
         return self.fc2(self.relu(self.fc1(x)))
 
 # Positionsinfo jedes Token in Inputsequenz bringen
-# dafür Sinus und Kosinusfunktionen unterschiedl. Frequenzen verwendet um Positionskodierung zu erzeugen
+# dafür Sinus und Kosinusfunktionen unterschiedl. Frequenzen verwendet um
+# Positionskodierung zu erzeugen
 
 
 class PositionalEncoding(nn.Module):
@@ -113,7 +123,8 @@ class PositionalEncoding(nn.Module):
     # max_seq_length: Die maximale Länge der Sequenz, für die positional encodings vorberechnet werden.
     # pe: Mit Nullen gefüllter Tensor, der mit positional encodings aufgefüllt wird.
     # position: Ein Tensor, der die Positionsindizes für jede Position in der Sequenz enthält.
-    # div_term: Ein Term, der verwendet wird, um die Positionsindizes auf eine bestimmte Weise zu skalieren.
+    # div_term: Ein Term, der verwendet wird, um die Positionsindizes auf eine
+    # bestimmte Weise zu skalieren.
     def __init__(self, d_model, max_seq_length):
         super(PositionalEncoding, self).__init__()
 
@@ -125,11 +136,13 @@ class PositionalEncoding(nn.Module):
             (math.log(10000.0) / d_model)
         )
 
-        # Sinusfunktion wird auf die geraden Indizes und  Kosinusfunktion auf die ungeraden Indizes von pe angewendet.
+        # Sinusfunktion wird auf die geraden Indizes und  Kosinusfunktion auf
+        # die ungeraden Indizes von pe angewendet.
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
 
-        # pe als Puffer registriert, d. h. er ist Teil des Modulstatus, wird aber nicht als trainierbarer Parameter betrachtet
+        # pe als Puffer registriert, d. h. er ist Teil des Modulstatus, wird
+        # aber nicht als trainierbarer Parameter betrachtet
         self.register_buffer("pe", pe.unsqueeze(0))
 
     def forward(self, x):
@@ -153,7 +166,8 @@ class EncoderLayer(nn.Module):
         # norm1 und 2: Layer normalisation -> Glättung vom Layerinput
         self.norm1 = nn.LayerNorm(d_model)
         self.norm2 = nn.LayerNorm(d_model)
-        # Dropout Layer -> random Aktivierungen auf null setzen -> Overfitting reduzieren
+        # Dropout Layer -> random Aktivierungen auf null setzen -> Overfitting
+        # reduzieren
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, mask):
@@ -163,7 +177,8 @@ class EncoderLayer(nn.Module):
         # Attention Output zum ursprünglichen Input hinzufügen (residual connection)
         # anschließend Dropout und Normalisierung mit norm1
         x = self.norm1(x + self.dropout(attn_output))
-        # Feed-Forward Network: Output aus vorherigem Schritt durch position-wise feed-forward network leiten
+        # Feed-Forward Network: Output aus vorherigem Schritt durch
+        # position-wise feed-forward network leiten
         ff_output = self.feed_forward(x)
         # Add & Normalize nach Feed Forward:
         # Feed Forward Output zum Input hinzufügen (residual connection)
@@ -198,20 +213,23 @@ class DecoderLayer(nn.Module):
     # src_mask: Source mask -> Teile des Encoder Outputs maskieren
     # tgt_mask: Target mask -> Teile des Decorder Input ignorieren
     def forward(self, x, enc_output, src_mask, tgt_mask):
-        # Self-Attention auf Target Sequenz: Input x durch self-attention Mechanismus verarbeitet
+        # Self-Attention auf Target Sequenz: Input x durch self-attention
+        # Mechanismus verarbeitet
         attn_output = self.self_attn(x, x, x, tgt_mask)
         # Add & Normalize nach self-attention:
         # Attention Output zum ursprünglichen Input hinzufügen (residual connection)
         # anschließend Dropout und Normalisierung mit norm1
         x = self.norm1(x + self.dropout(attn_output))
         # Cross-attention mit Encoder Output: Normalisierter Output aus vorherigem Schritt
-        # durch cross-attention Mechanismus verarbeitet, der Output enc_output des Encoders berücksichtigt
+        # durch cross-attention Mechanismus verarbeitet, der Output enc_output
+        # des Encoders berücksichtigt
         attn_output = self.cross_attn(x, enc_output, enc_output, src_mask)
         # Add & Normalize nach cross-attention:
         # cross-attention Output zum Input dieser Stufe hinzugefügt
         # anschließend Dropout und Normalisierung mit norm2
         x = self.norm2(x + self.dropout(attn_output))
-        # Feed-Forward network: Output aus vorherigem Schritt durch feed-forward netz geleitet
+        # Feed-Forward network: Output aus vorherigem Schritt durch
+        # feed-forward netz geleitet
         ff_output = self.feed_forward(x)
         # Add & Normalize nach Feed-forward: Feed forward Output zum Input dieser Stufe hinzugefügt
         # anschließend Dropout und Normalisierung mit norm3
@@ -220,7 +238,8 @@ class DecoderLayer(nn.Module):
         return x
 
 
-# Encoder und Decoder kombinieren, um komplettes Transformer Network zu erhalten
+# Encoder und Decoder kombinieren, um komplettes Transformer Network zu
+# erhalten
 class Transformer(nn.Module):
     def __init__(
         self,

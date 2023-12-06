@@ -3,7 +3,8 @@ import csv
 import pandas as pd
 
 
-def read_csv_chunk(file_path: str, start_index: int, stop_index: int) -> pd.DataFrame:
+def read_csv_chunk(file_path: str, start_index: int,
+                   stop_index: int) -> pd.DataFrame:
     """
     The lines of the CSV file from start index (inclusive) to stop index (exclusive) are read in.
 

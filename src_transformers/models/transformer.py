@@ -20,7 +20,8 @@ class MultiHeadAttention(nn.Module):
             num_heads (int): The number of attention heads.
         """
         super(MultiHeadAttention, self).__init__()
-        # Ensure that the model dimension (d_model) is divisible by the number of heads
+        # Ensure that the model dimension (d_model) is divisible by the number
+        # of heads
         assert d_model % num_heads == 0, "d_model must be divisible by num_heads"
 
         # Initialize dimensions
@@ -40,15 +41,18 @@ class MultiHeadAttention(nn.Module):
         """
         This function calculates the Self-Attention for one head.
         """
-        # Calculate attention scores (i.e. similarity scores between query and keys)
+        # Calculate attention scores (i.e. similarity scores between query and
+        # keys)
         attn_scores = torch.matmul(
             Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
 
-        # Apply mask if provided (useful for preventing attention to certain parts like padding)
+        # Apply mask if provided (useful for preventing attention to certain
+        # parts like padding)
         if mask is not None:
             attn_scores = attn_scores.masked_fill(mask == 0, -1e9)
 
-        # Softmax is applied to obtain attention probabilities (i.e. Attention weights)
+        # Softmax is applied to obtain attention probabilities (i.e. Attention
+        # weights)
         attn_probs = torch.softmax(attn_scores, dim=-1)
         # TODO: cheken warum das alles null ergibt
 
@@ -59,12 +63,14 @@ class MultiHeadAttention(nn.Module):
     def split_heads(self, x):
         # Reshape the input to have num_heads for multi-head attention
         batch_size, seq_length, d_model = x.size()
-        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2)
+        return x.view(batch_size, seq_length, self.num_heads,
+                      self.d_k).transpose(1, 2)
 
     def combine_heads(self, x):
         # Combine the multiple heads back to original shape
         batch_size, _, seq_length, d_k = x.size()
-        return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_model)
+        return x.transpose(1, 2).contiguous().view(
+            batch_size, seq_length, self.d_model)
 
     def forward(self, Q, K, V, mask=None):
         # Apply linear transformations and split heads
@@ -92,7 +98,8 @@ class MultiHeadAttention_Modified(nn.Module):
             num_heads (int): The number of attention heads.
         """
         super(MultiHeadAttention_Modified, self).__init__()
-        # Ensure that the model dimension (d_model) is divisible by the number of heads
+        # Ensure that the model dimension (d_model) is divisible by the number
+        # of heads
         assert dim_encoder % num_heads == 0, "d_model must be divisible by num_heads"
         assert dim_decoder % num_heads == 0, "d_model must be divisible by num_heads"
 
@@ -112,28 +119,41 @@ class MultiHeadAttention_Modified(nn.Module):
 
         self.device = device
 
-    def scaled_dot_product_attention(self, Q, K, V, mask=None, show_plot: bool = False):
+    def scaled_dot_product_attention(
+            self, Q, K, V, mask=None, show_plot: bool = False):
         """
         This function calculates the Self-Attention for one head.
         """
-        # Calculate attention scores (i.e. similarity scores between query and keys)
+        # Calculate attention scores (i.e. similarity scores between query and
+        # keys)
         attn_scores = torch.matmul(
             Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
         attn_scores = attn_scores.to(self.device)
 
-        plot_tensor(attn_scores[0], "mod. multihead: Attention scores", show_plot)
+        plot_tensor(
+            attn_scores[0],
+            "mod. multihead: Attention scores",
+            show_plot)
 
-        # Apply mask if provided (useful for preventing attention to certain parts like padding)
+        # Apply mask if provided (useful for preventing attention to certain
+        # parts like padding)
         if mask is not None:
             mask = mask.to(self.device)
             attn_scores = attn_scores.masked_fill(mask == 0, -1e9)
 
-        plot_tensor(attn_scores[0], "mod. multihead: Attention scores masked", show_plot)
+        plot_tensor(
+            attn_scores[0],
+            "mod. multihead: Attention scores masked",
+            show_plot)
 
-        # Softmax is applied to obtain attention probabilities (i.e. Attention weights)
+        # Softmax is applied to obtain attention probabilities (i.e. Attention
+        # weights)
         attn_probs = torch.softmax(attn_scores, dim=-1)
 
-        plot_tensor(attn_probs[0], "mod. multihead: Attention probs masked", show_plot)
+        plot_tensor(
+            attn_probs[0],
+            "mod. multihead: Attention probs masked",
+            show_plot)
 
         # Multiply by values to obtain the final output
         output = torch.matmul(attn_probs, V)
@@ -143,16 +163,17 @@ class MultiHeadAttention_Modified(nn.Module):
     def split_heads(self, x):
         # Reshape the input to have num_heads for multi-head attention
         batch_size, seq_length, d_model = x.size()
-        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2)
+        return x.view(batch_size, seq_length, self.num_heads,
+                      self.d_k).transpose(1, 2)
 
     def combine_heads(self, x):
         # Combine the multiple heads back to original shape
         batch_size, _, seq_length, d_k = x.size()
-        return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.dim_decoder)
+        return x.transpose(1, 2).contiguous().view(
+            batch_size, seq_length, self.dim_decoder)
 
     def forward(self, Q, K, V, mask=None, show_plot: bool = False):
         # Apply linear transformations and split heads
-
 
         plot_tensor(Q, "mod. multihead: Q Input", show_plot)
         plot_tensor(K, "mod. multihead: K Input", show_plot)
@@ -167,7 +188,8 @@ class MultiHeadAttention_Modified(nn.Module):
         plot_tensor(V[0], "mod. multihead: V", show_plot)
 
         # Perform scaled dot-product attention
-        attn_output = self.scaled_dot_product_attention(Q, K, V, mask, show_plot)
+        attn_output = self.scaled_dot_product_attention(
+            Q, K, V, mask, show_plot)
 
         # Combine heads and apply output transformation
         output = self.W_o(self.combine_heads(attn_output))
@@ -210,20 +232,24 @@ class PositionalEncoding(nn.Module):
         """
         super(PositionalEncoding, self).__init__()
 
-        # Create a positional encoding matrix with shape (seq_len_encoder, d_model)
+        # Create a positional encoding matrix with shape (seq_len_encoder,
+        # d_model)
         pe = torch.zeros(seq_length, d_model)
 
-        # Creates postitional encoding for one timestep of the length of the max sequence
+        # Creates postitional encoding for one timestep of the length of the
+        # max sequence
         position = torch.arange(0, seq_length, dtype=torch.float).unsqueeze(1)
 
         # Creates a divisor for the positional encoding along the model's dimension
-        # This is to make the positional encoding's values decay along the model's dimension
+        # This is to make the positional encoding's values decay along the
+        # model's dimension
         div_term = torch.exp(
             torch.arange(0, d_model, 2).float() * -
             (math.log(10000.0) / d_model)
         )
 
-        # Apply the div term to the positionoal encoding to create the positional encoding matrix
+        # Apply the div term to the positionoal encoding to create the
+        # positional encoding matrix
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
 
@@ -273,7 +299,8 @@ class EncoderLayer(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self, dim_encoder, dim_decoder, num_heads, d_ff, dropout, device):
+    def __init__(self, dim_encoder, dim_decoder,
+                 num_heads, d_ff, dropout, device):
         super(DecoderLayer, self).__init__()
         self.self_attn = MultiHeadAttention(dim_decoder, num_heads)
         self.cross_attn = MultiHeadAttention_Modified(
@@ -284,7 +311,8 @@ class DecoderLayer(nn.Module):
         self.norm3 = nn.LayerNorm(dim_decoder)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x, enc_output, src_mask, tgt_mask, show_plot: bool = False):
+    def forward(self, x, enc_output, src_mask,
+                tgt_mask, show_plot: bool = False):
         # Forward self attention layer for tgt inputs
         plot_tensor(x, "Decoder: X", show_plot)
         x = self.norm1(x)
@@ -298,7 +326,8 @@ class DecoderLayer(nn.Module):
         # The decoder's outputs are used as queries
         x = self.norm2(x)
         plot_tensor(x, "Decoder: att output normed", show_plot)
-        attn_output = self.cross_attn(x, enc_output, enc_output, src_mask, show_plot)
+        attn_output = self.cross_attn(
+            x, enc_output, enc_output, src_mask, show_plot)
         plot_tensor(attn_output, "Decoder: cross att output", show_plot)
         x = x + self.dropout(attn_output)
         # x = x + self.dropout(attn_output)
@@ -396,24 +425,30 @@ class Transformer(nn.Module):
             1), tgt_mask.size(2), src_mask.size(3)).bool()
 
         # Create the input for the decoder
-        # Targets are shifted one to the right and last entry of targets is filled on idx 0
+        # Targets are shifted one to the right and last entry of targets is
+        # filled on idx 0
         n_tgt_feature = tgt.shape[2]
         dec_input = torch.cat(
             (src[:, -1, -n_tgt_feature:].unsqueeze(1), tgt[:, :-1, :]), dim=1)
 
         for idx_ft in range(src.shape[2]):
             if src.shape[0] > 1:
-                src[:][:][idx_ft] = (src[:][:][idx_ft] - src[:][:][idx_ft].min())/ (src[:][:][idx_ft].max() - src[:][:][idx_ft].min())
+                src[:][:][idx_ft] = (
+                    src[:][:][idx_ft] - src[:][:][idx_ft].min()) / (
+                    src[:][:][idx_ft].max() - src[:][:][idx_ft].min())
             elif src.shape[0] == 1:
                 src[0][:][idx_ft] = (src[0][:][idx_ft] - src[0][:][idx_ft].min()) / (
-                            src[0][:][idx_ft].max() - src[0][:][idx_ft].min())
+                    src[0][:][idx_ft].max() - src[0][:][idx_ft].min())
 
         for idx_ft in range(dec_input.shape[2]):
             if dec_input.shape[0] > 1:
-                dec_input[:][:][idx_ft] = (dec_input[:][:][idx_ft] - dec_input[:][:][idx_ft].min())/ (dec_input[:][:][idx_ft].max() - dec_input[:][:][idx_ft].min())
+                dec_input[:][:][idx_ft] = (
+                    dec_input[:][:][idx_ft] - dec_input[:][:][idx_ft].min()) / (
+                    dec_input[:][:][idx_ft].max() - dec_input[:][:][idx_ft].min())
             elif dec_input.shape[0] == 1:
-                dec_input[0][:][idx_ft] = (dec_input[0][:][idx_ft] - dec_input[0][:][idx_ft].min())/ (dec_input[0][:][idx_ft].max() - dec_input[0][:][idx_ft].min())
-
+                dec_input[0][:][idx_ft] = (
+                    dec_input[0][:][idx_ft] - dec_input[0][:][idx_ft].min()) / (
+                    dec_input[0][:][idx_ft].max() - dec_input[0][:][idx_ft].min())
 
         plot_tensor(dec_input, "dec_input", self.show_plot)
 
@@ -436,14 +471,22 @@ class Transformer(nn.Module):
         # Forward encoder layers
         enc_output = src_embedded
         for enc_layer in self.encoder_layers:
-            enc_output = enc_layer(enc_output, mask=src_mask, show_plot=self.show_plot)
+            enc_output = enc_layer(
+                enc_output,
+                mask=src_mask,
+                show_plot=self.show_plot)
 
         plot_tensor(enc_output, "enc_output", self.show_plot)
 
         # Forward decoder layers
         dec_output = tgt_embedded
         for dec_layer in self.decoder_layers:
-            dec_output = dec_layer(dec_output, enc_output, dec_mask, tgt_mask, show_plot=self.show_plot)
+            dec_output = dec_layer(
+                dec_output,
+                enc_output,
+                dec_mask,
+                tgt_mask,
+                show_plot=self.show_plot)
 
         plot_tensor(dec_output, "dec_output", self.show_plot)
 

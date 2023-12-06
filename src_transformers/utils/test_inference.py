@@ -1,15 +1,15 @@
 import torch
 
+
 def test_inference():
     # Laod model
     model = torch.load("../../data/output/models/Transformer_v17.pt")
 
-
-
     # get model dimensions
     encoder_dimensions = model.positional_encoding_encoder.pe.shape[1]
     encoder_seq_len = model.positional_encoding_encoder.pe.shape[0]
-    decoder_dimensions = model.fc.out_features #model.positional_encoding_decoder.pe.shape[1]
+    # model.positional_encoding_decoder.pe.shape[1]
+    decoder_dimensions = model.fc.out_features
     decoder_seq_len = model.positional_encoding_decoder.pe.shape[0]
 
     output_dimensions = model.fc.out_features
@@ -30,8 +30,8 @@ def test_inference():
     )
     ts.append(
         {
-            'src': torch.mul(src_tensor.clone(),1000),
-            'tgt': torch.mul(tgt_tensor.clone(),1000)
+            'src': torch.mul(src_tensor.clone(), 1000),
+            'tgt': torch.mul(tgt_tensor.clone(), 1000)
         }
     )
     ts.append(

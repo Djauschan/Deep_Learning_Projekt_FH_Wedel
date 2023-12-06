@@ -5,6 +5,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def visualize_attention_mask_plotly(attention_mask):
     """
     Visualizes a 3D attention mask in an interactive scatter plot using plotly.
@@ -64,7 +65,7 @@ def visualize_attention_mask_plotly(attention_mask):
     fig.show(renderer="browser")
 
 
-def plot_tensor(tensor: torch.tensor, title: str=None, viz:bool = False):
+def plot_tensor(tensor: torch.tensor, title: str = None, viz: bool = False):
     """
     Plots a 3D tensor as a 3D bar chart.
 
@@ -82,8 +83,7 @@ def plot_tensor(tensor: torch.tensor, title: str=None, viz:bool = False):
             data = tensor
         data = data.numpy()[0]
 
-
-        axes=[None, None]
+        axes = [None, None]
 
         fig = plt.figure(figsize=(12, 5))
         axes[0] = fig.add_subplot(121, projection='3d')
@@ -96,11 +96,27 @@ def plot_tensor(tensor: torch.tensor, title: str=None, viz:bool = False):
         z = data.flatten()
 
         # Create a 3D bar chart
-        axes[0].bar3d(x.flatten(), y.flatten(), np.ones_like(z)*np.min(z), 1, 0.1, z, shade=True)
+        axes[0].bar3d(
+            x.flatten(),
+            y.flatten(),
+            np.ones_like(z) *
+            np.min(z),
+            1,
+            0.1,
+            z,
+            shade=True)
         axes[0].set_xlabel('Timeline')
         axes[0].set_ylabel('Feature')
 
-        axes[1].bar3d(y.flatten(), x.flatten(), np.ones_like(z) * np.min(z), 0.1, 1, z, shade=True)
+        axes[1].bar3d(
+            y.flatten(),
+            x.flatten(),
+            np.ones_like(z) *
+            np.min(z),
+            0.1,
+            1,
+            z,
+            shade=True)
         axes[1].set_xlabel('Feature')
         axes[1].set_ylabel('Timeline')
 

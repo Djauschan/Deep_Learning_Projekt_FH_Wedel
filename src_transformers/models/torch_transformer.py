@@ -53,7 +53,8 @@ class TransformerModel(nn.Module):
         self.linear.bias.data.zero_()
         self.linear.weight.data.uniform_(-initrange, initrange)
 
-    def forward(self, src: torch.Tensor, src_mask: torch.Tensor = None) -> torch.Tensor:
+    def forward(self, src: torch.Tensor,
+                src_mask: torch.Tensor = None) -> torch.Tensor:
         """
         Forward pass of the model.
 
@@ -119,6 +120,7 @@ class PositionalEncoding(nn.Module):
         """
         # self.pe is sliced not only by seq_len but also by dim_encoder before it's added to x.
         # This ensures that the dimensions of self.pe match those of x.
-        # The unsqueeze(0) is used to add an extra dimension to self.pe to match the batch size dimension of x.
+        # The unsqueeze(0) is used to add an extra dimension to self.pe to
+        # match the batch size dimension of x.
         x = x + self.pe[:x.size(1), :x.size(2)].unsqueeze(0)
         return self.dropout(x)

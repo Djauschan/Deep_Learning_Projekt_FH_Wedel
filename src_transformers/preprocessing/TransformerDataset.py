@@ -29,14 +29,16 @@ class TransformerDataset(Dataset):
 
         # The type of the ticker symbol is read out.
         self.type = data_frame["type"][1]
-        # Then it is removed from the data frame, since it is the same for all lines.
+        # Then it is removed from the data frame, since it is the same for all
+        # lines.
         data_frame = data_frame.drop("type", axis=1)
 
         # The ticker symbol is read out.
         self.symbol = data_frame["symbol"][1]
         # The name of the ticker symbol is then looked up.
         self.name = lookup_symbol(self.symbol, self.type)
-        # Then it is removed from the data frame, since it is the same for all lines.
+        # Then it is removed from the data frame, since it is the same for all
+        # lines.
         data_frame = data_frame.drop("symbol", axis=1)
 
         data_frame = add_time_information(data_frame)
@@ -56,7 +58,8 @@ class TransformerDataset(Dataset):
         numeric_values = np.concatenate((numeric_values, np.tile(
             one_hot_vec, (numeric_values.shape[0], 1))), axis=1)
 
-        # The data of the current transaction is used to predict the data of the next transaction.
+        # The data of the current transaction is used to predict the data of
+        # the next transaction.
         input = numeric_values[:-1]
         output = numeric_values[1:]
 

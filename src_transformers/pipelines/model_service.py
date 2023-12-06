@@ -36,7 +36,7 @@ class ModelService():
         """
         Creates a new model from a configuration.
 
-        This method creates a new model of the specified type with the specified attributes. 
+        This method creates a new model of the specified type with the specified attributes.
         The model is moved to the GPU if `gpu_activated` is True.
 
         Args:
@@ -93,7 +93,8 @@ class ModelService():
         relevant_file_names = list(map(lambda f: f.name, filter(lambda f: f.name.startswith(
             f'{name}_v'), MODEL_OUTPUT_PATH.iterdir())))
 
-        # Split off the substrings before the v and after the . in the file name
+        # Split off the substrings before the v and after the . in the file
+        # name
         version_numbers = list(
             map(lambda f: int(f.split('v')[1].split('.')[0]), relevant_file_names))
 
@@ -108,9 +109,9 @@ class ModelService():
         Saves the specified PyTorch model to a file in the `MODEL_OUTPUT_PATH` directory.
 
         The method first gets the class name of the model and the latest version number
-        of this model class. If no previous versions are found, it sets the version number to 1. 
+        of this model class. If no previous versions are found, it sets the version number to 1.
 
-        The model is then saved to a file with a name in the format '{model_class_name}_v{version}.pt'. 
+        The model is then saved to a file with a name in the format '{model_class_name}_v{version}.pt'.
         The absolute path to the saved model file is returned.
 
         Args:
@@ -119,7 +120,8 @@ class ModelService():
         Returns:
             str: The absolute path to the saved model file.
         """
-        # Use the global variable to determine if this is the first run of the program.
+        # Use the global variable to determine if this is the first run of the
+        # program.
         global first_save, path
         # Get the class name of the model as string
         model_class_name = type(model).__name__

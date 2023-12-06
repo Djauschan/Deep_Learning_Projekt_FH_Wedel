@@ -8,7 +8,8 @@ import pandas as pd
 # The path of the current file is determined.
 current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
-# Construct the path to the 'data' directory located two levels up from the current file's directory
+# Construct the path to the 'data' directory located two levels up from
+# the current file's directory
 data_dir_path = os.path.join(
     current_file_directory, os.pardir, os.pardir, 'data')
 
@@ -26,22 +27,25 @@ def plot_df(df: pd.DataFrame) -> None:
 
     # The type of the ticker symbol is read out.
     df_type = df["type"][1]
-    # Then it is removed from the data frame, since it is the same for all lines.
+    # Then it is removed from the data frame, since it is the same for all
+    # lines.
     df = df.drop("type", axis=1)
 
     # The ticker symbol is read out.
     symbol = df["symbol"][1]
-    # Then it is removed from the data frame, since it is the same for all lines.
+    # Then it is removed from the data frame, since it is the same for all
+    # lines.
     df = df.drop("symbol", axis=1)
 
-    # Determine the number of rows and columns in the plot needed to visualize the desired columns.
-    count: int = len(df.columns)-1
+    # Determine the number of rows and columns in the plot needed to visualize
+    # the desired columns.
+    count: int = len(df.columns) - 1
     rows: int = 2
     columns: int = math.ceil(count / 2)
 
     # Create plot
     fig, axes = plt.subplots(rows, columns, figsize=(
-        columns*6, rows*4))
+        columns * 6, rows * 4))
 
     # Determine the title of the plot.
     # If possible, the name of the ETF is used as the title.
@@ -53,13 +57,14 @@ def plot_df(df: pd.DataFrame) -> None:
         title = "Symbol " + symbol + " {" + df_type + "}"
     fig.suptitle(title)
 
-    # The desired columns of the data frame are visualized in the form of subplots.
+    # The desired columns of the data frame are visualized in the form of
+    # subplots.
     i = 0
     for i in range(count):
         row = i // columns
         col = i % columns
-        axes[row, col].plot(df.iloc[:, 0], df.iloc[:, i+1])
-        axes[row, col].set_title(df.columns[i+1])
+        axes[row, col].plot(df.iloc[:, 0], df.iloc[:, i + 1])
+        axes[row, col].set_title(df.columns[i + 1])
 
         # Display only years on the X axis.
         axes[row, col].xaxis.set_major_locator(mdates.YearLocator())
@@ -69,7 +74,7 @@ def plot_df(df: pd.DataFrame) -> None:
         plt.setp(axes[row, col].get_xticklabels(), rotation=45)
 
     # The subplots that are not used are hidden.
-    for z in range(i+1, rows*columns):
+    for z in range(i + 1, rows * columns):
         row = z // columns
         col = z % columns
         axes[row, col].set_axis_off()
