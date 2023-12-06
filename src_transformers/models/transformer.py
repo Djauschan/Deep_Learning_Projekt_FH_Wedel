@@ -112,7 +112,7 @@ class MultiHeadAttention_Modified(nn.Module):
 
         self.device = device
 
-    def scaled_dot_product_attention(self, Q, K, V, mask=None):
+    def scaled_dot_product_attention(self, Q, K, V, mask=None, show_plot: bool = False):
         """
         This function calculates the Self-Attention for one head.
         """
@@ -121,16 +121,23 @@ class MultiHeadAttention_Modified(nn.Module):
             Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
         attn_scores = attn_scores.to(self.device)
 
+        plot_tensor(attn_scores[0], "mod. multihead: Attention scores", show_plot)
+
         # Apply mask if provided (useful for preventing attention to certain parts like padding)
         if mask is not None:
             mask = mask.to(self.device)
             attn_scores = attn_scores.masked_fill(mask == 0, -1e9)
 
+        plot_tensor(attn_scores[0], "mod. multihead: Attention scores masked", show_plot)
+
         # Softmax is applied to obtain attention probabilities (i.e. Attention weights)
         attn_probs = torch.softmax(attn_scores, dim=-1)
 
+        plot_tensor(attn_probs[0], "mod. multihead: Attention probs masked", show_plot)
+
         # Multiply by values to obtain the final output
         output = torch.matmul(attn_probs, V)
+        plot_tensor(attn_probs[0], "mod. multihead: output", show_plot)
         return output
 
     def split_heads(self, x):
@@ -143,14 +150,24 @@ class MultiHeadAttention_Modified(nn.Module):
         batch_size, _, seq_length, d_k = x.size()
         return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.dim_decoder)
 
-    def forward(self, Q, K, V, mask=None):
+    def forward(self, Q, K, V, mask=None, show_plot: bool = False):
         # Apply linear transformations and split heads
+
+
+        plot_tensor(Q, "mod. multihead: Q Input", show_plot)
+        plot_tensor(K, "mod. multihead: K Input", show_plot)
+        plot_tensor(V, "mod. multihead: V Input", show_plot)
+
         Q = self.split_heads(self.W_q(Q))
         K = self.split_heads(self.W_k(K))
         V = self.split_heads(self.W_v(V))
 
+        plot_tensor(Q[0], "mod. multihead: Q", show_plot)
+        plot_tensor(K[0], "mod. multihead: K", show_plot)
+        plot_tensor(V[0], "mod. multihead: V", show_plot)
+
         # Perform scaled dot-product attention
-        attn_output = self.scaled_dot_product_attention(Q, K, V, mask)
+        attn_output = self.scaled_dot_product_attention(Q, K, V, mask, show_plot)
 
         # Combine heads and apply output transformation
         output = self.W_o(self.combine_heads(attn_output))
@@ -236,19 +253,22 @@ class EncoderLayer(nn.Module):
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x, mask):
+    def forward(self, x, mask, show_plot):
         # Forward attention layer
+        plot_tensor(x, "Encoder: X", show_plot)
+        x = self.norm1(x)
+        plot_tensor(x, "Encoder: X normed", show_plot)
         attn_output = self.self_attn(x, x, x, mask)
-
+        plot_tensor(attn_output, "Encoder: att output", show_plot)
+        x = x + self.dropout(attn_output)
         # Add + normalize + dropout
-        # TODO: Norm lieber vorher?
-        x = self.norm1(x + self.dropout(attn_output))
 
         # Forward feed forward layer
+        x = self.norm2(x)
         ff_output = self.feed_forward(x)
+        plot_tensor(ff_output, "Encoder: ff output", show_plot)
+        x = x + self.dropout(ff_output)
 
-        # Add + normalize + dropout
-        x = self.norm2(x + self.dropout(ff_output))
         return x
 
 
@@ -264,22 +284,30 @@ class DecoderLayer(nn.Module):
         self.norm3 = nn.LayerNorm(dim_decoder)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x, enc_output, src_mask, tgt_mask):
+    def forward(self, x, enc_output, src_mask, tgt_mask, show_plot: bool = False):
         # Forward self attention layer for tgt inputs
+        plot_tensor(x, "Decoder: X", show_plot)
+        x = self.norm1(x)
+        plot_tensor(x, "Decoder: X normed", show_plot)
         attn_output = self.self_attn(x, x, x, tgt_mask)
-        x = self.norm1(x + self.dropout(attn_output))
-        # x = x + self.dropout(attn_output)
+        plot_tensor(attn_output, "Decoder: att output", show_plot)
+        x = x + self.dropout(attn_output)
 
         # Forward cross attention layer for encoder outputs
         # Encoders outputs are used as keys and values
         # The decoder's outputs are used as queries
-        attn_output = self.cross_attn(x, enc_output, enc_output, src_mask)
-        x = self.norm2(x + self.dropout(attn_output))
+        x = self.norm2(x)
+        plot_tensor(x, "Decoder: att output normed", show_plot)
+        attn_output = self.cross_attn(x, enc_output, enc_output, src_mask, show_plot)
+        plot_tensor(attn_output, "Decoder: cross att output", show_plot)
+        x = x + self.dropout(attn_output)
         # x = x + self.dropout(attn_output)
 
         # Forward feed forward layer
+        x = self.norm3(x)
         ff_output = self.feed_forward(x)
-        x = self.norm3(x + self.dropout(ff_output))
+        plot_tensor(ff_output, "Decoder: ff output", show_plot)
+        x = x + self.dropout(ff_output)
         # x = x + self.dropout(ff_output)
         return x
 
@@ -352,10 +380,10 @@ class Transformer(nn.Module):
 
         return mask.to(self.device)
 
-    def forward(self, src, tgt, viz_rate: float = 0):
+    def forward(self, src, tgt):
 
         self.show_plot = False
-        if np.random.rand() < viz_rate:
+        if np.random.rand() < self.viz_rate:
             self.show_plot = True
 
         plot_tensor(src, "SRC", self.show_plot)
@@ -372,6 +400,20 @@ class Transformer(nn.Module):
         n_tgt_feature = tgt.shape[2]
         dec_input = torch.cat(
             (src[:, -1, -n_tgt_feature:].unsqueeze(1), tgt[:, :-1, :]), dim=1)
+
+        for idx_ft in range(src.shape[2]):
+            if src.shape[0] > 1:
+                src[:][:][idx_ft] = (src[:][:][idx_ft] - src[:][:][idx_ft].min())/ (src[:][:][idx_ft].max() - src[:][:][idx_ft].min())
+            elif src.shape[0] == 1:
+                src[0][:][idx_ft] = (src[0][:][idx_ft] - src[0][:][idx_ft].min()) / (
+                            src[0][:][idx_ft].max() - src[0][:][idx_ft].min())
+
+        for idx_ft in range(dec_input.shape[2]):
+            if dec_input.shape[0] > 1:
+                dec_input[:][:][idx_ft] = (dec_input[:][:][idx_ft] - dec_input[:][:][idx_ft].min())/ (dec_input[:][:][idx_ft].max() - dec_input[:][:][idx_ft].min())
+            elif dec_input.shape[0] == 1:
+                dec_input[0][:][idx_ft] = (dec_input[0][:][idx_ft] - dec_input[0][:][idx_ft].min())/ (dec_input[0][:][idx_ft].max() - dec_input[0][:][idx_ft].min())
+
 
         plot_tensor(dec_input, "dec_input", self.show_plot)
 
@@ -394,14 +436,14 @@ class Transformer(nn.Module):
         # Forward encoder layers
         enc_output = src_embedded
         for enc_layer in self.encoder_layers:
-            enc_output = enc_layer(enc_output, mask=src_mask)
+            enc_output = enc_layer(enc_output, mask=src_mask, show_plot=self.show_plot)
 
         plot_tensor(enc_output, "enc_output", self.show_plot)
 
         # Forward decoder layers
         dec_output = tgt_embedded
         for dec_layer in self.decoder_layers:
-            dec_output = dec_layer(dec_output, enc_output, dec_mask, tgt_mask)
+            dec_output = dec_layer(dec_output, enc_output, dec_mask, tgt_mask, show_plot=self.show_plot)
 
         plot_tensor(dec_output, "dec_output", self.show_plot)
 

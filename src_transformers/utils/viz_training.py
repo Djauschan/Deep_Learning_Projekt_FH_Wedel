@@ -14,7 +14,7 @@ def plot_evaluation(targets: np.array, predictions: np.array):
     n_target_features = targets.shape[2]
 
     fig, axes = plt.subplots(
-        ncols=1, nrows=n_target_features, figsize=(20, 10))
+        ncols=1, nrows=n_target_features, figsize=(20, n_target_features*2))
 
     colors = cm.tab20(range(20))
 

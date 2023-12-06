@@ -4,27 +4,30 @@ model_parameters:
     num_heads: 1
     num_layers: 1
     d_ff: 200
-    seq_len_encoder: 200
-    seq_len_decoder: 3
+    seq_len_encoder: 50
+    seq_len_decoder: 30
     dropout: 0.1
+    viz_model_rate: 0.0
 training_parameters:
   batch_size: 50
   epochs: 1000
-  learning_rate: 0.001
+  learning_rate: 0.01
   validation_split: 0.1
 dataset_parameters:
   read_all_files: false
   data_usage_ratio: 0.5 # Only the last 50% of the read data are used in the dataset
   # This parameter must be set to true if the symbols to be read in are changed.
-  create_new_file: true
+  create_new_file: false
   data_file: "data/output/Multi_Symbol.csv"
   encoder_symbols:
   # stocks
+    - "art1"
+    - "art2"
     - "AAPL"
     - "AAL"
     - "AMD"
-    # - "C"
-    # - "MRNA"
+#    - "C"
+#    - "MRNA"
     - "NIO"
     # - "NVDA"
     # - "SNAP"
@@ -44,6 +47,8 @@ dataset_parameters:
     # - "COMP"
     # - "W5000"
   decoder_symbols:
+    - "art1"
+    - "art2"
     - "AMD"
     - "AAPL"
     - "AAL"
