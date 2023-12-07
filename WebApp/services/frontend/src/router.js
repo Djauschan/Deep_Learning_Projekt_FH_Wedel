@@ -1,32 +1,45 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import Meta from 'vue-meta'
-
-import Home from './views/home'
-import Statistik from './views/statistik'
-import NotFound from './views/not-found'
+import { createRouter, createWebHistory } from 'vue-router';
+import Home from './views/home.vue'
+import Statistik from './views/statistik.vue'
+import NotFound from './views/not-found.vue'
+import Login from './views/Login.vue'
 import './style.css'
+import { useMyPiniaStore } from './store';
 
-Vue.use(Router)
-Vue.use(Meta)
-export default new Router({
-  mode: 'history',
+const router = createRouter({
+  history: createWebHistory(),
+  linkActiveClass: 'active',
   routes: [
     {
-      name: 'Home',
       path: '/',
       component: Home,
+      meta: { requiresAuth: true }
     },
     {
-      name: 'Statistik',
       path: '/statistik',
       component: Statistik,
+      meta: { requiresAuth: true }
     },
     {
-      name: '404 - Not Found',
-      path: '**',
-      component: NotFound,
-      fallback: true,
+      path: '/login',
+      component: Login
     },
-  ],
-})
+    {
+      path: '/**',
+      component: NotFound
+    }
+  ]
+});
+
+router.beforeEach((to) => {
+  console.log("loggedId: " + localStorage.isLoggedIn)
+  console.log("auth needed: " + to.meta.requiresAuth)
+  // Assuming to.meta.requiresAuth is true for routes that require authentication
+  if (to.meta.requiresAuth && !localStorage.isLoggedIn) {
+    // Redirect to the login page if not authenticated
+    console.log("back to login")
+    next('/login');
+  }
+});
+
+export default router;

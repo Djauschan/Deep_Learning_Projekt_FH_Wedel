@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Optional
 
 class UserBase(BaseModel):
     email: str
@@ -11,6 +10,9 @@ class UserBase(BaseModel):
 class User(UserBase):
     id: int
     is_active: bool
+
+    class Config:
+        from_attributes = True
 
 class UserCreate(UserBase):
     pass
@@ -24,9 +26,7 @@ class PasswordUpdate(BaseModel):
     new_password: str
 
 class LoginBase(BaseModel):
-    login_time: str
-    ip: str
-    location: str
+    pass
 
 class LoginCreate(LoginBase):
     pass
@@ -34,11 +34,14 @@ class LoginCreate(LoginBase):
 class Login(LoginBase):
     id: int
     user_id: int
+    login_time: str
 
     class Config:
-        from_attributes = True
+        orm_mode = True
         
 class LoginRequest(BaseModel):
     user: str
     password: str
-    location: Optional[dict]
+
+    class Config:
+        orm_mode = True

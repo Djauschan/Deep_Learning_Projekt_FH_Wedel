@@ -71,12 +71,11 @@ def update_user_by_username(db: Session, username: str, updated_data: schemas.Us
         raise HTTPException(status_code=404, detail="User not found")
 
 # method to create a login entry into table "login"
-def create_login(db: Session, login: schemas.LoginCreate, owner_id: int, location: dict):
+def create_login(db: Session, owner_id: int):
     now = datetime.now()
     current_date = now
     db_login = models.Login(
         login_time=current_date, 
-        location=location,
         user_id=owner_id
     )
     db.add(db_login)

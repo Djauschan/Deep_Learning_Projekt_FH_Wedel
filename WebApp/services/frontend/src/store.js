@@ -1,13 +1,15 @@
-import { createStore } from "vuex";
+import { defineStore } from 'pinia';
 
 // Initial state function
 const initialState = () => ({
     logged_user: null,
     logged_user_id: null,
+    API: 'http://localhost:8000'
 });
 
-export default createStore({
-    state: initialState(),
+export const useMyPiniaStore = defineStore({
+    id: 'myPiniaStore',
+    state: initialState,
     mutations: {
         setUser(state, user) {
             state.logged_user = user;
@@ -18,10 +20,13 @@ export default createStore({
         setApi(state, API) {
             state.API = API;
         },
-
         RESET_STATE(state) {
             Object.assign(state, initialState());
         },
+    },
+    getters: {
+        currentUser: (state) => state.logged_user,
+        isLoggedIn: (state) => state.logged_user !== null,
     },
     actions: {
         login({ commit }, { user, user_id }) {
@@ -32,13 +37,8 @@ export default createStore({
             commit("setUser", null);
             commit("RESET_STATE");
         },
-        // action to execute the reset
         resetState({ commit }) {
             commit("RESET_STATE");
         },
-    },
-    getters: {
-        currentUser: (state) => state.logged_user,
-        isLoggedIn: (state) => state.logged_user !== null,
-    },
+    }
 });

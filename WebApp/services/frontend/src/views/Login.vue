@@ -7,7 +7,7 @@
             <form v-if="!showRegister" id="login-form">
                 <input type="text" id="username" placeholder="Username" required v-model="username" />
                 <input type="password" id="password" placeholder="Password" required v-model="password" />
-                <button type="submit" @click.prevent="login_try">Log in</button>
+                <button type="submit" @click.prevent="sendLoginRequest">Log in</button>
                 <button type="button" @click.prevent="showRegister = !showRegister">
                     Register
                 </button>
@@ -28,128 +28,79 @@
         </div>
     </div>
 </template>
-  
+
 <script>
 import axios from "axios";
-import { mapState } from "vuex";
+import { defineComponent, computed, ref } from "vue";
+import { useMyPiniaStore } from "../store.js";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import "sweetalert2/dist/sweetalert2.min.css";
-export default {
-    name: "LoginPage",
-    data() {
-        return {
-            username: "",
-            password: "",
-            repeat_password: "",
-            email: "",
-            API: this.$store.state.API,
-            showRegister: false,
-            userLocation: { lat: null, lng: null },
-        };
-    },
-    methods: {
-        // method to call api route to create a new user in the database
-        async register_new_user() {
-            if (this.showRegister) {
-                if (this.repeat_password === this.password) {
-                    try {
-                        const response = await axios.post(
-                            this.$store.state.API + "/createUser",
-                            {
-                                email: this.email,
-                                username: this.username,
-                                password: this.password,
-                            }
-                        );
-                        console.log(response.status);
-                        this.showSuccess();
-                    } catch (error) {
-                        console.log(error)
+import DropDownMenu from "./DropDownMenu.vue";
+import router from '../router';
 
-                        Swal.fire({
-                            title: "Fehler beim Registrieren",
-                            text: "Username bereits belegt",
-                            icon: "info",
-                            iconColor: "#d0342c",
-                            showCloseButton: false,
-                            confirmButtonText: "Schließen",
-                            confirmButtonColor: "#d0342c",
+export default defineComponent({
+    name: "LoginPage",
+    components: {
+        DropDownMenu,
+    },
+    setup() {
+        const store = useMyPiniaStore();
+
+        const username = ref("");
+        const password = ref("");
+        const repeat_password = ref("");
+        const email = ref("");
+        const showRegister = ref(false);
+
+        const isUserLoggedIn = computed(() => {
+            return localStorage.isLoggedIn()
+        });
+
+        const register_new_user = async () => {
+            if (showRegister.value) {
+                if (repeat_password.value === password.value) {
+                    try {
+                        const response = await axios.post(store.API + "/createUser", {
+                            email: email.value,
+                            username: username.value,
+                            password: password.value,
                         });
+                        console.log("RESPONSE " + response.status);
+                        showSuccess();
+                    } catch (error) {
+                        console.log(error);
+                        showError("Error at registration", "Username already used");
                     }
                 } else {
-                    Swal.fire({
-                        title: "Fehler beim Registrieren",
-                        text: "Bitte versuche es noch einmal und gib zweimal das gleiche Passwort ein :)",
-                        icon: "info",
-                        iconColor: "#d0342c",
-                        showCloseButton: false,
-                        confirmButtonText: "Schließen",
-                        confirmButtonColor: "#d0342c",
-                    });
+                    showError(
+                        "Error at registration",
+                        "Try again with same password this time :)"
+                    );
                 }
             }
-        },
-        // method to initialize the login and ask user for permission for their location if the dialog doesn't show or the user blocks this, the login gets executed without the users geodata
-        async login_try() {
-            if ("geolocation" in navigator) {
-                let isCallbackCalled = false;
+        };
 
-                const timeoutId = setTimeout(() => {
-                    if (!isCallbackCalled) {
-                        console.warn("Geolocation request timed out or was blocked.");
-                        this.sendLoginRequest();
-                    }
-                }, 5000);
-
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        isCallbackCalled = true;
-                        clearTimeout(timeoutId);
-
-                        this.userLocation.lat = position.coords.latitude;
-                        this.userLocation.lng = position.coords.longitude;
-                        this.sendLoginRequest();
-                    },
-                    (error) => {
-                        isCallbackCalled = true;
-                        clearTimeout(timeoutId);
-
-                        console.warn("Could not get geolocation:", error.message);
-                        this.sendLoginRequest();
-                    }
-                );
-            } else {
-                console.warn("Geolocation is not supported by this browser.");
-                this.sendLoginRequest();
-            }
-        },
-
-        // method to create a Login for a user that exists in the db, also sets items in the vuex state management and localstorage
-        async sendLoginRequest() {
+        const sendLoginRequest = async () => {
             try {
-                const response = await axios.post(this.$store.state.API + "/login/", {
-                    user: this.username,
-                    password: this.password,
-                    location: this.userLocation,
+                const response = await axios.post(store.API + "/login/", {
+                    user: username.value,
+                    password: password.value,
                 });
                 if (response.data) {
-                    this.getUser(response.data.username);
-                    this.$store.dispatch("login", {
-                        user: response.data.username,
-                        user_id: response.data.id,
-                    });
-                    localStorage.setItem("logged_user", response.data.username);
-                    localStorage.setItem("logged_user_id", response.data.id);
-                    this.$router.push("/");
+                    localStorage.logged_user = response.data.username;
+                    localStorage.logged_user_id = response.data.id;
+                    localStorage.logged_email = response.data.email;
+                    localStorage.setItem('isLoggedIn', true);
+                    router.push("/");
                 }
             } catch (error) {
                 Swal.fire({
-                    title: "Fehler beim Login",
-                    text: "Falsche Logindaten eingegeben",
+                    title: "Error at login",
+                    text: "Wrong input data",
                     icon: "info",
                     iconColor: "#d0342c",
                     showCloseButton: false,
-                    confirmButtonText: "Schließen",
+                    confirmButtonText: "Close",
                     confirmButtonColor: "#d0342c",
                 });
                 if (
@@ -162,19 +113,20 @@ export default {
                     console.log(error);
                 }
             }
-        },
-        getUser(name) {
-            this.username = name;
-        },
-        // method to create a popup toast with sweetalert
-        showSuccess() {
+        };
+
+        const getUser = (name) => {
+            username.value = name;
+        };
+
+        const showSuccess = () => {
             Swal.fire({
-                title: "Erfolgreich registriert",
-                text: "Du kannst dich jetzt einloggen",
+                title: "Registered successful",
+                text: "You now can login",
                 icon: "info",
                 iconColor: "#2200cd",
                 showCloseButton: false,
-                confirmButtonText: "Schließen",
+                confirmButtonText: "Close",
                 confirmButtonColor: "#2200cd",
             }).then((result) => {
                 if (result.value) {
@@ -184,18 +136,35 @@ export default {
                     console.log("ciao");
                 }
             });
-        },
+        };
+
+        const showError = (title, text) => {
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: "info",
+                iconColor: "#d0342c",
+                showCloseButton: false,
+                confirmButtonText: "Close",
+                confirmButtonColor: "#d0342c",
+            });
+        };
+
+        return {
+            username,
+            password,
+            repeat_password,
+            email,
+            showRegister,
+            isUserLoggedIn,
+            register_new_user,
+            sendLoginRequest,
+            getUser,
+            showSuccess,
+            showError,
+        };
     },
-    computed: {
-        ...mapState(["user"]),
-        isLoggedIn() {
-            return this.$store.getters.isLoggedIn;
-        },
-        currentUser() {
-            return this.$store.getters.currentUser;
-        },
-    },
-};
+});
 </script>
   
 <style>

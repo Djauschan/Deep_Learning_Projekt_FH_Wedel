@@ -7,4 +7,6 @@ bcrypt
 requests
 yahoo_fin
 yfinance
-pandas_market_calendars
+pandas_market_calenda
+vue==3.2.45
+@vue/cli@5.0.8

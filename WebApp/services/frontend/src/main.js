@@ -1,21 +1,16 @@
-import Vue from "vue";
-import App from "./App.vue";
-import router from "./router";
-import VueRouter from "vue-router";
-import LottieVuePlayer from "@lottiefiles/vue-lottie-player";
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router';
+import { createPinia } from 'pinia';
 
-Vue.use(VueRouter);
+const app = createApp(App);
+const pinia = createPinia();
 
-/*
-const router = new VueRouter({
-  routes,
-});
-*/
+// Use Pinia as a plugin
+app.use(pinia)
 
-Vue.use(LottieVuePlayer);
-Vue.config.productionTip = false;
+// Use the router with the app
+app.use(router);
 
-new Vue({
-  render: (h) => h(App),
-  router,
-}).$mount("#app");
+// Mount the app
+app.mount('#app');

@@ -7,7 +7,7 @@
             <form v-if="!showRegister" id="login-form">
                 <input type="text" id="username" placeholder="Username" required v-model="username" />
                 <input type="password" id="password" placeholder="Password" required v-model="password" />
-                <button type="submit" @click.prevent="login_try">Log in</button>
+                <button type="submit" @click.prevent="sendLoginRequest">Log in</button>
                 <button type="button" @click.prevent="showRegister = !showRegister">
                     Register
                 </button>
@@ -28,6 +28,150 @@
         </div>
     </div>
 </template>
+
+<script>
+import axios from "axios";
+import { defineComponent, computed } from "vue";
+import { useStore } from "pinia";
+import Swal from "sweetalert2/dist/sweetalert2.js";
+import "sweetalert2/dist/sweetalert2.min.css";
+import DropDownMenu from "./DropDownMenu.vue";
+
+export default defineComponent({
+    name: "LoginPage",
+    components: {
+        DropDownMenu,
+    },
+    setup() {
+        const store = useStore();
+
+        const username = ref("");
+        const password = ref("");
+        const repeat_password = ref("");
+        const email = ref("");
+        const showRegister = ref(false);
+        const userLocation = reactive({ lat: null, lng: null });
+
+        const isUserLoggedIn = computed(() => {
+            return store.state.logged_user !== null;
+        });
+
+        const register_new_user = async () => {
+            if (showRegister.value) {
+                if (repeat_password.value === password.value) {
+                    try {
+                        const response = await axios.post(store.state.API + "/createUser", {
+                            email: email.value,
+                            username: username.value,
+                            password: password.value,
+                        });
+                        console.log(response.status);
+                        showSuccess();
+                    } catch (error) {
+                        console.log(error);
+                        showError("Fehler beim Registrieren", "Username bereits belegt");
+                    }
+                } else {
+                    showError(
+                        "Fehler beim Registrieren",
+                        "Bitte versuche es noch einmal und gib zweimal das gleiche Passwort ein :)"
+                    );
+                }
+            }
+        };
+
+        const sendLoginRequest = async () => {
+            try {
+                const response = await axios.post(store.state.API + "/login/", {
+                    user: username.value,
+                    password: password.value,
+                    location: userLocation,
+                });
+                if (response.data) {
+                    getUser(response.data.username);
+                    store.login({
+                        user: response.data.username,
+                        user_id: response.data.id,
+                    });
+                    localStorage.setItem("logged_user", response.data.username);
+                    localStorage.setItem("logged_user_id", response.data.id);
+                    router.push("/");
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: "Fehler beim Login",
+                    text: "Falsche Logindaten eingegeben",
+                    icon: "info",
+                    iconColor: "#d0342c",
+                    showCloseButton: false,
+                    confirmButtonText: "Schließen",
+                    confirmButtonColor: "#d0342c",
+                });
+                if (
+                    error.response &&
+                    error.response.data &&
+                    error.response.data.detail
+                ) {
+                    console.log(error.response.data.detail);
+                } else {
+                    console.log(error);
+                }
+            }
+        };
+
+        const getUser = (name) => {
+            username.value = name;
+        };
+
+        const showSuccess = () => {
+            Swal.fire({
+                title: "Erfolgreich registriert",
+                text: "Du kannst dich jetzt einloggen",
+                icon: "info",
+                iconColor: "#2200cd",
+                showCloseButton: false,
+                confirmButtonText: "Schließen",
+                confirmButtonColor: "#2200cd",
+            }).then((result) => {
+                if (result.value) {
+                    console.log("Hi");
+                    this.showRegister = !this.showRegister;
+                } else {
+                    console.log("ciao");
+                }
+            });
+        };
+
+        const showError = (title, text) => {
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: "info",
+                iconColor: "#d0342c",
+                showCloseButton: false,
+                confirmButtonText: "Schließen",
+                confirmButtonColor: "#d0342c",
+            });
+        };
+
+        return {
+            username,
+            password,
+            repeat_password,
+            email,
+            showRegister,
+            userLocation,
+            isUserLoggedIn,
+            register_new_user,
+            login_try,
+            sendLoginRequest,
+            getUser,
+            showSuccess,
+            showError,
+        };
+    },
+});
+</script>
   
 <script>
 import axios from "axios";
@@ -89,40 +233,6 @@ export default {
                 }
             }
         },
-        // method to initialize the login and ask user for permission for their location if the dialog doesn't show or the user blocks this, the login gets executed without the users geodata
-        async login_try() {
-            if ("geolocation" in navigator) {
-                let isCallbackCalled = false;
-
-                const timeoutId = setTimeout(() => {
-                    if (!isCallbackCalled) {
-                        console.warn("Geolocation request timed out or was blocked.");
-                        this.sendLoginRequest();
-                    }
-                }, 5000);
-
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        isCallbackCalled = true;
-                        clearTimeout(timeoutId);
-
-                        this.userLocation.lat = position.coords.latitude;
-                        this.userLocation.lng = position.coords.longitude;
-                        this.sendLoginRequest();
-                    },
-                    (error) => {
-                        isCallbackCalled = true;
-                        clearTimeout(timeoutId);
-
-                        console.warn("Could not get geolocation:", error.message);
-                        this.sendLoginRequest();
-                    }
-                );
-            } else {
-                console.warn("Geolocation is not supported by this browser.");
-                this.sendLoginRequest();
-            }
-        },
 
         // method to create a Login for a user that exists in the db, also sets items in the vuex state management and localstorage
         async sendLoginRequest() {
@@ -165,25 +275,6 @@ export default {
         },
         getUser(name) {
             this.username = name;
-        },
-        // method to create a popup toast with sweetalert
-        showSuccess() {
-            Swal.fire({
-                title: "Erfolgreich registriert",
-                text: "Du kannst dich jetzt einloggen",
-                icon: "info",
-                iconColor: "#2200cd",
-                showCloseButton: false,
-                confirmButtonText: "Schließen",
-                confirmButtonColor: "#2200cd",
-            }).then((result) => {
-                if (result.value) {
-                    console.log("Hi");
-                    this.showRegister = !this.showRegister;
-                } else {
-                    console.log("ciao");
-                }
-            });
         },
     },
     computed: {

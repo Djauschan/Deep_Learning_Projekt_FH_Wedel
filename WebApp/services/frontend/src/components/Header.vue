@@ -11,24 +11,27 @@
 </template>
   
 <script>
-import DropDownMenu from "./DropDownMenu.vue";
-import { mapState } from 'vuex';
-export default {
-    name: "HeaderPart",
+import { defineComponent, computed } from 'vue';
+import { useStore } from 'pinia';
+import DropDownMenu from './DropDownMenu.vue';
+
+export default defineComponent({
+    name: 'HeaderPart',
     components: {
         DropDownMenu,
     },
-    computed: {
-        ...mapState(['logged_user']),
-        isUserLoggedIn() {
-            return this.logged_user !== null;
-        },
+    setup() {
+        const store = useStore();
+
+        const isUserLoggedIn = computed(() => {
+            return store.state.logged_user !== null;
+        });
+
+        return {
+            isUserLoggedIn,
+        };
     },
-    data() {
-        return {};
-    },
-    methods: {},
-};
+});
 </script>
   
 <style>

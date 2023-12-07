@@ -14,7 +14,11 @@ app = FastAPI()
 
 
 # Configure CORS settings
-origins = ["http://localhost:8080"]  # Replace with the origins you want to allow
+origins = [    
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:8000",
+]  # Replace with the origins you want to allow
 
 app.add_middleware(
     CORSMiddleware,
@@ -96,13 +100,12 @@ def user_login(login_request: schemas.LoginRequest, db: Session = Depends(get_db
     user = crud.get_user_by_username(db, login_request.user)
     
     if not user:
-        raise HTTPException(status_code=400, detail="Email does not exist")
+        raise HTTPException(status_code=400, detail="Username does not exist")
 
     if not bcrypt.checkpw(login_request.password.encode('utf-8'), user.password):
         raise HTTPException(status_code=400, detail="Incorrect password")
-    print(login_request.location)
     # Creating a login record after successful authentication
-    login_record = crud.create_login(db, user.id, user.id, login_request.location)  # Removed schemas.LoginCreate()
+    login_record = crud.create_login(db, owner_id=user.id)  # Removed schemas.LoginCreate()
 
     if not login_record:
         raise HTTPException(status_code=500, detail="Could not create login record")
@@ -110,17 +113,17 @@ def user_login(login_request: schemas.LoginRequest, db: Session = Depends(get_db
     return {
         "username": user.username,
         "email": user.email,
-        "id": user.id,
+        "user_id": user.id,
         "is_active": user.is_active
     }
 
 @app.get("/getLogins/", response_model=list[schemas.Login])
-def read_logins(query: str = '', limit: int = 100, db: Session = Depends(get_db)):
+def get_logins(query: str = '', limit: int = 100, db: Session = Depends(get_db)):
     logins = crud.get_logins(db, query=query, limit=limit)
     return logins 
 
 @app.get("/getLoginByUser_ID/", response_model=list[schemas.Login])
-def read_logins(user_id: int, db: Session = Depends(get_db)):
+def get_logins(user_id: int, db: Session = Depends(get_db)):
     logins = crud.get_logins_by_user_id(db, owner_id=user_id)
     return logins
 

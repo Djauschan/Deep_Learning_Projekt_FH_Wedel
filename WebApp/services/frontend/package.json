@@ -7,28 +7,15 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@canvasjs/vue-stockcharts": "^1.0.2",
-    "@lottiefiles/vue-lottie-player": "1.0.4",
-    "@progress/kendo-vue-charts": "^4.1.0",
-    "@progress/kendo-vue-intl": "^4.1.0",
-    "@syncfusion/ej2-vue-charts": "^23.2.6",
-    "dangerous-html": "0.1.13",
-    "data-forge": "^1.10.1",
-    "data-forge-fs": "^0.0.9",
-    "data-forge-indicators": "^0.2.7",
-    "data-forge-plot": "^1.0.2",
     "devextreme-vue": "^23.1.6",
-    "hammerjs": "^2.0.8",
-    "indicatorts": "^1.0.16",
-    "trading-vue-js": "^1.0.2",
-    "vue": "^2.6.7",
-    "vue-meta": "^2.2.1",
-    "vue-router": "^3.0.2",
-    "vue2-highcharts": "^1.2.5"
+    "vue": "^3.2.45",
+    "vue-router": "^4.2.5",
+    "pinia": "2.1.7",
+    "axios": "1.6.2",
+    "sweetalert2": "9.0.0"
   },
   "devDependencies": {
     "@vue/babel-preset-app": "^5.0.8",
-    "@vue/cli-plugin-babel": "^5.0.4",
     "@vue/cli-service": "^5.0.8",
     "vue-template-compiler": "^2.6.7"
   },

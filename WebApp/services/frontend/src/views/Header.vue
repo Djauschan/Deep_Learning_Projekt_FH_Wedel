@@ -11,24 +11,25 @@
 </template>
   
 <script>
-import DropDownMenu from "./DropDownMenu.vue";
-import { mapState } from 'vuex';
-export default {
-    name: "HeaderPart",
+import { defineComponent, computed } from 'vue';
+import DropDownMenu from './DropDownMenu.vue';
+
+export default defineComponent({
+    name: 'HeaderPart',
     components: {
         DropDownMenu,
     },
-    computed: {
-        ...mapState(['logged_user']),
-        isUserLoggedIn() {
-            return this.logged_user !== null;
-        },
+    setup() {
+
+        const isUserLoggedIn = computed(() => {
+            return localStorage.logged_user !== null;
+        });
+
+        return {
+            isUserLoggedIn,
+        };
     },
-    data() {
-        return {};
-    },
-    methods: {},
-};
+});
 </script>
   
 <style>
@@ -53,7 +54,6 @@ export default {
     color: #fff;
 }
 
-/* Overwriting Bootstrap's sticky-top styles to make sure it sticks to the top */
 .sticky-top {
     position: sticky;
     z-index: 1020;

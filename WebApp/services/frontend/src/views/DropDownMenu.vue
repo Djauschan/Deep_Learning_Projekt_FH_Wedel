@@ -10,40 +10,53 @@
         <div v-if="isDropdownOpen" class="background" @click="closeDropdown"></div>
     </div>
 </template>
-
+  
 <script>
-export default {
-    components: {
-    },
-    data() {
-        return {
-            isDropdownOpen: false
+import { defineComponent, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+export default defineComponent({
+    setup() {
+        const router = useRouter();
+
+        const isDropdownOpen = ref(false);
+
+        const toggleDropdown = () => {
+            isDropdownOpen.value = !isDropdownOpen.value;
         };
-    },
-    methods: {
-        toggleDropdown() {
-            this.isDropdownOpen = !this.isDropdownOpen;
-        },
-        goToHome() {
-            this.closeDropdown();
-            this.$router.push('/');
-        },
-        goToStatistics() {
-            this.closeDropdown();
-            this.$router.push('/statistik')
-        },
-        logout() {
-            localStorage.removeItem('logegd_user_id');
+
+        const goToHome = () => {
+            closeDropdown();
+            router.push('/');
+        };
+
+        const goToStatistics = () => {
+            closeDropdown();
+            router.push('/statistik');
+        };
+
+        const logout = () => {
             localStorage.removeItem('logged_user');
-            this.$store.commit('setUser', null)
-            this.$store.commit('setUserId', null)
-            this.$router.push('/login')
-        },
-        closeDropdown() {
-            this.isDropdownOpen = false;
-        },
-    },
-};
+            localStorage.removeItem('logged_user_id');
+            localStorage.removeItem('logged_email');
+            localStorage.setItem('isLoggedIn', false);
+            router.push('/login');
+        };
+
+        const closeDropdown = () => {
+            isDropdownOpen.value = false;
+        };
+
+        return {
+            isDropdownOpen,
+            toggleDropdown,
+            goToHome,
+            goToStatistics,
+            logout,
+            closeDropdown
+        };
+    }
+});
 </script>
 
 <style>
@@ -59,7 +72,7 @@ export default {
     border: none;
     font-size: 24px;
     cursor: pointer;
-    color: purple;
+    color: white;
 }
 
 .dropdown-button2 {
@@ -71,7 +84,7 @@ export default {
     display: inline-block;
     top: 19px;
     left: 9px;
-    color: purple;
+    color: #3c4e74;
 }
 
 .menu-item {
@@ -82,7 +95,7 @@ export default {
     padding: 15px 15px;
     width: 100%;
     text-align: left;
-    color: purple;
+    color: #3c4e74;
 }
 
 .menu-item:hover {

@@ -19,8 +19,6 @@ class Login(Base):
     __tablename__="login"
 
     id = Column(Integer, primary_key=True, index=True)
-    ip = Column(String, index=True)
-    location = Column(JSON, index=True)
     login_time = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
 
