@@ -39,9 +39,11 @@ class DataReader():
         self.decoder_symbols = decoder_symbols
 
         self.root_folder = data_dir_name
-        # A list containing all file names and a list containing all symbols are created.
+        # A list containing all file names and a list containing all symbols
+        # are created.
         self.txt_files, self.input_symbols, self.target_symbols = self.get_txt_files()
-        # Counter, so that one file after the other can be read from the list of file names.
+        # Counter, so that one file after the other can be read from the list
+        # of file names.
         self.current_file_idx = 0
 
     def get_txt_files(self) -> tuple[list, list, list]:
@@ -60,7 +62,8 @@ class DataReader():
                 for inner_root, inner_dirs, inner_files in os.walk(dir_path):
                     for file in inner_files:
                         symbol = file.split("_")[0]
-                        if self.read_all_files or self.root_folder.endswith("test"):
+                        if self.read_all_files or self.root_folder.endswith(
+                                "test"):
                             # The paths of all text files are stored in a list.
                             if file.endswith(".txt"):
                                 txt_files.append(os.path.join(dir_path, file))
@@ -68,7 +71,8 @@ class DataReader():
                         else:
                             # The paths of all text files selected via the symbols
                             # in the configuration file are saved in a list.
-                            if file.endswith(".txt") and symbol in self.encoder_symbols:
+                            if file.endswith(
+                                    ".txt") and symbol in self.encoder_symbols:
                                 txt_files.append(os.path.join(dir_path, file))
                                 input_symbols.append(symbol)
                             elif file.endswith(".txt") and symbol in self.decoder_symbols:
@@ -109,10 +113,12 @@ class DataReader():
             data = pd.read_csv(file_to_read, names=[
                                "timestamp", "open", "high", "low", "close", "volume"])
 
-            # Replace Nan vaules in voulme column with 0. Indices do not have a volume.
+            # Replace Nan vaules in voulme column with 0. Indices do not have a
+            # volume.
             data["volume"] = data["volume"].fillna(0)
 
-            # The ticker symbol to which the data belongs is included in the file name.
+            # The ticker symbol to which the data belongs is included in the
+            # file name.
             filename = os.path.basename(file_to_read)
             data["symbol"] = filename.split("_")[0]
 

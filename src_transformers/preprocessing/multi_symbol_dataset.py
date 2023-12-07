@@ -76,7 +76,8 @@ class MultiSymbolDataset(Dataset):
             MultiSymbolDataset: The created or loaded dataset.
         """
         if not create_new_file:
-            # Read the existing file if the user wants to skip creating a new file
+            # Read the existing file if the user wants to skip creating a new
+            # file
             Logger.log_text(
                 "Loading pre-processed data from file for the multi symbol dataset.")
 

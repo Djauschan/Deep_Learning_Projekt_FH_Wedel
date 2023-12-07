@@ -5,8 +5,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from src_transformers.utils.viz_transformer import plot_tensor
-
 
 class MultiHeadAttention(nn.Module):
     """
@@ -20,7 +18,8 @@ class MultiHeadAttention(nn.Module):
             num_heads (int): The number of attention heads.
         """
         super(MultiHeadAttention, self).__init__()
-        # Ensure that the model dimension (d_model) is divisible by the number of heads
+        # Ensure that the model dimension (d_model) is divisible by the number
+        # of heads
         assert d_model % num_heads == 0, "d_model must be divisible by num_heads"
 
         # Initialize dimensions
@@ -40,18 +39,19 @@ class MultiHeadAttention(nn.Module):
         """
         This function calculates the Self-Attention for one head.
         """
-        # Calculate attention scores (i.e. similarity scores between query and keys)
+        # Calculate attention scores (i.e. similarity scores between query and
+        # keys)
         attn_scores = torch.matmul(
             Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
 
-        # Apply mask if provided (useful for preventing attention to certain parts like padding)
+        # Apply mask if provided (useful for preventing attention to certain
+        # parts like padding)
         if mask is not None:
             attn_scores = attn_scores.masked_fill(mask == 0, -1e9)
 
-        # Softmax is applied to obtain attention probabilities (i.e. Attention weights)
+        # Softmax is applied to obtain attention probabilities (i.e. Attention
+        # weights)
         attn_probs = torch.softmax(attn_scores, dim=-1)
-        # TODO: cheken warum das alles null ergibt
-
         # Multiply by values to obtain the final output
         output = torch.matmul(attn_probs, V)
         return output
@@ -59,12 +59,14 @@ class MultiHeadAttention(nn.Module):
     def split_heads(self, x):
         # Reshape the input to have num_heads for multi-head attention
         batch_size, seq_length, d_model = x.size()
-        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2)
+        return x.view(batch_size, seq_length, self.num_heads,
+                      self.d_k).transpose(1, 2)
 
     def combine_heads(self, x):
         # Combine the multiple heads back to original shape
         batch_size, _, seq_length, d_k = x.size()
-        return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_model)
+        return x.transpose(1, 2).contiguous().view(
+            batch_size, seq_length, self.d_model)
 
     def forward(self, Q, K, V, mask=None):
         # Apply linear transformations and split heads
@@ -92,7 +94,8 @@ class MultiHeadAttention_Modified(nn.Module):
             num_heads (int): The number of attention heads.
         """
         super(MultiHeadAttention_Modified, self).__init__()
-        # Ensure that the model dimension (d_model) is divisible by the number of heads
+        # Ensure that the model dimension (d_model) is divisible by the number
+        # of heads
         assert dim_encoder % num_heads == 0, "d_model must be divisible by num_heads"
         assert dim_decoder % num_heads == 0, "d_model must be divisible by num_heads"
 
@@ -112,21 +115,25 @@ class MultiHeadAttention_Modified(nn.Module):
 
         self.device = device
 
-    def scaled_dot_product_attention(self, Q, K, V, mask=None):
+    def scaled_dot_product_attention(
+            self, Q, K, V, mask=None, show_plot: bool = False):
         """
         This function calculates the Self-Attention for one head.
         """
-        # Calculate attention scores (i.e. similarity scores between query and keys)
+        # Calculate attention scores (i.e. similarity scores between query and
+        # keys)
         attn_scores = torch.matmul(
             Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
         attn_scores = attn_scores.to(self.device)
 
-        # Apply mask if provided (useful for preventing attention to certain parts like padding)
+        # Apply mask if provided (useful for preventing attention to certain
+        # parts like padding)
         if mask is not None:
             mask = mask.to(self.device)
             attn_scores = attn_scores.masked_fill(mask == 0, -1e9)
 
-        # Softmax is applied to obtain attention probabilities (i.e. Attention weights)
+        # Softmax is applied to obtain attention probabilities (i.e. Attention
+        # weights)
         attn_probs = torch.softmax(attn_scores, dim=-1)
 
         # Multiply by values to obtain the final output
@@ -136,21 +143,25 @@ class MultiHeadAttention_Modified(nn.Module):
     def split_heads(self, x):
         # Reshape the input to have num_heads for multi-head attention
         batch_size, seq_length, d_model = x.size()
-        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2)
+        return x.view(batch_size, seq_length, self.num_heads,
+                      self.d_k).transpose(1, 2)
 
     def combine_heads(self, x):
         # Combine the multiple heads back to original shape
         batch_size, _, seq_length, d_k = x.size()
-        return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.dim_decoder)
+        return x.transpose(1, 2).contiguous().view(
+            batch_size, seq_length, self.dim_decoder)
 
-    def forward(self, Q, K, V, mask=None):
+    def forward(self, Q, K, V, mask=None, show_plot: bool = False):
         # Apply linear transformations and split heads
+
         Q = self.split_heads(self.W_q(Q))
         K = self.split_heads(self.W_k(K))
         V = self.split_heads(self.W_v(V))
 
         # Perform scaled dot-product attention
-        attn_output = self.scaled_dot_product_attention(Q, K, V, mask)
+        attn_output = self.scaled_dot_product_attention(
+            Q, K, V, mask, show_plot)
 
         # Combine heads and apply output transformation
         output = self.W_o(self.combine_heads(attn_output))
@@ -193,20 +204,24 @@ class PositionalEncoding(nn.Module):
         """
         super(PositionalEncoding, self).__init__()
 
-        # Create a positional encoding matrix with shape (seq_len_encoder, d_model)
+        # Create a positional encoding matrix with shape (seq_len_encoder,
+        # d_model)
         pe = torch.zeros(seq_length, d_model)
 
-        # Creates postitional encoding for one timestep of the length of the max sequence
+        # Creates postitional encoding for one timestep of the length of the
+        # max sequence
         position = torch.arange(0, seq_length, dtype=torch.float).unsqueeze(1)
 
         # Creates a divisor for the positional encoding along the model's dimension
-        # This is to make the positional encoding's values decay along the model's dimension
+        # This is to make the positional encoding's values decay along the
+        # model's dimension
         div_term = torch.exp(
             torch.arange(0, d_model, 2).float() * -
             (math.log(10000.0) / d_model)
         )
 
-        # Apply the div term to the positionoal encoding to create the positional encoding matrix
+        # Apply the div term to the positionoal encoding to create the
+        # positional encoding matrix
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
 
@@ -236,24 +251,24 @@ class EncoderLayer(nn.Module):
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x, mask):
+    def forward(self, x, mask, show_plot):
         # Forward attention layer
+        x = self.norm1(x)
         attn_output = self.self_attn(x, x, x, mask)
-
+        x = x + self.dropout(attn_output)
         # Add + normalize + dropout
-        # TODO: Norm lieber vorher?
-        x = self.norm1(x + self.dropout(attn_output))
 
         # Forward feed forward layer
+        x = self.norm2(x)
         ff_output = self.feed_forward(x)
+        x = x + self.dropout(ff_output)
 
-        # Add + normalize + dropout
-        x = self.norm2(x + self.dropout(ff_output))
         return x
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self, dim_encoder, dim_decoder, num_heads, d_ff, dropout, device):
+    def __init__(self, dim_encoder, dim_decoder,
+                 num_heads, d_ff, dropout, device):
         super(DecoderLayer, self).__init__()
         self.self_attn = MultiHeadAttention(dim_decoder, num_heads)
         self.cross_attn = MultiHeadAttention_Modified(
@@ -264,22 +279,26 @@ class DecoderLayer(nn.Module):
         self.norm3 = nn.LayerNorm(dim_decoder)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x, enc_output, src_mask, tgt_mask):
+    def forward(self, x, enc_output, src_mask,
+                tgt_mask, show_plot: bool = False):
         # Forward self attention layer for tgt inputs
+        x = self.norm1(x)
         attn_output = self.self_attn(x, x, x, tgt_mask)
-        x = self.norm1(x + self.dropout(attn_output))
-        # x = x + self.dropout(attn_output)
+        x = x + self.dropout(attn_output)
 
         # Forward cross attention layer for encoder outputs
         # Encoders outputs are used as keys and values
         # The decoder's outputs are used as queries
-        attn_output = self.cross_attn(x, enc_output, enc_output, src_mask)
-        x = self.norm2(x + self.dropout(attn_output))
+        x = self.norm2(x)
+        attn_output = self.cross_attn(
+            x, enc_output, enc_output, src_mask, show_plot)
+        x = x + self.dropout(attn_output)
         # x = x + self.dropout(attn_output)
 
         # Forward feed forward layer
+        x = self.norm3(x)
         ff_output = self.feed_forward(x)
-        x = self.norm3(x + self.dropout(ff_output))
+        x = x + self.dropout(ff_output)
         # x = x + self.dropout(ff_output)
         return x
 
@@ -295,14 +314,9 @@ class Transformer(nn.Module):
             seq_len_encoder,
             seq_len_decoder,
             dropout,
-            device: torch.device,
-            viz_model_rate: float = 0.0
+            device: torch.device
     ):
         super(Transformer, self).__init__()
-
-        self.device = device
-        self.viz_rate = viz_model_rate
-        self.show_plot = False
 
         # Positional encoding
         self.positional_encoding_encoder = PositionalEncoding(
@@ -352,14 +366,11 @@ class Transformer(nn.Module):
 
         return mask.to(self.device)
 
-    def forward(self, src, tgt, viz_rate: float = 0):
+    def forward(self, src, tgt):
 
         self.show_plot = False
-        if np.random.rand() < viz_rate:
+        if np.random.rand() < self.viz_rate:
             self.show_plot = True
-
-        plot_tensor(src, "SRC", self.show_plot)
-        plot_tensor(tgt, "TGT", self.show_plot)
 
         # Generate masks for Inputs (src) and Targets (tgt)
         src_mask = self.generate_mask(src, no_peak=False)
@@ -368,12 +379,30 @@ class Transformer(nn.Module):
             1), tgt_mask.size(2), src_mask.size(3)).bool()
 
         # Create the input for the decoder
-        # Targets are shifted one to the right and last entry of targets is filled on idx 0
+        # Targets are shifted one to the right and last entry of targets is
+        # filled on idx 0
         n_tgt_feature = tgt.shape[2]
         dec_input = torch.cat(
             (src[:, -1, -n_tgt_feature:].unsqueeze(1), tgt[:, :-1, :]), dim=1)
 
-        plot_tensor(dec_input, "dec_input", self.show_plot)
+        for idx_ft in range(src.shape[2]):
+            if src.shape[0] > 1:
+                src[:][:][idx_ft] = (
+                    src[:][:][idx_ft] - src[:][:][idx_ft].min()) / (
+                    src[:][:][idx_ft].max() - src[:][:][idx_ft].min())
+            elif src.shape[0] == 1:
+                src[0][:][idx_ft] = (src[0][:][idx_ft] - src[0][:][idx_ft].min()) / (
+                    src[0][:][idx_ft].max() - src[0][:][idx_ft].min())
+
+        for idx_ft in range(dec_input.shape[2]):
+            if dec_input.shape[0] > 1:
+                dec_input[:][:][idx_ft] = (
+                    dec_input[:][:][idx_ft] - dec_input[:][:][idx_ft].min()) / (
+                    dec_input[:][:][idx_ft].max() - dec_input[:][:][idx_ft].min())
+            elif dec_input.shape[0] == 1:
+                dec_input[0][:][idx_ft] = (
+                    dec_input[0][:][idx_ft] - dec_input[0][:][idx_ft].min()) / (
+                    dec_input[0][:][idx_ft].max() - dec_input[0][:][idx_ft].min())
 
         dec_mask.to(self.device)
         dec_input.to(self.device)
@@ -388,28 +417,24 @@ class Transformer(nn.Module):
             self.positional_encoding_decoder(dec_input)
         )
 
-        plot_tensor(src_embedded, "src_embedded", self.show_plot)
-        plot_tensor(tgt_embedded, "tgt_embedded", self.show_plot)
-
         # Forward encoder layers
         enc_output = src_embedded
         for enc_layer in self.encoder_layers:
-            enc_output = enc_layer(enc_output, mask=src_mask)
-
-        plot_tensor(enc_output, "enc_output", self.show_plot)
+            enc_output = enc_layer(
+                enc_output,
+                mask=src_mask,
+                show_plot=self.show_plot)
 
         # Forward decoder layers
         dec_output = tgt_embedded
         for dec_layer in self.decoder_layers:
-            dec_output = dec_layer(dec_output, enc_output, dec_mask, tgt_mask)
-
-        plot_tensor(dec_output, "dec_output", self.show_plot)
+            dec_output = dec_layer(
+                dec_output,
+                enc_output,
+                dec_mask,
+                tgt_mask,
+                show_plot=self.show_plot)
 
         output = self.fc(dec_output)
-
-        plot_tensor(output, "output", self.show_plot)
-
-        if self.show_plot:
-            input("Press Enter to continue...")
 
         return output

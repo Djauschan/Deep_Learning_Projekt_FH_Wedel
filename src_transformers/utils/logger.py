@@ -22,7 +22,7 @@ class Logger():
     """
     A class used to log training information.
 
-    This class handles logging of training information to the console and to a TensorBoard log file. 
+    This class handles logging of training information to the console and to a TensorBoard log file.
     It logs the start and end times of the training, the training and validation losses for each
     epoch, and the model architecture. Additionally, it handles closing the logger after training is
     finished.
@@ -89,8 +89,8 @@ class Logger():
         """
         Logs the end time of the training and the reason the training finished.
 
-        This method calculates the training duration, writes a message to the console, 
-        and writes the end time, training duration, and finish reason to the TensorBoard log file. 
+        This method calculates the training duration, writes a message to the console,
+        and writes the end time, training duration, and finish reason to the TensorBoard log file.
         It also closes the TensorBoard writer.
 
         Args:
@@ -99,7 +99,8 @@ class Logger():
         training_end = datetime.now()
 
         if self._training_start is None:
-            # Set training duration to None if training start is None (if log_training_start was not called)
+            # Set training duration to None if training start is None (if
+            # log_training_start was not called)
             training_duration = None
         else:
             training_duration = training_end - self._training_start
@@ -143,28 +144,17 @@ class Logger():
         tqdm.write(f"[LOGGER]: Epoch {epoch}: Validation Loss = {value}")
         self._summary_writer.add_scalar("loss/val", value, epoch)
 
-    def save_loss_chart(self, targets: np.array, predictions: np.array, epoch: int):
+    def save_prediction_chart(self, targets: np.array,
+                              predictions: np.array, epoch: int):
         """
-        Logged ein Bild der aktuellen Klassifizierung
-        """
-        fig = plot_evaluation(targets, predictions)
+        Saves a chart of the predictions and targets for each feature to the TensorBoard log file.
+        Args:
+            targets (np.array): Targets of the model.
+            predictions (np.array): Predictions of the model.
+            epoch (int): Epoch, in which the predictions were made.
 
-        os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+        Returns: None
 
-        # Save image in Logger
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        image = Image.open(buf)
-        image = ToTensor()(image)
-        self._summary_writer.add_image("image/ts_chart", image, epoch)
-
-        print("[Logger]: Charts saved.")
-        plt.close('all')
-
-    def save_model(self, targets: np.array, predictions: np.array, epoch: int):
-        """
-        Logged ein Bild der atkuellen Klassifiezierung
         """
         fig = plot_evaluation(targets, predictions)
 
@@ -180,3 +170,14 @@ class Logger():
 
         print("[Logger]: Charts saved.")
         plt.close('all')
+
+    def log_model_path(self, model_path: str) -> None:
+        """
+        Logs the path of the saved model.
+        Args:
+            model_path (str): Path of the saved model.
+
+        Returns: None
+
+        """
+        self._summary_writer.add_text("model/mode_path", model_path)

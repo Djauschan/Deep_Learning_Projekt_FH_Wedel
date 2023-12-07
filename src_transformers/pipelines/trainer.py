@@ -162,7 +162,8 @@ class Trainer:
         self.logger.write_text("Trainer configuration", config_str)
         self.logger.write_model(self.model)
 
-        # Creating training and validation data loaders from the given data source
+        # Creating training and validation data loaders from the given data
+        # source
         train_loader, validation_loader = self.setup_dataloaders()
 
         # Perform model training
@@ -202,7 +203,8 @@ class Trainer:
 
         return train_loader, validation_loader
 
-    def train_model(self, train_loader: DataLoader, validation_loader: DataLoader, patience: int = 50) -> str:
+    def train_model(self, train_loader: DataLoader,
+                    validation_loader: DataLoader, patience: int = 50) -> str:
         """
         Trains the model for a specified number of epochs. For each epoch, the method calculates
         the training loss and validation loss, logs these losses, and saves the current state
@@ -231,9 +233,9 @@ class Trainer:
                 self.logger.log_training_loss(train_loss, epoch)
 
                 validation_loss, results = self.calculate_validation_loss(
-                    validation_loader)
+                    train_loader)
                 self.logger.log_validation_loss(validation_loss, epoch)
-                self.logger.save_loss_chart(
+                self.logger.save_prediction_chart(
                     predictions=results[0], targets=results[1], epoch=epoch)
 
                 # Early stopping
@@ -253,7 +255,8 @@ class Trainer:
                 finish_reason = "Training interrupted by user input."
                 break
 
-        # Overwrite finish reason if training was not finished due to early stopping or user input
+        # Overwrite finish reason if training was not finished due to early
+        # stopping or user input
         if finish_reason == "Training terminated before training loop ran through.":
             finish_reason = "Training was normally completed."
 
@@ -305,7 +308,8 @@ class Trainer:
 
         return train_loss / step_count
 
-    def calculate_validation_loss(self, validation_loader) -> tuple[float, np.array]:
+    def calculate_validation_loss(
+            self, validation_loader) -> tuple[float, np.array]:
         """
         Calculates the validation loss for the model. This method is called during each epoch.
 
@@ -366,6 +370,8 @@ class Trainer:
         to the file.
         """
         path = ModelService.save_model(self.model)
+        # TODO: log only once (with naming of model)
+        self.logger.log_model_path(model_path=path)
         Logger.log_text(f"Model saved to '{path}'.")
 
     def evaluate(self) -> None:
@@ -376,7 +382,8 @@ class Trainer:
         self.model.to(self.device)
         self.loss.to(self.device)
 
-        # Creating training and validation data loaders from the given data source
+        # Creating training and validation data loaders from the given data
+        # source
         self.validation_split = 1
         train_loader, validation_loader = self.setup_dataloaders()
 

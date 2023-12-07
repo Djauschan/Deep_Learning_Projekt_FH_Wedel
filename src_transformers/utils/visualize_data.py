@@ -20,7 +20,8 @@ def visualize_data(config: dict) -> None:
     data_parameters.pop("data_file")
     txt_reader = DataReader(**data_parameters)
     data = txt_reader.read_next_txt()
-    # As long as there is data and the user does not stop, data will be visualized.
+    # As long as there is data and the user does not stop, data will be
+    # visualized.
     while data is not None:
         plot_df(data)
         data = txt_reader.read_next_txt()

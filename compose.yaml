@@ -87,3 +87,17 @@ services:
         "src_transformers.utils.visualize_data",
         "data/test_configs/training_config.yaml"
       ]
+
+  # Service to monitor training with tensorboard
+  tensorboard:
+
+    # Use the latest tensorflow image
+    image: tensorflow/tensorflow:latest
+
+    # Map port 6006 on the host to port 6006 in the container (default TensorBoard port)
+    ports:
+      - 6006:6006
+
+    volumes:
+      - ./runs:/runs/ # Mount the 'runs' directory in the current directory to '/runs' in the container
+    command: [ "tensorboard", "--logdir=./runs/", "--bind_all" ]

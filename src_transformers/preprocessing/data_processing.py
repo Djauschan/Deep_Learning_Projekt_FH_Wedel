@@ -15,7 +15,8 @@ INDEX_MAPPING_FILE: Final[Path] = Path("data", "index_mapping.csv")
 
 dict_of_dicts: dict = {}
 
-for file, symbol_type in [(INDEX_MAPPING_FILE, "index"), (ETF_MAPPING_FILE, "ETF"), (STOCK_MAPPING_FILE, "stock")]:
+for file, symbol_type in [(INDEX_MAPPING_FILE, "index"),
+                          (ETF_MAPPING_FILE, "ETF"), (STOCK_MAPPING_FILE, "stock")]:
     if Path.exists(file):
         dict_file = pd.read_csv(file)
         dict_of_dicts[symbol_type] = (
@@ -73,7 +74,7 @@ def add_time_information(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_all_dates(reader: DataReader, data_usage_ratio: float) -> pd.DataFrame:
     """
-    Reads in all files that are to be imported and creates a data frame 
+    Reads in all files that are to be imported and creates a data frame
     that contains the union of all timestamps of all read-in files.
 
     Args:
@@ -111,11 +112,12 @@ def get_all_dates(reader: DataReader, data_usage_ratio: float) -> pd.DataFrame:
     return used_timestamps_df
 
 
-def fill_dataframe(all_dates: pd.DataFrame, reader: DataReader) -> tuple[list, pd.DataFrame]:
+def fill_dataframe(all_dates: pd.DataFrame,
+                   reader: DataReader) -> tuple[list, pd.DataFrame]:
     """
-    A data frame is created that contains the values required for training for all files that are to be read in. 
+    A data frame is created that contains the values required for training for all files that are to be read in.
     The columns are filled so that values are available for all files for all timestamps.
-    For stocks and ETFs, the closing price and the volume per minute are loaded. 
+    For stocks and ETFs, the closing price and the volume per minute are loaded.
     For indices, only the closing price per minute is taken into account.
 
 
@@ -124,7 +126,7 @@ def fill_dataframe(all_dates: pd.DataFrame, reader: DataReader) -> tuple[list, p
         reader (DataReader): DataReader object that reads in the files.
 
     Returns:
-        tuple[list, pd.DataFrame]: 
+        tuple[list, pd.DataFrame]:
         Symbols of all stocks in the data frame, data frame containing the values required for training.
     """
     stocks = []
@@ -141,21 +143,35 @@ def fill_dataframe(all_dates: pd.DataFrame, reader: DataReader) -> tuple[list, p
             # Only the closing price is used for indices.
             merged_df = pd.merge(all_dates, file_df[['timestamp', 'close']],
                                  how='left', on='timestamp', suffixes=('', f'_{symbol}'))
+
             # ffill: forward fill, bfill: backward fill
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
+
+            # Apply differencing on close and volume colums to get the change between timestamps.
+            all_dates[f'close {symbol}'] = all_dates[f'close {symbol}'].diff()
 
         if symbol_type == 'stock' or symbol_type == 'ETF':
             # The closing price and the volume are used for stocks and ETFs.
             merged_df = pd.merge(all_dates, file_df[['timestamp', 'close', 'volume']],
                                  how='left', on='timestamp', suffixes=('', f'_{symbol}'))
+
             # ffill: forward fill, bfill: backward fill
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
             all_dates[f'volume {symbol}'] = merged_df['volume'].fillna(0)
-            # The symbols of all stocks are saved in a list as they are used as target variables.
+
+            # Apply differencing on close and volume colums to get the change between timestamps.
+            all_dates[f'close {symbol}'] = all_dates[f'close {symbol}'].diff()
+            all_dates[f'volume {symbol}'] = all_dates[f'volume {symbol}'].diff()
+
+            # The symbols of all stocks are saved in a list as they are used as
+            # target variables.
             if symbol_type == 'stock':
                 stocks.append(symbol)
 
         # Explicitly delete the data frame to free up memory.
         del file_df
+
+    # Drop the first row, because it contains NaN values due to the differencing.
+    all_dates = all_dates.drop(all_dates.index[0]).reset_index(drop=True)
 
     return stocks, all_dates
