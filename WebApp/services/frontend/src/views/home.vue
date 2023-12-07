@@ -229,81 +229,6 @@
             <div class="home-container37">
               <div class="home-container38">
                 <div class="home-container39">
-                  <DangerousHTML
-                    html="<!DOCTYPE html>
-  <html>
-  <head>
-    <title>Custom Graph</title>
-    <style>
-      canvas {
-        width: 100%;
-        height: 300px;
-        border: 1px solid #ccc;
-      }
-    </style>
-  </head>
-  <body>
-    <canvas id='chart' style='width:100%;max-width:700px'></canvas>
-    <script>
-      const xValues = ['Data Point 1', 'Data Point 2', 'Data Point 3', 'Data Point 4', 'Data Point 5'];
-      const yValues = [10, 20, 30, 40, 50];
-      const lineColor = 'red';
-  
-      const canvas = document.getElementById('chart');
-      const ctx = canvas.getContext('2d');
-  
-      const maxYValue = Math.max(...yValues);
-      const yScale = canvas.height / maxYValue;
-      const xScale = canvas.width / (xValues.length - 1);
-  
-      // Draw the line chart
-      ctx.beginPath();
-      ctx.moveTo(0, canvas.height - yValues[0] * yScale);
-      for (let i = 1; i < yValues.length; i++) {
-        ctx.lineTo(i * xScale, canvas.height - yValues[i] * yScale);
-      }
-      ctx.strokeStyle = lineColor;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-  
-      // Draw the x-axis
-      ctx.beginPath();
-      ctx.moveTo(0, canvas.height);
-      ctx.lineTo(canvas.width, canvas.height);
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-  
-      // Draw the y-axis
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(0, canvas.height);
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-  
-      // Add labels to the x-axis
-      for (let i = 0; i < xValues.length; i++) {
-        ctx.fillText(xValues[i], i * xScale, canvas.height + 20);
-      }
-  
-      // Add labels to the y-axis
-      for (let i = 0; i <= maxYValue; i += 10) {
-        ctx.fillText(i, -20, canvas.height - i * yScale);
-      }
-  
-      // Add label to the x-axis
-      ctx.fillText('X Axis Label', canvas.width / 2, canvas.height);
-  
-      // Add label to the y-axis
-      ctx.save();
-      ctx.rotate(-Math.PI / 2);
-      ctx.fillText('Y Axis Label', -canvas.height / 2, 10);
-      ctx.restore();
-    </script>
-  </body>
-  </html>"
-                  ></DangerousHTML>
                 </div>
               </div>
             </div>
@@ -319,42 +244,6 @@
             <div class="home-container43">
               <div class="home-container44">
                 <div class="home-container45">
-                  <DangerousHTML
-                    html="<!DOCTYPE html>
-  <html>
-  <head>
-    <title>Custom Graph</title>
-    <style>
-      svg {
-        width: 100%;
-        height: 300px;
-        border: 1px solid #ccc;
-      }
-    </style>
-  </head>
-  <body>
-    <svg id='chart'></svg>
-    <script>
-      const data = [10, 20, 30, 40, 50];
-      const svg = document.getElementById('chart');
-      const barWidth = 40;
-      const barSpacing = 10;
-      let x = barSpacing;
-  
-      data.forEach((value) => {
-        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        rect.setAttribute('x', x);
-        rect.setAttribute('y', 300 - value);
-        rect.setAttribute('width', barWidth);
-        rect.setAttribute('height', value);
-        rect.setAttribute('fill', 'steelblue');
-        svg.appendChild(rect);
-        x += barWidth + barSpacing;
-      });
-    </script>
-  </body>
-  </html>"
-                  ></DangerousHTML>
                 </div>
               </div>
             </div>
@@ -369,12 +258,10 @@
 </template>
 
 <script>
-import DangerousHTML from "dangerous-html/vue";
 
 export default {
   name: "Home",
   components: {
-    DangerousHTML,
   },
   methods: {
     logout() {
@@ -472,7 +359,7 @@ export default {
   display: flex;
   align-items: center;
   padding-top: 5px;
-  border-color: #d9d9d9;
+  border-color: #7e7e7e;
   border-width: 1px;
   flex-direction: row;
   justify-content: flex-start;
@@ -695,7 +582,7 @@ export default {
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-text02 {
-  color: rgb(80, 245, 100);
+  color: #04049c;
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-container10 {
@@ -713,7 +600,7 @@ export default {
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-text03 {
-  color: #50f564;
+  color: #04049c;
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-container11 {
@@ -731,7 +618,7 @@ export default {
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-text04 {
-  color: rgb(80, 245, 100);
+  color: #04049c;
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-container12 {
@@ -749,7 +636,7 @@ export default {
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-navlink {
-  color: rgb(80, 245, 100);
+  color: #04049c;
   margin-bottom: var(--dl-space-space-twounits);
   text-decoration: none;
 }
@@ -768,7 +655,7 @@ export default {
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-text05 {
-  color: rgb(80, 245, 100);
+  color: #04049c;
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-container14 {
@@ -794,7 +681,7 @@ export default {
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-text06 {
-  color: rgb(80, 245, 100);
+  color: #04049c;
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-container16 {
@@ -812,7 +699,7 @@ export default {
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-text07 {
-  color: rgb(80, 245, 100);
+  color: #04049c;
   margin-bottom: var(--dl-space-space-twounits);
 }
 .home-container17 {
@@ -834,7 +721,7 @@ export default {
   border-width: 1px;
   flex-direction: row;
   justify-content: flex-start;
-  background-color: #b9e3e6;
+  background-color: #244870;
 }
 .home-container19 {
   width: 0px;
@@ -872,7 +759,7 @@ export default {
   border-width: 1px;
   flex-direction: column;
   justify-content: center;
-  background-color: #d9d9d9;
+  background-color: #7e7e7e;
 }
 .home-container23 {
   width: 200px;
@@ -902,7 +789,7 @@ export default {
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  background-color: #d9d9d9;
+  background-color: #7e7e7e;
 }
 .home-container26 {
   width: 100%;
@@ -915,7 +802,7 @@ export default {
   border-width: 1px;
   flex-direction: column;
   justify-content: center;
-  background-color: #d9d9d9;
+  background-color: #7e7e7e;
 }
 .home-container27 {
   width: 200px;
@@ -949,7 +836,7 @@ export default {
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  background-color: #d9d9d9;
+  background-color: #7e7e7e;
 }
 .home-container30 {
   flex: 0 0 auto;
@@ -963,7 +850,7 @@ export default {
   border-width: 1px;
   flex-direction: column;
   justify-content: center;
-  background-color: #d9d9d9;
+  background-color: #7e7e7e;
 }
 .home-container31 {
   width: 200px;
@@ -999,7 +886,7 @@ export default {
   margin-right: var(--dl-space-space-unit);
   flex-direction: column;
   justify-content: center;
-  background-color: #d9d9d9;
+  background-color: #7e7e7e;
 }
 .home-container34 {
   width: 200px;

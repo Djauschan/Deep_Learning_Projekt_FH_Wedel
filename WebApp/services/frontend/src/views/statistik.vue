@@ -1,105 +1,92 @@
 <template>
-  <section class="charts">
-    <h3>
-      Line Basic
-      <p>Load data with async</p>
-    </h3>
-    <vue-highcharts
-      :options="options"
-      :highcharts="Highcharts"
-      ref="lineCharts"
-    ></vue-highcharts>
-    <button @click="load">load</button>
-    <button @click="update">update xAxis Categories</button>
-    <button @click="remove">remove Series</button>
-    <button @click="add">add Series</button>
-    <input
-                      type="text"
-                      placeholder="Name Aktie"
-                      class="statistik-textinput input"
-                    />
-     <input
-                      type="text"
-                      placeholder="Zeitraum"
-                      class="statistik-textinput input"
-     />
-  </section>
+  <DxChart
+    id="chart"
+    :data-source="dataSource"
+    title="Stock Price"
+  >
+    <DxCommonSeriesSettings
+      argument-field="date"
+      type="stock"
+    />
+    <DxSeries
+      name="E-Mart"
+      open-value-field="o"
+      high-value-field="h"
+      low-value-field="l"
+      close-value-field="c"
+    >
+      <DxReduction color="red"/>
+    </DxSeries>
+    <DxArgumentAxis :workdays-only="true">
+      <DxLabel format="shortDate"/>
+    </DxArgumentAxis>
+    <DxValueAxis :tick-interval="1">
+      <DxTitle text="US dollars"/>
+      <DxLabel>
+        <DxFormat
+          :precision="0"
+          type="currency"
+        />
+      </DxLabel>
+    </DxValueAxis>
+    <DxExport :enabled="true"/>
+    <DxTooltip
+      :enabled="true"
+      :customize-tooltip="customizeTooltip"
+      location="edge"
+    />
+  </DxChart>
 </template>
 <script>
-import VueHighcharts from "vue2-highcharts";
-import Exporting from "highcharts/modules/exporting";
-import Highcharts from "highcharts";
-import * as data from "./data.js";
 
-Exporting(Highcharts);
+import DxChart, {
+  DxCommonSeriesSettings,
+  DxSeries,
+  DxReduction,
+  DxArgumentAxis,
+  DxLabel,
+  DxFormat,
+  DxValueAxis,
+  DxTitle,
+  DxExport,
+  DxTooltip,
+} from 'devextreme-vue/chart';
+
+import { dataSource } from './data.js';
+
 export default {
   components: {
-    VueHighcharts,
+    DxChart,
+    DxCommonSeriesSettings,
+    DxSeries,
+    DxReduction,
+    DxArgumentAxis,
+    DxLabel,
+    DxFormat,
+    DxValueAxis,
+    DxTitle,
+    DxExport,
+    DxTooltip,
   },
   data() {
     return {
-      options: data.basicData,
-      Highcharts: Highcharts,
+      dataSource,
     };
   },
-  mounted() {},
   methods: {
-    load() {
-      let lineCharts = this.$refs.lineCharts;
-      //charts.showLoading('loading');
-
-      // you also can use the delegateMethod()
-      lineCharts.delegateMethod("showLoading", "Loading...");
-      setTimeout(() => {
-        lineCharts.addSeries(data.asyncData);
-        lineCharts.hideLoading();
-      }, 2000);
-    },
-    update() {
-      let lineCharts = this.$refs.lineCharts;
-      lineCharts
-        .getChart()
-        .xAxis[0].setCategories([
-          "J",
-          "F",
-          "M",
-          "A",
-          "M",
-          "J",
-          "J",
-          "A",
-          "S",
-          "O",
-          "N",
-          "D",
-        ]);
-    },
-    remove() {
-      this.$refs.lineCharts.removeSeries();
-    },
-    add() {
-      this.$refs.lineCharts.addSeries({
-        data: [
-          7.0,
-          6.9,
-          9.5,
-          14.5,
-          18.2,
-          21.5,
-          25.2,
-          {
-            y: 26.5,
-            marker: {
-              symbol: "url(http://www.highcharts.com/demo/gfx/sun.png)",
-            },
-          },
-          23.3,
-          18.3,
-          13.9,
-          9.6,
-        ],
-      });
+    customizeTooltip(pointInfo) {
+      return {
+        text: `Open: $${pointInfo.openValue}<br/>
+Close: $${pointInfo.closeValue}<br/>
+High: $${pointInfo.highValue}<br/>
+Low: $${pointInfo.lowValue}<br/>`,
+      };
     },
   },
 };
 </script>
+<style>
+#chart {
+  height: 440px;
+}
+</style>
