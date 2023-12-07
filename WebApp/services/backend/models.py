@@ -35,4 +35,4 @@ class Stock(Base):
     high = Column(Float)
     low = Column(Float)
     close = Column(Float)
-    volume = Column(Integer)
+    volume = Column(Float)

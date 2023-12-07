@@ -109,9 +109,23 @@ def get_stock_days(db: Session, stock_symbol: str, n: int):
     first_day = stock_data.index.date[0].strftime('%m/%d/%y')
     last_day = stock_data.index.date[-1].strftime('%m/%d/%y')
 
+    stock_data["Volume"] = stock_data["Volume"].astype(float)
+
     print(stock_data)
 
-    db_stock = models.Stock(name=stock_symbol, start_date=first_day, end_date=last_day, open=stock_data.Open, high=stock_data.High, low=stock_data.Low, close=stock_data.Close)
+    us_dollar = "x"
+    s_p500 = "^GSPC"
+    nasdaq = "^IXIC"
+    gold = "GC=F"
+    silver = "SI=F"
+    energy = "^DJUSEN"
+    nickel = "NICKELUSD=X"
+    industrial_average = "^DJI"
+    internet = "x"
+    whilshire = "x"
+
+    db_stock = models.Stock(name=stock_symbol, start_date=first_day, end_date=last_day, 
+                            open=stock_data.Open, high=stock_data.High, low=stock_data.Low, close=stock_data.Close, volume=stock_data.Volume)
     print("rows: " + str(stock_data.shape[0]))
     
     return db_stock
