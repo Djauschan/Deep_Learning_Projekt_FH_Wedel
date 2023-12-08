@@ -298,7 +298,6 @@ class Trainer:
             prediction = self.model.forward(input_data, target)
             loss = self.loss(prediction, target.float())        
 
-            # loss = My_loss.rmsle(prediction, target.float())
 
             loss.backward()
 
