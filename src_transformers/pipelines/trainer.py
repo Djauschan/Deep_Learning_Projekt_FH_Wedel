@@ -351,8 +351,8 @@ class Trainer:
 
                 start_idx = step_count * self.batch_size
                 end_idx = start_idx + self.batch_size
-                results[0, start_idx:end_idx, :, :] = prediction
-                results[1, start_idx:end_idx, :, :] = target
+                results[0, start_idx:end_idx, :, :] = prediction.cpu()
+                results[1, start_idx:end_idx, :, :] = target.cpu()
 
                 validation_loss += loss.sum().item()
                 step_count += 1
