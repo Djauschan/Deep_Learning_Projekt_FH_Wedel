@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class My_loss: 
@@ -12,7 +11,7 @@ class My_loss:
         rmse_loss = torch.sqrt(mse_loss)
         return rmse_loss
     
-    
+    # Root Mean Squared Logarithmic Error
     @classmethod
     def rmsle(cls, prediction: torch.tensor, target: torch.tensor):
         # Anwenden des Logarithmus auf prediction und target
