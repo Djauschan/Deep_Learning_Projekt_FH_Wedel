@@ -383,25 +383,6 @@ class Transformer(nn.Module):
         dec_input = torch.cat(
             (src[:, -1, -n_tgt_feature:].unsqueeze(1), tgt[:, :-1, :]), dim=1)
 
-        for idx_ft in range(src.shape[2]):
-            if src.shape[0] > 1:
-                src[:][:][idx_ft] = (
-                    src[:][:][idx_ft] - src[:][:][idx_ft].min()) / (
-                    src[:][:][idx_ft].max() - src[:][:][idx_ft].min())
-            elif src.shape[0] == 1:
-                src[0][:][idx_ft] = (src[0][:][idx_ft] - src[0][:][idx_ft].min()) / (
-                    src[0][:][idx_ft].max() - src[0][:][idx_ft].min())
-
-        for idx_ft in range(dec_input.shape[2]):
-            if dec_input.shape[0] > 1:
-                dec_input[:][:][idx_ft] = (
-                    dec_input[:][:][idx_ft] - dec_input[:][:][idx_ft].min()) / (
-                    dec_input[:][:][idx_ft].max() - dec_input[:][:][idx_ft].min())
-            elif dec_input.shape[0] == 1:
-                dec_input[0][:][idx_ft] = (
-                    dec_input[0][:][idx_ft] - dec_input[0][:][idx_ft].min()) / (
-                    dec_input[0][:][idx_ft].max() - dec_input[0][:][idx_ft].min())
-
         dec_mask.to(self.device)
         dec_input.to(self.device)
 

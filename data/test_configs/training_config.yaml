@@ -1,27 +1,27 @@
 use_gpu: true
 model_parameters:
   transformer:
-    num_heads: 1
-    num_layers: 1
+    num_heads: 2
+    num_layers: 2
     d_ff: 200
     seq_len_encoder: 50
     seq_len_decoder: 30
     dropout: 0.1
 training_parameters:
-  batch_size: 50
-  epochs: 1000
-  learning_rate: 0.01
+  batch_size: 1000
+  epochs: 10000
+  learning_rate: 0.0001
   validation_split: 0.1
 dataset_parameters:
   read_all_files: false
-  data_usage_ratio: 0.5 # Only the last 50% of the read data are used in the dataset
+  data_usage_ratio: 0.115 # Only the last 50% of the read data are used in the dataset
   # This parameter must be set to true if the symbols to be read in are changed.
-  create_new_file: false
+  create_new_file: False
   data_file: "data/output/Multi_Symbol.csv"
   encoder_symbols:
   # stocks
     - "art1"
-    - "art2"
+#    - "art2"
     - "AAPL"
     - "AAL"
     - "AMD"
@@ -46,7 +46,7 @@ dataset_parameters:
     # - "COMP"
     # - "W5000"
   decoder_symbols:
-    - "art1"
+#    - "art1"
     - "art2"
     - "AMD"
     - "AAPL"
