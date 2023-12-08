@@ -51,7 +51,7 @@ class Trainer:
     epochs: int
     learning_rate: float
     validation_split: float
-    loss: nn.MSELoss | nn.CrossEntropyLoss
+    loss: nn.MSELoss | nn.CrossEntropyLoss | My_loss
     optimizer: optim.SGD | optim.Adam
     device: torch.device
     model: nn.Module
@@ -101,6 +101,8 @@ class Trainer:
             loss_instance = nn.MSELoss()
         elif loss == "crossentropy":
             loss_instance = nn.CrossEntropyLoss()
+        elif loss == "rmse":
+            loss_instance = My_loss.rmse()
         else:
             Logger.log_text(f"Loss {loss} is not valid, defaulting to MSELoss")
             loss_instance = nn.MSELoss()
@@ -294,8 +296,9 @@ class Trainer:
             target = target.to(self.device)
 
             prediction = self.model.forward(input_data, target)
-            loss = self.loss(prediction, target.float())
-            #loss = My_loss.rmse(prediction, target.float())
+            loss = self.loss(prediction, target.float())        
+
+            # loss = My_loss.rmsle(prediction, target.float())
 
             loss.backward()
 
