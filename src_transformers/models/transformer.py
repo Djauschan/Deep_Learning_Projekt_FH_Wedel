@@ -116,7 +116,7 @@ class MultiHeadAttention_Modified(nn.Module):
         self.device = device
 
     def scaled_dot_product_attention(
-            self, Q, K, V, mask=None, show_plot: bool = False):
+            self, Q, K, V, mask=None):
         """
         This function calculates the Self-Attention for one head.
         """
@@ -152,7 +152,7 @@ class MultiHeadAttention_Modified(nn.Module):
         return x.transpose(1, 2).contiguous().view(
             batch_size, seq_length, self.dim_decoder)
 
-    def forward(self, Q, K, V, mask=None, show_plot: bool = False):
+    def forward(self, Q, K, V, mask=None):
         # Apply linear transformations and split heads
 
         Q = self.split_heads(self.W_q(Q))
@@ -161,7 +161,7 @@ class MultiHeadAttention_Modified(nn.Module):
 
         # Perform scaled dot-product attention
         attn_output = self.scaled_dot_product_attention(
-            Q, K, V, mask, show_plot)
+            Q, K, V, mask)
 
         # Combine heads and apply output transformation
         output = self.W_o(self.combine_heads(attn_output))
@@ -251,7 +251,7 @@ class EncoderLayer(nn.Module):
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x, mask, show_plot):
+    def forward(self, x, mask):
         # Forward attention layer
         x = self.norm1(x)
         attn_output = self.self_attn(x, x, x, mask)
@@ -280,7 +280,7 @@ class DecoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, enc_output, src_mask,
-                tgt_mask, show_plot: bool = False):
+                tgt_mask):
         # Forward self attention layer for tgt inputs
         x = self.norm1(x)
         attn_output = self.self_attn(x, x, x, tgt_mask)
@@ -291,7 +291,7 @@ class DecoderLayer(nn.Module):
         # The decoder's outputs are used as queries
         x = self.norm2(x)
         attn_output = self.cross_attn(
-            x, enc_output, enc_output, src_mask, show_plot)
+            x, enc_output, enc_output, src_mask)
         x = x + self.dropout(attn_output)
         # x = x + self.dropout(attn_output)
 
@@ -317,6 +317,8 @@ class Transformer(nn.Module):
             device: torch.device
     ):
         super(Transformer, self).__init__()
+
+        self.device = device
 
         # Positional encoding
         self.positional_encoding_encoder = PositionalEncoding(
@@ -368,10 +370,6 @@ class Transformer(nn.Module):
 
     def forward(self, src, tgt):
 
-        self.show_plot = False
-        if np.random.rand() < self.viz_rate:
-            self.show_plot = True
-
         # Generate masks for Inputs (src) and Targets (tgt)
         src_mask = self.generate_mask(src, no_peak=False)
         tgt_mask = self.generate_mask(tgt, no_peak=True)
@@ -422,8 +420,7 @@ class Transformer(nn.Module):
         for enc_layer in self.encoder_layers:
             enc_output = enc_layer(
                 enc_output,
-                mask=src_mask,
-                show_plot=self.show_plot)
+                mask=src_mask)
 
         # Forward decoder layers
         dec_output = tgt_embedded
@@ -432,8 +429,7 @@ class Transformer(nn.Module):
                 dec_output,
                 enc_output,
                 dec_mask,
-                tgt_mask,
-                show_plot=self.show_plot)
+                tgt_mask)
 
         output = self.fc(dec_output)
 
