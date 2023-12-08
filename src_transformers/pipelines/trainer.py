@@ -17,7 +17,7 @@ from src_transformers.pipelines.model_service import ModelService
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
 from src_transformers.utils.viz_training import plot_evaluation
-from src_transformers.models.loss import loss
+from src_transformers.models.loss import My_loss
 
 FIG_OUTPUT_PATH: Final[Path] = Path("./data/output/eval_plot")
 
@@ -51,7 +51,7 @@ class Trainer:
     epochs: int
     learning_rate: float
     validation_split: float
-    loss: nn.MSELoss | nn.CrossEntropyLoss
+    loss: nn.MSELoss | nn.CrossEntropyLoss | My_loss
     optimizer: optim.SGD | optim.Adam
     device: torch.device
     model: nn.Module
@@ -101,6 +101,8 @@ class Trainer:
             loss_instance = nn.MSELoss()
         elif loss == "crossentropy":
             loss_instance = nn.CrossEntropyLoss()
+        elif loss == "rmse":
+            loss_instance = My_loss.rmse()
         else:
             Logger.log_text(f"Loss {loss} is not valid, defaulting to MSELoss")
             loss_instance = nn.MSELoss()
@@ -307,8 +309,8 @@ class Trainer:
             target = target.to(self.device)
 
             prediction = self.model.forward(input_data, target)
-            loss = self.loss(prediction, target.float())
-            # Loss = loss.rmse(prediction, target.float())
+            loss = self.loss(prediction, target.float())        
+
 
             # Safe prediction and target for visualization
             start_idx = step_count * self.batch_size
@@ -372,8 +374,8 @@ class Trainer:
 
                 start_idx = step_count * self.batch_size
                 end_idx = start_idx + self.batch_size
-                results[0, start_idx:end_idx, :, :] = prediction
-                results[1, start_idx:end_idx, :, :] = target
+                results[0, start_idx:end_idx, :, :] = prediction.cpu()
+                results[1, start_idx:end_idx, :, :] = target.cpu()
 
                 validation_loss += loss.sum().item()
                 step_count += 1
