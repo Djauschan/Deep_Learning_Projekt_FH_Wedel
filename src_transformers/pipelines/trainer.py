@@ -17,7 +17,7 @@ from src_transformers.pipelines.model_service import ModelService
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
 from src_transformers.utils.viz_training import plot_evaluation
-from src_transformers.models.loss import loss
+# from src_transformers.models.loss import loss
 
 FIG_OUTPUT_PATH: Final[Path] = Path("./data/output/eval_plot")
 
