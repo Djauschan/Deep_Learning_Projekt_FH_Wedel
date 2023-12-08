@@ -230,14 +230,20 @@ class Trainer:
         finish_reason = "Training terminated before training loop ran through."
         for epoch in tqdm(range(self.epochs)):
             try:
-                train_loss = self.calculate_train_loss(train_loader)
-                self.logger.log_training_loss(train_loss, epoch)
+                train_loss, train_results = self.calculate_train_loss(train_loader)
 
-                validation_loss, results = self.calculate_validation_loss(
-                    train_loader)
+                # Logging loss and chart of results
+                self.logger.log_training_loss(train_loss, epoch)
+                self.logger.save_prediction_chart(
+                    predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
+
+                validation_loss, validation_results = self.calculate_validation_loss(
+                    validation_loader)
+
+                # Logging loss and chart of results
                 self.logger.log_validation_loss(validation_loss, epoch)
                 self.logger.save_prediction_chart(
-                    predictions=results[0], targets=results[1], epoch=epoch)
+                    predictions=validation_results[0], targets=validation_results[1], epoch=epoch, name="validation_set")
 
                 # Early stopping
                 if min_loss > validation_loss:
@@ -263,7 +269,7 @@ class Trainer:
 
         return finish_reason
 
-    def calculate_train_loss(self, train_loader) -> float:
+    def calculate_train_loss(self, train_loader) -> tuple[float, np.array]:
         """
         Calculates the training loss for the model. This method is called during each epoch.
 
@@ -278,12 +284,19 @@ class Trainer:
 
         Returns:
             float: The average training loss per batch.
+            np.array: Results for predictions (prediction & targets)
         """
         self.model.train()
         train_loss: float = 0
         step_count: int = 0
 
         loder_len = len(train_loader)
+
+        # create an array to store the predictions and targets of all samples
+        samples = len(train_loader.dataset)
+        prediction_len = train_loader.dataset.dataset.decoder_input_length
+        dim = train_loader.dataset.dataset.decoder_dimensions
+        results = np.zeros((2, samples, prediction_len, dim))
 
         for input_data, target in train_loader:
 
@@ -297,6 +310,12 @@ class Trainer:
             loss = self.loss(prediction, target.float())
             # Loss = loss.rmse(prediction, target.float())
 
+            # Safe prediction and target for visualization
+            start_idx = step_count * self.batch_size
+            end_idx = start_idx + self.batch_size
+            results[0, start_idx:end_idx, :, :] = prediction.detach().cpu()
+            results[1, start_idx:end_idx, :, :] = target.detach().cpu()
+
             loss.backward()
 
             self.optimizer.step()
@@ -308,7 +327,9 @@ class Trainer:
                 print(
                     f'Batch {step_count}/{loder_len} loss: {round(loss.item(), 2)}')
 
-        return train_loss / step_count
+        loss = train_loss / step_count
+
+        return loss, results
 
     def calculate_validation_loss(
             self, validation_loader) -> tuple[float, np.array]:
