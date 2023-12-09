@@ -10,6 +10,8 @@ services:
     environment:
       # Specify which GPUs to use
       - NVIDIA_VISIBLE_DEVICES=all
+      # Specify the default configuration file
+      - CONFIG_PATH=data/test_configs/training_config_tt.yaml
 
     # Specify the build context for this service (current directory)
     build:
@@ -38,7 +40,7 @@ services:
         "-m",
         "src_transformers.main",
         "-c",
-        "data/test_configs/training_config.yaml",
+        "${CONFIG_PATH}",
         "-p",
         "train"
       ]
@@ -62,7 +64,7 @@ services:
         "-m",
         "src_transformers.main",
         "-c",
-        "data/test_configs/training_config.yaml",
+        "${CONFIG_PATH}",
         "-p",
         "predict"
       ]
@@ -85,7 +87,7 @@ services:
         "python",
         "-m",
         "src_transformers.utils.visualize_data",
-        "data/test_configs/training_config.yaml"
+        "${CONFIG_PATH}"
       ]
 
   # Service to monitor training with tensorboard
