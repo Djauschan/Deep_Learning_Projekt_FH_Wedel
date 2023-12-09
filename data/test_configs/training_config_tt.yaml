@@ -9,10 +9,10 @@ model_parameters:
     dropout: 0.5
 training_parameters:
   batch_size: 50
-  epochs: 1
+  epochs: 500
   learning_rate: 0.0025
   validation_split: 0.1
-  loss: "rmsle"
+  loss: "mse"
 dataset_parameters:
   read_all_files: false
   data_usage_ratio: 0.01 # Only the last 1% of the read data are used in the dataset
@@ -34,16 +34,16 @@ dataset_parameters:
   # ETFs
     # - "ACWI"
   # indices
-    # - "DXY"
-    # - "SPX"
-    # - "DJCIGC"
-    #- "DJCISI"
-    # - "DJCIEN"
-    # - "DJCIIK"
-    # - "DJI"
-    # - "DJINET"
-    # - "COMP"
-    # - "W5000"
+    - "DXY"
+    - "SPX"
+    - "DJCIGC"
+    - "DJCISI"
+    - "DJCIEN"
+    - "DJCIIK"
+    - "DJI"
+    - "DJINET"
+    - "COMP"
+    - "W5000"
   decoder_symbols:
     - "MRNA"
     - "NIO"
