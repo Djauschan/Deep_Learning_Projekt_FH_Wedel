@@ -18,6 +18,7 @@ def visualize_data(config: dict) -> None:
     # Remove parameter that the datareader does not need.
     data_parameters.pop("create_new_file")
     data_parameters.pop("data_file")
+    data_parameters.pop("data_usage_ratio")
     txt_reader = DataReader(**data_parameters)
     data = txt_reader.read_next_txt()
     # As long as there is data and the user does not stop, data will be

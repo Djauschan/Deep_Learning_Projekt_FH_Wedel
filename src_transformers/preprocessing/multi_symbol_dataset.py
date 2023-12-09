@@ -60,6 +60,7 @@ class MultiSymbolDataset(Dataset):
 
         Args:
             read_all_files (bool): Whether to read all files in the data directory.
+            data_usage_ratio (float): The ratio of data to use for the dataset.
             create_new_file (bool): Whether to create a new file for the preprocessed data.
             data_file (str): The path to the file to store the data in or to load the data from.
             encoder_symbols (list[str]): The symbols to use for the encoder input.
@@ -163,7 +164,7 @@ class MultiSymbolDataset(Dataset):
         decoder_input_end = encoder_input_end + self.decoder_input_length
 
         # Load the data from the file, offset by the given index
-        data = read_csv_chunk(
+        data, headers = read_csv_chunk(
             self.data_file, encoder_input_start, decoder_input_end)
 
         encoder_input = data.to_numpy()
@@ -173,8 +174,8 @@ class MultiSymbolDataset(Dataset):
 
         decoder_input = data.iloc[:, -self.decoder_dimensions:].to_numpy()
         # Get the decoder input (starting from the end of encoder input)
-        decoder_input = decoder_input[self.encoder_input_length:self.encoder_input_length +
-                                      self.decoder_input_length]
+        decoder_input = decoder_input[self.encoder_input_length:self.encoder_input_length
+                                      + self.decoder_input_length]
         decoder_input = torch.tensor(decoder_input, dtype=torch.float32)
         # TODO decoder_input umbennen in decoder_target
 

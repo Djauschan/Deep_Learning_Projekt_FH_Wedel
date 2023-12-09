@@ -17,7 +17,7 @@ from src_transformers.pipelines.model_service import ModelService
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
 from src_transformers.utils.viz_training import plot_evaluation
-from src_transformers.models.loss import My_loss
+from src_transformers.models.loss import RMSELoss, RMSLELoss
 
 FIG_OUTPUT_PATH: Final[Path] = Path("./data/output/eval_plot")
 
@@ -51,7 +51,7 @@ class Trainer:
     epochs: int
     learning_rate: float
     validation_split: float
-    loss: nn.MSELoss | nn.CrossEntropyLoss | My_loss
+    loss: nn.MSELoss | nn.CrossEntropyLoss | RMSELoss | RMSLELoss
     optimizer: optim.SGD | optim.Adam
     device: torch.device
     model: nn.Module
@@ -102,10 +102,13 @@ class Trainer:
         elif loss == "crossentropy":
             loss_instance = nn.CrossEntropyLoss()
         elif loss == "rmse":
-            loss_instance = My_loss.rmse()
+            loss_instance = RMSELoss()
+        elif loss == "rmsle":
+            loss_instance = RMSLELoss()
         else:
             Logger.log_text(f"Loss {loss} is not valid, defaulting to MSELoss")
             loss_instance = nn.MSELoss()
+        Logger.log_text(f"Using {loss} loss function.")
 
         # Setting up the optimizer
         if optimizer == "adam":
@@ -309,8 +312,7 @@ class Trainer:
             target = target.to(self.device)
 
             prediction = self.model.forward(input_data, target)
-            loss = self.loss(prediction, target.float())        
-
+            loss = self.loss(prediction, target.float())
 
             # Safe prediction and target for visualization
             start_idx = step_count * self.batch_size

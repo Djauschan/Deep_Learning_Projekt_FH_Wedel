@@ -6,4 +6,4 @@ tensorflow
 PyYAML
 tqdm
 plotly
-sklearn
+scikit-learn
