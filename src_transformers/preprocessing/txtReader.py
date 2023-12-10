@@ -113,7 +113,7 @@ class DataReader():
             data = pd.read_csv(file_to_read, names=[
                                "timestamp", "open", "high", "low", "close", "volume"])
 
-            # Replace Nan vaules in voulme column with 0. Indices do not have a
+            # Replace Nan values in volume column with 0. Indices do not have a
             # volume.
             data["volume"] = data["volume"].fillna(0)
 

@@ -1,44 +1,53 @@
 import pandas as pd
-from sklearn import preprocessing
+
 import yaml
 import sys
 import pickle
+
+from src_transformers.preprocessing.preprocessing_constants import SCALER_OPTIONS
 from src_transformers.preprocessing.txtReader import DataReader
 from src_transformers.utils.plot import plot_df
 
 def generate_scaler(config: dict) -> None:
     """
-    Visualizes the files and saves the result in the directory data/output
-
+    Generates a scaler for each symbol in the data set and stores it in a pickle file.
     Args:
-        config (dict): Dictionary for the configuration of data preprocessing.
+        config: The configuration file.
+
+    Returns: None
+
     """
     # Get the parameters for the data set.
     data_parameters = config["dataset_parameters"]
+
     # Remove parameter that the datareader does not need.
     data_parameters.pop("create_new_file")
     data_parameters.pop("data_file")
     data_parameters.pop("data_usage_ratio")
-    txt_reader = DataReader(**data_parameters)
-    data = txt_reader.read_next_txt()
-    # As long as there is data and the user does not stop, data will be
-    # visualized.
+
+    # As long as there is data and the user does not stop, Scaler is created for each symbol.
     scaler_dict = {}
-    while data is not None:
-        symbol = data.iloc[0]["symbol"]
-        scaler = preprocessing.MinMaxScaler()
-        scaler.fit(data['close'].values.reshape(-1, 1))
-        scaler_dict[symbol] = scaler
-
+    for scaler in SCALER_OPTIONS:
+        txt_reader = DataReader(**data_parameters)
         data = txt_reader.read_next_txt()
+        while data is not None:
+            symbol = data.iloc[0]["symbol"]
+            scaler_close = scaler()
+            scaler_close.fit(data['close'].values.reshape(-1, 1))
+            scaler_dict[f'close {symbol}'] = scaler_close
 
-    with open("data/output/scaler.pkl", 'wb') as file:
-        pickle.dump(scaler_dict, file)
+            scaler_volume = scaler()
+            scaler_volume.fit(data['volume'].values.reshape(-1, 1))
+            scaler_dict[f'volume {symbol}'] = scaler_volume
 
-    # Laden der Pickle-Datei
-    with open('data/output/scaler.pkl', 'rb') as file:
-        loaded_scalers = pickle.load(file)
-    print(loaded_scalers)
+            data = txt_reader.read_next_txt()
+
+
+        # Save all scaler in a pickle file.
+        with open(f"data/output/scaler_{type(scaler_close).__name__}.pkl", 'wb') as file:
+            pickle.dump(scaler_dict, file)
+
+        print(scaler)
 
 
 if __name__ == "__main__":
@@ -51,5 +60,5 @@ if __name__ == "__main__":
     with open(config_file_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
-    # Visualize data.
+    # Generate scaler
     generate_scaler(config)
