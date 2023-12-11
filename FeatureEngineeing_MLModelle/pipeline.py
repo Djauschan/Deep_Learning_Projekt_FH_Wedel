@@ -11,7 +11,7 @@ from feature_ts import day_name_transformer, dtf, lag_backward_features, lag_for
 
 
 class ClassPipeline:
-    def __init__(self):
+    def __init__(self, data):
 
         self.data = data
         # Initialisierung der FeatureEngineering-Klasse mit den Daten
