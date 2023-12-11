@@ -4,7 +4,6 @@ import Statistik from './views/statistik.vue'
 import NotFound from './views/not-found.vue'
 import Login from './views/Login.vue'
 import './style.css'
-import { useMyPiniaStore } from './store';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -13,12 +12,12 @@ const router = createRouter({
     {
       path: '/',
       component: Home,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: false }
     },
     {
       path: '/statistik',
       component: Statistik,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: false }
     },
     {
       path: '/login',
@@ -31,7 +30,7 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach((to) => {
+router.beforeEach((to, from, next) => {
   console.log("loggedId: " + localStorage.isLoggedIn)
   console.log("auth needed: " + to.meta.requiresAuth)
   // Assuming to.meta.requiresAuth is true for routes that require authentication
@@ -39,6 +38,8 @@ router.beforeEach((to) => {
     // Redirect to the login page if not authenticated
     console.log("back to login")
     next('/login');
+  } else {
+    next();
   }
 });
 

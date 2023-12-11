@@ -10,9 +10,9 @@
     "devextreme-vue": "^23.1.6",
     "vue": "^3.2.45",
     "vue-router": "^4.2.5",
-    "pinia": "2.1.7",
-    "axios": "1.6.2",
-    "sweetalert2": "9.0.0"
+    "pinia": "^2.1.7",
+    "axios": "^1.6.2",
+    "sweetalert2": "^9.0.0"
   },
   "devDependencies": {
     "@vue/babel-preset-app": "^5.0.8",
