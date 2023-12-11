@@ -121,10 +121,10 @@ class MultiSymbolDataset(Dataset):
             with open(f'data/output/scaler_{scaler}.pkl', 'rb') as file:
                 loaded_scalers = pickle.load(file)
 
-            # Get all columns that contain volume or close
+            # Get all columns that contain volume
             symbol_columns = [item for item in data_df.columns if "volume" in item]
 
-            # Apply scaler to each close and volume column in symbol list
+            # Apply scaler to each volume column in symbol list
             for col in symbol_columns:
                 loaded_scaler = loaded_scalers[col]
                 data_df[col] = loaded_scaler.transform(data_df[col].values.reshape(-1, 1))
@@ -190,19 +190,6 @@ class MultiSymbolDataset(Dataset):
         encoder_input = torch.tensor(encoder_input, dtype=torch.float32)
 
         decoder_input = data.iloc[:, -self.decoder_dimensions:]
-
-        ## Inverse normalization on decoder targets
-        # Load scaler from pickle file
-        with open(f'data/output/scaler_{self.scaler}.pkl', 'rb') as file:
-            loaded_scalers = pickle.load(file)
-
-        # Get all columns that contain volume or close
-        symbol_columns = [item for item in decoder_input.columns if "volume" in item]
-
-        # Apply scaler to each close and volume column in symbol list
-        for col in symbol_columns:
-            loaded_scaler = loaded_scalers[col]
-            decoder_input[col] = loaded_scaler.transform(decoder_input[col].values.reshape(-1, 1))
 
         decoder_input = decoder_input.to_numpy()
         # Get the decoder input (starting from the end of encoder input)

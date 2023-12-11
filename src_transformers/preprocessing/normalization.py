@@ -8,6 +8,7 @@ from src_transformers.preprocessing.preprocessing_constants import SCALER_OPTION
 from src_transformers.preprocessing.txtReader import DataReader
 from src_transformers.utils.plot import plot_df
 
+
 def generate_scaler(config: dict) -> None:
     """
     Generates a scaler for each symbol in the data set and stores it in a pickle file.
@@ -24,6 +25,7 @@ def generate_scaler(config: dict) -> None:
     data_parameters.pop("create_new_file")
     data_parameters.pop("data_file")
     data_parameters.pop("data_usage_ratio")
+    data_parameters.pop("scaler")
 
     # As long as there is data and the user does not stop, Scaler is created for each symbol.
     scaler_dict = {}
@@ -41,7 +43,6 @@ def generate_scaler(config: dict) -> None:
             scaler_dict[f'volume {symbol}'] = scaler_volume
 
             data = txt_reader.read_next_txt()
-
 
         # Save all scaler in a pickle file.
         with open(f"data/output/scaler_{type(scaler_close).__name__}.pkl", 'wb') as file:
