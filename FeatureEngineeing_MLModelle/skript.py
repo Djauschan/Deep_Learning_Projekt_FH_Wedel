@@ -34,3 +34,24 @@ df_daily = cleaner.daily()
 
 df_normal
 
+#features
+data = df_hourly
+
+#pipeline
+# Verwendung der ClassPipeline
+pipeline = ClassPipeline(data)
+
+# Anwenden der Test-Pipeline
+#data_pip_test = pipeline.fit_transform(data, 'test')
+
+# Anwenden der Cor-Pipeline
+#data_pip_cor = pipeline.fit_transform(data, 'cor')
+
+# Anwenden der Model-Pipeline
+data_pip_model = pipeline.fit_transform(data, 'model')
+
+
+print(data_pip_model)
+
+print(data_pip_model.columns)
+#modelle
