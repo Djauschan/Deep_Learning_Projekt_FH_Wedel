@@ -31,16 +31,11 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  console.log("loggedId: " + localStorage.isLoggedIn)
+  console.log("loggedId: " + localStorage.getItem('isLoggedIn'))
   console.log("auth needed: " + to.meta.requiresAuth)
-  if (to.meta.requiresAuth == true) {
-    if (!localStorage.isLoggedIn) {
-      console.log("back to login")
-      next('/login');
-    } else {
-      console.log("IF not back to login")
-      next();
-    }
+  if (to.meta.requiresAuth && (localStorage.getItem('isLoggedIn') !== 'true')) {
+    console.log("back to login")
+    next('/login');
   } else {
     console.log("not back to login")
     next();

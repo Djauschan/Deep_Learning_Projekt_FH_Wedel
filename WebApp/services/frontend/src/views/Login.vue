@@ -88,7 +88,7 @@ export default defineComponent({
                 });
                 if (response.data) {
                     localStorage.logged_user = response.data.username;
-                    localStorage.logged_user_id = response.data.id;
+                    localStorage.logged_user_id = response.data.user_id;
                     localStorage.logged_email = response.data.email;
                     localStorage.setItem('isLoggedIn', true);
                     router.push("/");
