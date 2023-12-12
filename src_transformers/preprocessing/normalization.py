@@ -1,8 +1,8 @@
-import pandas as pd
-
-import yaml
-import sys
 import pickle
+import sys
+
+import pandas as pd
+import yaml
 
 from src_transformers.preprocessing.preprocessing_constants import SCALER_OPTIONS
 from src_transformers.preprocessing.txtReader import DataReader
@@ -26,6 +26,8 @@ def generate_scaler(config: dict) -> None:
     data_parameters.pop("data_file")
     data_parameters.pop("data_usage_ratio")
     data_parameters.pop("scaler")
+    data_parameters.pop("subseries_amount")
+    data_parameters.pop("validation_split")
 
     # As long as there is data and the user does not stop, Scaler is created for each symbol.
     scaler_dict = {}

@@ -10,14 +10,14 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
 
+from src_transformers.models.loss import RMSELoss, RMSLELoss
 from src_transformers.pipelines.model_service import ModelService
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
 from src_transformers.utils.viz_training import plot_evaluation
-from src_transformers.models.loss import RMSELoss, RMSLELoss
 
 FIG_OUTPUT_PATH: Final[Path] = Path("./data/output/eval_plot")
 
@@ -50,7 +50,6 @@ class Trainer:
     batch_size: int
     epochs: int
     learning_rate: float
-    validation_split: float
     loss: nn.MSELoss | nn.CrossEntropyLoss | RMSELoss | RMSLELoss
     optimizer: optim.SGD | optim.Adam
     device: torch.device
@@ -66,7 +65,6 @@ class Trainer:
         batch_size: int,
         epochs: int,
         learning_rate: float,
-        validation_split: float,
         device: torch.device,
         loss: str = "mse",
         optimizer: str = "adam",
@@ -131,7 +129,6 @@ class Trainer:
             batch_size=batch_size,
             epochs=epochs,
             learning_rate=learning_rate,
-            validation_split=validation_split,
             loss=loss_instance,
             optimizer=optimizer_instance,
             device=device,
@@ -187,17 +184,11 @@ class Trainer:
         The data loaders are stored in the `self.train_loader` and `self.validation_loader`
         attributes, respectively.
         """
-
-        # determine train and val set size
-        dataset_size = len(self._dataset)
-        validation_size = int(np.floor(self.validation_split * dataset_size))
-        train_size = dataset_size - validation_size
+        training_indices, validation_indices = self._dataset.get_subset_indices()
 
         # Split dataset by index not random
-        train_dataset = torch.utils.data.Subset(
-            self._dataset, range(train_size))
-        validation_dataset = torch.utils.data.Subset(
-            self._dataset, range(train_size, train_size + validation_size))
+        train_dataset = Subset(self._dataset, training_indices)
+        validation_dataset = Subset(self._dataset, validation_indices)
 
         # Create torch data loaders
         train_loader = DataLoader(
@@ -274,7 +265,7 @@ class Trainer:
 
         return finish_reason
 
-    def calculate_train_loss(self, train_loader) -> tuple[float, np.array]:
+    def calculate_train_loss(self, train_loader) -> tuple[float, np.ndarray]:
         """
         Calculates the training loss for the model. This method is called during each epoch.
 
@@ -335,8 +326,7 @@ class Trainer:
 
         return loss, results
 
-    def calculate_validation_loss(
-            self, validation_loader) -> tuple[float, np.array]:
+    def calculate_validation_loss(self, validation_loader) -> tuple[float, np.ndarray]:
         """
         Calculates the validation loss for the model. This method is called during each epoch.
 

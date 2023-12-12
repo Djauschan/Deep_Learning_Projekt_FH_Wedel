@@ -11,7 +11,6 @@ training_parameters:
   batch_size: 1000
   epochs: 10000
   learning_rate: 0.0001
-  validation_split: 0.1
   loss: "rmse" #Options: "mse", "rmse", "rmsle"
 dataset_parameters:
   read_all_files: false
@@ -19,12 +18,12 @@ dataset_parameters:
   subseries_amount: 10 # The time series will be cut into 10 subseries (which each consist of a train and validation subset)
   validation_split: 0.1 # The last 10% of timestamps in a subseries are used for validation
   # This parameter must be set to true if the symbols to be read in are changed.
-  create_new_file: true
+  create_new_file: false
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol.csv"
   encoder_symbols:
   # stocks
-    - "art1"
+#    - "art1"
 #    - "art2"
     - "AAPL"
     - "AAL"
@@ -51,8 +50,8 @@ dataset_parameters:
     # - "W5000"
   decoder_symbols:
 #    - "art1"
-    - "art2"
-    - "AMD"
+#    - "art2"
+#    - "AMD"
     - "AAPL"
     - "AAL"
     - "NIO"
