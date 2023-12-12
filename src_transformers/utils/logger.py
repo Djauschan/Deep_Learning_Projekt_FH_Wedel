@@ -15,7 +15,7 @@ from torch.utils.tensorboard.writer import SummaryWriter
 from torchvision.transforms import ToTensor
 from tqdm import tqdm
 
-from src_transformers.utils.viz_training import plot_evaluation
+from src_transformers.utils.viz_training import plot_evaluation, plot_loss_horizon
 
 
 class Logger():
@@ -170,6 +170,34 @@ class Logger():
         self._summary_writer.add_image(f"image/ts_chart_{name}", image, epoch)
 
         print(f"[Logger]: Chart for {name} saved.")
+        plt.close('all')
+
+    def save_horizon_chart(self, targets: np.array,
+                              predictions: np.array, epoch: int, name: str = "validation_set"):
+        """
+        Saves a chart of the predictions and targets for each feature to the TensorBoard log file.
+        Args:
+            targets (np.array): Targets of the model.
+            predictions (np.array): Predictions of the model.
+            epoch (int): Epoch, in which the predictions were made.
+            name (str): Name of the chart. Defaults to "validation_set".
+
+        Returns: None
+
+        """
+        fig = plot_loss_horizon(targets, predictions)
+
+        os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+        # Save image in Logger
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image = Image.open(buf)
+        image = ToTensor()(image)
+        self._summary_writer.add_image(f"image/horizon_chart_{name}", image, epoch)
+
+        print(f"[Logger]: Horizon chart for {name} saved.")
         plt.close('all')
 
     def log_model_path(self, model_path: str) -> None:

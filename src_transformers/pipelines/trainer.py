@@ -237,17 +237,21 @@ class Trainer:
             try:
                 train_loss, train_results = self.calculate_train_loss(train_loader)
 
-                # Logging loss and chart of results
+                # Logging loss and charts of results
                 self.logger.log_training_loss(train_loss, epoch)
                 self.logger.save_prediction_chart(
+                    predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
+                self.logger.save_horizon_chart(
                     predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
 
                 validation_loss, validation_results = self.calculate_validation_loss(
                     validation_loader)
 
-                # Logging loss and chart of results
+                # Logging loss and charts of results
                 self.logger.log_validation_loss(validation_loss, epoch)
                 self.logger.save_prediction_chart(
+                    predictions=validation_results[0], targets=validation_results[1], epoch=epoch, name="validation_set")
+                self.logger.save_horizon_chart(
                     predictions=validation_results[0], targets=validation_results[1], epoch=epoch, name="validation_set")
 
                 # Early stopping

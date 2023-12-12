@@ -217,7 +217,7 @@ class PositionalEncoding(nn.Module):
         # model's dimension
         div_term = torch.exp(
             torch.arange(0, d_model, 2).float() * -
-            (math.log(10000.0) / d_model)
+            (math.log(10.0) / d_model)
         )
 
         # Apply the div term to the positionoal encoding to create the
@@ -335,7 +335,8 @@ class Transformer(nn.Module):
              for _ in range(num_layers)]
         )
 
-        self.fc = nn.Linear(dim_decoder, dim_decoder)
+        self.fc1 = nn.Linear(dim_decoder, d_ff)
+        self.fc2 = nn.Linear(d_ff, dim_decoder)
         self.dropout = nn.Dropout(dropout)
 
     def generate_mask(self, seq, no_peak: bool):
@@ -412,6 +413,6 @@ class Transformer(nn.Module):
                 dec_mask,
                 tgt_mask)
 
-        output = self.fc(dec_output)
+        output = self.fc2(self.dropout(self.fc1(dec_output)))
 
         return output

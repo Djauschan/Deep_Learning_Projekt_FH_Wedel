@@ -8,21 +8,23 @@ model_parameters:
     seq_len_decoder: 30
     dropout: 0.1
 training_parameters:
-  batch_size: 1000
+  batch_size: 150
   epochs: 10000
   learning_rate: 0.0001
   validation_split: 0.1
   loss: "rmse" #Options: "mse", "rmse", "rmsle"
+  optimizer: "sgd" #Options: "adam", "sgd"
+  momentum: 0.2
 dataset_parameters:
   read_all_files: false
   data_usage_ratio: 0.115 # Only the last 50% of the read data are used in the dataset
   # This parameter must be set to true if the symbols to be read in are changed.
-  create_new_file: true
+  create_new_file: false
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol.csv"
   encoder_symbols:
   # stocks
-    - "art1"
+#    - "art1"
 #    - "art2"
     - "AAPL"
     - "AAL"
@@ -49,9 +51,9 @@ dataset_parameters:
     # - "W5000"
   decoder_symbols:
 #    - "art1"
-    - "art2"
+#    - "art2"
     - "AMD"
     - "AAPL"
-    - "AAL"
+#    - "AAL"
     - "NIO"
     - "TSLA"
