@@ -14,7 +14,7 @@ data_dir_path = os.path.join(
     current_file_directory, os.pardir, os.pardir, 'data')
 
 # Construct the path to the 'output' directory located in the 'data' directory
-output_dir_path = os.path.join(data_dir_path, 'output')
+output_dir_path = os.path.join(data_dir_path, 'output', 'images')
 
 
 def plot_df(df: pd.DataFrame) -> None:

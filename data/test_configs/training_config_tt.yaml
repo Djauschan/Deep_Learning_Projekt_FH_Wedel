@@ -9,14 +9,16 @@ model_parameters:
     dropout: 0.5
 training_parameters:
   batch_size: 50
-  epochs: 100
+  epochs: 500
   learning_rate: 0.0025
   validation_split: 0.1
+  loss: "mse" #Options: "mse", "rmse", "rmsle"
 dataset_parameters:
   read_all_files: false
-  data_usage_ratio: 0.05 # Only the last 30% of the read data are used in the dataset
+  data_usage_ratio: 0.001 # Only the last 1% of the read data are used in the dataset
   # This parameter must be set to true if the symbols to be read in are changed.
   create_new_file: true
+  scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol.csv"
   encoder_symbols:
   # stocks
@@ -33,10 +35,10 @@ dataset_parameters:
   # ETFs
     # - "ACWI"
   # indices
-    # - "DXY"
-    # - "SPX"
-    # - "DJCIGC"
-    #- "DJCISI"
+    - "DXY"
+    - "SPX"
+    - "DJCIGC"
+    # - "DJCISI"
     # - "DJCIEN"
     # - "DJCIIK"
     # - "DJI"

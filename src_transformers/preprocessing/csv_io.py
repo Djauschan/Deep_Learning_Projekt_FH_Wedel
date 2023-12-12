@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def read_csv_chunk(file_path: str, start_index: int,
-                   stop_index: int) -> pd.DataFrame:
+                   stop_index: int) -> tuple[pd.DataFrame, list[str]]:
     """
     The lines of the CSV file from start index (inclusive) to stop index (exclusive) are read in.
 
@@ -14,7 +14,7 @@ def read_csv_chunk(file_path: str, start_index: int,
         stop_index (int): Stop index of the extract from the CSV file.
 
     Returns:
-        pf.DataFrame: Extract from the CSV file.
+        tuple[pd.DataFrame, list[str]]: Extract from the CSV file, column names of the CSV file
     """
 
     # Calculate the number of rows to read
@@ -23,7 +23,11 @@ def read_csv_chunk(file_path: str, start_index: int,
     # Read the specified range from the CSV file, starting from the header
     df = pd.read_csv(file_path, skiprows=start_index,
                      nrows=num_rows_to_read, index_col=0)
-    return df
+
+    # get the column names of the csv file
+    header = pd.read_csv(file_path, nrows=0).columns.tolist()
+
+    return df, header
 
 
 def get_csv_shape(csv_file: str) -> tuple[int, int]:

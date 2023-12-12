@@ -17,6 +17,7 @@ from src_transformers.pipelines.model_service import ModelService
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
 from src_transformers.utils.viz_training import plot_evaluation
+from src_transformers.models.loss import RMSELoss, RMSLELoss
 
 FIG_OUTPUT_PATH: Final[Path] = Path("./data/output/eval_plot")
 
@@ -50,7 +51,7 @@ class Trainer:
     epochs: int
     learning_rate: float
     validation_split: float
-    loss: nn.MSELoss | nn.CrossEntropyLoss
+    loss: nn.MSELoss | nn.CrossEntropyLoss | RMSELoss | RMSLELoss
     optimizer: optim.SGD | optim.Adam
     device: torch.device
     model: nn.Module
@@ -100,9 +101,14 @@ class Trainer:
             loss_instance = nn.MSELoss()
         elif loss == "crossentropy":
             loss_instance = nn.CrossEntropyLoss()
+        elif loss == "rmse":
+            loss_instance = RMSELoss()
+        elif loss == "rmsle":
+            loss_instance = RMSLELoss()
         else:
             Logger.log_text(f"Loss {loss} is not valid, defaulting to MSELoss")
             loss_instance = nn.MSELoss()
+        Logger.log_text(f"Using {loss} loss function.")
 
         # Setting up the optimizer
         if optimizer == "adam":
@@ -229,14 +235,20 @@ class Trainer:
         finish_reason = "Training terminated before training loop ran through."
         for epoch in tqdm(range(self.epochs)):
             try:
-                train_loss = self.calculate_train_loss(train_loader)
-                self.logger.log_training_loss(train_loss, epoch)
+                train_loss, train_results = self.calculate_train_loss(train_loader)
 
-                validation_loss, results = self.calculate_validation_loss(
-                    train_loader)
+                # Logging loss and chart of results
+                self.logger.log_training_loss(train_loss, epoch)
+                self.logger.save_prediction_chart(
+                    predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
+
+                validation_loss, validation_results = self.calculate_validation_loss(
+                    validation_loader)
+
+                # Logging loss and chart of results
                 self.logger.log_validation_loss(validation_loss, epoch)
                 self.logger.save_prediction_chart(
-                    predictions=results[0], targets=results[1], epoch=epoch)
+                    predictions=validation_results[0], targets=validation_results[1], epoch=epoch, name="validation_set")
 
                 # Early stopping
                 if min_loss > validation_loss:
@@ -262,7 +274,7 @@ class Trainer:
 
         return finish_reason
 
-    def calculate_train_loss(self, train_loader) -> float:
+    def calculate_train_loss(self, train_loader) -> tuple[float, np.array]:
         """
         Calculates the training loss for the model. This method is called during each epoch.
 
@@ -277,12 +289,19 @@ class Trainer:
 
         Returns:
             float: The average training loss per batch.
+            np.array: Results for predictions (prediction & targets)
         """
         self.model.train()
         train_loss: float = 0
         step_count: int = 0
 
         loder_len = len(train_loader)
+
+        # create an array to store the predictions and targets of all samples
+        samples = len(train_loader.dataset)
+        prediction_len = train_loader.dataset.dataset.decoder_input_length
+        dim = train_loader.dataset.dataset.decoder_dimensions
+        results = np.zeros((2, samples, prediction_len, dim))
 
         for input_data, target in train_loader:
 
@@ -295,6 +314,12 @@ class Trainer:
             prediction = self.model.forward(input_data, target)
             loss = self.loss(prediction, target.float())
 
+            # Safe prediction and target for visualization
+            start_idx = step_count * self.batch_size
+            end_idx = start_idx + self.batch_size
+            results[0, start_idx:end_idx, :, :] = prediction.detach().cpu()
+            results[1, start_idx:end_idx, :, :] = target.detach().cpu()
+
             loss.backward()
 
             self.optimizer.step()
@@ -306,7 +331,9 @@ class Trainer:
                 print(
                     f'Batch {step_count}/{loder_len} loss: {round(loss.item(), 2)}')
 
-        return train_loss / step_count
+        loss = train_loss / step_count
+
+        return loss, results
 
     def calculate_validation_loss(
             self, validation_loader) -> tuple[float, np.array]:
@@ -349,8 +376,8 @@ class Trainer:
 
                 start_idx = step_count * self.batch_size
                 end_idx = start_idx + self.batch_size
-                results[0, start_idx:end_idx, :, :] = prediction
-                results[1, start_idx:end_idx, :, :] = target
+                results[0, start_idx:end_idx, :, :] = prediction.cpu()
+                results[1, start_idx:end_idx, :, :] = target.cpu()
 
                 validation_loss += loss.sum().item()
                 step_count += 1

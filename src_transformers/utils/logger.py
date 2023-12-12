@@ -145,13 +145,14 @@ class Logger():
         self._summary_writer.add_scalar("loss/val", value, epoch)
 
     def save_prediction_chart(self, targets: np.array,
-                              predictions: np.array, epoch: int):
+                              predictions: np.array, epoch: int, name: str = "validation_set"):
         """
         Saves a chart of the predictions and targets for each feature to the TensorBoard log file.
         Args:
             targets (np.array): Targets of the model.
             predictions (np.array): Predictions of the model.
             epoch (int): Epoch, in which the predictions were made.
+            name (str): Name of the chart. Defaults to "validation_set".
 
         Returns: None
 
@@ -166,9 +167,9 @@ class Logger():
         buf.seek(0)
         image = Image.open(buf)
         image = ToTensor()(image)
-        self._summary_writer.add_image("image/ts_chart", image, epoch)
+        self._summary_writer.add_image(f"image/ts_chart_{name}", image, epoch)
 
-        print("[Logger]: Charts saved.")
+        print(f"[Logger]: Chart for {name} saved.")
         plt.close('all')
 
     def log_model_path(self, model_path: str) -> None:

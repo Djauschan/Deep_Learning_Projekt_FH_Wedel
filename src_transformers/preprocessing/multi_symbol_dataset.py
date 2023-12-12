@@ -2,6 +2,7 @@
 This module contains the MultiSymbolDataset class which is used to handle multi-symbol
 financial data.
 """
+import pickle
 from dataclasses import dataclass
 from tracemalloc import start
 
@@ -44,6 +45,7 @@ class MultiSymbolDataset(Dataset):
     encoder_input_length: int
     decoder_input_length: int
     data_file: str
+    scaler: str
 
     @classmethod
     def create_from_config(cls,
@@ -56,7 +58,8 @@ class MultiSymbolDataset(Dataset):
                            encoder_symbols: list[str],
                            decoder_symbols: list[str],
                            encoder_input_length: int,
-                           decoder_input_length: int):
+                           decoder_input_length: int,
+                           scaler: str = "MinMaxScaler"):
         """
         This method either creates a new MultiSymbolDataset by preprocessing financial data for
         multiple symbols (using information from the configuration file) or creates the dataset
@@ -65,6 +68,7 @@ class MultiSymbolDataset(Dataset):
 
         Args:
             read_all_files (bool): Whether to read all files in the data directory.
+            data_usage_ratio (float): The ratio of data to use for the dataset.
             create_new_file (bool): Whether to create a new file for the preprocessed data.
             data_file (str): The path to the file to store the data in or to load the data from.
             encoder_symbols (list[str]): The symbols to use for the encoder input.
@@ -117,6 +121,19 @@ class MultiSymbolDataset(Dataset):
             # Re-ordering the target columns to be at the end
             data_df = data_df[current_columns + target_columns]
 
+            ## Normalization with fitted normalizer
+            # Load scaler from pickle file
+            with open(f'data/output/scaler_{scaler}.pkl', 'rb') as file:
+                loaded_scalers = pickle.load(file)
+
+            # Get all columns that contain volume
+            symbol_columns = [item for item in data_df.columns if "volume" in item]
+
+            # Apply scaler to each volume column in symbol list
+            for col in symbol_columns:
+                loaded_scaler = loaded_scalers[col]
+                data_df[col] = loaded_scaler.transform(data_df[col].values.reshape(-1, 1))
+
             length = len(data_df)
             encoder_dimensions = data_df.shape[1]
             decoder_dimensions = len(decoder_symbols)
@@ -132,7 +149,8 @@ class MultiSymbolDataset(Dataset):
                    decoder_dimensions=decoder_dimensions,
                    encoder_input_length=encoder_input_length,
                    decoder_input_length=decoder_input_length,
-                   data_file=data_file)
+                   data_file=data_file,
+                   scaler=scaler)
 
     def __len__(self) -> int:
         """
@@ -170,7 +188,7 @@ class MultiSymbolDataset(Dataset):
         decoder_input_end = encoder_input_end + self.decoder_input_length
 
         # Load the data from the file, offset by the given index
-        data = read_csv_chunk(
+        data, headers = read_csv_chunk(
             self.data_file, encoder_input_start, decoder_input_end)
 
         encoder_input = data.to_numpy()
@@ -178,10 +196,12 @@ class MultiSymbolDataset(Dataset):
         encoder_input = encoder_input[0:self.encoder_input_length]
         encoder_input = torch.tensor(encoder_input, dtype=torch.float32)
 
-        decoder_input = data.iloc[:, -self.decoder_dimensions:].to_numpy()
+        decoder_input = data.iloc[:, -self.decoder_dimensions:]
+
+        decoder_input = decoder_input.to_numpy()
         # Get the decoder input (starting from the end of encoder input)
-        decoder_input = decoder_input[self.encoder_input_length:self.encoder_input_length +
-                                      self.decoder_input_length]
+        decoder_input = decoder_input[self.encoder_input_length:self.encoder_input_length
+                                      + self.decoder_input_length]
         decoder_input = torch.tensor(decoder_input, dtype=torch.float32)
         # TODO decoder_input umbennen in decoder_target
 
