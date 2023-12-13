@@ -176,17 +176,18 @@ class Trainer:
 
     def setup_dataloaders(self) -> tuple[DataLoader, DataLoader]:
         """
-        Sets up the training and validation data loaders.
+        Sets up the data loaders holding the training and validation datasets.
 
-        This function creates data loaders from the dataset.
-        It splits the dataset into training and validation sets based on the
-        `self.validation_split` attribute, and creates data loaders for both of these sets.
-        The data loaders are stored in the `self.train_loader` and `self.validation_loader`
-        attributes, respectively.
+        This method splits the dataset into training and validation subsets using the dataset's 
+        `get_subset_indices` method. It then creates data loaders for the training and validation 
+        subsets with the specified batch size and without shuffling.
+
+        Returns:
+            DataLoader: The training data loader.
+            DataLoader: The validation data loader.
         """
+        # Splitting the dataset into training and validation sets using the dataset's subset functionality
         training_indices, validation_indices = self._dataset.get_subset_indices()
-
-        # Split dataset by index not random
         train_dataset = Subset(self._dataset, training_indices)
         validation_dataset = Subset(self._dataset, validation_indices)
 
