@@ -1,4 +1,5 @@
 ### Features erstellen
+
 import pandas as pd
 import numpy as np
 
@@ -12,7 +13,8 @@ from feature_engine.selection import DropFeatures
 
 data_columns = ['open', 'high', 'low', 'close', 'volume']
 
-# features definitions
+####################################################################
+### jeden df
 def add_day_name():
     def transform(data):
         df = data.copy()
@@ -34,6 +36,21 @@ dtf = DatetimeFeatures(
         "weekend",
        ],
 )
+
+def create_differenz_value(df):
+    for col in data_columns:
+        df[col + '_Differenz'] = df[col].diff()
+    return df
+differenz_value = FunctionTransformer(create_differenz_value)
+
+# Drop missing data
+imputer = DropMissingData()
+
+# Drop original time series
+drop_ts = DropFeatures(features_to_drop=['open', 'high', 'low', 'close', 'volume'])
+
+####################################################################
+### df hourly 
 
 #lag feature backward mit 1h - 7h 
 def create_lag_features_backward(data, max_lag_hours=7):
@@ -61,17 +78,8 @@ def replace_weekend_volume_with_zero(data):
     return df
 replace_weekend_volume = FunctionTransformer(replace_weekend_volume_with_zero)
 
-# Drop missing data
-imputer = DropMissingData()
 
-# Drop original time series
-drop_ts = DropFeatures(features_to_drop=['open', 'high', 'low', 'close', 'volume'])
-
-#drop_ts = DropFeatures(features_to_drop=data_columns)
-
-
-
-
+####################################################################
 # Class FeatureEngineering
 class FeatureEngineering:
     def __init__(self, data: pd.DataFrame):
