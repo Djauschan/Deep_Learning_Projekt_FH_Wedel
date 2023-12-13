@@ -1,0 +1,27 @@
+use_gpu: true
+model_parameters:
+  mlp:
+    seq_len_encoder: 50
+    seq_len_decoder: 10
+    hidden_dim: 200
+training_parameters:
+  batch_size: 150
+  epochs: 10000
+  learning_rate: 0.001
+  loss: "mse" # Options: "mse", "rmse", "rmsle"
+  optimizer: "adam" # Options: "adam", "sgd"
+  momentum: 0.2
+dataset_parameters:
+  read_all_files: false
+  data_usage_ratio: 0.15 # Only the last 50% of the read data are used in the dataset
+  subseries_amount: 1 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
+  validation_split: 0.2 # The last 10% of timestamps in a subseries are used for validation
+  create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
+  scaler: "MinMaxScaler" # Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
+  data_file: "data/output/Multi_Symbol.csv"
+  encoder_symbols:
+  # stocks
+    - "TSLA"
+
+  decoder_symbols:
+    - "TSLA"
