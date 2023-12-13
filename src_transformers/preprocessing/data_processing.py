@@ -147,8 +147,8 @@ def fill_dataframe(all_dates: pd.DataFrame,
             # ffill: forward fill, bfill: backward fill
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
 
-            # Apply differencing on close colum to get the change between timestamps.
-            all_dates[f'close {symbol}'] = all_dates[f'close {symbol}'].diff()
+            # Apply relative differencing on close colum to get the change between timestamps.
+            all_dates[f'close {symbol}'] = all_dates[f'close {symbol}'].pct_change(fill_method=None)
 
         if symbol_type == 'stock' or symbol_type == 'ETF':
             # The closing price and the volume are used for stocks and ETFs.
@@ -159,8 +159,8 @@ def fill_dataframe(all_dates: pd.DataFrame,
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
             all_dates[f'volume {symbol}'] = merged_df['volume'].fillna(0)
 
-            # Apply differencing on close colum to get the change between timestamps.
-            all_dates[f'close {symbol}'] = all_dates[f'close {symbol}'].diff()
+            # Apply relative differencing on close colum to get the change between timestamps.
+            all_dates[f'close {symbol}'] = all_dates[f'close {symbol}'].pct_change(fill_method=None)
 
             # The symbols of all stocks are saved in a list as they are used as
             # target variables.
