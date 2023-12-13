@@ -36,18 +36,15 @@ def generate_scaler(config: dict) -> None:
         data = txt_reader.read_next_txt()
         while data is not None:
             symbol = data.iloc[0]["symbol"]
-            scaler_close = scaler()
-            scaler_close.fit(data['close'].values.reshape(-1, 1))
-            scaler_dict[f'close {symbol}'] = scaler_close
-
-            scaler_volume = scaler()
-            scaler_volume.fit(data['volume'].values.reshape(-1, 1))
-            scaler_dict[f'volume {symbol}'] = scaler_volume
+            if data.iloc[0]['type'] == 'stock':
+                scaler_volume = scaler()
+                scaler_volume.fit(data['volume'].values.reshape(-1, 1))
+                scaler_dict[f'volume {symbol}'] = scaler_volume
 
             data = txt_reader.read_next_txt()
 
         # Save all scaler in a pickle file.
-        with open(f"data/output/scaler_{type(scaler_close).__name__}.pkl", 'wb') as file:
+        with open(f"data/output/scaler_{type(scaler_volume).__name__}.pkl", 'wb') as file:
             pickle.dump(scaler_dict, file)
 
         print(scaler)
