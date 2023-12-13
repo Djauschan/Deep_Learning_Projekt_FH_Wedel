@@ -1,11 +1,11 @@
 use_gpu: true
 model_parameters:
   transformer:
-    num_heads: 2
-    num_layers: 2
+    num_heads: 1
+    num_layers: 1
     d_ff: 200
     seq_len_encoder: 50
-    seq_len_decoder: 30
+    seq_len_decoder: 10
     dropout: 0.1
 training_parameters:
   batch_size: 150
@@ -27,15 +27,15 @@ dataset_parameters:
 #    - "art1"
 #    - "art2"
     - "AAPL"
-    - "AAL"
-    - "AMD"
-#    - "C"
+#    - "AAL"
+#    - "AMD"
+##    - "C"
 #    - "MRNA"
-    - "NIO"
-    # - "NVDA"
-    # - "SNAP"
-    # - "SQ"
-    - "TSLA"
+#    - "NIO"
+#    - "NVDA"
+#    # - "SNAP"
+#    # - "SQ"
+#    - "TSLA"
   # ETFs
     - "ACWI"
   # indices
@@ -52,8 +52,11 @@ dataset_parameters:
   decoder_symbols:
 #    - "art1"
 #    - "art2"
-    - "AMD"
+#    - "art2"
+#    - "AMD"
     - "AAPL"
 #    - "AAL"
-    - "NIO"
-    - "TSLA"
+#    - "MRNA"
+#    - "NIO"
+#    - "NVDA"
+#    - "TSLA"
