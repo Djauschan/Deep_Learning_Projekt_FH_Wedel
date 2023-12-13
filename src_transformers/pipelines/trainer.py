@@ -295,7 +295,7 @@ class Trainer:
 
         # create an array to store the predictions and targets of all samples
         samples = len(train_loader.dataset)
-        prediction_len = train_loader.dataset.dataset.decoder_input_length
+        prediction_len = train_loader.dataset.dataset.decoder_target_length
         dim = train_loader.dataset.dataset.decoder_dimensions
         results = np.zeros((2, samples, prediction_len, dim))
 
