@@ -9,6 +9,4 @@ pmdarima
 torch
 scikit-learn
 statsforecast
-keras_tuner
-tensorflow
 os

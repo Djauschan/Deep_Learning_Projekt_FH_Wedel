@@ -7,7 +7,13 @@ import matplotlib.pyplot as plt
 class Arima():
    
     def __init__(self, y_values):
-       
+
+        """
+        Initializes the Arima Class
+
+        Args:
+        y_values: list of the values that the model will be trained on
+        """
         self.y_values= y_values
         self.arimaModell= AutoARIMA(max_p=15,max_q=15)
        
@@ -15,57 +21,114 @@ class Arima():
        
  
     def forecast(self, forecasthorizon:int, trainData):
+        """
+        Calculates the forecast for a given forecasthorizon
+        args:
+        forcasthorizon(int): days that are to be predicted
+        trainData: data to for the model training
+
+        return:
+        Forecast for the forecasthorizon
+        """
        
         model = self.arimaModell.forecast(trainData,forecasthorizon)
         return model['mean']
  
     def logTransformer(self, forecasthorizon:int, trainData):
+        """
+        Transforms train data with the log function to make data stationary. 
+        Generates a forecast with transformed data and backtransforms these data.
+
+        args:
+        forcasthorizon(int): days that are to be predicted
+        trainData: data to for the model training
+
+        return:
+        Forecast for the forecasthorizon
+        """
         lg_transformer=np.log(trainData)
         forecast =  self.forecast(forecasthorizon,lg_transformer)
-        rücktransformierte_werte=np.exp(forecast)
-        return rücktransformierte_werte
+        backtransformed_forecast=np.exp(forecast)
+        return backtransformed_forecast
  
     def squareTransformer(self, forecasthorizon:int,trainData):
+        """
+        Transforms train data by squaring them to make data stationary. 
+        Generates a forecast with transformed data and backtransforms these data.
+
+        args:
+        forcasthorizon(int): days that are to be predicted
+        trainData: data to for the model training
+
+        return:
+        Forecast for the forecasthorizon
+        """
         square_transformer= np.sqrt(trainData)
         forecast =  self.forecast(forecasthorizon,square_transformer)
-        rücktransformierte_werte=np.square(forecast)
-        return rücktransformierte_werte
+        backtransformed_forecast=np.square(forecast)
+        return backtransformed_forecast
  
  
     def percent_change(self, forecasthorizon:int,trainData):
+        """
+        Transforms train data by calculating the percentage change them to make data stationary. 
+        Generates a forecast with transformed data and backtransforms these data.
+
+        args:
+        forcasthorizon(int): days that are to be predicted
+        trainData: data to for the model training
+
+        return:
+        Forecast for the forecasthorizon
+        """
         pct_change_transform= np.array(pd.Series(trainData).pct_change().dropna())
         forecast =  self.forecast(forecasthorizon,pct_change_transform)
-        # Letzter bekannter Wert der ursprünglichen Zeitreihe
-        letzter_wert = trainData[-1]
+        # last known value from the actual time series
+        last_value = trainData[-1]
  
-        # Initialisieren der Liste für die rücktransformierten Vorhersagen
-        rücktransformierte_werte = np.array([letzter_wert])
+        # initialising the list for the backtransformed predictions
+        backtransformed_forecast = np.array([last_value])
  
-        # Rücktransformation für jede Vorhersage
+        # backtransformation for every predicition
         for pct_change in forecast:
-            neuer_wert = rücktransformierte_werte[-1] * (1 + pct_change)
-            rücktransformierte_werte = np.append(rücktransformierte_werte,neuer_wert)
+            new_value = backtransformed_forecast[-1] * (1 + pct_change)
+            backtransformed_forecast = np.append(backtransformed_forecast,new_value)
  
-        # Entfernen des ersten Werts (ursprünglicher letzter bekannter Wert)
-        rücktransformierte_werte = rücktransformierte_werte[1:]
-        return rücktransformierte_werte
+        # removing the last known value (last known value is not a part of the prediction)
+        backtransformed_forecast = backtransformed_forecast[1:]
+        return backtransformed_forecast
  
            
    
     def shift_logTransformer(self, forecasthorizon:int,trainData):
+        """
+        Transforms train data by using a shif log transformation to make data stationary. 
+        Generates a forecast with transformed data and backtransforms these data.
+
+        args:
+        forcasthorizon(int): days that are to be predicted
+        trainData: data to for the model training
+
+        return:
+        Forecast for the forecasthorizon
+        """
         shift_log= np.log(np.array((trainData/pd.Series(trainData).shift(1)).dropna()))
        
         forecast= self.forecast(forecasthorizon,shift_log)
-        letzter_wert=trainData[-1]
-        rücktransformierte_werte = np.array([letzter_wert])
+        # last known value from the actual time series
+        last_value=trainData[-1]
        
- 
+        # initialising the list for the backtransformed predictions
+        backtransformed_forecast= np.array([last_value])
+       
+        # backtransformation for every predicition
         for i in forecast:
-            neuer_wert= rücktransformierte_werte[-1]*np.exp(i)
-            rücktransformierte_werte = np.append(rücktransformierte_werte,neuer_wert)
-        rücktransformierte_werte = rücktransformierte_werte[1:]
+            new_value= backtransformed_forecast[-1]*np.exp(i)
+            backtransformed_forecast = np.append(backtransformed_forecast,new_value)
+        
+        backtransformed_forecast = backtransformed_forecast[1:]
  
-        return rücktransformierte_werte
+        return backtransformed_forecast
 
     
 

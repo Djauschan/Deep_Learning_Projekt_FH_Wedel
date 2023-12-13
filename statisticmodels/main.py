@@ -9,8 +9,6 @@ from sklearn.model_selection import TimeSeriesSplit
 from preprocessing.evaluation import Evaluation
 from arch import arch_model
  
- 
- 
 test = DataReader({"READ_ALL_FILES": "READ_ALL_FILES"})
  
 txt_files, symbols = test.get_txt_files()

@@ -4,6 +4,11 @@ import numpy as np
 
 class DataCleaner:
     def __init__(self, raw_data: pd.DataFrame):
+        """
+        initializes the DataCleaner class
+        args:
+        raw_data(pd.Dataframe): data with missing time stamps
+        """
         self.raw_data = raw_data.set_index("timestamp").drop(["type"], axis=1)
         self.difference = []
         self.nunique_dates = len(np.unique(self.raw_data.index.date))
@@ -14,11 +19,13 @@ class DataCleaner:
 
     def calculate_diff(self, time:str, intervall):
         """
-        time ist ein String der Form "16:00" oder "09:30"
-        List mit 2 Strings in Form von: [" 15:00:00", " 16:30:00"]
+        calculates the how many time stamps are missing
+        args:
+        time(str): string that indicates, whether 16.00 or 9.30 is about to be filled
+        intervall: interval to check whether there are any data for these days
         """
-        #Hier wird die Differenz gebildet aus allen Tagen im Datensatz und die Stempel die wir brauchen!
-        #Fehlender Zeitstempel werden hier bemerkbar
+        #Creating the difference between all days from the data set and days with the needed timestamp
+        #missing timestamps will be recognized here
         data = self.raw_data.between_time(time, time)
         small = data.index.date
         big = self.raw_data.index.date
@@ -26,7 +33,8 @@ class DataCleaner:
 
         
         for date in self.difference:
-            # Überprüfen, ob es Daten zwischen 15:00:00 und 16:30:00 gibt
+            # checking if there are any available timestamps within a 2 hour range from opening or close
+            #if there are no available timestamps day will be removed
             time_range = pd.date_range(
                 str(date) + intervall[0], str(date) + intervall[1], freq="1T"
             )
@@ -37,8 +45,12 @@ class DataCleaner:
 
     def datafiller(self, fillTime):
         """
-        Für filltime Entweder " 16:00:00" oder " 09:30:00"
+        function to fill the missing time stamps
+        args:
+        fillTime: either 16:00:00 or 09:30:00
+
         """
+        #filling missing timestamps with none beforehand
         fill_dates = pd.to_datetime(np.array([str(i) + fillTime for i in self.difference]))
         for i in fill_dates:
             self.raw_data.loc[i] = None
@@ -49,6 +61,7 @@ class DataCleaner:
         interCounter, ffCounter, bfCounter = 0,0,0
         #indexing = list(self.raw_data.index)
 
+        #filling missing time stamps
         for null_value in fill_dates: 
             nullValueIndex=  null_value_index = self.raw_data.index.get_indexer([null_value])[0]
             lowerBound, upperBound=nullValueIndex - 1,nullValueIndex+2
