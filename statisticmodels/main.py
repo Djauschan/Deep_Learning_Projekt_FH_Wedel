@@ -1,14 +1,13 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
- 
 from preprocessing.txtReader import DataReader
 from preprocessing.data_cleaning import DataCleaner
 from models.visualisation import VisualizeStatsModel
 from models.arima import Arima
 from sklearn.model_selection import TimeSeriesSplit
 from preprocessing.evaluation import Evaluation
- 
+from arch import arch_model
  
  
  
@@ -37,32 +36,15 @@ print(arimaData.head())
 print(arimaData.info())
  
 yWerte=arimaData['y'].values
+yWerte_df = pd.DataFrame(yWerte)
+yWerte_df['Return'] = yWerte_df.pct_change()
+yWerte_df = yWerte_df.replace([np.inf, -np.inf], np.nan)
+yWerte_df = yWerte_df.dropna()
+basic_gm = arch_model(10* yWerte_df['Return'], p=1, q=1, mean= 'constant', vol = 'GARCH', dist = 'normal')
+gm_result = basic_gm.fit(disp='off')
+gm_forecast= gm_result.forecast(horizon = 5)
+print(gm_forecast.variance[-1:])
  
- 
- 
- 
- 
- 
- 
-crossValidierung=Evaluation(30,3,yWerte)
- 
-testarray, Resultdic= crossValidierung.CrossValidation('ets')
- 
-print(Resultdic.keys())
-print(Resultdic.values())
-print('ich bin Kevin')
-print(testarray)
- 
- 
- 
-for keys,value in Resultdic.items():
-    print('Das sind die Metriken für ',keys)
-    temp=crossValidierung.metricsCalculation(testarray,value)
-    print(temp)
- 
-viz=VisualizeStatsModel(arimaData,testarray,testarray,testarray)
- 
-viz.arimaCrossvalidation(testarray,Resultdic)
  
 # plt.style.use('fivethirtyeight')
 # colors = ['b', 'g', 'r', 'c', 'm']
