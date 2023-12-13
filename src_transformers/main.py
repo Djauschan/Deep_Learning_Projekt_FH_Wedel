@@ -1,7 +1,3 @@
-from src_transformers.utils.logger import Logger
-from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
-from src_transformers.pipelines.trainer import Trainer
-from src_transformers.pipelines.model_service import ModelService
 import argparse
 from typing import Final
 
@@ -9,6 +5,10 @@ import torch
 import yaml
 from torch import cuda
 
+from src_transformers.pipelines.model_service import ModelService
+from src_transformers.pipelines.trainer import Trainer
+from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
+from src_transformers.utils.logger import Logger
 
 TRAIN_COMMAND: Final[str] = "train"
 EVAL_COMMAND: Final[str] = "evaluate"
@@ -72,7 +72,7 @@ def main() -> None:
 
     dataset = MultiSymbolDataset.create_from_config(
         encoder_input_length=model_attributes.get("seq_len_encoder"),
-        decoder_input_length=model_attributes.get("seq_len_decoder"),
+        decoder_target_length=model_attributes.get("seq_len_decoder"),
         **config.pop("dataset_parameters"))
 
     model = ModelService.create_model(device=device,

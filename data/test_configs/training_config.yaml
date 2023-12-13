@@ -11,16 +11,16 @@ training_parameters:
   batch_size: 150
   epochs: 10000
   learning_rate: 0.0001
-  validation_split: 0.1
-  loss: "rmse" #Options: "mse", "rmse", "rmsle"
-  optimizer: "sgd" #Options: "adam", "sgd"
+  loss: "rmse" # Options: "mse", "rmse", "rmsle"
+  optimizer: "sgd" # Options: "adam", "sgd"
   momentum: 0.2
 dataset_parameters:
   read_all_files: false
-  data_usage_ratio: 0.115 # Only the last 50% of the read data are used in the dataset
-  # This parameter must be set to true if the symbols to be read in are changed.
-  create_new_file: false
-  scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
+  data_usage_ratio: 0.5 # Only the last 50% of the read data are used in the dataset
+  subseries_amount: 10 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
+  validation_split: 0.1 # The last 10% of timestamps in a subseries are used for validation
+  create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
+  scaler: "MinMaxScaler" # Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol.csv"
   encoder_symbols:
   # stocks

@@ -37,10 +37,12 @@ class MultiSymbolDataset(Dataset):
     """
 
     length: int
+    subseries_amount: int
+    validation_split: float
     encoder_dimensions: int
     decoder_dimensions: int
     encoder_input_length: int
-    decoder_input_length: int
+    decoder_target_length: int
     data_file: str
     scaler: str
 
@@ -48,12 +50,14 @@ class MultiSymbolDataset(Dataset):
     def create_from_config(cls,
                            read_all_files: bool,
                            data_usage_ratio: float,
+                           subseries_amount: int,
+                           validation_split: float,
                            create_new_file: bool,
                            data_file: str,
                            encoder_symbols: list[str],
                            decoder_symbols: list[str],
                            encoder_input_length: int,
-                           decoder_input_length: int,
+                           decoder_target_length: int,
                            scaler: str = "MinMaxScaler"):
         """
         This method either creates a new MultiSymbolDataset by preprocessing financial data for
@@ -69,7 +73,7 @@ class MultiSymbolDataset(Dataset):
             encoder_symbols (list[str]): The symbols to use for the encoder input.
             decoder_symbols (list[str]): The symbols to use for the decoder input.
             encoder_input_length (int): The length of the encoder input sequence.
-            decoder_input_length (int): The length of the decoder input sequence.
+            decoder_target_length (int): The length of the decoder target sequence.
 
         Returns:
             MultiSymbolDataset: The created or loaded dataset.
@@ -138,10 +142,12 @@ class MultiSymbolDataset(Dataset):
                 f"Dataframe holding the preprocessed data was stored to the file '{data_file}'.")
 
         return cls(length=length,
+                   subseries_amount=subseries_amount,
+                   validation_split=validation_split,
                    encoder_dimensions=encoder_dimensions,
                    decoder_dimensions=decoder_dimensions,
                    encoder_input_length=encoder_input_length,
-                   decoder_input_length=decoder_input_length,
+                   decoder_target_length=decoder_target_length,
                    data_file=data_file,
                    scaler=scaler)
 
@@ -155,7 +161,7 @@ class MultiSymbolDataset(Dataset):
         Returns:
             int: The number of samples in the dataset.
         """
-        return self.length - self.encoder_input_length - self.decoder_input_length + 1
+        return self.length - self.encoder_input_length - self.decoder_target_length + 1
 
     def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -163,39 +169,92 @@ class MultiSymbolDataset(Dataset):
         starting at the specified index.
 
         The encoder input sequence starts at the specified index and has a length of
-        `self.encoder_input_length`. The decoder input sequence starts immediately after the
-        input sequence and has a length of `self.decoder_input_length`.
+        `self.encoder_input_length`. The decoder target sequence starts immediately after the
+        input sequence and has a length of `self.decoder_target_length`.
 
         The method reads a chunk of data from the data file, starting at `encoder_input_start`
-        and ending at `decoder_input_end`. It then extracts the encoder and decoder inputs
+        and ending at `decoder_target_end`. It then extracts the encoder input and decoder target
         from this chunk and converts them to PyTorch tensors.
 
         Args:
             index (int): The index of the sample in the dataset.
 
         Returns:
-            tuple[torch.Tensor, torch.Tensor]: Time series sequences as input for the encoder
-                and decoder starting at the specified index.
+            torch.Tensor: The encoder input sequence.
+            torch.Tensor: The decoder target sequence.
         """
+        # Calculate the start of the encoder input and the end of the decoder target
+        # from the given index to load the correct data from the file
         encoder_input_start, encoder_input_end = index, index + self.encoder_input_length
-        decoder_input_end = encoder_input_end + self.decoder_input_length
+        decoder_target_end = encoder_input_end + self.decoder_target_length
 
         # Load the data from the file, offset by the given index
-        data, headers = read_csv_chunk(
-            self.data_file, encoder_input_start, decoder_input_end)
-
+        data, _ = read_csv_chunk(
+            self.data_file, encoder_input_start, decoder_target_end)
         encoder_input = data.to_numpy()
+
         # Get the encoder input from 0 to self.input_length
         encoder_input = encoder_input[0:self.encoder_input_length]
         encoder_input = torch.tensor(encoder_input, dtype=torch.float32)
 
-        decoder_input = data.iloc[:, -self.decoder_dimensions:]
+        # Only keep the decoder symbols (which are at the end) for the decoder target
+        decoder_target = data.iloc[:, -self.decoder_dimensions:]
+        decoder_target = decoder_target.to_numpy()
 
-        decoder_input = decoder_input.to_numpy()
-        # Get the decoder input (starting from the end of encoder input)
-        decoder_input = decoder_input[self.encoder_input_length:self.encoder_input_length
-                                      + self.decoder_input_length]
-        decoder_input = torch.tensor(decoder_input, dtype=torch.float32)
-        # TODO decoder_input umbennen in decoder_target
+        # Get the decoder target (starting from the end of encoder input)
+        decoder_target = decoder_target[self.encoder_input_length:self.encoder_input_length
+                                        + self.decoder_target_length]
+        decoder_target = torch.tensor(decoder_target, dtype=torch.float32)
 
-        return encoder_input, decoder_input
+        return encoder_input, decoder_target
+
+    def get_subset_indices(self) -> tuple[list[int], list[int]]:
+        """
+        Computes and returns the indices for the training and validation sets of all subseries.
+
+        This method calculates the lengths of the subseries, as well as their training and
+        validation sets. It then generates the indices for the training and validation subsets,
+        ensuring that the training and validation sets do not overlap by considering the
+        transformer's encoder and decoder input lengths.
+
+        Returns:
+            list[int]: A list containing the indices for the training sets of all subseries.
+            list[int]: A list containing the indices for the validation sets of all subseries.
+        """
+        # Compute the lengths of the subseries, as well as their training and validation parts
+        subseries_length = int(self.length / self.subseries_amount)
+        validation_length = int(subseries_length * self.validation_split)
+        training_length = subseries_length - validation_length
+
+        training_indices = []
+        validation_indices = []
+        # Set start index for the first training subseries to the remainder (X) of the modulo
+        # This is done to skip the first X elements which we cannot allocate to a subseries
+        training_start = self.length % subseries_length
+
+        # Iterate over all subseries
+        for _ in range(self.subseries_amount):
+            # The validation set of the subseries starts right after the training set
+            validation_start = training_start + training_length
+            # The training set of the subseries ends before the validation set, keeping the
+            # encoder and decoder input lengths in mind to not overlap training and validation sets
+            training_end = validation_start - \
+                self.decoder_target_length - self.encoder_input_length + 1
+
+            # Create the training indices for this subseries and append them to the list
+            subseries_training_indices = range(training_start, training_end)
+            training_indices.extend(subseries_training_indices)
+
+            # The training set of the *next* subseries starts right after the validation set
+            training_start = validation_start + validation_length
+            # The validation set of the subseries ends before the next subseries' training set,
+            # keeping the encoder and decoder input lengths in mind to not overlap the subseries
+            validation_end = training_start - \
+                self.decoder_target_length - self.encoder_input_length + 1
+
+            # Create the validation indices for this subseries and append them to the list
+            subseries_validation_indices = range(
+                validation_start, validation_end)
+            validation_indices.extend(subseries_validation_indices)
+
+        return training_indices, validation_indices
