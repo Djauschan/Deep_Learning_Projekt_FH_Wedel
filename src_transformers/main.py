@@ -67,6 +67,13 @@ def main() -> None:
         Logger.log_text(
             "GPU was either deactivated or is not available, using the CPU for the started pipeline.")
 
+    seed = config["training_parameters"]["seed"]
+    # Setting random seed for torch
+    if seed is not None:
+        torch.manual_seed(seed)
+        if device == torch.device("cuda"):
+            torch.cuda.manual_seed(seed)
+
     model_parameters = config.pop("model_parameters")
     model_name, model_attributes = model_parameters.popitem()
 

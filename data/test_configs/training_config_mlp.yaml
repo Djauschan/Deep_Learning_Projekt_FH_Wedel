@@ -6,11 +6,12 @@ model_parameters:
     hidden_dim: 200
 training_parameters:
   batch_size: 150
-  epochs: 10000
+  epochs: 10
   learning_rate: 0.001
   loss: "mse" # Options: "mse", "rmse", "rmsle"
   optimizer: "adam" # Options: "adam", "sgd"
   momentum: 0.2
+  seed: 69
 dataset_parameters:
   read_all_files: false
   data_usage_ratio: 0.15 # Only the last 50% of the read data are used in the dataset

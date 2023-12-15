@@ -56,20 +56,22 @@ class Trainer:
     model: nn.Module
     logger: Logger
     eval_mode: bool
+    seed: int
 
     @classmethod
     def create_trainer_from_config(
-        cls: type["Trainer"],
-        dataset: MultiSymbolDataset,
-        model: nn.Module,
-        batch_size: int,
-        epochs: int,
-        learning_rate: float,
-        device: torch.device,
-        loss: str = "mse",
-        optimizer: str = "adam",
-        momentum: float = 0,
-        eval_mode: bool = False
+            cls: type["Trainer"],
+            dataset: MultiSymbolDataset,
+            model: nn.Module,
+            batch_size: int,
+            epochs: int,
+            learning_rate: float,
+            device: torch.device,
+            loss: str = "mse",
+            optimizer: str = "adam",
+            momentum: float = 0,
+            eval_mode: bool = False,
+            seed: int = None
     ) -> "Trainer":
         """
         Creates a Trainer instance from an unpacked configuration file.
@@ -89,6 +91,7 @@ class Trainer:
             optimizer (str, optional): Optimizer to use. Defaults to "adam".
             momentum (float, optional): Momentum for the optimizer. Defaults to 0.
             eval_mode (bool, optional): If the model is evaluated, the validation split is set to 1.
+            seed (int, optional): Seed for the random number generator.
 
         Returns:
             Trainer: A Trainer instance with the specified configuration.
@@ -125,6 +128,12 @@ class Trainer:
             optimizer_instance = optim.Adam(
                 model.parameters(), lr=learning_rate)
 
+        # Setting random seed for torch
+        if seed is not None:
+            torch.manual_seed(seed)
+            if device == torch.device("cuda"):
+                torch.cuda.manual_seed(seed)
+
         instance = cls(
             batch_size=batch_size,
             epochs=epochs,
@@ -134,7 +143,8 @@ class Trainer:
             device=device,
             model=model,
             logger=Logger(),
-            eval_mode=eval_mode
+            eval_mode=eval_mode,
+            seed=seed
         )
 
         cls._dataset = dataset
@@ -242,9 +252,11 @@ class Trainer:
                 # Logging loss and charts of results
                 self.logger.log_validation_loss(validation_loss, epoch)
                 self.logger.save_prediction_chart(
-                    predictions=validation_results[0], targets=validation_results[1], epoch=epoch, name="validation_set")
+                    predictions=validation_results[0], targets=validation_results[1], epoch=epoch,
+                    name="validation_set")
                 self.logger.save_horizon_chart(
-                    predictions=validation_results[0], targets=validation_results[1], epoch=epoch, name="validation_set")
+                    predictions=validation_results[0], targets=validation_results[1], epoch=epoch,
+                    name="validation_set")
 
                 # Early stopping
                 if min_loss > validation_loss:
