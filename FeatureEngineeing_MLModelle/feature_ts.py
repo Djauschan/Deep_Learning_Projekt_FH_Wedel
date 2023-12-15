@@ -43,6 +43,15 @@ def create_differenz_value(df):
     return df
 differenz_value = FunctionTransformer(create_differenz_value)
 
+def create_differenz_and_pct_change(df):
+    for col in data_columns:
+        # Berechnung der Differenz
+        df[col + '_Differenz'] = df[col].diff()
+        # Berechnung der prozentualen Änderung
+        df[col + '_PctChange'] = df[col].pct_change() * 100  # Multipliziert mit 100, um es in Prozent auszudrücken
+    return df
+differenz_pct_change_transformer = FunctionTransformer(create_differenz_and_pct_change)
+
 # Drop missing data
 imputer = DropMissingData()
 

@@ -18,8 +18,10 @@ class LinearRegressionModel:
     def fit(self, X_train, y_train):
         self.model.fit(X_train, y_train)
 
-    def evaluate(self, X_test, y_test):
-        predictions = self.model.predict(X_test)
+    def predict(self, X_test):
+        return self.model.predict(X_test)
+
+    def evaluate(self, predictions, y_test):
         evaluation_results = {
             "MAE": mean_absolute_error(y_test, predictions),
             "RMSE": mean_squared_error(y_test, predictions, squared=False),
@@ -27,7 +29,7 @@ class LinearRegressionModel:
             "Median AE": median_absolute_error(y_test, predictions),
         }
         return evaluation_results
-    
+
     def vs (self, X_test, y_test):
         variance_score = {
             "Variance Score": self.model.score(X_test, y_test),
@@ -51,8 +53,7 @@ class RandomForestModel:
     def predict(self, X_test):
         return self.model.predict(X_test)
 
-    def evaluate(self, X_test, y_test):
-        predictions = self.predict(X_test)
+    def evaluate(self, predictions, y_test):
         evaluation_results = {
             "MAE": mean_absolute_error(y_test, predictions),
             "RMSE": mean_squared_error(y_test, predictions, squared=False),
@@ -76,8 +77,10 @@ class GradientBoostingModel:
     def fit(self, X_train, y_train):
         self.model.fit(X_train, y_train)
 
-    def evaluate(self, X_test, y_test):
-        predictions = self.model.predict(X_test)
+    def predict(self, X_test):
+        return self.model.predict(X_test)
+
+    def evaluate(self, predictions, y_test):
         evaluation_results = {
             "MAE": mean_absolute_error(y_test, predictions),
             "RMSE": mean_squared_error(y_test, predictions, squared=False),
@@ -105,12 +108,11 @@ class SVMModel:
     def predict(self, X_test):
         return self.model.predict(X_test)
 
-    def evaluate(self, X_test, y_test):
-        predictions = self.predict(X_test)
+    def evaluate(self, predictions, y_test):
         evaluation_results = {
             "MAE": mean_absolute_error(y_test, predictions),
             "RMSE": mean_squared_error(y_test, predictions, squared=False),
             "MSLE": mean_squared_log_error(y_test, predictions),
-            "Median AE": median_absolute_error(y_test, predictions)
+            "Median AE": median_absolute_error(y_test, predictions),
         }
         return evaluation_results
