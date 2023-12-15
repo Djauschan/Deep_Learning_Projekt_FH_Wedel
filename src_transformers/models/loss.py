@@ -23,11 +23,8 @@ class RMSELoss(nn.Module):
         Returns:
             torch.tensor: The RMSE loss.
         """
-        # Ensure that the values are not negative to avoid NaNs
-        prediction = torch.clamp(prediction, min=0)
-        target = torch.clamp(target, min=0)
 
-        mse_loss = nn.MSELoss()(prediction, target)
+        mse_loss = nn.MSELoss()(prediction, target, min=0.0001)
         rmse_loss = torch.sqrt(mse_loss)
         return rmse_loss
 
@@ -52,8 +49,8 @@ class RMSLELoss(nn.Module):
             torch.tensor: The RMSLE loss.
         """
         # Ensure that the values are not negative to avoid NaNs
-        prediction = torch.clamp(prediction, min=0)
-        target = torch.clamp(target, min=0)
+        prediction = torch.clamp(prediction, min=0.0001)
+        target = torch.clamp(target, min=0.0001)
 
         # Applying the logarithm to prediction and target
         log_prediction = torch.log1p(prediction)
