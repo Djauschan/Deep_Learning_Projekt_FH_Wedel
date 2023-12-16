@@ -36,7 +36,7 @@ def generate_scaler(config: dict) -> None:
         data = txt_reader.read_next_txt()
         while data is not None:
             symbol = data.iloc[0]["symbol"]
-            if data.iloc[0]['type'] == 'stock':
+            if data.iloc[0]['type'] == 'stock' or data.iloc[0]['type'] == 'ETF':
                 scaler_volume = scaler()
                 scaler_volume.fit(data['volume'].values.reshape(-1, 1))
                 scaler_dict[f'volume {symbol}'] = scaler_volume

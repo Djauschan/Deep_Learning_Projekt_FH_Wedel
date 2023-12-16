@@ -23,8 +23,7 @@ class RMSELoss(nn.Module):
         Returns:
             torch.tensor: The RMSE loss.
         """
-
-        mse_loss = nn.MSELoss()(prediction, target, min=0.0001)
+        mse_loss = nn.MSELoss()(prediction, target)
         rmse_loss = torch.sqrt(mse_loss)
         return rmse_loss
 

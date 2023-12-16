@@ -3,48 +3,57 @@ model_parameters:
   torch_transformer:
     num_heads: 1
     num_layers: 1
-    d_ff: 100
-    seq_len_encoder: 30
-    seq_len_decoder: 30
-    dropout: 0.5
+    d_ff: 20
+    seq_len_encoder: 10
+    seq_len_decoder: 10
+    dropout: 0.2
 training_parameters:
-  batch_size: 50
-  epochs: 500
+  batch_size: 200
+  epochs: 100
   learning_rate: 0.0025
-  loss: "mse" #Options: "mse", "rmse", "rmsle"
+  loss: "rmse" #Options: "mse", "rmse", "rmsle"
+  seed: 42
 dataset_parameters:
   read_all_files: false
-  data_usage_ratio: 0.02 # Only the last 1% of the read data are used in the dataset
-  subseries_amount: 5 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
+  data_usage_ratio: 0.02 # Only the last 2% of the read data are used in the dataset
+  subseries_amount: 4 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
   validation_split: 0.1 # The last 10% of timestamps in a subseries are used for validation
   create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol.csv"
   encoder_symbols:
   # stocks
-    # - "AAPL"
-    # - "AAL"
-    # - "AMD"
-    # - "C"
-    - "MRNA"
-    - "NIO"
-    # - "NVDA"
-    # - "SNAP"
-    # - "SQ"
-    # - "TSLA"
+    - "AAPL" # Apple
+    - "AAL" # American Airlines
+    - "AMD" # Advanced Micro Devices
+    - "C" # Citigroup
+    - "MRNA" # Moderna
+    # - "NIO" # NIO
+    # - "NVDA" # NVIDIA
+    # - "SNAP" # Snap
+    # - "SQ" # Block
+    # - "TSLA" # Tesla
   # ETFs
-    # - "ACWI"
+    - "ACWI" # iShares MSCI ACWI ETF
   # indices
-    # - "DXY"
-    # - "SPX"
-    # - "DJCIGC"
-    # - "DJCISI"
-    # - "DJCIEN"
-    # - "DJCIIK"
-    # - "DJI"
-    # - "DJINET"
-    # - "COMP"
-    # - "W5000"
+    - "DXY" # US Dollar Index
+    - "SPX" # S&P 500
+    - "DJCIGC" # Dow Jones Commodity Index Gold
+    - "DJCISI" # Dow Jones Commodity Index Silver
+    - "DJCIEN" # Dow Jones Commodity Index Energy
+    - "DJCIIK" # Dow Jones Commodity Index Nickel
+    - "DJI" # Dow Jones Industrial Average
+    - "DJINET" # Dow Jones Internet Composite Index
+    - "COMP" # NASDAQ Composite
+    - "W5000" # FT Wilshire 5000 Full Cap
   decoder_symbols:
-    - "MRNA"
-    - "NIO"
+    - "AAPL" # Apple
+    - "AAL" # American Airlines
+    - "AMD" # Advanced Micro Devices
+    - "C" # Citigroup
+    - "MRNA" # Moderna
+    # - "NIO" # NIO
+    # - "NVDA" # NVIDIA
+    # - "SNAP" # Snap
+    # - "SQ" # Block
+    # - "TSLA" # Tesla
