@@ -21,7 +21,7 @@ for i in symbols:
     print(i)
 
 # 0 = AAL, 1 = AAPL, ...   #von den 10 datas
-data.current_file_idx = 2
+data.current_file_idx = 1
 df = data.read_next_txt()
 print("\nData:", df.symbol[0], "\n")
 
@@ -39,15 +39,17 @@ df_daily = cleaner.daily()
 df_normal
 
 data_columns = df_normal.columns
-print(data_columns)
+print(data_columns, "\n")
 
 
 #features + pipeline
-data = df_hourly
+data = df_normal
 
 # Anwendung der Pipeline
 pipeline = ClassPipeline(data)
+
 data_pip = pipeline.fit_transform(data, 'test')
+print(data_pip.columns)
 print(data_pip)
 print("pip läuft \n")
 
@@ -81,6 +83,22 @@ print(train_data)
 print(train_data.columns)
 print("split pip done \n") #nur zum testen
 
+######## Prüfen von NaN / zu große Werte / oder infintiv value ################
+# Überprüfen auf extrem große Werte
+max_float64 = np.finfo(np.float64).max
+min_float64 = np.finfo(np.float64).min
+print('Maximaler Wert in train_data:', train_data.max().max())
+print('Maximaler Wert in test_data:', test_data.max())
+print('Werte in train_data außerhalb des float64 Bereichs:', ((train_data > max_float64) | (train_data < min_float64)).sum().sum())
+print('Werte in test_data außerhalb des float64 Bereichs:', ((test_data > max_float64) | (test_data < min_float64)).sum())
+
+print('Anzahl der NaN-Werte in train_data:', train_data.isna().sum().sum()) # Überprüfung auf NaN Werte
+print('Anzahl der unendlichen Werte in train_data:', np.isinf(train_data).sum().sum()) # Überprüfung auf unendliche Werte
+print('Anzahl der NaN-Werte in test_data:', test_data.isna().sum().sum()) # Überprüfung auf NaN Werte
+print('Anzahl der unendlichen Werte in test_data:', np.isinf(test_data).sum().sum()) # Überprüfung auf unendliche Werte
+print("\prüfung done \n")
+#########################
+
 # Feature (X = unabhängige Variable) und Ziel (y = abhängige Variable) 
 # Zielvariable 'Close'
 X_train = train_data[train_data.index < test_data.index.min()]
@@ -90,8 +108,6 @@ y_train = train_data[train_data.index < test_data.index.min()]['close']
 y_test = test_data[test_data.index >= test_data.index.min()]['close']
 
 print("done, now ml-model \n") #nur zum testen
-
-
 
 ####### Verwendung der ML-Modelle #########
 # Initialisierung und Training des linearen Regressionsmodells
@@ -104,7 +120,12 @@ lr_coefficients = lr_model.coef()
 print("lr done\n")
 
 # Initialisierung und Training des Random Forest-Modells
-rf_model = RandomForestModel()
+rf_model = RandomForestModel( # Hyperparameter beim nächsten mal weiter anpassen
+    n_estimators=10,      # Anpassen der Anzahl der Bäume im Wald
+    max_depth=10,         # Anpassen der maximalen Tiefe der Bäume (None bedeutet keine Begrenzung)
+    min_samples_split=2,  # Anpassen der Mindestanzahl von Beispielen, die für einen Split erforderlich sind
+    min_samples_leaf=1    # Anpassen der Mindestanzahl von Beispielen in einem Blattknoten
+)
 rf_model.fit(X_train, y_train)
 rf_predictions = rf_model.predict(X_test)
 rf_evaluation_results = rf_model.evaluate(rf_predictions, y_test)
@@ -112,7 +133,11 @@ rf_feature_importances = rf_model.fi()
 print("rf done\n")
 
 # Initialisierung und Training des Gradient Boosting-Modells
-gbm_model = GradientBoostingModel()
+gbm_model = GradientBoostingModel( # Hyperparameter beim nächsten mal weiter anpassen
+    n_estimators=10,    # Die Anzahl der Bäume im GBM-Ensemble
+    learning_rate=0.1,  # Die Lernrate, die angibt, wie stark jeder Baum die Vorhersagen beeinflusst
+    max_depth=3         # Die maximale Tiefe der Bäume im GBM
+    )
 gbm_model.fit(X_train, y_train)
 gbm_predictions = gbm_model.predict(X_test)
 gbm_evaluation_results = gbm_model.evaluate(gbm_predictions, y_test)

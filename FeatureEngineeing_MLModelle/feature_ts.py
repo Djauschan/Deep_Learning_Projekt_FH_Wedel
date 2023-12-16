@@ -43,20 +43,43 @@ def create_differenz_value(df):
     return df
 differenz_value = FunctionTransformer(create_differenz_value)
 
-def create_differenz_and_pct_change(df):
+def create_differenz_and_pct_change(data):
+    df = data.copy()
     for col in data_columns:
-        # Berechnung der Differenz
-        df[col + '_Differenz'] = df[col].diff()
-        # Berechnung der prozentualen Änderung
-        df[col + '_PctChange'] = df[col].pct_change() * 100  # Multipliziert mit 100, um es in Prozent auszudrücken
+        if col in data_columns:
+            df.loc[:, col + '_Differenz'] = df[col].diff() # Berechnung der Differenz
+            df.loc[:, col + '_PctChange'] = df[col].pct_change() * 100 # Berechnung der prozentualen Änderung # Multipliziert mit 100, um es in Prozent auszudrücken
     return df
 differenz_pct_change_transformer = FunctionTransformer(create_differenz_and_pct_change)
 
 # Drop missing data
 imputer = DropMissingData()
 
+#drop infinitiv valuess
+def remove_infinite_values(df):
+    # Ersetzt sowohl positive als auch negative unendliche Werte durch NaN
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df.dropna(inplace=True) # Entfernt alle Zeilen mit NaN-Werten
+    return df
+remove_infinite = FunctionTransformer(remove_infinite_values)
+
 # Drop original time series
 drop_ts = DropFeatures(features_to_drop=['open', 'high', 'low', 'close', 'volume'])
+
+
+
+####################################################################
+### df normal / minütlich && if dtf is made
+def create_window_feature(data):
+    df = data.copy()
+    for col in data_columns:
+        if col in data_columns:
+            # Berechnen des durchschnittlichen Wertes der Spalte pro Stunde
+            average_value_per_hour = df.groupby('hour')[col].transform('mean')
+            df[col + '_average_per_hour'] = average_value_per_hour
+
+    return df
+window_feature_transformer = FunctionTransformer(create_window_feature) #kw_args={'data_columns': data_columns}
 
 ####################################################################
 ### df hourly 
@@ -83,7 +106,7 @@ def replace_weekend_volume_with_zero(data):
     # Kopie des DataFrame erstellen, um das Original nicht zu ändern
     df = data.copy()
     # Ersetze das 'Volume'-Attribut auf 0 für Wochenenden (wenn 'weekend' gleich 1 ist)
-    df.loc[df['weekend'] == 1, 'Volume'] = 0
+    df.loc[df['weekend'] == 1, 'volume'] = 0
     return df
 replace_weekend_volume = FunctionTransformer(replace_weekend_volume_with_zero)
 
