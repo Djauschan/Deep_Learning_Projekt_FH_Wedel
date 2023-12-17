@@ -90,6 +90,27 @@ services:
         "${CONFIG_PATH}"
       ]
 
+  # Service to start auto-sklearn
+  auto_sklearn:
+
+    # This service extends the base_service
+    extends:
+      service: base_service
+
+    # Map port 5004 on the host to port 5000 in the container
+    ports:
+      - 5004:5000
+
+    # Specify the command to run when the container starts
+    # This command starts the auto-sklearn process
+    command:
+      [
+        "python",
+        "-m",
+        "src_transformers.models.auto_sklearn",
+        "${CONFIG_PATH}"
+      ]
+
   # Service to monitor training with tensorboard
   tensorboard:
 
