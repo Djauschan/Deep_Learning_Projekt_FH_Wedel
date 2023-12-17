@@ -1,8 +1,9 @@
 # syntax=docker/dockerfile:1
 
-# Use the official Python image with a specified version 3.11.6
-ARG PYTHON_VERSION=3.11.6
-FROM python:${PYTHON_VERSION}-slim as base
+# Use the official Python image with a specified version.
+# The version 3.9 is the latest version that is compatible with the auto-sklearn image.
+ARG PYTHON_VERSION=3.9
+FROM python:${PYTHON_VERSION} as base
 
 # Prevent Python from writing .pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1

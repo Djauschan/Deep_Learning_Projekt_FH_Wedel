@@ -7,3 +7,4 @@ PyYAML
 tqdm
 plotly
 scikit-learn
+auto-sklearn

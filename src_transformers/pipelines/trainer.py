@@ -4,7 +4,7 @@ This module contains the Trainer class which is used to train a PyTorch model.
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Final
+from typing import Final, Union
 
 import numpy as np
 import torch
@@ -50,8 +50,8 @@ class Trainer:
     batch_size: int
     epochs: int
     learning_rate: float
-    loss: nn.MSELoss | nn.CrossEntropyLoss | RMSELoss | RMSLELoss
-    optimizer: optim.SGD | optim.Adam
+    loss: Union[nn.MSELoss, nn.CrossEntropyLoss, RMSELoss, RMSLELoss]
+    optimizer: Union[optim.SGD, optim.Adam]
     device: torch.device
     model: nn.Module
     logger: Logger
