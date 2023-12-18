@@ -78,9 +78,8 @@
                   <select>
                     <option value="Option 1" selected>CNN</option>
                     <option value="Option 2">ANN</option>
-                    <option value="Option 1">Option 1</option>
-                    <option value="Option 2">Option 2</option>
-                    <option value="Option 3">Option 3</option>
+                    <option value="Option 1">Transformer</option>
+                    <option value="Option 2">LSTM</option>
                   </select>
                 </div>
               </div>
@@ -133,7 +132,7 @@
                       d="M670.824 644.34c-15.27-8.884-34.862-3.708-43.75 11.57-17.256 29.662-49.088 48.090-83.074 48.090h-128c-41.716 0-77.286-26.754-90.496-64h154.496c17.672 0 32-14.326 32-32s-14.328-32-32-32h-160v-64h160c17.672 0 32-14.328 32-32s-14.328-32-32-32h-154.496c13.21-37.246 48.78-64 90.496-64h128c33.986 0 65.818 18.426 83.074 48.090 8.888 15.276 28.478 20.456 43.752 11.568 15.276-8.888 20.456-28.476 11.568-43.752-28.672-49.288-81.702-79.906-138.394-79.906h-128c-77.268 0-141.914 55.056-156.78 128h-35.22c-17.672 0-32 14.328-32 32s14.328 32 32 32h32v64h-32c-17.672 0-32 14.326-32 32s14.328 32 32 32h35.22c14.866 72.944 79.512 128 156.78 128h128c56.692 0 109.72-30.62 138.394-79.91 8.888-15.276 3.708-34.864-11.57-43.75z">
                     </path>
                   </svg>
-                  <button type="button" class="button">Starte Traiding</button>
+                  <button type="button" class="button" @click="simulateProgress">Prognose</button>
                 </div>
               </div>
             </div>
@@ -142,26 +141,82 @@
             <div class="home-container37">
               <div class="home-container38">
                 <div class="home-container39">
+                  <DxChart id="chart" :data-source="dataSource" title="Predicted Stock Price">
+                   <DxCommonSeriesSettings argument-field="date" type="stock" />
+                    <DxSeries name="E-Mart" open-value-field="o" high-value-field="h" low-value-field="l" close-value-field="c">
+                     <DxReduction color="red" />
+                    </DxSeries>
+                    <DxArgumentAxis :workdays-only="true">
+                      <DxLabel format="shortDate" />
+                    </DxArgumentAxis>
+                    <DxValueAxis :tick-interval="1">
+                      <DxTitle text="US dollars" />
+                      <DxLabel>
+                        <DxFormat :precision="0" type="currency" />
+                      </DxLabel>
+                    </DxValueAxis>
+                    <DxExport :enabled="true" />
+                    <DxTooltip :enabled="true" :customize-tooltip="customizeTooltip" location="edge" />
+                  </DxChart>
                 </div>
               </div>
             </div>
             <div class="home-container40">
-              <div class="home-container41">
-                <span class="home-text12">Besitzer</span>
-                <span class="home-text13">Gültig bis</span>
-                <span class="home-text14">Kartennummer</span>
+              <div class="home-container43">
+                <span>Model Calculating...</span>
+                <ProgressBar ref="progressBar" />
               </div>
             </div>
           </div>
           <div class="home-container42">
             <div class="home-container43">
               <div class="home-container44">
-                <div class="home-container45">
+                <div class="home-container45">  
+                  <DxChart id="chart" :data-source="dataSource" title="Past Stock Price">
+                   <DxCommonSeriesSettings argument-field="date" type="stock" />
+                    <DxSeries name="E-Mart" open-value-field="o" high-value-field="h" low-value-field="l" close-value-field="c">
+                     <DxReduction color="red" />
+                    </DxSeries>
+                    <DxArgumentAxis :workdays-only="true">
+                      <DxLabel format="shortDate" />
+                    </DxArgumentAxis>
+                    <DxValueAxis :tick-interval="1">
+                      <DxTitle text="US dollars" />
+                      <DxLabel>
+                        <DxFormat :precision="0" type="currency" />
+                      </DxLabel>
+                    </DxValueAxis>
+                    <DxExport :enabled="true" />
+                    <DxTooltip :enabled="true" :customize-tooltip="customizeTooltip" location="edge" />
+                  </DxChart>
                 </div>
               </div>
             </div>
-            <div class="home-container46"></div>
-            <div class="home-container47"></div>
+            <div class="home-container32">
+              <div class="home-container33">
+                <div class="home-container34">
+                  <span>Der Agent empfiehlt:</span>
+                </div>
+                <button type="button" class="button">Aktie Kaufen!</button>
+              </div>
+            </div>
+            <div class="home-container32">
+              <div class="home-container33">
+                <div class="home-container34">
+                  <span>Zuletzt angesehen</span>
+                </div>
+                <div class="home-container35">
+                 <select>
+                   <option value="Option 1" selected>
+                     E-Mart
+                   </option>
+                   <option value="Option 2">
+                    Amazon
+                   </option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -170,13 +225,44 @@
   </div>
 </template>
 
-<script>
+<script>import DxChart, {
+  DxCommonSeriesSettings,
+  DxSeries,
+  DxReduction,
+  DxArgumentAxis,
+  DxLabel,
+  DxFormat,
+  DxValueAxis,
+  DxTitle,
+  DxExport,
+  DxTooltip,
+} from 'devextreme-vue/chart';
+
+import { dataSource } from './data.js';
 import Header from './Header.vue'
+import ProgressBar from "@/components/ProgressBar.vue";
 
 export default {
   name: "Home",
   components: {
-    Header
+    Header,
+    DxChart,
+    DxCommonSeriesSettings,
+    DxSeries,
+    DxReduction,
+    DxArgumentAxis,
+    DxLabel,
+    DxFormat,
+    DxValueAxis,
+    DxTitle,
+    DxExport,
+    DxTooltip,
+    ProgressBar,
+  },
+  data() {
+    return {
+      dataSource,
+    };
   },
   methods: {
     checkAuth() {
@@ -185,6 +271,27 @@ export default {
     logout() {
       localStorage.logout();
       this.$router.push("/login");
+    },
+    customizeTooltip(pointInfo) {
+      return {
+        text: `Open: $${pointInfo.openValue}<br/>
+                Close: $${pointInfo.closeValue}<br/>
+                High: $${pointInfo.highValue}<br/>
+                Low: $${pointInfo.lowValue}<br/>`,
+      };
+    },
+    simulateProgress() {
+      let progress = 0;
+      const progressBar = this.$refs.progressBar;
+
+      const intervalId = setInterval(() => {
+        progress += 10;
+        progressBar.updateProgress(progress);
+
+        if (progress >= 100) {
+          clearInterval(intervalId);
+        }
+      }, 500);
     },
   },
   metaInfo: {
@@ -209,7 +316,9 @@ export default {
   flex-direction: column;
 }
 
-
+#chart {
+  height: 100%;
+}
 
 home-header { 
   width: 100vw;
@@ -702,7 +811,7 @@ home-header {
   border-width: 1px;
   flex-direction: row;
   justify-content: flex-start;
-  background-color: #244870;
+  background-color: #306197;
 }
 
 .home-container19 {
@@ -777,9 +886,13 @@ home-header {
 
 .home-container25 {
   width: 214px;
-  height: 89px;
+  height: 87px;
   display: flex;
+  box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
+  border-color: var(--dl-color-gray-black);
+  border-style: groove;
+  border-width: 1px;
   flex-direction: row;
   justify-content: center;
   background-color: #7e7e7e;
@@ -837,8 +950,12 @@ home-header {
 .home-container29 {
   width: 200px;
   height: 89px;
+  box-shadow: 5px 5px 10px 0px #000000;
   display: flex;
   align-items: center;
+  border-color: var(--dl-color-gray-black);
+  border-style: groove;
+  border-width: 1px;
   flex-direction: row;
   justify-content: center;
   background-color: #7e7e7e;
@@ -1032,7 +1149,7 @@ home-header {
 .home-container43 {
   flex: 0 0 auto;
   width: auto;
-  height: auto;
+  height: 20vh;
   display: flex;
   align-items: center;
   margin-left: var(--dl-space-space-unit);
@@ -1045,13 +1162,13 @@ home-header {
 }
 
 .home-container44 {
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: 20vh;
   box-shadow: 5px 5px 10px 0px #000000;
 }
 
 .home-container45 {
-  display: contents;
+  height: 20vh;
 }
 
 .home-container46 {
