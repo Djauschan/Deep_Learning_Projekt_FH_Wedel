@@ -28,16 +28,18 @@ data_dir_path = os.path.join(
 output_dir_path = os.path.join(data_dir_path, 'output', 'images')
 
 
-def get_data(config: dict) -> None:
+def get_data(config: dict) -> tuple[np.array, np.array, np.array, np.array]:
     """
-    Visualizes the files and saves the result in the directory data/output
+    Load data according to the configuration.
+    The data is loaded with the trainer as Pytorch dataloader for comparability 
+    and then converted into Numpy arrays to be used with Sklearn.
 
     Args:
-        config (dict): Dictionary for the configuration of data preprocessing.
-    """
-    # Get the parameters for the data set.
-    data_parameters = config["dataset_parameters"]
+        config (dict): The configuration dictionary.
 
+    Returns:
+        tuple[np.array, np.array, np.array, np.array]: Training and test data as Numpy arrays.
+    """
     model_parameters = config.pop("model_parameters")
     model_name, model_attributes = model_parameters.popitem()
 
@@ -47,9 +49,17 @@ def get_data(config: dict) -> None:
     else:
         device = torch.device('cpu')
 
-    dataset = MultiSymbolDataset.create_from_config(encoder_input_length=model_attributes.get("seq_len_encoder"), decoder_target_length=model_attributes.get("seq_len_decoder"), **config.pop("dataset_parameters"))
+    dataset = MultiSymbolDataset.create_from_config(
+        encoder_input_length=model_attributes.get("seq_len_encoder"),
+        decoder_target_length=model_attributes.get("seq_len_decoder"),
+        **config.pop("dataset_parameters"))
 
-    model = ModelService.create_model(device=device, encoder_dimensions=dataset.encoder_dimensions, decoder_dimensions=dataset.decoder_dimensions, model_name=model_name, model_attributes=model_attributes)
+    model = ModelService.create_model(
+        device=device,
+        encoder_dimensions=dataset.encoder_dimensions,
+        decoder_dimensions=dataset.decoder_dimensions,
+        model_name=model_name,
+        model_attributes=model_attributes)
 
     trainer = Trainer.create_trainer_from_config(
         dataset=dataset,
@@ -57,9 +67,10 @@ def get_data(config: dict) -> None:
         device=device,
         **config.pop("training_parameters"))
 
-    # Creating training and validation data loaders from the given data source.
+    # Creating training and validation according to the configuration.
     train_loader, validation_loader = trainer.setup_dataloaders()
 
+    # Transform the Pytorch dataloaders into Numpy arrays.
     train_inputs, train_targets = [], []
     val_inputs, val_targets = [], []
 
@@ -80,6 +91,32 @@ def get_data(config: dict) -> None:
     return train_inputs, train_targets, val_inputs, val_targets
 
 
+def plot_prediction(features_count: int, prediction: np.array, target: np.array, mode: str) -> None:
+    """
+    Plot the prediction and the target for each feature.
+
+    Args:
+        features_count (int): The number of target features.
+        prediction (np.array): Prediction for the first element of each sample sequence.
+        target (np.array): Target for the first element of each sample sequence.
+        mode (str): The mode of the plot. Either 'train' or 'test'.
+    """
+
+    for i in range(features_count):
+        plt.figure(figsize=(10, 6))
+        plt.plot(target[:, i], label='Actual')
+        plt.plot(prediction[:, i], label='Predicted')
+        plt.title(f'Feature {i+1}')
+        plt.xlabel('Sample')
+        plt.ylabel('Value')
+        plt.legend()
+        plt.show()
+        plt.savefig(os.path.join(output_dir_path, f'feature_{mode}_{i+1}.png'))
+
+        # Close plot to reduce memory usage
+        plt.close()
+
+
 if __name__ == "__main__":
 
     # Check if the path to the configuration file was passed as an argument.
@@ -90,13 +127,11 @@ if __name__ == "__main__":
     with open(config_file_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
-    # Get data.
+    # Load data as Numpy arrays.
     train_inputs, train_targets, test_inputs, test_targets = get_data(config)
 
     # Get initial shapes.
-    train_inputs_shape = train_inputs.shape
     train_targets_shape = train_targets.shape
-    test_inputs_shape = test_inputs.shape
     test_targets_shape = test_targets.shape
 
     # Transform a list of sequences of samples into a list of samples each containing a sequence.
@@ -105,12 +140,16 @@ if __name__ == "__main__":
     test_inputs = test_inputs.reshape(test_inputs.shape[0], -1)
     test_targets = test_targets.reshape(test_targets.shape[0], -1)
 
-    # multiply all walues by 1000 to get significant loss
+    # Multiply all walues by 1000 to get significant loss
+    # No model could be found either with or without this scaling.
     train_inputs = train_inputs * 1000
     train_targets = train_targets * 1000
     test_inputs = test_inputs * 1000
     test_targets = test_targets * 1000
 
+    # Automatically create a regession ensemble with Auto-Sklearn.
+    # To do this, 100GB of memory is allocated to prevent an error message occurring due to insufficient memory.
+    # One job is defined because otherwise there may be race conditions when accessing files.
     automl = autosklearn.regression.AutoSklearnRegressor(memory_limit=1024 * 100, n_jobs=1)
     automl.fit(train_inputs, train_targets)
     print(automl.leaderboard())
@@ -126,40 +165,12 @@ if __name__ == "__main__":
     train_predictions = train_predictions.reshape(train_targets_shape)
     train_targets = train_targets.reshape(train_targets_shape)
 
-    # Plot test
+    # Plot test predictions vs targets for the first elemnt of each sample sequence.
     test_targets_first = test_targets[:, 0, :]
     test_predictions_first = test_predictions[:, 0, :]
+    plot_prediction(test_targets_shape[2], test_predictions_first, test_targets_first, "test")
 
-    # Create 5 line plots
-    for i in range(test_targets_shape[2]):
-        plt.figure(figsize=(10, 6))
-        plt.plot(test_targets_first[:, i], label='Actual')
-        plt.plot(test_predictions_first[:, i], label='Predicted')
-        plt.title(f'Feature {i+1}')
-        plt.xlabel('Sample')
-        plt.ylabel('Value')
-        plt.legend()
-        plt.show()
-        plt.savefig(os.path.join(output_dir_path, f'feature_test_{i+1}.png'))
-
-        # Close plot to reduce memory usage
-        plt.close()
-
-    # Plot train
+    # Plot train predictions vs targets for the first elemnt of each sample sequence.
     train_targets_first = train_targets[:, 0, :]
     train_predictions_first = train_predictions[:, 0, :]
-
-    # Create 5 line plots
-    for i in range(train_targets_shape[2]):
-        plt.figure(figsize=(10, 6))
-        plt.plot(train_targets_first[:, i], label='Actual')
-        plt.plot(train_predictions_first[:, i], label='Predicted')
-        plt.title(f'Feature {i+1}')
-        plt.xlabel('Sample')
-        plt.ylabel('Value')
-        plt.legend()
-        plt.show()
-        plt.savefig(os.path.join(output_dir_path, f'feature_train_{i+1}.png'))
-
-        # Close plot to reduce memory usage
-        plt.close()
+    plot_prediction(train_targets_shape[2], train_predictions_first, train_targets_first, "train")
