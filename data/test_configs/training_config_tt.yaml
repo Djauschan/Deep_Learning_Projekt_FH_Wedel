@@ -1,23 +1,26 @@
 use_gpu: true
 model_parameters:
   torch_transformer:
-    num_heads: 1
+    num_heads: 2
     num_layers: 1
-    d_ff: 20
-    seq_len_encoder: 10
-    seq_len_decoder: 10
+    d_ff: 30
+    seq_len_encoder: 20
+    seq_len_decoder: 20
     dropout: 0.2
 training_parameters:
   batch_size: 200
   epochs: 100
   learning_rate: 0.0025
-  loss: "rmse" #Options: "mse", "rmse", "rmsle"
+  loss: "mse" #Options: "mse", "rmse", "rmsle"
   seed: 42
 dataset_parameters:
   read_all_files: false
-  data_usage_ratio: 0.01 # Only the last 1% of the read data are used in the dataset
+  last_of_day: false # Only the last timestamp of each day is used
+  first_of_hour: false # Only the first timestamp of each hour is used
+  first_of_half_hour: false # Only the first timestamp of each half hour is used
+  data_usage_ratio: 0.2 # Only the last 1% of the read data are used in the dataset
   subseries_amount: 4 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
-  validation_split: 0.1 # The last 10% of timestamps in a subseries are used for validation
+  validation_split: 0.15 # The last 10% of timestamps in a subseries are used for validation
   create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol.csv"
@@ -36,16 +39,16 @@ dataset_parameters:
   # ETFs
     # - "ACWI" # iShares MSCI ACWI ETF
   # indices
-    # - "DXY" # US Dollar Index
-    # - "SPX" # S&P 500
-    # - "DJCIGC" # Dow Jones Commodity Index Gold
-    # - "DJCISI" # Dow Jones Commodity Index Silver
-    # - "DJCIEN" # Dow Jones Commodity Index Energy
-    # - "DJCIIK" # Dow Jones Commodity Index Nickel
-    # - "DJI" # Dow Jones Industrial Average
-    # - "DJINET" # Dow Jones Internet Composite Index
-    # - "COMP" # NASDAQ Composite
-    # - "W5000" # FT Wilshire 5000 Full Cap
+    - "DXY" # US Dollar Index
+    - "SPX" # S&P 500
+    - "DJCIGC" # Dow Jones Commodity Index Gold
+    - "DJCISI" # Dow Jones Commodity Index Silver
+    - "DJCIEN" # Dow Jones Commodity Index Energy
+    - "DJCIIK" # Dow Jones Commodity Index Nickel
+    - "DJI" # Dow Jones Industrial Average
+    - "DJINET" # Dow Jones Internet Composite Index
+    - "COMP" # NASDAQ Composite
+    - "W5000" # FT Wilshire 5000 Full Cap
   decoder_symbols:
     - "AAPL" # Apple
     - "AAL" # American Airlines
