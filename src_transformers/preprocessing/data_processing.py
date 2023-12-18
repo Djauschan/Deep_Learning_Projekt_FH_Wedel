@@ -58,17 +58,9 @@ def add_time_information(df: pd.DataFrame) -> pd.DataFrame:
     df['last of day'] = df.groupby(
         df['timestamp'].dt.date).cumcount(ascending=False) == 0
 
-    # It is checked whether a transaction is the last of an hour or an half hour.
-    # Check if a timestamp is the first of an hour
-    df['first of hour'] = df.groupby([df['timestamp'].dt.date, df['timestamp'].dt.hour]).cumcount() == 0
-    # Check if a timestamp is the first of a half hour
-    df['first of half hour'] = df.groupby([df['timestamp'].dt.date, df['timestamp'].dt.hour, df['timestamp'].dt.minute // 30]).cumcount() == 0
-
     # Convert boolean to integer.
     df['first of day'] = df['first of day'].astype(int)
     df['last of day'] = df['last of day'].astype(int)
-    df['first of hour'] = df['first of hour'].astype(int)
-    df['first of half hour'] = df['first of half hour'].astype(int)
 
     # Convert python time to posix time.
     df['posix_time'] = df['timestamp'].apply(

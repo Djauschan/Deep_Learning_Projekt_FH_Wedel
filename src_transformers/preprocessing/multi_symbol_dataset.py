@@ -58,9 +58,6 @@ class MultiSymbolDataset(Dataset):
                            decoder_symbols: list[str],
                            encoder_input_length: int,
                            decoder_target_length: int,
-                           last_of_day: bool,
-                           first_of_hour: bool,
-                           first_of_half_hour: bool,
                            scaler: str = "MinMaxScaler"):
         """
         This method either creates a new MultiSymbolDataset by preprocessing financial data for
@@ -77,9 +74,6 @@ class MultiSymbolDataset(Dataset):
             decoder_symbols (list[str]): The symbols to use for the decoder input.
             encoder_input_length (int): The length of the encoder input sequence.
             decoder_target_length (int): The length of the decoder target sequence.
-            last_of_day (bool): Whether to only use the last timestamp of each day.
-            first_of_hour (bool): Whether to only use the first timestamp of each hour.
-            first_of_half_hour (bool): Whether to only use the first timestamp of each half hour.
             scaler (str, optional): The scaler to use for the data. Defaults to "MinMaxScaler".
 
         Returns:
@@ -110,10 +104,6 @@ class MultiSymbolDataset(Dataset):
             data_df = add_time_information(data_df)
             Logger.log_text(
                 "Added more precise time information to the dataframe.")
-
-                data_df['group'] = data_df['first of half hour'].cumsum()
-                data_df['Test'] = data_df.groupby('group')['close W5000'].cumsum()
-                data_df = data_df[data_df['first of half hour'] == 1]
 
             # If the number of columns is odd, a column with zeros is added.
             # This is necessary because the number of columns must be even for the

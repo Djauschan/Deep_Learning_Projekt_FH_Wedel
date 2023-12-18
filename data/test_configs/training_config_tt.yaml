@@ -15,9 +15,6 @@ training_parameters:
   seed: 42
 dataset_parameters:
   read_all_files: false
-  last_of_day: false # Only the last timestamp of each day is used
-  first_of_hour: false # Only the first timestamp of each hour is used
-  first_of_half_hour: false # Only the first timestamp of each half hour is used
   data_usage_ratio: 0.2 # Only the last 1% of the read data are used in the dataset
   subseries_amount: 4 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
   validation_split: 0.15 # The last 10% of timestamps in a subseries are used for validation
