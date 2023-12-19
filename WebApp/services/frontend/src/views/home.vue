@@ -6,11 +6,6 @@
         <div class="home-container01">
           <span class="home-logo">Alles auf einen Blick!</span>
         </div>
-        <svg viewBox="0 0 1024 1024" class="home-icon">
-          <path
-            d="M682 726v-256q0-82-46-137t-124-55-124 55-46 137v256h340zM768 682l86 86v42h-684v-42l86-86v-212q0-100 51-174t141-96v-30q0-26 18-45t46-19 46 19 18 45v30q90 22 141 96t51 174v212zM512 938q-34 0-60-25t-26-59h172q0 34-26 59t-60 25z">
-          </path>
-        </svg>
         <div class="home-container02">
           <div data-thq="thq-navbar-nav" class="home-desktop-menu"></div>
         </div>
@@ -68,54 +63,67 @@
           <div class="home-container20">
             <div class="home-container21">
               <div class="home-container22">
-                <div class="home-container23"><span>aktives Modell</span></div>
-                <div class="home-container24">
-                  <svg viewBox="0 0 1024 1024" class="home-icon26">
-                    <path
-                      d="M512 682.667h-341.333c-11.776 0-22.4-4.736-30.165-12.501s-12.501-18.389-12.501-30.165v-426.667c0-11.776 4.736-22.4 12.501-30.165s18.389-12.501 30.165-12.501h682.667c11.776 0 22.4 4.736 30.165 12.501s12.501 18.389 12.501 30.165v426.667c0 11.776-4.736 22.4-12.501 30.165s-18.389 12.501-30.165 12.501zM469.333 768v85.333h-128c-23.552 0-42.667 19.115-42.667 42.667s19.115 42.667 42.667 42.667h341.333c23.552 0 42.667-19.115 42.667-42.667s-19.115-42.667-42.667-42.667h-128v-85.333h298.667c35.328 0 67.413-14.379 90.496-37.504s37.504-55.168 37.504-90.496v-426.667c0-35.328-14.379-67.413-37.504-90.496s-55.168-37.504-90.496-37.504h-682.667c-35.328 0-67.413 14.379-90.496 37.504s-37.504 55.168-37.504 90.496v426.667c0 35.328 14.379 67.413 37.504 90.496s55.168 37.504 90.496 37.504z">
-                    </path>
-                  </svg>
-                  <select>
-                    <option value="Option 1" selected>CNN</option>
-                    <option value="Option 2">ANN</option>
-                    <option value="Option 1">Transformer</option>
-                    <option value="Option 2">LSTM</option>
-                  </select>
+                <div class="home-container30">
+                  <div class="home-container31">
+                    <span>Aktie</span>
+                  </div>
+                  <div class="spread">
+                    <div class="home-container32">
+                      <svg viewBox="0 0 1024 1024" class="home-icon30">
+                        <path
+                          d="M914.005 409.344l-275.84-278.827c-56.704-56.747-131.712-87.851-211.499-87.851s-154.795 31.104-211.2 87.509c-60.416 60.331-90.752 143.189-86.485 226.731-28.245 46.293-43.648 99.413-43.648 155.051 0 79.787 31.104 154.795 87.509 211.2l130.261 127.317 148.565 148.48c16.683 16.725 38.485 25.045 60.331 25.045s43.648-8.32 60.331-25.003l298.667-298.667c33.195-33.195 33.365-86.955 0.341-120.32l-3.968-4.011 46.293-46.336c33.195-33.195 33.365-86.955 0.341-120.32zM512 938.667l-149.248-149.205-129.579-126.635c-83.328-83.328-83.328-218.411 0-301.653 41.643-41.685 96.256-62.507 150.827-62.507s109.184 20.821 150.827 62.507l275.84 278.827-298.667 298.667zM595.499 301.184c-56.704-56.747-131.712-87.851-211.499-87.851-54.443 0-106.539 14.805-152.107 41.899 10.283-23.467 24.704-45.525 43.947-64.768 41.643-41.643 96.256-62.464 150.827-62.464s109.184 20.821 150.827 62.507l275.84 278.827-45.995 45.995-211.84-214.144z">
+                        </path>
+                        <path
+                          d="M384 447.957c35.413 0 64 28.672 64 64.043 0 35.413-28.587 63.957-64 63.957s-64-28.544-64-63.957c0-35.371 28.587-64.043 64-64.043M384 405.291c-58.795 0-106.667 47.872-106.667 106.709 0 58.795 47.872 106.624 106.667 106.624s106.667-47.829 106.667-106.624c0-58.837-47.872-106.709-106.667-106.709z">
+                        </path>
+                      </svg>
+                      <select>
+                        <option value="Option 1" selected>
+                          E-Mart
+                        </option>
+                        <option value="Option 2">
+                          Amazon
+                        </option>
+                      </select>
+                      <div class="search">
+                        <search-bar ref="searchbar"></search-bar>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="home-container25">
                 <div class="home-container26">
                   <div class="home-container27">
-                    <span>Modell Guthaben</span>
+                    <span>aktives Modell</span>
                   </div>
                   <div class="home-container28">
-                    <svg viewBox="0 0 1024 1024" class="home-icon28">
+                    <svg viewBox="0 0 1024 1024" class="home-icon26">
                       <path
-                        d="M928 128h-832c-52.8 0-96 43.2-96 96v576c0 52.8 43.2 96 96 96h832c52.8 0 96-43.2 96-96v-576c0-52.8-43.2-96-96-96zM96 192h832c17.346 0 32 14.654 32 32v96h-896v-96c0-17.346 14.654-32 32-32zM928 832h-832c-17.346 0-32-14.654-32-32v-288h896v288c0 17.346-14.654 32-32 32zM128 640h64v128h-64zM256 640h64v128h-64zM384 640h64v128h-64z">
+                        d="M512 682.667h-341.333c-11.776 0-22.4-4.736-30.165-12.501s-12.501-18.389-12.501-30.165v-426.667c0-11.776 4.736-22.4 12.501-30.165s18.389-12.501 30.165-12.501h682.667c11.776 0 22.4 4.736 30.165 12.501s12.501 18.389 12.501 30.165v426.667c0 11.776-4.736 22.4-12.501 30.165s-18.389 12.501-30.165 12.501zM469.333 768v85.333h-128c-23.552 0-42.667 19.115-42.667 42.667s19.115 42.667 42.667 42.667h341.333c23.552 0 42.667-19.115 42.667-42.667s-19.115-42.667-42.667-42.667h-128v-85.333h298.667c35.328 0 67.413-14.379 90.496-37.504s37.504-55.168 37.504-90.496v-426.667c0-35.328-14.379-67.413-37.504-90.496s-55.168-37.504-90.496-37.504h-682.667c-35.328 0-67.413 14.379-90.496 37.504s-37.504 55.168-37.504 90.496v426.667c0 35.328 14.379 67.413 37.504 90.496s55.168 37.504 90.496 37.504z">
                       </path>
                     </svg>
-                    <input type="text" placeholder="Wert in Euro" class="home-textinput input" />
+                    <select>
+                      <option value="Option 1" selected>CNN</option>
+                      <option value="Option 2">ANN</option>
+                      <option value="Option 1">Transformer</option>
+                      <option value="Option 2">LSTM</option>
+                    </select>
                   </div>
                 </div>
               </div>
               <div class="home-container29">
-                <div class="home-container30">
-                  <div class="home-container31"><span>Traiding Tags</span></div>
-                  <div class="home-container32">
-                    <svg viewBox="0 0 1024 1024" class="home-icon30">
-                      <path
-                        d="M914.005 409.344l-275.84-278.827c-56.704-56.747-131.712-87.851-211.499-87.851s-154.795 31.104-211.2 87.509c-60.416 60.331-90.752 143.189-86.485 226.731-28.245 46.293-43.648 99.413-43.648 155.051 0 79.787 31.104 154.795 87.509 211.2l130.261 127.317 148.565 148.48c16.683 16.725 38.485 25.045 60.331 25.045s43.648-8.32 60.331-25.003l298.667-298.667c33.195-33.195 33.365-86.955 0.341-120.32l-3.968-4.011 46.293-46.336c33.195-33.195 33.365-86.955 0.341-120.32zM512 938.667l-149.248-149.205-129.579-126.635c-83.328-83.328-83.328-218.411 0-301.653 41.643-41.685 96.256-62.507 150.827-62.507s109.184 20.821 150.827 62.507l275.84 278.827-298.667 298.667zM595.499 301.184c-56.704-56.747-131.712-87.851-211.499-87.851-54.443 0-106.539 14.805-152.107 41.899 10.283-23.467 24.704-45.525 43.947-64.768 41.643-41.643 96.256-62.464 150.827-62.464s109.184 20.821 150.827 62.507l275.84 278.827-45.995 45.995-211.84-214.144z">
-                      </path>
-                      <path
-                        d="M384 447.957c35.413 0 64 28.672 64 64.043 0 35.413-28.587 63.957-64 63.957s-64-28.544-64-63.957c0-35.371 28.587-64.043 64-64.043M384 405.291c-58.795 0-106.667 47.872-106.667 106.709 0 58.795 47.872 106.624 106.667 106.624s106.667-47.829 106.667-106.624c0-58.837-47.872-106.709-106.667-106.709z">
-                      </path>
+                <div class="home-container26">
+                  <div class="home-container23">
+                    <span>Modell Guthaben</span>
+                  </div>
+                  <div class="home-container24">
+                    <svg viewBox="0 0 1024 1024" class="home-icon28">
+                    <path
+                      d="M928 128h-832c-52.8 0-96 43.2-96 96v576c0 52.8 43.2 96 96 96h832c52.8 0 96-43.2 96-96v-576c0-52.8-43.2-96-96-96zM96 192h832c17.346 0 32 14.654 32 32v96h-896v-96c0-17.346 14.654-32 32-32zM928 832h-832c-17.346 0-32-14.654-32-32v-288h896v288c0 17.346-14.654 32-32 32zM128 640h64v128h-64zM256 640h64v128h-64zM384 640h64v128h-64z">
+                    </path>
                     </svg>
-                    <select>
-                      <option value="Option 1" selected>
-                        Umweltfreundlich
-                      </option>
-                      <option value="Option 2">Risiko</option>
-                    </select>
+                    <input type="text" placeholder="Wert in Euro" class="home-textinput input" />
                   </div>
                 </div>
               </div>
@@ -192,7 +200,7 @@
                 </div>
               </div>
             </div>
-            <div class="home-container32">
+            <div class="home-container70">
               <div class="home-container33">
                 <div class="home-container34">
                   <span>Der Agent empfiehlt:</span>
@@ -200,7 +208,7 @@
                 <button type="button" class="button">Aktie Kaufen!</button>
               </div>
             </div>
-            <div class="home-container32">
+            <div class="home-container71">
               <div class="home-container33">
                 <div class="home-container34">
                   <span>Zuletzt angesehen</span>
@@ -241,6 +249,7 @@
 import { dataSource } from './data.js';
 import Header from './Header.vue'
 import ProgressBar from "@/components/ProgressBar.vue";
+import SearchBar from '@/components/SearchBar.vue';
 
 export default {
   name: "Home",
@@ -258,6 +267,7 @@ export default {
     DxExport,
     DxTooltip,
     ProgressBar,
+    SearchBar,
   },
   data() {
     return {
@@ -314,10 +324,25 @@ export default {
   overflow: auto;
   align-items: center;
   flex-direction: column;
+  background-color: #306197;
 }
 
 #chart {
   height: 100%;
+}
+
+.search {
+  width: 100%;
+  object-fit: cover;
+  margin-left: 15%;
+}
+
+.spread{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-around;
 }
 
 home-header { 
@@ -337,18 +362,16 @@ home-header {
 }
 
 .home-navbar-interactive {
-  width: 90%;
+  width: 100%;
   display: flex;
   position: sticky;
   max-width: var(--dl-size-size-maxwidth);
   align-items: center;
   padding-top: var(--dl-space-space-oneandhalfunits);
   padding-left: var(--dl-space-space-threeunits);
-  border-radius: 50px;
   padding-right: var(--dl-space-space-threeunits);
   padding-bottom: var(--dl-space-space-oneandhalfunits);
   justify-content: space-between;
-  background-color: var(--dl-color-gray-white);
 }
 
 .home-container01 {
@@ -360,6 +383,7 @@ home-header {
   align-items: flex-end;
   flex-direction: column;
   justify-content: center;
+  background-color: #ffffff;
 }
 
 .home-logo {
@@ -807,8 +831,6 @@ home-header {
   height: 100%;
   display: flex;
   align-items: center;
-  border-color: var(--dl-color-gray-black);
-  border-width: 1px;
   flex-direction: row;
   justify-content: flex-start;
   background-color: #306197;
@@ -842,8 +864,8 @@ home-header {
 
 .home-container22 {
   flex: 0 0 auto;
-  width: 200px;
-  height: 87px;
+  width: 300px;
+  height: 100px;
   display: flex;
   box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
@@ -885,8 +907,8 @@ home-header {
 }
 
 .home-container25 {
-  width: 214px;
-  height: 87px;
+  width: 200px;
+  height: 100px;
   display: flex;
   box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
@@ -901,7 +923,7 @@ home-header {
 
 .home-container26 {
   width: 100%;
-  height: 87px;
+  height: 100px;
   display: flex;
   box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
@@ -948,8 +970,8 @@ home-header {
 }
 
 .home-container29 {
-  width: 200px;
-  height: 89px;
+  width: 214px;
+  height: 100px;
   box-shadow: 5px 5px 10px 0px #000000;
   display: flex;
   align-items: center;
@@ -964,8 +986,8 @@ home-header {
 
 .home-container30 {
   flex: 0 0 auto;
-  width: 200px;
-  height: 87px;
+  width: 300px;
+  height: 100px;
   display: flex;
   box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
@@ -985,12 +1007,33 @@ home-header {
   align-items: center;
   flex-direction: column;
   justify-content: center;
+  margin-top: 5px;
   border-radius: 10px; /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container32 {
   flex: 0 0 auto;
-  width: 266px;
+  width: 100%;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+}
+
+.home-container70 {
+  flex: 0 0 auto;
+  width: auto;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+}
+
+.home-container71 {
+  flex: 0 0 auto;
+  width: auto;
   height: 50%;
   display: flex;
   align-items: center;
@@ -999,8 +1042,8 @@ home-header {
 }
 
 .home-icon30 {
-  width: 24px;
-  height: 24px;
+  width: 50px;
+  height: 50px;
   margin-right: var(--dl-space-space-halfunit);
   border-radius: 10px; /* Adjust the value to control the roundness of the corners */
 }
@@ -1008,7 +1051,7 @@ home-header {
 .home-container33 {
   flex: 0 0 auto;
   width: 200px;
-  height: 87px;
+  height: 100px;
   display: flex;
   box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
@@ -1094,6 +1137,7 @@ home-header {
   align-items: space-between;
   flex-direction: column;
   border-radius: 20px; /* Adjust the value to control the roundness of the corners */
+  margin-right: 1%;
 }
 
 .home-container41 {
