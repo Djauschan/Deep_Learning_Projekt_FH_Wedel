@@ -25,8 +25,8 @@ class LinearRegressionModel:
         evaluation_results = {
             "MAE": mean_absolute_error(y_test, predictions),
             "RMSE": mean_squared_error(y_test, predictions, squared=False),
-            "MSLE": mean_squared_log_error(y_test, predictions),
-            "Median AE": median_absolute_error(y_test, predictions),
+            #"MSLE": mean_squared_log_error(y_test, predictions),
+            #"Median AE": median_absolute_error(y_test, predictions),
         }
         return evaluation_results
 
@@ -62,8 +62,8 @@ class RandomForestModel:
         evaluation_results = {
             "MAE": mean_absolute_error(y_test, predictions),
             "RMSE": mean_squared_error(y_test, predictions, squared=False),
-            "MSLE": mean_squared_log_error(y_test, predictions),
-            "Median AE": median_absolute_error(y_test, predictions),
+            #"MSLE": mean_squared_log_error(y_test, predictions),
+            #"Median AE": median_absolute_error(y_test, predictions),
         }
         return evaluation_results
     
@@ -93,8 +93,8 @@ class GradientBoostingModel:
         evaluation_results = {
             "MAE": mean_absolute_error(y_test, predictions),
             "RMSE": mean_squared_error(y_test, predictions, squared=False),
-            "MSLE": mean_squared_log_error(y_test, predictions),
-            "Median AE": median_absolute_error(y_test, predictions),
+            #"MSLE": mean_squared_log_error(y_test, predictions),
+            #"Median AE": median_absolute_error(y_test, predictions),
         }
         return evaluation_results
     
@@ -121,7 +121,7 @@ class SVMModel:
         evaluation_results = {
             "MAE": mean_absolute_error(y_test, predictions),
             "RMSE": mean_squared_error(y_test, predictions, squared=False),
-            "MSLE": mean_squared_log_error(y_test, predictions),
-            "Median AE": median_absolute_error(y_test, predictions),
+            #"MSLE": mean_squared_log_error(y_test, predictions),
+            #"Median AE": median_absolute_error(y_test, predictions),
         }
         return evaluation_results

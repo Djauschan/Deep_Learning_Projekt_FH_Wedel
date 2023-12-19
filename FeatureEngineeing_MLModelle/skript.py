@@ -104,8 +104,24 @@ print("\prüfung done \n")
 X_train = train_data[train_data.index < test_data.index.min()]
 X_test = test_data[test_data.index >= test_data.index.min()]
 
-y_train = train_data[train_data.index < test_data.index.min()]['close']
-y_test = test_data[test_data.index >= test_data.index.min()]['close']
+#X_train.drop(["close"], axis=1, inplace=True)
+#X_test.drop(["close"], axis=1, inplace=True)
+
+X_train.drop(["close_PctChange"], axis=1, inplace=True)
+X_test.drop(["close_PctChange"], axis=1, inplace=True)
+X_train.drop(["close_Differenz"], axis=1, inplace=True)
+X_test.drop(["close_Differenz"], axis=1, inplace=True)
+
+print(X_train.columns)
+
+#y_train = train_data[train_data.index < test_data.index.min()]['close']
+#y_test = test_data[test_data.index >= test_data.index.min()]['close']
+
+y_train = train_data[train_data.index < test_data.index.min()]['close_PctChange']
+y_test = test_data[test_data.index >= test_data.index.min()]['close_PctChange']
+
+print(X_train)
+print(y_train)
 
 print("done, now ml-model \n") #nur zum testen
 
@@ -202,7 +218,7 @@ evaluation_results = {
     #'SVM': svm_evaluation_results
 }
 # Metriken, die Sie vergleichen möchten
-metrics = ['MAE', 'RMSE', 'MSLE', 'Median AE']
+metrics = ['MAE', 'RMSE'] #, 'MSLE', 'Median AE']
 n_models = len(evaluation_results)
 n_metrics = len(metrics)
 
