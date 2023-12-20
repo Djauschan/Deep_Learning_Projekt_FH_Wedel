@@ -96,18 +96,6 @@ model.fit(X_train, y_train, epochs=100, batch_size=32, validation_data=(X_valid,
 #     predicted_absolute_change = last_close_price * predicted_pct_change
 #     predicted_close_price = last_close_price + predicted_absolute_change
 #     return predicted_close_price
-
-def predict_next_day(model, data, scaler, last_close_price):
-    if len(data) < 30:
-        raise ValueError("Nicht genügend Daten für eine Vorhersage verfügbar.")
-    last_sequence = data[-30:].reshape(1, 30, 1)
-    predicted_scaled = model.predict(last_sequence)
-    predicted_price_change = scaler.inverse_transform(predicted_scaled)[0, 0]
-    predicted_close_price = last_close_price + predicted_price_change
-    return predicted_close_price
-
-# Setzen Sie dies auf "ja", wenn Sie ein zuvor gespeichertes Modell laden möchten, 
-# und auf "nein", wenn Sie das in dieser Sitzung trainierte Modell verwenden möchten.
 load_saved_model = "nein"  # Oder "ja"
 
 if load_saved_model.lower() == "ja":
@@ -117,9 +105,34 @@ else:
     # Hier verwenden wir das in dieser Sitzung trainierte Modell
     print("Verwendung des in dieser Sitzung trainierten Modells")
 
-# Letzter bekannter Close-Preis
-last_close_price = data['Close'].iloc[-1]
+def predict_next_day(model, data, scaler, last_close_price, last_date_index):
+    if len(data) < 30:
+        raise ValueError("Nicht genügend Daten für eine Vorhersage verfügbar.")
+    last_sequence = data[-30:].reshape(1, 30, 1)
+    predicted_scaled = model.predict(last_sequence)
+    predicted_price_change = scaler.inverse_transform(predicted_scaled)[0, 0]
+    predicted_close_price = last_close_price + predicted_price_change
+    next_day_index = last_date_index + pd.DateOffset(days=1)
+    return next_day_index, predicted_close_price
 
-# Vorhersage des nächsten Tages
-predicted_close = predict_next_day(model, scaled_data, scaler, last_close_price)
-print(f"Vorhergesagter Close-Preis für den nächsten Tag: {predicted_close}")
+last_close_price = data['Close'].iloc[-31]
+last_date_index = data.index[-31]
+
+next_day_index, predicted_close = predict_next_day(model, scaled_data, scaler, last_close_price, last_date_index)
+print(f"Vorhergesagter Close-Preis für {next_day_index.date()}: {predicted_close}")
+
+# Ausgabe der Vorhersage für den nächsten Tag
+def get_actual_next_day_close(data, predicted_date):
+    if predicted_date in data.index:
+        actual_next_day_close = data.loc[predicted_date]['Close']
+        return actual_next_day_close
+    else:
+        return None  # bzw. Fehlerbehandlung einbauen, falls das Datum nicht gefunden wird
+
+# 
+predicted_date = next_day_index  # Das Datum, das von der Vorhersagefunktion zurückgegeben wird
+actual_close_price = get_actual_next_day_close(data, predicted_date)
+if actual_close_price is not None:
+    print(f"Tatsächlicher Close-Preis für {predicted_date.date()}: {actual_close_price}")
+else:
+    print(f"Kein Datenpunkt gefunden für das Datum {predicted_date.date()}")
