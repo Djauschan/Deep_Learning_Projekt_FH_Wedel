@@ -104,11 +104,15 @@ def get_logins_by_user_id(db: Session, owner_id: int):
 def get_stock_days(db: Session, stock_symbol: str, n: int):
     # Download historical data from Yahoo Finance
     stock_data = yf.download(stock_symbol, period=f"{n}d")
+    return_data = []
 
     first_day = stock_data.index.date[0].strftime('%m/%d/%y')
     last_day = stock_data.index.date[-1].strftime('%m/%d/%y')
 
     stock_data["Volume"] = stock_data["Volume"].astype(float)
+
+    for element in stock_data:
+        print(element.date)
 
     print(stock_data)
 
@@ -127,4 +131,4 @@ def get_stock_days(db: Session, stock_symbol: str, n: int):
                             open=stock_data.Open, high=stock_data.High, low=stock_data.Low, close=stock_data.Close, volume=stock_data.Volume)
     print("rows: " + str(stock_data.shape[0]))
     
-    return db_stock
+    return stock_data

@@ -39,7 +39,7 @@ def get_db():
 
 
 # test method to get Stock data for n days
-@app.get("/getStock/{stock_symbol}/{days_back}")
+@app.get("/getStock/")
 def get_stock_days(stock_symbol: str, days_back: int, db: Session = Depends(get_db)):
     return crud.get_stock_days(stock_symbol=stock_symbol, n=days_back, db=db)
 
@@ -133,3 +133,4 @@ def check_login(email: str, password: str, db: Session = Depends(get_db)):
     
     if user:
         raise HTTPException(status_code=400, detail="Email does not exist")
+

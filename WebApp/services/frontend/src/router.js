@@ -12,12 +12,12 @@ const router = createRouter({
     {
       path: "/",
       component: Home,
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
     },
     {
       path: "/statistik",
       component: Statistik,
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
     },
     {
       path: "/login",
