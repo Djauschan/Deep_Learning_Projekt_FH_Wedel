@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "./views/home.vue";
 import Statistik from "./views/statistik.vue";
+import ModelInformation from "./views/ModelInformation.vue";
 import NotFound from "./views/not-found.vue";
 import Login from "./views/Login.vue";
 import "./style.css";
@@ -12,12 +13,17 @@ const router = createRouter({
     {
       path: "/",
       component: Home,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     {
       path: "/statistik",
       component: Statistik,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
+    },
+    {
+      path: "/ModelInformation",
+      component: ModelInformation,
+      meta: { requiresAuth: false },
     },
     {
       path: "/login",

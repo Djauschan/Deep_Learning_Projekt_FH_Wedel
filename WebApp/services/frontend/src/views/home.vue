@@ -615,7 +615,6 @@ home-header {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  background-color: #b9e3e6;
 }
 
 .home-container06 {
@@ -833,7 +832,6 @@ home-header {
   align-items: center;
   flex-direction: row;
   justify-content: flex-start;
-  background-color: #306197;
 }
 
 .home-container19 {
@@ -1203,6 +1201,7 @@ home-header {
   flex-direction: column;
   justify-content: center;
   background-color: #eff0f2;
+  box-shadow: 5px 5px 10px 0px #000000;
 }
 
 .home-container44 {
