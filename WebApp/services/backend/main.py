@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import crud, models, schemas
 from database import SessionLocal, engine
 import bcrypt
-from fastapi.middleware.cors import CORSMiddleware
 import datetime as DT
 
 # Create tables in the database based on the model definitions
@@ -13,12 +13,12 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-# Configure CORS settings
-origins = [    
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:8000",
-]  # Replace with the origins you want to allow
+]
 
 app.add_middleware(
     CORSMiddleware,

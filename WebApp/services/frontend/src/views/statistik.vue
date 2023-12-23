@@ -2,7 +2,7 @@
   <Header />
   <DxChart id="chart" :data-source="get_stock_data()" title="Stock Price">
     <DxCommonSeriesSettings argument-field="date" type="stock" />
-    <DxSeries name="E-Mart" open-value-field="open" high-value-field="high" low-value-field="low" close-value-field="close">
+    <DxSeries name="aapl" open-value-field="open" high-value-field="high" low-value-field="low" close-value-field="close">
       <DxReduction color="red" />
     </DxSeries>
     <DxArgumentAxis :workdays-only="true">
@@ -38,7 +38,6 @@ import Header from './Header.vue'
 import axios from "axios";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import { useMyPiniaStore } from "../store.js";
-import { provide, inject } from 'vue'
 
 export default {
   components: {
@@ -78,7 +77,6 @@ Low: $${pointInfo.lowValue}<br/>`,
             days_back: '10',
           }
         });
-        console.log("localStorage.API: " + store.API)
         console.log(response.data)
         return response.data.date
       } catch (error) {
@@ -86,7 +84,6 @@ Low: $${pointInfo.lowValue}<br/>`,
           title: "Error at getting data",
           text: error,
           icon: "info",
-          iconColor: "#d0342c",
           showCloseButton: false,
           confirmButtonText: "Close",
           confirmButtonColor: "#d0342c",
