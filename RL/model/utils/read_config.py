@@ -36,6 +36,8 @@ class Config_reader:
         try: 
             return self.config[section_name][parameter_name]
         except KeyError:
+            if section_name not in self.config:
+                raise KeyError(f'Section "{section_name}" not found in config file ({self.config_file_path}).')
             raise KeyError(f'Parameter "{parameter_name}" not found under section "{section_name}" in config file ({self.config_file_path}).')
         
     def __get_single_parameter(self, parameter_name : str) -> object:
