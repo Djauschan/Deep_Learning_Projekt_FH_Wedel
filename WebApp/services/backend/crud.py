@@ -107,9 +107,6 @@ def get_stock_days(db: Session, stock_symbol: str, n: int):
     stock_data["Volume"] = stock_data["Volume"].astype(float)
     return_data = []
 
-    first_day = stock_data.index.date[0].strftime('%m/%d/%y')
-    last_day = stock_data.index.date[-1].strftime('%m/%d/%y')
-
     for index, row in stock_data.iterrows():
         return_data.append({"date": index.strftime('%m/%d/%y'), "open": row["Open"], "high": row["High"], "low": row["Low"], "close": row["Close"], "volume": row["Volume"]})
 
