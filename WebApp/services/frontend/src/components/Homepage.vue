@@ -1018,7 +1018,7 @@ export default {
     align-items: center;
     flex-direction: row;
     justify-content: center;
-    background-color: #grey400 (secondary);
+    background-color: var(--dl-color-secondary-grey400);
 }
 
 .home-container28 {
