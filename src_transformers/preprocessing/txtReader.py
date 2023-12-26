@@ -137,9 +137,6 @@ class DataReader():
             # Only Use data to the last timestamp of the last day
             data = data[data["timestamp"] <= self.last_date]
 
-            # Print higest and lowest timestamp for each file with its symbol
-            print("Symbol:" , data["symbol"].iloc[0], "Min: ", data["timestamp"].min(), "Max: ", data["timestamp"].max())
-
             self.current_file_idx += 1
             return data
         else:
