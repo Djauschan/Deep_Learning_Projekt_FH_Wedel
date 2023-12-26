@@ -4,6 +4,7 @@ financial data.
 """
 import pickle
 from dataclasses import dataclass
+from datetime import date
 
 import torch
 from torch.utils.data import Dataset
@@ -49,6 +50,7 @@ class MultiSymbolDataset(Dataset):
     @classmethod
     def create_from_config(cls,
                            read_all_files: bool,
+                           last_date: date,
                            data_usage_ratio: float,
                            subseries_amount: int,
                            validation_split: float,
@@ -67,6 +69,7 @@ class MultiSymbolDataset(Dataset):
 
         Args:
             read_all_files (bool): Whether to read all files in the data directory.
+            last_date (date): The last date to use in the dataset.
             data_usage_ratio (float): The ratio of data to use for the dataset.
             create_new_file (bool): Whether to create a new file for the preprocessed data.
             data_file (str): The path to the file to store the data in or to load the data from.
@@ -92,7 +95,7 @@ class MultiSymbolDataset(Dataset):
                 "Data pre-processing for the multi symbol dataset was started.")
 
             data_reader = DataReader(
-                read_all_files, encoder_symbols, decoder_symbols)
+                read_all_files, encoder_symbols, decoder_symbols, last_date)
 
             data_df = get_all_dates(data_reader, data_usage_ratio)
             Logger.log_text(

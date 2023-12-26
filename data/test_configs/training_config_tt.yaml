@@ -15,6 +15,7 @@ training_parameters:
   seed: 42
 dataset_parameters:
   read_all_files: false
+  last_date: 2021-01-03 # YYYY-MM-DD Last date of the data to be read in
   data_usage_ratio: 0.2 # Only the last 1% of the read data are used in the dataset
   subseries_amount: 4 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
   validation_split: 0.15 # The last 10% of timestamps in a subseries are used for validation
@@ -28,11 +29,11 @@ dataset_parameters:
     - "AMD" # Advanced Micro Devices
     - "C" # Citigroup
     - "MRNA" # Moderna
-    # - "NIO" # NIO
-    # - "NVDA" # NVIDIA
-    # - "SNAP" # Snap
-    # - "SQ" # Block
-    # - "TSLA" # Tesla
+    - "NIO" # NIO
+    - "NVDA" # NVIDIA
+    - "SNAP" # Snap
+    - "SQ" # Block
+    - "TSLA" # Tesla
   # ETFs
     # - "ACWI" # iShares MSCI ACWI ETF
   # indices
@@ -52,8 +53,8 @@ dataset_parameters:
     - "AMD" # Advanced Micro Devices
     - "C" # Citigroup
     - "MRNA" # Moderna
-    # - "NIO" # NIO
-    # - "NVDA" # NVIDIA
-    # - "SNAP" # Snap
-    # - "SQ" # Block
-    # - "TSLA" # Tesla
+    - "NIO" # NIO
+    - "NVDA" # NVIDIA
+    - "SNAP" # Snap
+    - "SQ" # Block
+    - "TSLA" # Tesla
