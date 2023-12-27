@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import pickle
-from Aggregationfunction import state_to_index
 from Aggregationfunction import aggregate_q_values
 from TraidingEnvirement import TradingEnvironment
 from Q_Learning import QLearningAgent

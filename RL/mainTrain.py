@@ -30,7 +30,7 @@ agent_types = ['ma5', 'ma30', 'ma200', 'rsi']  # Bezeichnungen der Agententypen
 performance_metrics = {agent_type: [] for agent_type in agent_types}  # Initialisiert Leistungsmetriken
 
 # Trainingsprozess der Agenten
-NUM_EPISODES = 100  # Anzahl der Trainingsepisoden
+NUM_EPISODES = 5  # Anzahl der Trainingsepisoden
 cumulative_rewards = {agent_type: np.zeros(NUM_EPISODES) for agent_type in agent_types}  # Kumulative Belohnungen
 
 for episode in tqdm(range(NUM_EPISODES)):  # Trainingsschleife

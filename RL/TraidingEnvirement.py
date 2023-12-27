@@ -1,8 +1,4 @@
 import numpy as np
-class ActionSpace:
-    def __init__(self, n):
-        self.n = n
-
 
 class TradingEnvironment:
     def __init__(self, data, reward_params=None):
@@ -15,8 +11,6 @@ class TradingEnvironment:
         self.stock_owned = 0
         self.initial_portfolio_value = self.get_portfolio_value()
         self.std_devs = self.calculate_std_deviation(['ma5', 'ma30', 'ma200', 'rsi'])
-        self.action_space = ActionSpace(n=3)  # Angenommen, Sie haben 3 Aktionen: Kaufen, Halten, Verkaufen
-   
 
         # Angepasstes Belohnungsschema
         if reward_params is None:
