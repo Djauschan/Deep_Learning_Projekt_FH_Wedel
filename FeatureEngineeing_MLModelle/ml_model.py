@@ -44,13 +44,10 @@ class LinearRegressionModel:
 
 ############### RF ##################### 
 class RandomForestModel:
-    def __init__(self, n_estimators=10, max_depth=10, min_samples_split=2, min_samples_leaf=1):
-        self.model = RandomForestRegressor(
-            n_estimators=n_estimators,
-            max_depth=max_depth,
-            min_samples_split=min_samples_split,
-            min_samples_leaf=min_samples_leaf
-        )
+    hyperparameters = {"n_estimators": 10, "max_depth": 10, "min_samples_split": 2, "min_samples_leaf": 1}
+
+    def __init__(self):
+        self.model = RandomForestRegressor(**RandomForestModel.hyperparameters)
 
     def fit(self, X_train, y_train):
         self.model.fit(X_train, y_train)
@@ -76,12 +73,10 @@ class RandomForestModel:
 
 ############### GBM ##################### 
 class GradientBoostingModel:
-    def __init__(self, n_estimators=10, learning_rate=0.1, max_depth=3):
-        self.model = GradientBoostingRegressor(
-            n_estimators=n_estimators,
-            learning_rate=learning_rate,
-            max_depth=max_depth
-        )
+    hyperparameters = {"n_estimators": 10, "learning_rate": 0.1, "max_depth": 3}
+
+    def __init__(self):
+        self.model = GradientBoostingRegressor(**GradientBoostingModel.hyperparameters)
 
     def fit(self, X_train, y_train):
         self.model.fit(X_train, y_train)
@@ -105,11 +100,12 @@ class GradientBoostingModel:
         return gbm_feature_importances
 
 
-
 ############### SVM ##################### 
 class SVMModel:
-    def __init__(self, kernel='rbf', C=1.0, epsilon=0.1):
-        self.model = SVR(kernel=kernel, C=C, epsilon=epsilon)
+    hyperparameters = {"kernel": 'rbf', "C": 1.0, "epsilon": 0.1}
+
+    def __init__(self):
+        self.model = SVR(**SVMModel.hyperparameters)
 
     def fit(self, X_train, y_train):
         self.model.fit(X_train, y_train)

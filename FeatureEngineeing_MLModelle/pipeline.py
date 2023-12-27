@@ -5,11 +5,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer
 
 from feature_ts import FeatureEngineering
-from feature_ts import day_name_transformer, dtf, replace_weekend_volume, imputer, drop_ts, remove_infinite
-from feature_ts import differenz_value, differenz_pct_change_transformer
-from feature_ts import lag_backward_features, lag_forward_features
-from feature_ts import window_feature_transformer
 
+from feature_ts import day_name_transformer, dtf, replace_weekend_volume, imputer, drop_ts, remove_infinite
+from feature_ts import differenz_value, pct_change_transformer, differenz_pct_change_transformer
+from feature_ts import lag_backward_20d_features, monthly_average_feature
+from feature_ts import lag_backward_7h_features, lag_forward_7h_features
+from feature_ts import window_feature_transformer
 
 class ClassPipeline:
     def __init__(self, data):
@@ -23,16 +24,21 @@ class ClassPipeline:
                 # for all
                 ("day_name", day_name_transformer),
                 ("datetime_features", dtf),
-                ("replace_weekend_volume", replace_weekend_volume),
-                ("value_differenz", differenz_value),
-                ("pct_dif", differenz_pct_change_transformer),
+                ("replace_weekend_volume", replace_weekend_volume), #for daily -> resample "D"
+                ("differenz_value", differenz_value), #dif
+                ("pct_change", pct_change_transformer), #pct
+                ("pct_dif", differenz_pct_change_transformer), #dif + pct
 
                 #for normal / minütlich, only with dtf
-                ("window_feature_transformer", window_feature_transformer), #mit dtf ! -> ("datetime_features", dtf),
-
+                ("window_feature", window_feature_transformer), #mit dtf ! -> ("datetime_features", dtf),
+                
                 # for hourly
-                ("lag_features_back", lag_backward_features),
-                ("lag_features_for", lag_forward_features),
+                ("lag_features_back", lag_backward_7h_features),
+                ("lag_features_for", lag_forward_7h_features),
+
+                #bus daily
+                ("lag_backward_20d_features", lag_backward_20d_features),
+                ("monthly_average_feature", monthly_average_feature),
 
                 # last ones
                 ("dropna", imputer),
@@ -40,13 +46,23 @@ class ClassPipeline:
                 ("drop_ts", drop_ts),
             ]
         )
-
+        ################################################################
         self.pipe_h = Pipeline( #hourly df
             [
                 ("create_differenz", differenz_value),
                 ("datetime_features", dtf),
-                ("lag_features_back", lag_backward_features),
+                ("lag_features_back", lag_backward_7h_features),
                 ("replace_weekend_volume", replace_weekend_volume),
+                ("dropna", imputer),
+            ]
+        )
+
+        self.pipe_busdaily = Pipeline( #daily business df
+            [
+                ("datetime_features", dtf),
+                ("pct_change", pct_change_transformer),
+                ("lag_backward_20d_features", lag_backward_20d_features),
+                ("monthly_average_feature", monthly_average_feature),
                 ("dropna", imputer),
             ]
         )
@@ -63,11 +79,13 @@ class ClassPipeline:
         )
 
     def fit_transform(self, data, pipeline_name):
-        if pipeline_name == 'all':
+        if pipeline_name == 'all': #alle
             return self.pipe_all.fit_transform(data)
-        elif pipeline_name == 'h':
+        elif pipeline_name == 'h': #hourly
             return self.pipe_h.fit_transform(data)
-        elif pipeline_name == 'test':
+        elif pipeline_name == 'busdaily': #business daily
+            return self.pipe_busdaily.fit_transform(data)
+        elif pipeline_name == 'test': #normal
             return self.pipe_test.fit_transform(data)
         else:
             raise ValueError("Unbekannter Pipeline-Name")
