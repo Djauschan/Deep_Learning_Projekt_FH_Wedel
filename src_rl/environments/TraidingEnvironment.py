@@ -79,7 +79,7 @@ class TradingEnvironment:
             else:
                 reward = self.reward_params['invalid_action_penalty']
             """
-        elif action == -1:  # Verkaufen
+        elif action == 2:  # Verkaufen
             reward = self.reward_params['sell_reward'] * (current_price - next_price) / current_price
             """
             if self.stock_owned > 0:
@@ -90,8 +90,11 @@ class TradingEnvironment:
             else:
                 reward = self.reward_params['invalid_action_penalty']
             """
-        else:  # Halten
+        elif action == 0:  # Halten
+            # TODO: Belohnung anpassen. Agent hält aktuell permanent, ohne zu traden. Das ist nicht sinnvoll.
             reward = self.reward_params['hold_reward']
+        else:
+            raise ValueError(f"The provided action ({action}) is invalid!")
 
         self.current_step += 1
         if self.current_step >= len(self.data):
@@ -101,7 +104,7 @@ class TradingEnvironment:
         next_states = self.get_state()
 
         #Kontrolle
-        print(f"Schritt: {self.current_step}, Aktion: {action}, Belohnung: {reward}, Neuer Zustand: {next_states}")
+        # print(f"Schritt: {self.current_step}, Aktion: {action}, Belohnung: {reward}, Neuer Zustand: {next_states}")
 
         return next_states, reward, self.done
 
