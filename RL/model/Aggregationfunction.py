@@ -12,11 +12,18 @@ def state_to_index(state, max_value=99):
     return index % 100  # Begrenzung des Index auf die Größe der Q-Tabelle
 
 def aggregate_q_values(agents, states, agent_types):
-    combined_q_values = np.zeros(2)  # Für 2 Aktionen
+    combined_q_values = np.zeros(3)  # Für 3 Aktionen
     for agent, agent_type in zip(agents, agent_types):
-        state = states[agent_type]
-        state_index = state_to_index(state)  # Konvertieren Sie den Zustand in einen Index
-        weight = 15 if agent_type == 'rsi' else agent.weight  # Standardgewichtung für RSI
-        q_values = agent.q_table[state_index] * weight
-        combined_q_values += q_values
+        if agent_type == 'rsi':
+            rsi_value = states[agent_type][0]  # Annahme: RSI-Wert ist der erste Eintrag in der Liste
+            action = agent.rsi_decision(rsi_value)
+            if action != 0:
+                return action
+        else:
+            state = states[agent_type]
+            state_index = state_to_index(state)  # Konvertieren Sie den Zustand in einen Index
+            q_values = agent.q_table[state_index] * agent.weight
+            combined_q_values += q_values
     return np.argmax(combined_q_values)
+
+

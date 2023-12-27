@@ -1,4 +1,8 @@
 import numpy as np
+class ActionSpace:
+    def __init__(self, n):
+        self.n = n
+
 
 class TradingEnvironment:
     def __init__(self, data, reward_params=None):
@@ -11,15 +15,18 @@ class TradingEnvironment:
         self.stock_owned = 0
         self.initial_portfolio_value = self.get_portfolio_value()
         self.std_devs = self.calculate_std_deviation(['ma5', 'ma30', 'ma200', 'rsi'])
+        self.action_space = ActionSpace(n=3)  # Angenommen, Sie haben 3 Aktionen: Kaufen, Halten, Verkaufen
+   
 
+        # Angepasstes Belohnungsschema
         if reward_params is None:
             reward_params = {
-                'buy_reward': 10,
-                'sell_reward': 10,
-                'hold_reward': 10,
-                'buy_penalty': -0.1,
-                'sell_penalty': -0.1,
-                'invalid_action_penalty': -0.01
+                'buy_reward': 5,
+                'sell_reward': 5,
+                'hold_reward': 1,
+                'buy_penalty': -1,
+                'sell_penalty': -1,
+                'invalid_action_penalty': -5
             }
         self.reward_params = reward_params
 
@@ -30,7 +37,7 @@ class TradingEnvironment:
             std_devs[ma_column] = deviation.std()
         return std_devs
 
-    def discretize_deviation(self, price, ma_value, ma_column, n_bins=10):
+    def discretize_deviation(self, price, ma_value, ma_column, n_bins = 20):
         std_dev = self.std_devs[ma_column]
         max_deviation = 2 * std_dev  # ±2 Standardabweichungen
 
@@ -68,21 +75,29 @@ class TradingEnvironment:
         next_price = self.data['close'].iloc[self.current_step + 1] if self.current_step < len(self.data) - 1 else current_price
 
         if action == 1:  # Kaufen
+            reward = self.reward_params['buy_reward'] * (next_price - current_price) / current_price
+            """
             if self.balance >= current_price:
                 self.stock_owned += 1
                 self.balance -= current_price
-                reward = self.reward_params['buy_reward'] if next_price != current_price else self.reward_params['buy_penalty']
+                # Belohnung basierend auf Marktbewegungen
+                reward = self.reward_params['buy_reward'] if next_price > current_price else self.reward_params['buy_penalty']
             else:
                 reward = self.reward_params['invalid_action_penalty']
-
+            """
         elif action == -1:  # Verkaufen
+            reward = self.reward_params['sell_reward'] * (current_price - next_price) / current_price
+            """
             if self.stock_owned > 0:
                 self.stock_owned -= 1
                 self.balance += current_price
-                reward = self.reward_params['sell_reward'] if next_price != current_price else self.reward_params['sell_penalty']
+                # Belohnung basierend auf Marktbewegungen
+                reward = self.reward_params['sell_reward'] if next_price < current_price else self.reward_params['sell_penalty']
             else:
-                reward = self.reward_params['invalid_action_penalty'] 
-
+                reward = self.reward_params['invalid_action_penalty']
+            """
+        else:  # Halten
+            reward = self.reward_params['hold_reward']
 
         self.current_step += 1
         if self.current_step >= len(self.data):
@@ -90,6 +105,10 @@ class TradingEnvironment:
             return [], 0, True
 
         next_states = self.get_state()
+
+        #Kontrolle
+        print(f"Schritt: {self.current_step}, Aktion: {action}, Belohnung: {reward}, Neuer Zustand: {next_states}")
+
         return next_states, reward, self.done
 
     def get_state(self):

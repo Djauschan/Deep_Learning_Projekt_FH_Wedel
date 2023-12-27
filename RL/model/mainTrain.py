@@ -6,6 +6,7 @@ from tqdm import tqdm
 import pickle
 from Aggregationfunction import aggregate_q_values 
 from Q_Learning import QLearningAgent
+import matplotlib.pyplot as plt
 import sys
 directory_path = r'C:\Users\Joel\Desktop\FH-Wedel\Deep Learning Projekt\Git\Deep_Learning-2\Simulation'
 sys.path.append(directory_path)
@@ -18,71 +19,57 @@ train_data_path = r'C:\Users\Joel\Desktop\FH-Wedel\Deep Learning Projekt\Git\Dee
 
 # Einlesen der Daten
 train_data = pd.read_csv(train_data_path)
-env = TradingEnvironment(train_data)
+env = TradingEnvironment(train_data)  # Erzeugt ein TradingEnvironment-Objekt mit den Trainingsdaten
 
-# Erstellen der Agenten
-ma5_agent = QLearningAgent('ma5', state_size=10, action_size=2)
-ma30_agent = QLearningAgent('ma30', state_size=10, action_size=2)
-ma200_agent = QLearningAgent('ma200', state_size=10, action_size=2)
-rsi_agent = QLearningAgent('rsi', state_size=10, action_size=2)
+# Erstellen der Q-Learning-Agenten für verschiedene Indikatoren
+ma5_agent = QLearningAgent('ma5', state_size=100, action_size=3)
+ma30_agent = QLearningAgent('ma30', state_size=100, action_size=3)
+ma200_agent = QLearningAgent('ma200', state_size=100, action_size=3)
+rsi_agent = QLearningAgent('rsi', state_size=100, action_size=3)  # Q-Tabelle nicht erforderlich
 
-# Initialisierung des RSI-Agenten (Handcrafted Feature)
-# 0-30 kaufen; 7-100 verkaufen
-rsi_agent.q_table = np.array([[0, 1], [0, 1], [0, 1], [0, 0], [0, 0], [0, 0], [1, 0], [1, 0], [1, 0], [1, 0]], dtype=np.float64)
-rsi_agent.exploration_rate = 0.0  # Keine Exploration
+ql_agents = [ma5_agent, ma30_agent, ma200_agent, rsi_agent]  # Liste aller Agenten
+agent_types = ['ma5', 'ma30', 'ma200', 'rsi']  # Bezeichnungen der Agententypen
+performance_metrics = {agent_type: [] for agent_type in agent_types}  # Initialisiert Leistungsmetriken
 
-ql_agents = [ma5_agent, ma30_agent, ma200_agent, rsi_agent]
-agent_types = ['ma5', 'ma30', 'ma200', 'rsi']
-performance_metrics = {agent_type: [] for agent_type in agent_types}
+# Trainingsprozess der Agenten
+NUM_EPISODES = 100  # Anzahl der Trainingsepisoden
+cumulative_rewards = {agent_type: np.zeros(NUM_EPISODES) for agent_type in agent_types}  # Kumulative Belohnungen
 
-def berechne_neue_gewichtung(leistungen):
-    alpha = 0.05  # Glättungsfaktor
-    gewichtetes_mittel = 0
-    normierungsfaktor = 0
-
-    for i, leistung in enumerate(reversed(leistungen)):
-        gewicht = (1 - alpha) ** i
-        gewichtetes_mittel += leistung * gewicht
-        normierungsfaktor += gewicht
-
-    if normierungsfaktor > 0:
-        gewichtetes_mittel /= normierungsfaktor
-
-    return 1.001 if gewichtung > 0 else 0.999
-
-# Trainingsprozess
-NUM_EPISODES = 100
-for episode in tqdm(range(NUM_EPISODES)):
-    states = env.reset()
+for episode in tqdm(range(NUM_EPISODES)):  # Trainingsschleife
+    states = env.reset()  # Zustand der Umgebung zurücksetzen
     done = False
+    episode_rewards = {agent_type: 0 for agent_type in agent_types}  # Initialisiert Belohnungen für die Episode
 
     while not done:
-        final_action = aggregate_q_values(ql_agents, states, agent_types)
-        next_states, reward, done = env.step(final_action)
+        final_action = aggregate_q_values(ql_agents, states, agent_types)  # Bestimmt die endgültige Aktion basierend auf aggregierten Q-Werten
+        next_states, reward, done = env.step(final_action)  # Führt die Aktion aus und erhält Belohnungen und nächsten Zustand
 
         if not done:
             for agent, agent_type in zip(ql_agents, agent_types):
                 state = states[agent_type]
                 next_state = next_states[agent_type]
-                agent.learn(state, final_action, reward, next_state, done)
+                agent.learn(state, final_action, reward, next_state, done)  # Trainiert jeden Agenten
+                episode_rewards[agent_type] += reward  # Summiert die Belohnungen
 
     if env.done:
-        episode_performance = env.messen_der_leistung()
+        episode_performance = env.messen_der_leistung()  # Misst die Leistung der Episode
         for agent_type in agent_types:
-            performance_metrics[agent_type].append(episode_performance)
+            performance_metrics[agent_type].append(episode_performance)  # Speichert die Leistung
+            cumulative_rewards[agent_type][episode] = episode_rewards[agent_type]  # Speichert kumulative Belohnungen
 
-    #Q-Table überwachen
+    # Ausgabe der Q-Tabellen für Überwachungszwecke
     print(f"Episode {episode + 1}/{NUM_EPISODES}")
     for agent in ql_agents:
         print(f"Q-Tabelle für {agent.agent_type}:")
         print(agent.q_table)
 
-# Durchschnittliche Leistung und Anpassung der Gewichtungen
-for agent_type, leistungen in performance_metrics.items():
-    gewichtung = berechne_neue_gewichtung(leistungen)
+# Anpassung der Gewichtung basierend auf der Leistung
+for agent_type in agent_types:
+    agent_performance = performance_metrics[agent_type][-1]
     for agent in ql_agents:
         if agent.agent_type == agent_type:
-            agent.weight = gewichtung
+            agent.weight = max(min(agent.weight + agent_performance * 0.01, 1), 0)
+
 
 # Speichern der trainierten Modelle
 for agent, agent_type in zip(ql_agents, agent_types):
@@ -91,3 +78,15 @@ for agent, agent_type in zip(ql_agents, agent_types):
         pickle.dump(agent, file)
 
 print("Modelle wurden erfolgreich gespeichert.")
+
+# Visualisierung der Metriken
+for agent_type in agent_types:
+    plt.figure(figsize=(12, 5))
+
+    plt.subplot(1, 2, 1)
+    plt.plot(cumulative_rewards[agent_type])
+    plt.title(f"Kumulative Belohnungen pro Episode für {agent_type}")
+    plt.xlabel("Episode")
+    plt.ylabel("Kumulative Belohnung")
+
+    plt.show()
