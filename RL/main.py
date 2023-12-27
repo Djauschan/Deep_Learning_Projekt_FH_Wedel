@@ -4,14 +4,11 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import pickle
-import sys
-directory_path = r'C:\Users\Joel\Desktop\FH-Wedel\Deep Learning Projekt\Git\Deep_Learning-2\RL\model'
-sys.path.append(directory_path)
 from Aggregationfunction import state_to_index
 from Aggregationfunction import aggregate_q_values
-from Traidingenvirement import TradingEnvironment
+from TraidingEnvirement import TradingEnvironment
 from Q_Learning import QLearningAgent
-from Traidingenvirement import TradingEnvironment  # Stellen Sie sicher, dass Sie die richtige Pfadangabe verwenden
+from TraidingEnvirement import TradingEnvironment  # Stellen Sie sicher, dass Sie die richtige Pfadangabe verwenden
 import matplotlib.pyplot as plt  # Für die Darstellung der Ergebnisse
 
 

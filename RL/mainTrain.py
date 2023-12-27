@@ -8,9 +8,7 @@ from Aggregationfunction import aggregate_q_values
 from Q_Learning import QLearningAgent
 import matplotlib.pyplot as plt
 import sys
-directory_path = r'C:\Users\Joel\Desktop\FH-Wedel\Deep Learning Projekt\Git\Deep_Learning-2\Simulation'
-sys.path.append(directory_path)
-from Traidingenvirement import TradingEnvironment
+from TraidingEnvirement import TradingEnvironment
 
 
 # Pfadangaben
