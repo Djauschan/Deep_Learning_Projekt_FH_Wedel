@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import sys
 
 class QLearningAgent:
     def __init__(self, agent_type, state_size, action_size=3, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=0.99, exploration_min=0.01):
@@ -58,11 +59,19 @@ class QLearningAgent:
         :param done: Ob die Episode beendet ist.
         """
         q_update = reward
-        if not done:
-            q_update += self.discount_factor * np.amax(self.q_table[next_state])  # Aktualisierung der Q-Werte
+        # print(f'{q_update=}')
+        # if not done:
+        #     q_update += self.discount_factor * np.amax(self.q_table[next_state])  # Aktualisierung der Q-Werte
+        #     print(f'{self.discount_factor * np.amax(self.q_table[next_state])=}')
+        # print(f'{q_update=}')
+        # print(f'{self.learning_rate=}')
+        # print(f'{q_update - self.q_table[state, action]=}')
+        # print(f'{self.learning_rate * (q_update - self.q_table[state, action])=}')
+    
         self.q_table[state, action] += self.learning_rate * (q_update - self.q_table[state, action])
 
         # Aktualisieren der Erkundungsrate
         if done:
             self.exploration_rate *= self.exploration_decay
             self.exploration_rate = max(self.exploration_min, self.exploration_rate)
+            

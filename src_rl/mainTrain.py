@@ -33,7 +33,7 @@ def main():
     performance_metrics = {agent_type: [] for agent_type in agent_types}  # Initialisiert Leistungsmetriken
 
     # Trainingsprozess der Agenten
-    NUM_EPISODES = 5  # Anzahl der Trainingsepisoden
+    NUM_EPISODES = config.get_parameter('epochs', 'train_parameters')  # Anzahl der Trainingsepisoden
     cumulative_rewards = {agent_type: np.zeros(NUM_EPISODES) for agent_type in agent_types}  # Kumulative Belohnungen
 
     for episode in tqdm(range(NUM_EPISODES)):  # Trainingsschleife
@@ -43,13 +43,12 @@ def main():
 
         while not done:
             final_action = aggregate_q_values(ql_agents, states, agent_types)  # Bestimmt die endgültige Aktion basierend auf aggregierten Q-Werten
-            next_states, reward, done = env.step(final_action)  # Führt die Aktion aus und erhält Belohnungen und nächsten Zustand
+            states, reward, done = env.step(final_action)  # Führt die Aktion aus und erhält Belohnungen und nächsten Zustand
 
             if not done:
                 for agent, agent_type in zip(ql_agents, agent_types):
                     state = states[agent_type]
-                    next_state = next_states[agent_type]
-                    agent.learn(state, final_action, reward, next_state, done)  # Trainiert jeden Agenten
+                    agent.learn(state, final_action, reward, state, done)  # Trainiert jeden Agenten
                     episode_rewards[agent_type] += reward  # Summiert die Belohnungen
 
         if env.done:

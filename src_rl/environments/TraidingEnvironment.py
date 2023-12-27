@@ -37,7 +37,7 @@ class TradingEnvironment:
 
         deviation = (price - ma_value) / ma_value * 100
         scaled_deviation = (deviation + max_deviation) / (2 * max_deviation)
-
+        
         return max(0, min(int(scaled_deviation * n_bins), n_bins - 1))
 
     def get_portfolio_value(self):
