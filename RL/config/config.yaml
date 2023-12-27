@@ -1,0 +1,2 @@
+directories:
+  train_data: RL/data/train_data # Path to training data
