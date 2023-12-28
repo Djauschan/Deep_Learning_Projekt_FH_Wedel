@@ -10,7 +10,7 @@ from feature_ts import FeatureEngineering
 from pipeline import ClassPipeline
 from split import DataSplitter
 from split_xy import Xy_DataSplitter
-
+from ml_model import ActualValues, BaseModel, LinearRegressionModel, RandomForestModel, GradientBoostingModel, SVMModel
 
 #################################
 # Daten einlesen
@@ -30,12 +30,10 @@ print(data_columns) #nur zum testen
 
 #Data clean
 cleaner = DataCleaner(df)
-
 df_b_daily = cleaner.busi() #daily business days, Wert von 16 Uhr
 
 data_columns = df_b_daily.columns
 print(data_columns, "\n") # ['open', 'high', 'low', 'close', 'volume']
-
 
 #features + pipeline
 data = df_b_daily
@@ -48,21 +46,18 @@ print(data_pip.columns)
 print(data_pip)
 print("pip läuft \n")
 
-
 ############################# start #####################
-# Verwendung der Klasse zum splitten der Daten aktuell erstmal train test 80-20
+# Verwendung der Klasse zum splitten der Daten
 splitter = DataSplitter(data)
-
 #splitter.split_by_ratio(split_ratio=0.8)  # Split für 80% Trainingsdaten
 #splitter.split_by_date(pd.Timestamp('2019-12-31 16:00:00')) #Split zu diesen Datum
-
 splitter.split_by_date_lag20d(pd.Timestamp('2019-12-31 16:00:00')) #Split zu diesen Datum mit beachtung der 20 Tage
 
 train_data = splitter.get_train_data()
 test_data = splitter.get_test_data()
 
 print("Maximaler Index train_data:", train_data.index.max()) #2019-12-31
-print("Minimaler Index test_data:", test_data.index.min()) #2019-12-04 -> richtig beim splitt - 20 BD
+print("Minimaler Index test_data:", test_data.index.min()) #2019-12-04 -> richtig beim splitt - 20 BD wegen den LagFeatures
 print("\n")
 
 print("Trainingsdaten:\n", train_data)
@@ -70,7 +65,7 @@ print("Testdaten:\n", test_data)
 
 # Plot um die aufteilung anzusehen
 plt.figure(figsize=(10, 6))
-plt.plot(train_data.index, train_data['close'], label='Trainingsdaten', linewidth=2)
+plt.plot(train_data.index, train_data['close'], label='Trainingsdaten')
 plt.plot(test_data.index, test_data['close'], label='Testdaten')
 plt.title('Aufteilung der Trainings- und Testdaten')
 plt.xlabel('Index')
@@ -79,7 +74,7 @@ plt.legend()
 #plt.show()
 
 ####
-#spltt data durch pipeline
+#splitt train und test data durch pipeline
 train_data = pipeline.fit_transform(train_data, 'busdaily')
 test_data = pipeline.fit_transform(test_data, 'busdaily')
 
@@ -97,12 +92,10 @@ back_transform_train_data = train_data[['open', 'close']] #backup für zurück t
 back_transform_test_data = test_data[['open', 'close']] #backup für zurück transfomieren der realen werten 
 
 # Feature (X = unabhängige Variable) und Ziel (y = abhängige Variable) 
-# Zielvariable 'close'
-###
+### split xy 
 splitter = Xy_DataSplitter(train_data, test_data)
 splitter.split_into_features_and_target('close') # Zielvariable 'close'
 
-# Zugriff auf die aufgeteilten Daten
 X_train = splitter.get_X_train()
 X_test = splitter.get_X_test()
 y_train = splitter.get_y_train()
@@ -127,68 +120,192 @@ print(y_test)
 
 print("done, now ml-model \n") #nur zum testen
 
+############################################################################################################################################################################
+###################################### Verwendung der ML-Modelle ####################################################
 
-###########################################
-####### Verwendung der ML-Modelle #########
-# Initialisierung und Training des linearen Regressionsmodells
-
-import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-import numpy as np
-
-last_known_open_value = back_transform_test_data['open'].iloc[0]
+# Letzter bekannter Wert
+last_known_open_value = back_transform_test_data['open'].iloc[0] # Letzter bekannter Open-Wert
 last_known_close_value = back_transform_test_data['close'].iloc[0] # Letzter bekannter Close-Wert
 
-model = RandomForestRegressor()
-model.fit(X_train, y_train)
+# die Tatsächlicher Close-Wert für den entsprechenden Zeitpunkt
+actual_values_class = ActualValues()
+actual_close_values, actual_indices = actual_values_class.get_actual_values_test_close(X_test, back_transform_test_data)
 
-# Erstellen von leeren Listen für die gespeicherten Werte
-predicted_close_values = []
-actual_close_values = []
-indices = []
+####### Initialisierung und Training der Modelle #######
+### siehe in ml_model.py -> länge der prediction noch in ml_model jeweils anpassen / Hyperparameter
 
-######
-#for i in range(len(X_test)):  # Für jeden Zeitpunkt im Testdatensatz
-for i in range(min(20, len(X_test))): #Für die nächten 10 Index
-    # Umwandlung der Daten in DataFrame mit Feature-Namen
-    X_test_row_df = pd.DataFrame([X_test.iloc[i]], columns=X_test.columns)
+############### LR ##################### 
+lr_model = LinearRegressionModel()
+lr_model.fit(X_train, y_train)
+lr_train_predictions = lr_model.train_predict(X_train)
+lr_predictions, lr_indices = lr_model.predict(X_test, back_transform_test_data) #return predicted_close_values, indices # test prediction
+print("LR Model done \n")
+############### RF ##################### 
+rf_model = RandomForestModel()
+rf_model.fit(X_train, y_train)
+rf_train_predictions = rf_model.train_predict(X_train)
+rf_predictions, rf_indices = rf_model.predict(X_test, back_transform_test_data)
+print("RF Model done \n")
+############### GBM ##################### 
+gbm_model = GradientBoostingModel()
+gbm_model.fit(X_train, y_train)
+gbm_train_predictions = gbm_model.train_predict(X_train)
+gbm_predictions, gbm_indices = gbm_model.predict(X_test, back_transform_test_data)
+print("GBM Model done \n")
+############### SVM ##################### 
+svm_model = SVMModel()
+svm_model.fit(X_train, y_train)
+svm_train_predictions = svm_model.train_predict(X_train)
+svm_predictions, svm_indices = svm_model.predict(X_test, back_transform_test_data)
+print("SVM Model done \n")
 
-    # Vorhersage für den nächsten Tag (prozentuale Veränderung)
-    predicted_pct_change = model.predict(X_test_row_df)[0]
+#######################################################
+############### Model extra Infos ##################### 
+print("Mehr Infos zu den Modellen:\n")
+lr_train_variance_score = lr_model.calculate_variance_score(X_train, y_train)
+print("LR Train: Variance Score:", lr_train_variance_score)
+lr_train_coefficients = lr_model.get_coefficients()
+print("LR Train: Coefficients:", lr_train_coefficients)
 
-    # Umwandlung der prozentualen Veränderung in einen absoluten Close-Wert
-    predicted_close = last_known_close_value * (1 + predicted_pct_change / 100)
-    predicted_close_values.append(predicted_close)
+lr_variance_score = lr_model.calculate_variance_score(X_test, y_test)
+print("LR Test: Variance Score:", lr_variance_score)
+lr_coefficients = lr_model.get_coefficients()
+print("LR Test:Coefficients:", lr_coefficients)
 
-    # Aktualisieren des letzten bekannten Close-Werts für die nächste Vorhersage
-    last_known_close_value = back_transform_test_data["close"].iloc[i]
+rf_feature_importances = rf_model.get_feature_importances()
+print("RF Feature Importances:", rf_feature_importances)
 
-    # Tatsächlicher Close-Wert für den entsprechenden Zeitpunkt
-    actual_close = back_transform_test_data["close"].iloc[i]
-    actual_close_values.append(actual_close)
+gbm_feature_importances = gbm_model.get_feature_importances()
+print("GBM Feature Importances:", gbm_feature_importances)
 
-    # Speichern des Indizes
-    indices.append(X_test.index[i])
+svm_support_vectors = svm_model.get_support_vectors()
+svm_n_support = svm_model.get_n_support()
+svm_dual_coef = svm_model.get_dual_coef()
+print("SVM Support Vectors:", svm_support_vectors)
+print("SVM Number of Support Vectors per Class:", svm_n_support)
+print("SVM Dual Coefficients:", svm_dual_coef)
 
-# Berechnung des MAE
-mae = mean_absolute_error(actual_close_values, predicted_close_values)
+##########################################################
+############### Evaluation MAE, RMSE##################### 
+print("Evaluation der Fehlermetricen:\n")
+############ Train 
+### LR 
+lr_train_evaluation_results = lr_model.calculate_training_error(X_train, y_train)
+print("Trainingsfehler für das LR-Modell:", lr_train_evaluation_results)
 
-# Berechnung des RMSE
-rmse = np.sqrt(mean_squared_error(actual_close_values, predicted_close_values))
+### RF
+rf_train_evaluation_results = rf_model.calculate_training_error(X_train, y_train)
+print("Trainingsfehler für das RF-Modell:", rf_train_evaluation_results)
 
-print("Mean Absolute Error (MAE):", mae)
-print("Root Mean Squared Error (RMSE):", rmse)
+### GBM
+gbm_train_evaluation_results = gbm_model.calculate_training_error(X_train, y_train)
+print("Trainingsfehler für das GBM-Modell:", gbm_train_evaluation_results)
+
+### SVM
+svm_train_evaluation_results = svm_model.calculate_training_error(X_train, y_train)
+print("Trainingsfehler für das SVM-Modell:", svm_train_evaluation_results)
+
+############### Test  
+### LR evaluation  
+lr_evaluation_results = lr_model.evaluate(lr_predictions, actual_close_values)
+print("Testfehler für das LR-Modell:", lr_evaluation_results)
+
+### RF evaluation  
+rf_evaluation_results = rf_model.evaluate(rf_predictions, actual_close_values)
+print("Testfehler für das RF-Modell:", rf_evaluation_results)
+
+### GBM evaluation  
+gbm_evaluation_results = gbm_model.evaluate(gbm_predictions, actual_close_values)
+print("Testfehler für das GBM-Modell:", gbm_evaluation_results)
+
+### SVM evaluation  
+svm_evaluation_results = svm_model.evaluate(svm_predictions, actual_close_values)
+print("Testfehler für das SVM-Modell:", svm_evaluation_results)
+
+####################### plot ######################## 
+###### Train + Test plot der evaluation
+evaluation_results_plot = {
+    'LR_Train': lr_train_evaluation_results,
+    'LR_Test': lr_evaluation_results,
+    'RF_Train': rf_train_evaluation_results,
+    'RF_Test': rf_evaluation_results,
+    'GBM_Train': gbm_train_evaluation_results,
+    'GBM_Test': gbm_evaluation_results,
+    'SVM_Train': svm_train_evaluation_results,
+    'SVM_Test': svm_evaluation_results,
+}
+
+# Metriken, die Sie vergleichen möchten
+metrics = ['MAE', 'RMSE'] #, 'MSLE', 'Median AE']
+n_models = len(evaluation_results_plot)
+n_metrics = len(metrics)
+
+# X-Achsen-Positionen für jedes Modell
+x = np.arange(n_metrics)
+bar_width = 0.1  # Breite der Balken
+
+model_colors = {
+    'LR_Train': '#FF9999',  # Light Red
+    'LR_Test': '#FF0000',   # Red
+    'RF_Train': '#99FF99',  # Light Green
+    'RF_Test': '#008000',   # Green
+    'GBM_Train': '#ADD8E6', # Light Blue
+    'GBM_Test': '#0000FF',  # Blue
+    'SVM_Train': '#FFCC99', # Light Orange
+    'SVM_Test': '#FFA500',  # Orange
+}
+
+plt.figure(figsize=(18, 8))
+
+# Berechnen Sie die X-Achsen-Positionen für jedes Modell
+x = np.arange(n_metrics) * (n_models + 1) * bar_width
+
+# Erstellung der Balkendiagramme für Trainings- und Testfehler
+for i, model in enumerate(evaluation_results_plot.keys()):
+    for j, metric in enumerate(metrics):
+        # Berechnen Sie die Position für jeden Balken
+        position = x[j] + i * bar_width
+
+        # Plot
+        plot_val = evaluation_results_plot[model][metric]
+        bar_plot = plt.bar(position, plot_val, width=bar_width, color=model_colors[model], label=model if j == 0 else "")
+
+        # Beschriftung der Balken
+        plt.text(position, plot_val, f'{plot_val:.2f}', ha='center', va='bottom')
+
+plt.xlabel('Metriken')
+plt.ylabel('Werte')
+plt.title('Vergleich der Modelle basierend auf verschiedenen Metriken - Trainings- und Testfehler')
+plt.xticks(x + bar_width * n_models / 2 - bar_width, metrics)
+plt.legend()
+#plt.show()
+
+#######################################################################################
+### plot der vorhergesagten und tatsächlichen Werte
+
+### alle prediction der modelle in einen datensatz
+predictions_data = {
+    "lr_prediction": lr_predictions,
+    "rf_prediction": rf_predictions,
+    "gbm_prediction": gbm_predictions,
+    #"svm_prediction": svm_predictions,
+}
+predictions_data
 
 # Visualisierung der vorhergesagten und tatsächlichen Close-Werte
 plt.figure(figsize=(12, 6))
-plt.plot(indices, predicted_close_values, label='Vorhergesagte Close-Werte', marker='.')
-plt.plot(indices, actual_close_values, label='Tatsächliche Close-Werte', marker='x')
+
+plt.plot(actual_indices, actual_close_values, label='Tatsächliche Werte', color='black')
+plt.plot(actual_indices, lr_predictions, label='LR Vorhergesagte Werte', color='red')
+plt.plot(actual_indices, rf_predictions, label='RF Vorhergesagte Werte', color='green')
+plt.plot(actual_indices, gbm_predictions, label='GBM Vorhergesagte Werte', color='blue')
+plt.plot(actual_indices, svm_predictions, label='SVM Vorhergesagte Werte', color='orange')
+
 plt.title('Vergleich der vorhergesagten und tatsächlichen Close-Werte')
 plt.xlabel('Zeitpunkt')
 plt.ylabel('Close-Wert')
 plt.legend()
-plt.xticks(rotation=45)  # Drehen der X-Achsen-Beschriftungen für bessere Lesbarkeit
+#plt.xticks(rotation=45)  # Drehen der X-Achsen-Beschriftungen für bessere Lesbarkeit
 plt.show()
 
 
