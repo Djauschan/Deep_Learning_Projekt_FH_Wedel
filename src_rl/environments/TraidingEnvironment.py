@@ -92,7 +92,7 @@ class TradingEnvironment:
             """
         elif action == 0:  # Halten
             # TODO: Belohnung anpassen. Agent hält aktuell permanent, ohne zu traden. Das ist nicht sinnvoll.
-            reward = self.reward_params['hold_reward']
+            reward = 0
         else:
             raise ValueError(f"The provided action ({action}) is invalid!")
 

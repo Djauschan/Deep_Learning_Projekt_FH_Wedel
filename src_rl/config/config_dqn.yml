@@ -2,4 +2,4 @@ directories:
   train_data: data/train_data.csv # Path to training data
 
 train_parameters:
-  epochs: 50 # Number of epochs to train
+  epochs: 250 # Number of epochs to train
