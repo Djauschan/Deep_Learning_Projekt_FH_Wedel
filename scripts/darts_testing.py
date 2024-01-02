@@ -25,20 +25,19 @@ dataset = TimeSeries.from_csv("data/output/darts_dataset.csv",
                               fill_missing_dates=True,
                               fillna_value=0)
 
+# dataset = dataset.tail(10000)
+
 print(dataset.columns)
 print(dataset.pd_dataframe().shape)
 
 train, val = dataset.split_after(0.9)
 
-# dataset.plot()
-# plt.show()
-
 my_model = TransformerModel(
-    input_chunk_length=30,
+    input_chunk_length=20,
     output_chunk_length=1,
-    batch_size=32,
-    n_epochs=3,
-    model_name="aa_transformer",
+    batch_size=1024,
+    n_epochs=1,
+    model_name="darts_transformer",
     nr_epochs_val_period=10,
     d_model=16,
     nhead=8,
@@ -49,14 +48,17 @@ my_model = TransformerModel(
     activation="relu",
     random_state=42,
     save_checkpoints=True,
-    force_reset=True,
+    log_tensorboard=True,
+    work_dir="runs"
 )
 
 my_model.fit(series=train, val_series=val, verbose=True)
 
+my_model.save("runs/darts_transformer/model.pt")
 
-def eval_model(model, n, series, val_series):
-    pred_series = model.predict(n=n)
+
+def eval_model(model, series, val_series):
+    pred_series = model.predict(n=len(val_series))
     plt.figure(figsize=(8, 5))
     series.plot(label="actual")
     pred_series.plot(label="forecast")
@@ -65,7 +67,4 @@ def eval_model(model, n, series, val_series):
     plt.show()
 
 
-best_model = TransformerModel.load_from_checkpoint(
-    model_name="aa_transformer", best=True)
-
-eval_model(best_model, 75000, dataset, val)
+eval_model(my_model, dataset, val)
