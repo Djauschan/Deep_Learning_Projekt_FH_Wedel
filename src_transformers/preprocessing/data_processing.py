@@ -63,11 +63,13 @@ def add_time_information(df: pd.DataFrame) -> pd.DataFrame:
     df['last of day'] = df['last of day'].astype(int)
 
     # Convert python time to posix time.
-    df['posix_time'] = df['timestamp'].apply(
-        lambda x: x.timestamp())
+    # df['posix_time'] = df['timestamp'].apply(
+    #     lambda x: x.timestamp())
 
-    df.set_index('posix_time', inplace=True)
-    df.drop(columns=['timestamp'], inplace=True)
+    # df.set_index('posix_time', inplace=True)
+    # df.drop(columns=['timestamp'], inplace=True)
+
+    df.set_index('timestamp', inplace=True)
 
     return df
 
