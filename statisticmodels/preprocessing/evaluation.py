@@ -3,10 +3,13 @@ import numpy as np
 from sklearn.model_selection import TimeSeriesSplit
 from models.arima import Arima
 from sklearn import metrics
-from models.exponentialsmoothing import Exponentialsmoothing
-from models.exponentialsmoothing import Theta
- 
- 
+from models.basic_stasmodels import Exponentialsmoothing
+from models.basic_stasmodels import Theta
+from models.basic_stasmodels import Historic_average
+from models.basic_stasmodels import Naive_
+from models.basic_stasmodels import Window_average 
+
+
 class Evaluation:
  
     def __init__(self, splits, testlength, y_values):
@@ -60,8 +63,34 @@ class Evaluation:
             prognoseDic={'theta': np.array([])}
             for train_index, test_index in self.splitter.split(data):
                 testArray = np.append(testArray, data[test_index])
-                etsResult= thetamodel.forecast(self.testlength,data[train_index])
-                prognoseDic['theta']=np.append(prognoseDic['theta'], etsResult)
+                thetaResult= thetamodel.forecast(self.testlength,data[train_index])
+                prognoseDic['theta']=np.append(prognoseDic['theta'], thetaResult)
+        
+        
+        elif model=='hist':
+            histmodel=Historic_average()
+            prognoseDic={'hist': np.array([])}
+            for train_index, test_index in self.splitter.split(data):
+                testArray = np.append(testArray, data[test_index])
+                histResult= histmodel.forecast(self.testlength,data[train_index])
+                prognoseDic['hist']=np.append(prognoseDic['hist'], histResult)
+        
+        elif model=='naive':
+            naivemodel=Naive_()
+            prognoseDic={'naive': np.array([])}
+            for train_index, test_index in self.splitter.split(data):
+                testArray = np.append(testArray, data[test_index])
+                naiveResult= naivemodel.forecast(self.testlength,data[train_index])
+                prognoseDic['naive']=np.append(prognoseDic['naive'], naiveResult)
+
+        
+        elif model=='window':
+            windowmodel=Window_average()
+            prognoseDic={'window': np.array([])}
+            for train_index, test_index in self.splitter.split(data):
+                testArray = np.append(testArray, data[test_index])
+                windowResult= windowmodel.forecast(self.testlength,data[train_index])
+                prognoseDic['window']=np.append(prognoseDic['window'], windowResult)
  
         return testArray, prognoseDic
  

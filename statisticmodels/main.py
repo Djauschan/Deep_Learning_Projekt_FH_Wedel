@@ -7,7 +7,7 @@ from models.visualisation import VisualizeStatsModel
 from models.arima import Arima
 from sklearn.model_selection import TimeSeriesSplit
 from preprocessing.evaluation import Evaluation
-from arch import arch_model
+
  
 test = DataReader({"READ_ALL_FILES": "READ_ALL_FILES"})
  
@@ -17,7 +17,7 @@ txt_files, symbols = test.get_txt_files()
 for i in symbols:
     print(i)
  
-test.current_file_idx = 0
+test.current_file_idx = 1
  
 df = test.read_next_txt()
 clean = DataCleaner(df)
@@ -34,14 +34,20 @@ print(arimaData.head())
 print(arimaData.info())
  
 yWerte=arimaData['y'].values
-yWerte_df = pd.DataFrame(yWerte)
-yWerte_df['Return'] = yWerte_df.pct_change()
-yWerte_df = yWerte_df.replace([np.inf, -np.inf], np.nan)
-yWerte_df = yWerte_df.dropna()
-basic_gm = arch_model(10* yWerte_df['Return'], p=1, q=1, mean= 'constant', vol = 'GARCH', dist = 'normal')
-gm_result = basic_gm.fit(disp='off')
-gm_forecast= gm_result.forecast(horizon = 5)
-print(gm_forecast.variance[-1:])
+
+cross=Evaluation(100,3,yWerte)
+
+test, prognose=cross.CrossValidation('window')
+
+vizualizer= VisualizeStatsModel(arimaData,prognose,test,test)
+
+vizualizer.arimaCrossvalidation(test,prognose)
+
+
+
+
+
+
  
  
 # plt.style.use('fivethirtyeight')
