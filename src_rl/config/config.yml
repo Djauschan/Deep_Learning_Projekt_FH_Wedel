@@ -1,6 +1,48 @@
 directories:
   train_data: data/train_data.csv # Path to training data
+  test_data: data/test_data.csv # Path to test data
+
+agent_types: ['ma5', 'ma30', 'ma200', 'rsi']
+
+aggregation:
+  aggregation_state_size: 4 #Inputsize from each agent
+  
+q_models: # Path to q-models
+  ma5: models/ma5_agent_model.pkl
+  ma30: models/ma5_agent_model.pkl
+  ma200: models/ma5_agent_model.pkl
+  rsi: models/rsi_agent_model.pkl
+  aggregation: models/aggregation_agent_model.pkl
+
 
 train_parameters:
-  epochs: 100 # Number of epochs to train
+  epochs: 150 # Number of epochs to train
+  state_size: 20  # Number of different states that an agent can distinguish 
+  action_size: 3   # Possible actions: sell (-1), hold (0), buy (+1)
+
+  #monitor the Portfoliovalue over the trainingcycle:
+  start_cash_monitoring: 1000 #monitor the cashvalue over the trainingcycle
+  start_stock_monitoring: 0 #monitor the stockamount over the trainingcycle
+
+  # parameters for Q-Learning Agents
+  learning_rate: 0.2 # Learning rate
+  discount_factor: 0.9 # Discount factor for future rewards
+  exploration_rate: 0.2 # Initial exploration rate
+  exploration_decay: 0.1 # Decay rate for the exploration rate
+  exploration_min: 0.01 # Minimum exploration rate
+
+  # parameters for rewards
+  reward: 2 #correct prediction
+  hold_reward: 0.0
+  penalty: -2 #incorrect prediction
+
+  #additional penalty, when the portfolio value undercut the min threshold
+  min_portfolio_threshold: 0.3 #< 30% from the started value
+  threshold_penalty: -1
+  threshold_reward: 1
+
+
+
+
+
 

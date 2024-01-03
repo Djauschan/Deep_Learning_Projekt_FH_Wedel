@@ -1,95 +1,136 @@
-
-# Imports
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import pickle
-from utils.aggregationfunction import aggregate_q_values 
-from agents.q_learning import QLearningAgent
 import matplotlib.pyplot as plt
-import sys
-from environments.TraidingEnvironment import TradingEnvironment
+from environments.TraidingEnvironment_q_learning import TradingEnvironment
 from utils.read_config import Config_reader
-    
+from agents.q_learning import QLearningAgent
+from utils.aggregationfunction import aggregate_actions
+
+
 def main():
-    # Read config file
+ 
+    # Konfigurationsdatei und Daten einlesen
     config = Config_reader('config/config.yml')
-    
-    # Pfadangaben
     train_data_path = config.get_parameter('train_data', 'directories')
-
-    # Einlesen der Daten
     train_data = pd.read_csv(train_data_path)
-    env = TradingEnvironment(train_data)  # Erzeugt ein TradingEnvironment-Objekt mit den Trainingsdaten
+    env = TradingEnvironment(train_data)
 
-    # Erstellen der Q-Learning-Agenten für verschiedene Indikatoren
-    ma5_agent = QLearningAgent('ma5', state_size=100, action_size=3)
-    ma30_agent = QLearningAgent('ma30', state_size=100, action_size=3)
-    ma200_agent = QLearningAgent('ma200', state_size=100, action_size=3)
-    rsi_agent = QLearningAgent('rsi', state_size=100, action_size=3)  # Q-Tabelle nicht erforderlich
+    # Initialisierung der Q-Learning-Agenten und des Aggregationsagenten
+    state_size = config.get_parameter('state_size', 'train_parameters')
+    aggregation_state_size = config.get_parameter('aggregation_state_size', 'aggregation')
+    agent_types = config.get_parameter('agent_types')
+    ql_agents = [QLearningAgent(agent_type, state_size, 'config/config.yml') for agent_type in agent_types]
+    aggregation_agent = QLearningAgent('aggregation', aggregation_state_size, 'config/config.yml')
 
-    ql_agents = [ma5_agent, ma30_agent, ma200_agent, rsi_agent]  # Liste aller Agenten
-    agent_types = ['ma5', 'ma30', 'ma200', 'rsi']  # Bezeichnungen der Agententypen
-    performance_metrics = {agent_type: [] for agent_type in agent_types}  # Initialisiert Leistungsmetriken
+    # Trainingsparameter
+    NUM_EPISODES = config.get_parameter('epochs', 'train_parameters')
 
-    # Trainingsprozess der Agenten
-    NUM_EPISODES = config.get_parameter('epochs', 'train_parameters')  # Anzahl der Trainingsepisoden
-    cumulative_rewards = {agent_type: np.zeros(NUM_EPISODES) for agent_type in agent_types}  # Kumulative Belohnungen
+    # Initialisierung der Sammelvariablen für individuelle Agenten und Aggregationsagent
+    cumulative_rewards = {agent_type: np.zeros(NUM_EPISODES) for agent_type in agent_types}
+    cumulative_rewards['aggregation'] = np.zeros(NUM_EPISODES)  # Für den Aggregationsagenten
+    portfolio_values = {agent_type: [[] for _ in range(NUM_EPISODES)] for agent_type in agent_types}
+    portfolio_values['aggregation'] = [[] for _ in range(NUM_EPISODES)]  # Für den Aggregationsagenten
 
-    for episode in tqdm(range(NUM_EPISODES)):  # Trainingsschleife
-        states = env.reset()  # Zustand der Umgebung zurücksetzen
+    # Trainingsprozess für individuelle Agenten
+    for agent, agent_type in zip(ql_agents, agent_types):
+        train_individual_agent(agent, agent_type, NUM_EPISODES, env, config, cumulative_rewards, portfolio_values)
+
+    # Trainingsprozess für den Aggregationsagenten
+    train_aggregation_agent(aggregation_agent, ql_agents, agent_types, NUM_EPISODES, env, config, cumulative_rewards, portfolio_values)
+
+    # Speichern der Modelle
+    save_models(ql_agents, agent_types, aggregation_agent)
+
+    # Visualisierung der Performance
+    visualize_performance(agent_types, cumulative_rewards, portfolio_values, config)
+
+def train_individual_agent(agent, agent_type, num_episodes, env, config, cumulative_rewards, portfolio_values):
+    for episode in tqdm(range(num_episodes), desc=f"Training {agent_type}"):
+        states = env.reset()
         done = False
-        episode_rewards = {agent_type: 0 for agent_type in agent_types}  # Initialisiert Belohnungen für die Episode
+        episode_rewards = 0
+        while not done:
+            state = states[agent_type]
+            action = agent.act(state)
+            next_states, reward, done = env.step(action, agent_type)
+            if not done:
+                next_state = next_states[agent_type]
+                agent.learn(state, action, reward, next_state, done)
+            episode_rewards += reward
+            states = next_states
+        cumulative_rewards[agent_type][episode] = episode_rewards
+        portfolio_values[agent_type][episode].append(env.calculate_portfolio_value(agent_type))
+
+
+def train_aggregation_agent(aggregation_agent, ql_agents, agent_types, num_episodes, env, config, cumulative_rewards, portfolio_values):
+    for episode in tqdm(range(num_episodes), desc="Training Aggregation Agent"):
+        states = env.reset()
+        done = False
+        aggregation_state = [0] * config.get_parameter('aggregation_state_size', 'aggregation')
+        step_count = 0
+        episode_rewards = 0
 
         while not done:
-            final_action = aggregate_q_values(ql_agents, states, agent_types)  # Bestimmt die endgültige Aktion basierend auf aggregierten Q-Werten
-            states, reward, done = env.step(final_action)  # Führt die Aktion aus und erhält Belohnungen und nächsten Zustand
+            individual_actions = [agent.act(states[agent_type]) for agent, agent_type in zip(ql_agents, agent_types)]
+            aggregated_action = aggregate_actions(aggregation_agent, individual_actions) 
 
-            if not done:
-                for agent, agent_type in zip(ql_agents, agent_types):
-                    state = states[agent_type]
-                    agent.learn(state, final_action, reward, state, done)  # Trainiert jeden Agenten
-                    episode_rewards[agent_type] += reward  # Summiert die Belohnungen
+            _, aggregation_reward, done = env.step(aggregated_action, 'aggregation', calculate_value = True)
+            new_aggregation_state = update_aggregation_state(aggregation_state, individual_actions)
+            aggregation_agent.learn(aggregation_state, aggregated_action, aggregation_reward, new_aggregation_state, done)
+            episode_rewards += aggregation_reward
+            aggregation_state = new_aggregation_state
+    
 
-        if env.done:
-            episode_performance = env.messen_der_leistung()  # Misst die Leistung der Episode
-            for agent_type in agent_types:
-                performance_metrics[agent_type].append(episode_performance)  # Speichert die Leistung
-                cumulative_rewards[agent_type][episode] = episode_rewards[agent_type]  # Speichert kumulative Belohnungen
-
-        # Ausgabe der Q-Tabellen für Überwachungszwecke
-        print(f"Episode {episode + 1}/{NUM_EPISODES}")
-        for agent in ql_agents:
-            print(f"Q-Tabelle für {agent.agent_type}:")
-            print(agent.q_table)
-
-    # Anpassung der Gewichtung basierend auf der Leistung
-    for agent_type in agent_types:
-        agent_performance = performance_metrics[agent_type][-1]
-        for agent in ql_agents:
-            if agent.agent_type == agent_type:
-                agent.weight = max(min(agent.weight + agent_performance * 0.01, 1), 0)
+        # Aktualisieren der Sammelvariablen für den Aggregationsagenten
+        cumulative_rewards['aggregation'][episode] = episode_rewards
+        portfolio_values['aggregation'][episode].append(env.calculate_portfolio_value('aggregation'))
 
 
-    # Speichern der trainierten Modelle
+def save_models(ql_agents, agent_types, aggregation_agent):
     for agent, agent_type in zip(ql_agents, agent_types):
-        model_file_path = f'models\\{agent_type}_agent_model.pkl'
+        model_file_path = f'models/{agent_type}_agent_model.pkl'
         with open(model_file_path, 'wb') as file:
             pickle.dump(agent, file)
+    with open('models/aggregation_agent_model.pkl', 'wb') as file:
+        pickle.dump(aggregation_agent, file)
 
-    print("Modelle wurden erfolgreich gespeichert.")
+def visualize_performance(agent_types, cumulative_rewards, portfolio_values, config):
+    NUM_EPISODES = config.get_parameter('epochs', 'train_parameters')
 
-    # Visualisierung der Metriken
+    # Visualisierung für individuelle Agenten
     for agent_type in agent_types:
         plt.figure(figsize=(12, 5))
-
-        plt.subplot(1, 2, 1)
-        plt.plot(cumulative_rewards[agent_type])
-        plt.title(f"Kumulative Belohnungen pro Episode für {agent_type}")
+        plt.plot([pv[-1] for pv in portfolio_values[agent_type] if pv], label="Portfolio-Werte")
+        cumulative_average_end_values = np.cumsum([pv[-1] for pv in portfolio_values[agent_type] if pv]) / np.arange(1, len(portfolio_values[agent_type]) + 1)
+        plt.plot(cumulative_average_end_values, label="Iterativer Durchschnitt der Endwerte", color='g')
+        plt.axhline(y=config.get_parameter('start_cash_monitoring', 'train_parameters'), color='r', linestyle='--', label="Anfangswert des Portfolios")
+        plt.title(f"Performance pro Episode für {agent_type}")
         plt.xlabel("Episode")
-        plt.ylabel("Kumulative Belohnung")
-
+        plt.ylabel("Wert")
+        plt.legend()
         plt.show()
 
-if __name__ == '__main__':
+    # Visualisierung für die Aggregationsfunktion
+    plt.figure(figsize=(12, 5))
+    plt.plot([pv[-1] for pv in portfolio_values['aggregation'] if pv], label="Portfolio-Werte (Aggregation)")
+    cumulative_average_end_values = np.cumsum([pv[-1] for pv in portfolio_values['aggregation'] if pv]) / np.arange(1, len(portfolio_values['aggregation']) + 1)
+    plt.plot(cumulative_average_end_values, label="Iterativer Durchschnitt der Endwerte (Aggregation)", color='g')
+    plt.axhline(y=config.get_parameter('start_cash_monitoring', 'train_parameters'), color='r', linestyle='--', label="Anfangswert des Portfolios")
+    plt.title("Performance pro Episode (Aggregationsagent)")
+    plt.xlabel("Episode")
+    plt.ylabel("Wert")
+    plt.legend()
+    plt.show()
+
+
+def update_aggregation_state(current_state, actions):
+    new_state = list(current_state)
+    for i, action in enumerate(actions):
+        new_state[i] = action
+    return new_state
+
+if __name__ == "__main__":
     main()
+

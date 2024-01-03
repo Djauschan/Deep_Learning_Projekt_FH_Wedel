@@ -1,5 +1,17 @@
 import numpy as np
 
+def aggregate_actions(aggregation_agent, actions):
+    weighted_actions = np.zeros(3)  # Angenommen, es gibt 3 mögliche Aktionen
+    for i, action in enumerate(actions):
+        weighted_actions += aggregation_agent.q_table[i, action]
+
+    # Wenn alle gewichteten Aktionen gleich sind, wählen Sie zufällig
+    if np.all(weighted_actions == weighted_actions[0]):
+        return np.random.choice(len(weighted_actions))
+    else:
+        return np.argmax(weighted_actions)
+
+"""
 #Aggregationfunction
 
 def state_to_index(state, max_value=99):
@@ -25,5 +37,5 @@ def aggregate_q_values(agents, states, agent_types):
             q_values = agent.q_table[state_index] * agent.weight
             combined_q_values += q_values
     return np.argmax(combined_q_values)
-
+"""
 

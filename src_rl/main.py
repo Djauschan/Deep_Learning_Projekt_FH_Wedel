@@ -1,128 +1,146 @@
-#Imports
+# Imports
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import pickle
-from Aggregationfunction import aggregate_q_values
-from TraidingEnvirement import TradingEnvironment
-from Q_Learning import QLearningAgent
-from TraidingEnvirement import TradingEnvironment  # Stellen Sie sicher, dass Sie die richtige Pfadangabe verwenden
-import matplotlib.pyplot as plt  # Für die Darstellung der Ergebnisse
+from utils.aggregationfunction import aggregate_actions
+from environments.TraidingEnvironment_q_learning import TradingEnvironment
+from utils.read_config import Config_reader
+
+class Portfolio:
+    def __init__(self, cash, stocks):
+        self.cash = cash
+        self.stocks = stocks
+        self.last_action = None
+
+    def calculate_portfolio_change(self, action, current_price):
+        if action == 1 and self.cash >= current_price and self.last_action != 'buy':  # Kaufen
+            self.stocks += 1
+            self.cash -= current_price
+            self.last_action = 'buy'
+        elif action == 2 and self.stocks > 0 and self.last_action != 'sell':  # Verkaufen
+            self.stocks -= 1
+            self.cash += current_price
+            self.last_action = 'sell'
+        return self.cash + self.stocks * current_price
+
+def main():
+    # Initialwert des Portfolios
+    initial_portfolio_value = 10000
+
+    portfolio = Portfolio(initial_portfolio_value, 0)  # Start mit Bargeld und 0 Aktien
+
+    # Konfigurationsdatei lesen
+    config = Config_reader('config/config.yml')
+
+    # Laden der trainierten Modelle
+    ma5_agent = pickle.load(open(config.get_parameter('ma5', 'q_models'), 'rb'))
+    ma30_agent = pickle.load(open(config.get_parameter('ma30', 'q_models'), 'rb'))
+    ma200_agent = pickle.load(open(config.get_parameter('ma200', 'q_models'), 'rb'))
+    aggregation_agent = pickle.load(open(config.get_parameter('aggregation', 'q_models'), 'rb'))
+
+    # Testparameter
+    test_data_path = config.get_parameter('test_data', 'directories')
+    test_data = pd.read_csv(test_data_path)
+    env = TradingEnvironment(test_data)
+
+    # Listen für Testergebnisse
+    portfolio_values = []
+    actions = []
+    individual_agent_actions = {agent_type: [] for agent_type in ['ma5', 'ma30', 'ma200', 'rsi']}
+
+    # Testdurchlauf
+    NUM_EPISODES = 1
+    for episode in tqdm(range(NUM_EPISODES), desc="Testdurchlauf"):
+        state = env.reset()
+        done = False
+
+        while not done:
+            individual_actions = [
+                ma5_agent.act(state['ma5']),
+                ma30_agent.act(state['ma30']),
+                ma200_agent.act(state['ma200'])
+            ]
+
+            # RSI-basierte Aktion hinzufügen
+            rsi_value = test_data['rsi'].iloc[env.current_step]
+            previous_rsi = test_data['rsi'].iloc[env.current_step - 1] if env.current_step > 0 else rsi_value
+            rsi_action = 0  # Halten
+            current_price = test_data['close'].iloc[env.current_step]
+            previous_price = test_data['close'].iloc[env.current_step - 1] if env.current_step > 0 else current_price
+
+            if (rsi_value < 25 and current_price > previous_price) or (previous_rsi >= 25 and rsi_value < 25):
+                rsi_action = 1  # Kaufen
+            elif (rsi_value > 75 and current_price < previous_price) or (previous_rsi <= 75 and rsi_value > 75):
+                rsi_action = 2  # Verkaufen
+            #individual_actions.append(rsi_action)
+
+            proposed_action = aggregate_actions(aggregation_agent, individual_actions)
+
+            # Überprüfen, ob die vorgeschlagene Aktion durchführbar ist
+            if (proposed_action == 1 and portfolio.last_action == 'buy') or \
+               (proposed_action == 2 and portfolio.last_action == 'sell'):
+                final_action = 0  # Halten, wenn die letzte Aktion gleich war
+            else:
+                final_action = proposed_action
+
+            actions.append(final_action)
+
+            # Anpassen des Portfolio-Wertes basierend auf der Aktion
+            portfolio_value = portfolio.calculate_portfolio_change(final_action, current_price)
+            portfolio_values.append(portfolio_value)
+
+            # Aktualisieren der Schritte und Überprüfung der Beendigungsbedingung
+            env.current_step += 1
+            if env.current_step >= len(test_data) - 1:
+                done = True
+
+            # Aktualisieren der individual_agent_actions
+            for i, agent_type in enumerate(['ma5', 'ma30', 'ma200']): #, 'rsi'
+                individual_agent_actions[agent_type].append(individual_actions[i])
 
 
-#trained Agents
-# Laden der trainierten Modelle
-ma5_agent = pickle.load(open(r'C:\Users\Joel\Desktop\FH-Wedel\Deep Learning Projekt\Git\Deep_Learning-2\Simulation\ma5_agent_model.pkl', 'rb'))
-ma30_agent = pickle.load(open(r'C:\Users\Joel\Desktop\FH-Wedel\Deep Learning Projekt\Git\Deep_Learning-2\Simulation\ma30_agent_model.pkl', 'rb'))
-ma200_agent = pickle.load(open(r'C:\Users\Joel\Desktop\FH-Wedel\Deep Learning Projekt\Git\Deep_Learning-2\Simulation\ma200_agent_model.pkl', 'rb'))
-rsi_agent = pickle.load(open(r'C:\Users\Joel\Desktop\FH-Wedel\Deep Learning Projekt\Git\Deep_Learning-2\Simulation\rsi_agent_model.pkl', 'rb'))
+    # Ergebnisse ausgeben
+    #for agent_type, agent_actions in individual_agent_actions.items():
+    #    print(f"Aktionen: {agent_actions}")
+                
 
 
-# Agentenliste
-ql_agents = [ma5_agent, ma30_agent, ma200_agent, rsi_agent]
-agent_types = ['ma5', 'ma30', 'ma200', 'rsi']
+    # Visualisierung
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), gridspec_kw={'height_ratios': [2, 1]})
 
-#Testing
-# Pfad zum Testdatensatz
-test_data_path = r'C:\Users\Joel\Desktop\FH-Wedel\Deep Learning Projekt\Git\Deep_Learning-2\test_data.csv'
-# Einlesen des Testdatensatzes
-test_data = pd.read_csv(test_data_path)
+    # Aktienchart und MAs zeichnen
+    ax1.plot(test_data['close'], label='Schließkurse', color='blue')
+    if 'ma5' in test_data.columns:
+        ax1.plot(test_data['ma5'], label='MA 5 Tage', color='orange')
+    if 'ma30' in test_data.columns:
+        ax1.plot(test_data['ma30'], label='MA 30 Tage', color='green')
+    if 'ma200' in test_data.columns:
+        ax1.plot(test_data['ma200'], label='MA 200 Tage', color='red')
 
-# Erstellen der Handelsumgebung für den Testdatensatz
-env = TradingEnvironment(test_data)
+    # Kauf- und Verkaufsorders markieren
+    for i, action in enumerate(actions):
+        if action == 1:  # Kauf
+            ax1.scatter(i, test_data['close'].iloc[i], color='green', marker='^')
+        elif action == 2:  # Verkauf
+            ax1.scatter(i, test_data['close'].iloc[i], color='red', marker='v')
 
-# Listen zur Aufzeichnung der Ergebnisse
-portfolio_values = []
-actions = []
-individual_agent_actions = {agent_type: [] for agent_type in agent_types}  # Für individuelle Agentenaktionen
+    ax1.set_title('Aktienchart mit gleitenden Durchschnitten und Orders')
+    ax1.set_xlabel('Zeit')
+    ax1.set_ylabel('Preis')
+    ax1.legend()
 
-# Testparameter
-NUM_EPISODES = 1
-
-#Run Test
-for episode in tqdm(range(NUM_EPISODES)):
-    states = env.reset()
-    done = False
-    portfolio_value = []  # Portfolio-Werte für jede Episode
-
-    for agent in ql_agents:
-        print(agent.q_table.shape)  # Überprüfen Sie, ob dies (state_size, 2) für jeden Agenten anzeigt
-    while not done:
-        # Aktionen der Agenten auswählen
-        individual_actions = [agent.act(states[agent.agent_type]) for agent in ql_agents]
-        for agent_type, action in zip(agent_types, individual_actions):
-            individual_agent_actions[agent_type].append(action)
-
-        final_action = aggregate_q_values(ql_agents, states, agent_types)
-        actions.append(final_action)  # Speichern der aggregierten Aktion
-
-        # Aktionen durchführen und Belohnung erhalten
-        next_states, reward, done = env.step(final_action)
-        portfolio_value.append(env.balance + env.stock_owned * env.data['close'].iloc[env.current_step-1])
-
-        states = next_states
-
-    portfolio_values.append(portfolio_value)
-
-
-
-
-# Ausgabe der individuellen Aktionen jedes Agenten -> zur Kontrolle
-for agent_type, agent_actions in individual_agent_actions.items():
-    print(f"Aktionen von {agent_type}: {agent_actions}")
-
-
-
-
-
-
-
-
-
-# Plot der Portfolio-Werte
-
-# Laden des Testdatensatzes
-test_data_path = r'C:\Users\Joel\Desktop\FH-Wedel\Deep Learning Projekt\Git\Deep_Learning-2\test_data.csv'
-test_data = pd.read_csv(test_data_path)
-
-# Erstellen einer Figur und definieren von zwei Subplots
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), gridspec_kw={'height_ratios': [2, 1]})
-
-# Zeichnen des Aktiencharts (Schließkurse) und der MAs auf dem ersten Subplot
-ax1.plot(test_data['close'], label='Schließkurse', color='blue')
-if 'ma5' in test_data.columns:
-    ax1.plot(test_data['ma5'], label='MA 5 Tage', color='orange')
-if 'ma30' in test_data.columns:
-    ax1.plot(test_data['ma30'], label='MA 30 Tage', color='green')
-if 'ma200' in test_data.columns:
-    ax1.plot(test_data['ma200'], label='MA 200 Tage', color='red')
-
-# Markierungen für Kauf- und Verkaufsorders
-
-for i, action in enumerate(actions):
-    #action
-    if action == 1:  # Kauf
-        ax1.scatter(i, test_data['close'].iloc[i], color='green', marker='^')  # Kein Label für Kauf
-    elif action == -1:  # Verkauf
-        ax1.scatter(i, test_data['close'].iloc[i], color='red', marker='v')  # Kein Label für Verkauf
-    print(action)
-ax1.set_title('Aktienchart mit gleitenden Durchschnitten und Orders')
-ax1.set_xlabel('Zeit')
-ax1.set_ylabel('Preis')
-ax1.legend()
-
-# Zeichnen des RSI auf dem zweiten Subplot
-if 'rsi' in test_data.columns:
-    ax2.plot(test_data['rsi'], label='RSI', color='purple')
-    ax2.axhline(70, color='red', linestyle='--')
-    ax2.axhline(30, color='green', linestyle='--')
-    ax2.set_ylim([0, 100])
-    ax2.set_title('Relative Strength Index (RSI)')
+    # Wertentwicklung des Portfolios zeichnen
+    ax2.plot(portfolio_values, label='Portfolio-Wert', color='purple')
+    ax2.set_title('Wertentwicklung des Portfolios')
     ax2.set_xlabel('Zeit')
-    ax2.set_ylabel('RSI')
+    ax2.set_ylabel('Wert')
     ax2.legend()
 
-# Anzeigen des Plots
-plt.tight_layout()
-plt.show()
+    plt.tight_layout()
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()
