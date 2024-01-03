@@ -57,6 +57,7 @@ class Trainer:
     logger: Logger
     eval_mode: bool
     seed: int
+    patience: int
 
     @classmethod
     def create_trainer_from_config(
@@ -71,7 +72,8 @@ class Trainer:
             optimizer: str = "adam",
             momentum: float = 0,
             eval_mode: bool = False,
-            seed: int = None
+            seed: int = None,
+            patience: int = 50
     ) -> "Trainer":
         """
         Creates a Trainer instance from an unpacked configuration file.
@@ -92,6 +94,7 @@ class Trainer:
             momentum (float, optional): Momentum for the optimizer. Defaults to 0.
             eval_mode (bool, optional): If the model is evaluated, the validation split is set to 1.
             seed (int, optional): Seed for the random number generator.
+            patience (int, optional): Number of epochs to wait for improvement before stopping. Defaults to 50.
 
         Returns:
             Trainer: A Trainer instance with the specified configuration.
@@ -144,7 +147,8 @@ class Trainer:
             model=model,
             logger=Logger(),
             eval_mode=eval_mode,
-            seed=seed
+            seed=seed,
+            patience=patience
         )
 
         cls._dataset = dataset
@@ -212,7 +216,7 @@ class Trainer:
         return train_loader, validation_loader
 
     def train_model(self, train_loader: DataLoader,
-                    validation_loader: DataLoader, patience: int = 50) -> str:
+                    validation_loader: DataLoader) -> str:
         """
         Trains the model for a specified number of epochs. For each epoch, the method calculates
         the training loss and validation loss, logs these losses, and saves the current state
@@ -225,7 +229,6 @@ class Trainer:
         Args:
             train_loader (DataLoader): DataLoader for the training set.
             validation_loader (DataLoader): DataLoader for the validation set.
-            patience (int, optional): Number of epochs to wait for improvement before stopping. Defaults to 50.
 
         Returns:
             str: The reason the training ended.
@@ -263,9 +266,9 @@ class Trainer:
                     min_loss = validation_loss
                     cur_patience = 0
                 else:
-                    if patience > 0:
+                    if self.patience > 0:
                         cur_patience += 1
-                        if cur_patience == patience:
+                        if cur_patience == self.patience:
                             finish_reason = "Training finished because of early stopping."
                             self.save_model()
                             break
