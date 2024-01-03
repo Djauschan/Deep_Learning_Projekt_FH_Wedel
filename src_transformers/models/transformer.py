@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+torch.autograd.set_detect_anomaly(True)
 
 class MultiHeadAttention(nn.Module):
     """
@@ -217,7 +218,7 @@ class PositionalEncoding(nn.Module):
         # model's dimension
         div_term = torch.exp(
             torch.arange(0, d_model, 2).float() * -
-            (math.log(10.0) / d_model)
+            (math.log(100.0) / d_model)
         )
 
         # Apply the div term to the positionoal encoding to create the
@@ -289,17 +290,16 @@ class DecoderLayer(nn.Module):
         # Forward cross attention layer for encoder outputs
         # Encoders outputs are used as keys and values
         # The decoder's outputs are used as queries
+        # TODO: unmcommend the following lines
         x = self.norm2(x)
         attn_output = self.cross_attn(
             x, enc_output, enc_output, src_mask)
         x = x + self.dropout(attn_output)
-        # x = x + self.dropout(attn_output)
 
         # Forward feed forward layer
-        x = self.norm3(x)
+        # x = self.norm3(x)
         ff_output = self.feed_forward(x)
         x = x + self.dropout(ff_output)
-        # x = x + self.dropout(ff_output)
         return x
 
 
@@ -335,7 +335,7 @@ class Transformer(nn.Module):
              for _ in range(num_layers)]
         )
 
-        self.fc1 = nn.Linear(dim_decoder, d_ff)
+        self.fc1 = nn.Linear(dim_decoder, dim_decoder)
         self.fc2 = nn.Linear(d_ff, dim_decoder)
         self.dropout = nn.Dropout(dropout)
 
@@ -383,6 +383,7 @@ class Transformer(nn.Module):
         n_tgt_feature = tgt.shape[2]
         dec_input = torch.cat(
             (src[:, -1, -n_tgt_feature:].unsqueeze(1), tgt[:, :-1, :]), dim=1)
+        #dec_input = tgt #TODO: remove this line
 
         dec_mask.to(self.device)
         dec_input.to(self.device)
@@ -396,6 +397,8 @@ class Transformer(nn.Module):
         tgt_embedded = self.dropout(
             self.positional_encoding_decoder(dec_input)
         )
+        # src_embedded = src
+        # tgt_embedded = dec_input
 
         # Forward encoder layers
         enc_output = src_embedded
@@ -413,6 +416,8 @@ class Transformer(nn.Module):
                 dec_mask,
                 tgt_mask)
 
-        output = self.fc2(self.dropout(self.fc1(dec_output)))
+        output = self.dropout(self.fc1(dec_output))
+
+        output = output + self.dropout(dec_output)
 
         return output

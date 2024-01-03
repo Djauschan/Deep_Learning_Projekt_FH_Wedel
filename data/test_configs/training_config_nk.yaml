@@ -1,0 +1,67 @@
+use_gpu: true
+model_parameters:
+  transformer:
+    num_heads: 1
+    num_layers: 1
+    d_ff: 200
+    seq_len_encoder: 40
+    seq_len_decoder: 2
+    dropout: 0.0
+training_parameters:
+  batch_size: 150
+  epochs: 10000
+  learning_rate: 0.001
+  loss: "rmse" # Options: "mse", "rmse", "rmsle"
+  optimizer: "adam" # Options: "adam", "sgd"
+  momentum: 0.1
+  seed: 69
+  patience: 10000
+dataset_parameters:
+  read_all_files: false
+  data_usage_ratio: 0.15 # Only the last 50% of the read data are used in the dataset
+  subseries_amount: 1 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
+  validation_split: 0.2 # The last 10% of timestamps in a subseries are used for validation
+  create_new_file: false # This parameter must be set to true if the symbols to be read in are changed.
+  scaler: "MinMaxScaler" # Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
+  data_file: "data/output/Multi_Symbol_test.csv"
+  encoder_symbols:
+  # stocks
+    - "art"
+    - "art2"
+    - "sin"
+    - "cos"
+    - "AAPL"
+#    - "AAL"
+#    - "AMD"
+#    - "C"
+#    - "MRNA"
+#    - "NIO"
+#    - "NVDA"
+#    - "SNAP"
+#    - "SQ"
+#    - "TSLA"
+  # ETFs
+#    - "ACWI"
+  # indices
+#    - "DXY"
+    # - "SPX"
+    # - "DJCIGC"
+    # - "DJCISI"
+    # - "DJCIEN"
+    # - "DJCIIK"
+    # - "DJI"
+    # - "DJINET"
+#    - "COMP"
+    # - "W5000"
+  decoder_symbols:
+    - "art"
+    - "art2"
+    - "sin"
+    - "cos"
+#    - "AMD"
+    - "AAPL"
+#    - "AAL"
+#    - "MRNA"
+#    - "NIO"
+#    - "NVDA"
+#    - "TSLA"
