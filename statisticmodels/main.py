@@ -7,8 +7,8 @@ from models.visualisation import VisualizeStatsModel
 from models.arima import Arima
 from sklearn.model_selection import TimeSeriesSplit
 from preprocessing.evaluation import Evaluation
+from models.neuralmodels import Nbeats
 
- 
 test = DataReader({"READ_ALL_FILES": "READ_ALL_FILES"})
  
 txt_files, symbols = test.get_txt_files()
@@ -21,27 +21,52 @@ test.current_file_idx = 1
  
 df = test.read_next_txt()
 clean = DataCleaner(df)
- 
- 
+
  
 print(clean.df_at_16.info())
 print(clean.df_at_09.info())
 df16Cleaned=clean.df_at_16
 df09Cleaned=clean.df_at_09
  
-arimaData= clean.transformForNixtla(df16Cleaned)
-print(arimaData.head())
-print(arimaData.info())
+nixtlaData= clean.transformForNixtla(df16Cleaned)
+
+y_test=nixtlaData[nixtlaData['ds']>"2021-01-03"]
+y_train=nixtlaData[nixtlaData['ds']<"2021-01-03"]
+
+
+neural= Nbeats(len(y_test),30)
+
+results= neural.forecast(y_train)
+
+print(results)
+
+
+
+
+
+plt.plot(list(range(1,len(results)+1)),list(results['NBEATS']), label='N-Beats')
+plt.plot(list(range(1,len(results)+1)),list(y_test['y']),label='echte Werte')
+plt.legend()
+
+plt.show()
+
+
+
+
+
+
+
+
  
-yWerte=arimaData['y'].values
+# yWerte=arimaData['y'].values
 
-cross=Evaluation(100,3,yWerte)
+# cross=Evaluation(100,3,yWerte)
 
-test, prognose=cross.CrossValidation('window')
+# test, prognose=cross.CrossValidation('window')
 
-vizualizer= VisualizeStatsModel(arimaData,prognose,test,test)
+# vizualizer= VisualizeStatsModel(arimaData,prognose,test,test)
 
-vizualizer.arimaCrossvalidation(test,prognose)
+# vizualizer.arimaCrossvalidation(test,prognose)
 
 
 

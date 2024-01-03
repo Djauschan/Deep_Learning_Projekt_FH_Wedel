@@ -1,12 +1,6 @@
 matplotlib
-numpy
-pandas
 seaborn
-Pillow
-tqdm
-statsmodels
-pmdarima
-torch
 scikit-learn
 statsforecast
-os
+neuralforecast
+torch

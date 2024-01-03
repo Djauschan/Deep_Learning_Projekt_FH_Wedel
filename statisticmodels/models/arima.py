@@ -3,7 +3,7 @@ import pandas as pd
 from statsforecast import StatsForecast
 from statsforecast.models import AutoARIMA
 import matplotlib.pyplot as plt
- 
+
 class Arima():
    
     def __init__(self, y_values):
