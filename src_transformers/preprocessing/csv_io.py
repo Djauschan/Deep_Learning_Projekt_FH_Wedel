@@ -32,13 +32,13 @@ def read_csv_chunk(file_path: str, start_index: int,
 
 def get_csv_shape(csv_file: str) -> tuple[int, int]:
     """
-    Counts the number of rows in the CSV file.
+    Counts the number of rows and columns without posix_time in the CSV file.
 
     Args:
         csv_file (str): Path of the CSV file.
 
     Returns:
-        int: Number of rows in the CSV file.
+        tuple[int, int]: Number of rows in the CSV file, number of columns in the CSV file - 1
     """
     with open(csv_file, 'r', newline='', encoding='utf-8') as file:
         csv_reader = csv.reader(file)

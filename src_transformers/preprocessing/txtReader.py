@@ -1,6 +1,7 @@
 import os
 from typing import Optional
 import pandas as pd
+from datetime import date
 
 type_dict = {"etf-complete": "ETF", "us3000": "stock", "usindex": "index"}
 
@@ -14,6 +15,7 @@ class DataReader():
                  read_all_files: bool,
                  encoder_symbols: list[str],
                  decoder_symbols: list[str],
+                 last_date: date,
                  data_dir_name: str = "data/input"):
         """
         Initializes a data reader.
@@ -22,6 +24,7 @@ class DataReader():
             read_all_files (bool): Boolean whether all files should be processed.
             encoder_symbols (list[str]): Symbols that are to be used as input features
             decoder_symbols (list[str]): Symbols that are to be predicted.
+            last_date (date): Last date that is read in.
             data_dir_name (str, optional): Directory in which the data is located.
 
         It is expected that the files containing the data are located in subdirectories. \n
@@ -37,6 +40,8 @@ class DataReader():
         self.read_all_files = read_all_files
         self.encoder_symbols = encoder_symbols
         self.decoder_symbols = decoder_symbols
+        # Get last minute of the day
+        self.last_date = pd.to_datetime(last_date) + pd.Timedelta(days=1) - pd.Timedelta(minutes=1)
 
         self.root_folder = data_dir_name
         # A list containing all file names and a list containing all symbols
@@ -128,6 +133,9 @@ class DataReader():
             # Convert timestamp to python timestamp.
             data["timestamp"] = pd.to_datetime(
                 data["timestamp"], format="%Y-%m-%d %H:%M:%S")
+
+            # Only Use data to the last timestamp of the last day
+            data = data[data["timestamp"] <= self.last_date]
 
             self.current_file_idx += 1
             return data
