@@ -8,6 +8,7 @@ from models.arima import Arima
 from sklearn.model_selection import TimeSeriesSplit
 from preprocessing.evaluation import Evaluation
 from models.neuralmodels import Nbeats
+from models.neuralmodels import Nhits
 
 test = DataReader({"READ_ALL_FILES": "READ_ALL_FILES"})
  
@@ -17,7 +18,7 @@ txt_files, symbols = test.get_txt_files()
 for i in symbols:
     print(i)
  
-test.current_file_idx = 1
+test.current_file_idx = 0
  
 df = test.read_next_txt()
 clean = DataCleaner(df)
@@ -34,7 +35,7 @@ y_test=nixtlaData[nixtlaData['ds']>"2021-01-03"]
 y_train=nixtlaData[nixtlaData['ds']<"2021-01-03"]
 
 
-neural= Nbeats(len(y_test),30)
+neural= Nhits(len(y_test),30)
 
 results= neural.forecast(y_train)
 
@@ -44,7 +45,7 @@ print(results)
 
 
 
-plt.plot(list(range(1,len(results)+1)),list(results['NBEATS']), label='N-Beats')
+plt.plot(list(range(1,len(results)+1)),list(results['NHITS']), label='N-Hits')
 plt.plot(list(range(1,len(results)+1)),list(y_test['y']),label='echte Werte')
 plt.legend()
 
