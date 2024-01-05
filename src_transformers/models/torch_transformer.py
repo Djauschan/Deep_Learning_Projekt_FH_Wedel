@@ -67,20 +67,13 @@ class TransformerModel(nn.Module):
         """
         src_mask = None  # TODO find proper solution
 
-        # Min-max scaling
-        src = (src - src.min()) / (src.max() - src.min())
-
         src = self.embedding(src) * math.sqrt(self.d_model)
         src = self.pos_encoder(src)
         if src_mask is None:
             src_mask = nn.Transformer.generate_square_subsequent_mask(
                 src.size(1)).to(self.device)
-        # TODO all values NaN after one epoch
         output = self.transformer_encoder(src, src_mask)
         output = self.linear(output)
-
-        # Reverse min-max scaling
-        output = output * (src.max() - src.min()) + src.min()
 
         return output
 
