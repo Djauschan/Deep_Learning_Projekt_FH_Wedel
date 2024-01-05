@@ -117,9 +117,9 @@ class TradingEnvironment:
         change_percentage = ((new_portfolio_value - self.last_portfolio_values[agent_type]) / self.last_portfolio_values[agent_type]) * 100 if self.last_portfolio_values[agent_type] != 0 else 0
 
         # Überprüfen der Wertänderung
-        if change_percentage > 20:
+        if change_percentage > 10:
             reward += self.config.get_parameter('threshold_reward', 'train_parameters')
-        elif change_percentage < -20:
+        elif change_percentage < -10:
             reward -= self.config.get_parameter('threshold_penalty', 'train_parameters')
 
         # Aktualisieren des letzten Portfolio-Wertes
