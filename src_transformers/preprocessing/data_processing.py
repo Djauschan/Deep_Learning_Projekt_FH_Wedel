@@ -119,11 +119,13 @@ def fill_dataframe(all_dates: pd.DataFrame,
     The columns are filled so that values are available for all files for all timestamps.
     For stocks and ETFs, the closing price and the volume per minute are loaded.
     For indices, only the closing price per minute is taken into account.
+    The data frame is then resampled to the desired time resolution.
 
 
     Args:
         all_dates (pd.DataFrame): Data frame that contains the union of all timestamps of all read-in files.
         reader (DataReader): DataReader object that reads in the files.
+        time_resolution (int): Time resolution to which the data frame is to be resampled.
 
     Returns:
         tuple[list, pd.DataFrame]:
@@ -184,7 +186,8 @@ def fill_dataframe(all_dates: pd.DataFrame,
     # Resample the DataFrame with a frequency of time_resolution entries and aggregate dynamically
     agg_df = all_dates.resample(f"{time_resolution}Min").agg(agg_dict)
 
-    # Drop rows which contain any NaN values
+    # Drop rows which contain any NaN values.
+    # This removes rows that were added by the aggregation but for which there are no values in the real data.
     agg_df.dropna(inplace=True)
 
     # Apply relative differencing on close colum to get the change between timestamps.
