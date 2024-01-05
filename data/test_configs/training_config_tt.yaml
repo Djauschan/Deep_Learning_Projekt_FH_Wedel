@@ -13,6 +13,8 @@ training_parameters:
   learning_rate: 0.0025
   loss: "mse" #Options: "mse", "rmse", "rmsle"
   seed: 42
+  patience: 10000
+  log_image_frequency: 5
 dataset_parameters:
   read_all_files: true
   last_date: 2021-01-03 # YYYY-MM-DD Last date of the data to be read in

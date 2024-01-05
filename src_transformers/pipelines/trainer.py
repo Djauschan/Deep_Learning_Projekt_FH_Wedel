@@ -58,6 +58,7 @@ class Trainer:
     eval_mode: bool
     seed: int
     patience: int
+    log_image_frequency: int
 
     @classmethod
     def create_trainer_from_config(
@@ -73,7 +74,8 @@ class Trainer:
             momentum: float = 0,
             eval_mode: bool = False,
             seed: int = None,
-            patience: int = 50
+            patience: int = 50,
+            log_image_frequency: int = 10
     ) -> "Trainer":
         """
         Creates a Trainer instance from an unpacked configuration file.
@@ -95,6 +97,7 @@ class Trainer:
             eval_mode (bool, optional): If the model is evaluated, the validation split is set to 1.
             seed (int, optional): Seed for the random number generator.
             patience (int, optional): Number of epochs to wait for improvement before stopping. Defaults to 50.
+            log_image_frequency (int, optional): Frequency of logging images. Defaults to 10.
 
         Returns:
             Trainer: A Trainer instance with the specified configuration.
@@ -148,7 +151,8 @@ class Trainer:
             logger=Logger(),
             eval_mode=eval_mode,
             seed=seed,
-            patience=patience
+            patience=patience,
+            log_image_frequency=log_image_frequency
         )
 
         cls._dataset = dataset
@@ -244,22 +248,24 @@ class Trainer:
 
                 # Logging loss and charts of results
                 self.logger.log_training_loss(train_loss, epoch)
-                self.logger.save_prediction_chart(
-                    predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
-                self.logger.save_horizon_chart(
-                    predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
+                if epoch % self.log_image_frequency == 0:
+                    self.logger.save_prediction_chart(
+                        predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
+                    self.logger.save_horizon_chart(
+                        predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
 
                 validation_loss, validation_results = self.calculate_validation_loss(
                     validation_loader)
 
                 # Logging loss and charts of results
                 self.logger.log_validation_loss(validation_loss, epoch)
-                self.logger.save_prediction_chart(
-                    predictions=validation_results[0], targets=validation_results[1], epoch=epoch,
-                    name="validation_set")
-                self.logger.save_horizon_chart(
-                    predictions=validation_results[0], targets=validation_results[1], epoch=epoch,
-                    name="validation_set")
+                if epoch % self.log_image_frequency == 0:
+                    self.logger.save_prediction_chart(
+                        predictions=validation_results[0], targets=validation_results[1], epoch=epoch,
+                        name="validation_set")
+                    self.logger.save_horizon_chart(
+                        predictions=validation_results[0], targets=validation_results[1], epoch=epoch,
+                        name="validation_set")
 
                 # Early stopping
                 if min_loss > validation_loss:
