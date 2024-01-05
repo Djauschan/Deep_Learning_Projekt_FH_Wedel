@@ -418,6 +418,4 @@ class Transformer(nn.Module):
 
         output = self.dropout(self.fc1(dec_output))
 
-        output = output + self.dropout(dec_output)
-
         return output
