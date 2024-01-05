@@ -113,7 +113,7 @@ def get_all_dates(reader: DataReader, data_usage_ratio: float) -> pd.DataFrame:
 
 
 def fill_dataframe(all_dates: pd.DataFrame,
-                   reader: DataReader) -> tuple[list, pd.DataFrame]:
+                   reader: DataReader, time_resolution: int) -> tuple[list, pd.DataFrame]:
     """
     A data frame is created that contains the values required for training for all files that are to be read in.
     The columns are filled so that values are available for all files for all timestamps.
@@ -147,9 +147,6 @@ def fill_dataframe(all_dates: pd.DataFrame,
             # ffill: forward fill, bfill: backward fill
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
 
-            # Apply relative differencing on close colum to get the change between timestamps.
-            all_dates[f'close {symbol}'] = all_dates[f'close {symbol}'].pct_change(fill_method=None)
-
         if symbol_type == 'stock' or symbol_type == 'ETF':
             # The closing price and the volume are used for stocks and ETFs.
             merged_df = pd.merge(all_dates, file_df[['timestamp', 'close', 'volume']],
@@ -159,9 +156,6 @@ def fill_dataframe(all_dates: pd.DataFrame,
             all_dates[f'close {symbol}'] = merged_df['close'].ffill().bfill()
             all_dates[f'volume {symbol}'] = merged_df['volume'].fillna(0)
 
-            # Apply relative differencing on close colum to get the change between timestamps.
-            all_dates[f'close {symbol}'] = all_dates[f'close {symbol}'].pct_change(fill_method=None)
-
             # The symbols of all stocks are saved in a list as they are used as
             # target variables.
             if symbol_type == 'stock':
@@ -170,7 +164,37 @@ def fill_dataframe(all_dates: pd.DataFrame,
         # Explicitly delete the data frame to free up memory.
         del file_df
 
-    # Drop the first row, because it contains NaN values due to the differencing.
-    all_dates = all_dates.drop(all_dates.index[0]).reset_index(drop=True)
+    # Set Timestamp as index.
+    all_dates.set_index('timestamp', inplace=True)
 
-    return stocks, all_dates
+    # Change time resolution of data frame.
+    # The volume is summed up, the last closing price of the intervall is used.
+    # The selectied timesamp is the first of the intervall.
+    # The values beginning with the selected timestamt to the last of the intervall are considered.
+    # Example: time reslution = 30 timestamps = 2019-08-02 04:00:00
+    # volume = sum between 2019-08-02 04:00:00 and 2019-08-02 04:29:00
+    # close = last value between 2019-08-02 04:00:00 and 2019-08-02 04:29:00
+
+    # Find all 'close' and 'volume' columns
+    close_columns = [col for col in all_dates.columns if 'close' in col]
+    volume_columns = [col for col in all_dates.columns if 'volume' in col]
+    # Create a dictionary for  aggregation
+    agg_dict = {col: 'last' for col in close_columns}
+    agg_dict.update({col: 'sum' for col in volume_columns})
+    # Resample the DataFrame with a frequency of time_resolution entries and aggregate dynamically
+    agg_df = all_dates.resample(f"{time_resolution}Min").agg(agg_dict)
+
+    # Drop rows which contain any NaN values
+    agg_df.dropna(inplace=True)
+
+    # Apply relative differencing on close colum to get the change between timestamps.
+    for colum in close_columns:
+        # Apply relative differencing on close colum to get the change between timestamps.
+        agg_df[colum] = agg_df[colum].pct_change(fill_method=None)
+        # If the vaules do not differ, the result is NaN. This is replaced by 0.
+        agg_df[colum] = agg_df[colum].fillna(0)
+
+    # Drop the first row, because it contains NaN values due to the differencing.
+    agg_df = agg_df.drop(agg_df.index[0]).reset_index()
+
+    return stocks, agg_df
