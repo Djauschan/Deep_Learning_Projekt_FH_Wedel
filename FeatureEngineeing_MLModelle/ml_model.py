@@ -16,7 +16,7 @@ from sklearn.metrics import median_absolute_error
 ##################### Actual value #####################
 class ActualValues:
     #Länge der prediction --> i
-    num_points = 100     #20 für 1 Monat -> 20 Business Days #None, für den gesmaten X_test lang
+    num_points = 20     #20 für 1 Monat -> 20 Business Days #None, für den gesmaten X_test lang
     
     def get_actual_values_test_close(self, X_test, back_transform_test_data):
         actual_close_values = []
@@ -46,7 +46,7 @@ class ActualValues:
 ##################### Basis Model#######################
 class BaseModel:
     #Länge der prediction --> i
-    num_points = 100     #20 für 1 Monat -> 20 Business Days #None, für den gesmaten X_test lang
+    num_points = 20     #20 für 1 Monat -> 20 Business Days #None, für den gesmaten X_test lang
     
     def __init__(self, model):
         self.model = model
@@ -69,7 +69,8 @@ class BaseModel:
             predicted_close_values.append(predicted_close)
             
             # Aktualisieren des letzten bekannten Close-Werts für die nächste Vorhersage
-            last_known_close_value = back_transform_test_data["close"].iloc[i]
+            #last_known_close_value = back_transform_test_data["close"].iloc[i]
+            last_known_close_value = predicted_close
             indices.append(X_test.index[i])
 
         return predicted_close_values, indices
