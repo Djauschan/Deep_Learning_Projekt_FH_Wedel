@@ -1,0 +1,33 @@
+dataset_parameters:
+  create_new_file: true
+  data_file: data/output/Multi_Symbol_Train.csv
+  data_usage_ratio: 0.3
+  decoder_symbols:
+  - AAPL
+  encoder_symbols:
+  - AAPL
+  - DXY
+  first_date: '2021-01-04'
+  last_date: '2021-02-01'
+  read_all_files: false
+  scaler: MinMaxScaler
+  subseries_amount: 1
+  time_resolution: 30
+  validation_split: 0.2
+model_parameters:
+  torch_transformer:
+    d_ff: 30
+    dropout: 0
+    num_heads: 1
+    num_layers: 1
+    seq_len_decoder: 30
+    seq_len_encoder: 30
+training_parameters:
+  batch_size: 50
+  epochs: 750
+  learning_rate: 0.0025
+  log_image_frequency: 5
+  loss: mse
+  patience: 10000
+  seed: 42
+use_gpu: true

@@ -51,6 +51,7 @@ class MultiSymbolDataset(Dataset):
     @classmethod
     def create_from_config(cls,
                            read_all_files: bool,
+                           first_date: date,
                            last_date: date,
                            data_usage_ratio: float,
                            subseries_amount: int,
@@ -71,6 +72,7 @@ class MultiSymbolDataset(Dataset):
 
         Args:
             read_all_files (bool): Whether to read all files in the data directory.
+            first_date (date): The first date to use in the dataset.
             last_date (date): The last date to use in the dataset.
             data_usage_ratio (float): The ratio of data to use for the dataset.
             create_new_file (bool): Whether to create a new file for the preprocessed data.
@@ -98,7 +100,7 @@ class MultiSymbolDataset(Dataset):
                 "Data pre-processing for the multi symbol dataset was started.")
 
             data_reader = DataReader(
-                read_all_files, encoder_symbols, decoder_symbols, last_date)
+                read_all_files, encoder_symbols, decoder_symbols, first_date, last_date)
 
             data_df = get_all_dates(data_reader, data_usage_ratio)
             Logger.log_text(

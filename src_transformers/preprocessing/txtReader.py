@@ -15,7 +15,8 @@ class DataReader():
                  read_all_files: bool,
                  encoder_symbols: list[str],
                  decoder_symbols: list[str],
-                 last_date: date,
+                 first_date: date = date(2000, 1, 1),
+                 last_date: date = date.today(),
                  data_dir_name: str = "data/input"):
         """
         Initializes a data reader.
@@ -24,7 +25,8 @@ class DataReader():
             read_all_files (bool): Boolean whether all files should be processed.
             encoder_symbols (list[str]): Symbols that are to be used as input features
             decoder_symbols (list[str]): Symbols that are to be predicted.
-            last_date (date): Last date that is read in.
+            first_date (date, optional): First date that is read in.
+            last_date (date, optional): Last date that is read in.
             data_dir_name (str, optional): Directory in which the data is located.
 
         It is expected that the files containing the data are located in subdirectories. \n
@@ -41,6 +43,7 @@ class DataReader():
         self.encoder_symbols = encoder_symbols
         self.decoder_symbols = decoder_symbols
         # Get last minute of the day
+        self.first_date = pd.to_datetime(first_date)
         self.last_date = pd.to_datetime(last_date) + pd.Timedelta(days=1) - pd.Timedelta(minutes=1)
 
         self.root_folder = data_dir_name
@@ -134,8 +137,12 @@ class DataReader():
             data["timestamp"] = pd.to_datetime(
                 data["timestamp"], format="%Y-%m-%d %H:%M:%S")
 
-            # Only Use data to the last timestamp of the last day
-            data = data[data["timestamp"] <= self.last_date]
+            # Only read in data that is within the specified time period.
+            data = data[(data["timestamp"] >= self.first_date) & (data["timestamp"] <= self.last_date)]
+
+            # Raise error if the dataframe is empty.
+            if data.empty:
+                raise ValueError("No data for the selected date range available.")
 
             self.current_file_idx += 1
             return data
