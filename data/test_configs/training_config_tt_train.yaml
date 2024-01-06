@@ -8,8 +8,8 @@ model_parameters:
     seq_len_decoder: 30
     dropout: 0
 training_parameters:
-  batch_size: 50
-  epochs: 750
+  batch_size: 200
+  epochs: 1
   learning_rate: 0.0025
   loss: "mse" #Options: "mse", "rmse", "rmsle"
   seed: 42
@@ -21,7 +21,7 @@ dataset_parameters:
   last_date: 2021-01-03 # YYYY-MM-DD Last date of the data to be read in
   data_usage_ratio: 0.3 # Only the last 1% of the read data are used in the dataset
   subseries_amount: 1 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
-  validation_split: 0.2 # The last 10% of timestamps in a subseries are used for validation
+  validation_split: 0.15 # The last 10% of timestamps in a subseries are used for validation
   create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol_Train.csv"
