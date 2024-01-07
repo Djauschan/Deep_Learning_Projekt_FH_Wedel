@@ -106,7 +106,7 @@ class MultiSymbolDataset(Dataset):
             Logger.log_text(
                 f"Created a dataframe from the selected {len(data_df)} timestamps, "
                 + f"since the user specified a data usage ratio of {data_usage_ratio}.")
-            cls.stocks, data_df = fill_dataframe(data_df, data_reader, time_resolution)
+            cls.stocks, cls.prices, data_df = fill_dataframe(data_df, data_reader, time_resolution)
             Logger.log_text(
                 "Filled the timestamp dataframe with data from the selected stocks and symbols.")
             data_df = add_time_information(data_df)
