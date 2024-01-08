@@ -1,48 +1,48 @@
+"""
+This module contains the Predictor class which is used to predict using a PyTorch model.
+"""
 from dataclasses import dataclass
-from datetime import datetime
-from pathlib import Path
-from typing import Final, Union
 
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader, Subset
-from tqdm import tqdm
+from torch.utils.data import DataLoader
 
-from src_transformers.models.loss import RMSELoss, RMSLELoss
-from src_transformers.pipelines.model_service import ModelService
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
-from src_transformers.utils.logger import Logger
-from src_transformers.utils.viz_training import plot_evaluation
-
-"""
-This module contains the Predictor class which is used to train a PyTorch model.
-"""
 
 
 @dataclass
 class Predictor():
+    """
+    A class used to make predictions using a PyTorch model.
 
+    Attributes:
+        model (nn.Module): The PyTorch model to use for predictions.
+        device (torch.device): The device (CPU or GPU) where the model and data should be loaded.
+        dataset (MultiSymbolDataset): The dataset to use for predictions.
+    """
     model: nn.Module
     device: torch.device
     dataset: MultiSymbolDataset
 
-    @classmethod
-    def create_predictor_from_config(cls,
-                                     model: nn.Module,
-                                     device: torch.device,
-                                     dataset: MultiSymbolDataset) -> "Predictor":
+    def predict(self) -> torch.Tensor:
+        """
+        Makes predictions on the dataset using the model.
 
-        return cls(model=model,
-                   device=device,
-                   dataset=dataset)
+        This method iterates over the dataset, makes a prediction each iteration,
+        and concatenates the predictions into a single tensor.
 
-    def predict(self):
-        datalaoder = DataLoader(self.dataset, shuffle=False)
+        Returns:
+            torch.Tensor: A tensor containing the predictions for the entire dataset.
+        """
+        predictions = []
+        data_loader = DataLoader(self.dataset, shuffle=False)
         self.model.eval()
+
         with torch.no_grad():
-            for input, target in datalaoder:
-                input = input.to(self.device)
-                output = self.model(input)
-                print(output)
+            for encoder_input, _ in data_loader:
+                encoder_input = encoder_input.to(self.device)
+                output = self.model(encoder_input)
+                # Squeeze the batch dimension
+                predictions.append(torch.squeeze(output, 0))
+
+        return torch.cat(predictions, dim=0)

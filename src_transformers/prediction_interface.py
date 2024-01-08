@@ -1,10 +1,12 @@
-import pandas as pd
-import yaml
-from src_transformers.abstract_model import AbstractModel
 import subprocess
-
 from pathlib import Path
 from typing import Final, Optional
+
+import pandas as pd
+import yaml
+
+from src_transformers.abstract_model import AbstractModel
+from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 
 DEFAULT_PATH: Final[Path] = Path("data", "test_configs", "training_config_tt_predict.yaml")
 
