@@ -20,8 +20,16 @@ class Multi_Layer_Perceptron(nn.Module):
         self.layer_stack = nn.Sequential(
             nn.Linear(seq_len_encoder * dim_encoder, hidden_dim),
             nn.ReLU(),
+            nn.Dropout(0.3),  # Dropout-Schicht mit 30% Wahrscheinlichkeit
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
+            nn.Dropout(0.3),  # Eine weitere Dropout-Schicht
+            nn.Linear(hidden_dim, hidden_dim),  # Zusätzliche Schicht
+            nn.ReLU(),
+            nn.Dropout(0.3),  # Noch eine Dropout-Schicht
+            nn.Linear(hidden_dim, hidden_dim),  # Noch eine zusätzliche Schicht
+            nn.ReLU(),
+            nn.Dropout(0.3),  # Noch eine Dropout-Schicht
             nn.Linear(hidden_dim, seq_len_decoder * dim_decoder),
         )
 
