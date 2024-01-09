@@ -17,6 +17,7 @@ from src_transformers.preprocessing.data_processing import (
 )
 from src_transformers.preprocessing.txtReader import DataReader
 from src_transformers.utils.logger import Logger
+from src_transformers.preprocessing.preprocessing_constants import SCALER_OPTIONS
 
 
 @dataclass
@@ -129,37 +130,47 @@ class MultiSymbolDataset(Dataset):
             # Re-ordering the target columns to be at the end
             data_df = data_df[current_columns + target_columns]
 
-            ## Normalization with fitted normalizer
-            # Load scaler from pickle file
-            with open(f'data/output/scaler_{scaler}.pkl', 'rb') as file:
-                loaded_scalers = pickle.load(file)
-
-            # Get all columns that contain volume
-            symbol_columns = [item for item in data_df.columns if "volume" in item]
-
-            # Apply scaler to each volume column in symbol list
-            for col in symbol_columns:
-                loaded_scaler = loaded_scalers[col]
-                data_df[col] = loaded_scaler.transform(data_df[col].values.reshape(-1, 1))
-
             length = len(data_df)
             encoder_dimensions = data_df.shape[1]
             decoder_dimensions = len(decoder_symbols)
 
+            # Create the instance of the MultiSymbolDataset
+            instance_multi_symbol_dataset = cls(length=length,
+                                                subseries_amount=subseries_amount,
+                                                validation_split=validation_split,
+                                                encoder_dimensions=encoder_dimensions,
+                                                decoder_dimensions=decoder_dimensions,
+                                                encoder_input_length=encoder_input_length,
+                                                decoder_target_length=decoder_target_length,
+                                                data_file=data_file,
+                                                scaler=scaler,
+                                                time_resolution=time_resolution)
+
+            ## Normalization
+            scaler = SCALER_OPTIONS[scaler]()
+
+            # Get all columns that contain volume and indeces in train set
+            volume_cols = [item for item in data_df.columns if "volume" in item]
+            train_indeces, validation_indecies = instance_multi_symbol_dataset.get_subset_indices()
+
+
+            # Fit scaler to each volume column only with train data
+            scaler.fit(data_df[volume_cols].iloc[train_indeces])
+
+            # Transform train and test data
+            data_df[volume_cols] = scaler.transform(data_df[volume_cols])
+
+            # Store scaler in pickle file
+            scaler_path = instance_multi_symbol_dataset.data_file.replace('.csv', f'_scaler.pkl')
+            with open(scaler_path, 'wb') as file:
+                pickle.dump(scaler, file)
+
+            # Store data in csv file
             data_df.to_csv(data_file, mode='w', header=True)
             Logger.log_text(
                 f"Dataframe holding the preprocessed data was stored to the file '{data_file}'.")
 
-        return cls(length=length,
-                   subseries_amount=subseries_amount,
-                   validation_split=validation_split,
-                   encoder_dimensions=encoder_dimensions,
-                   decoder_dimensions=decoder_dimensions,
-                   encoder_input_length=encoder_input_length,
-                   decoder_target_length=decoder_target_length,
-                   data_file=data_file,
-                   scaler=scaler,
-                   time_resolution=time_resolution)
+        return instance_multi_symbol_dataset
 
     def __len__(self) -> int:
         """
