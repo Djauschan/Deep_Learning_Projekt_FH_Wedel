@@ -128,8 +128,10 @@ def fill_dataframe(all_dates: pd.DataFrame,
         time_resolution (int): Time resolution to which the data frame is to be resampled.
 
     Returns:
-        tuple[list, pd.DataFrame]:
-        Symbols of all stocks in the data frame, data frame containing the values required for training.
+        tuple[list, dict, pd.DataFrame]:
+        Symbols of all stocks in the data frame
+        Dictionary that assigns an absolute price value to all symbols.
+        Data frame containing the values required for training.
     """
     stocks = []
 
@@ -169,6 +171,15 @@ def fill_dataframe(all_dates: pd.DataFrame,
     # Set Timestamp as index.
     all_dates.set_index('timestamp', inplace=True)
 
+    # Absolute prices of the last known time step (offset) are saved.
+    offset = 0
+    # Fill the Dictionary with the absolute price values of all symbols at position "offset".
+    prices = {}
+    for symbol in all_dates.columns:
+        if 'close' in symbol:
+            only_symbol = symbol.split(' ')[1]
+            prices[only_symbol] = all_dates[symbol].iloc[offset]
+
     # Change time resolution of data frame.
     # The volume is summed up, the last closing price of the intervall is used.
     # The selectied timesamp is the first of the intervall.
@@ -200,4 +211,4 @@ def fill_dataframe(all_dates: pd.DataFrame,
     # Drop the first row, because it contains NaN values due to the differencing.
     agg_df = agg_df.drop(agg_df.index[0]).reset_index()
 
-    return stocks, agg_df
+    return stocks, prices, agg_df

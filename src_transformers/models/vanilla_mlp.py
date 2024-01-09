@@ -22,6 +22,11 @@ class Multi_Layer_Perceptron(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),  
+            nn.ReLU(),
+            nn.Dropout(0.3),  # Dropout-Schicht mit 30% Wahrscheinlichkeit
+            nn.Linear(hidden_dim, hidden_dim),  
+            nn.ReLU(),
             nn.Linear(hidden_dim, seq_len_decoder * dim_decoder),
         )
 

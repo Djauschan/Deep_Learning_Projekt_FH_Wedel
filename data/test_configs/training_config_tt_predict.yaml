@@ -1,7 +1,7 @@
 dataset_parameters:
   create_new_file: true
   data_file: data/output/Multi_Symbol_Train.csv
-  data_usage_ratio: 0.3
+  data_usage_ratio: 0.5
   decoder_symbols:
   - AAPL
   encoder_symbols:
@@ -24,7 +24,7 @@ model_parameters:
     seq_len_encoder: 30
 training_parameters:
   batch_size: 50
-  epochs: 750
+  epochs: 20
   learning_rate: 0.0025
   log_image_frequency: 5
   loss: mse

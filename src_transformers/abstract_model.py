@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import pandas as pd
+import typing
 
 
 class AbstractModel(ABC):
@@ -44,3 +45,23 @@ class AbstractModel(ABC):
 
         """
         pass
+
+    @staticmethod
+    def calculate_absolut_prices(prices: typing.Iterable, start_price: float) -> list:
+        """
+        Calculates the absolut prices from the relative prices.
+        The start price is the price before the first relative price is applied.
+
+        Args:
+            prices (typing.Iterable): Iterable of relative prices.
+            start_price (float): Absolute start price before the first relative price is applied.
+
+        Returns:
+            list: List of absolute prices.
+        """
+        for i, price_change in enumerate(prices):
+            if i == 0:
+                prices[i] = start_price * (1 + price_change)
+            else:
+                prices[i] = prices[i - 1] * (1 + price_change)
+        return prices

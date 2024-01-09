@@ -139,7 +139,7 @@ class ModelService():
         return str(path.absolute())
 
     @classmethod
-    def load_newest_model(cls, model_class: nn.Module) -> nn.Module:
+    def load_newest_model(cls, model_name: str) -> nn.Module:
         """
         Loads the latest version of a PyTorch model of the specified class from the
         `MODEL_OUTPUT_PATH` directory.
@@ -149,7 +149,7 @@ class ModelService():
         the file with the highest version number. The loaded model is set to evaluation mode.
 
         Args:
-            model_class (nn.Module): The class of the model to be loaded.
+            model_name (str): The name of the model to be loaded.
 
         Raises:
             ValueError: If no model is found in the `MODEL_OUTPUT_PATH` directory.
@@ -157,13 +157,15 @@ class ModelService():
         Returns:
             nn.Module: The loaded model.
         """
-        version = cls.get_latest_version(model_class.__name__)
+        model = MODEL_NAME_MAPPING[model_name]
+
+        version = cls.get_latest_version(model.__name__)
         if version == 0:
             raise ValueError(
-                f'No model of class {model_class.__name__} found in {MODEL_OUTPUT_PATH}')
+                f'No model of class {model.__name__} found in {MODEL_OUTPUT_PATH}')
 
         model = torch.load(
-            Path(MODEL_OUTPUT_PATH, f"{model_class.__name__}_v{version}.pt"))
+            Path(MODEL_OUTPUT_PATH, f"{model.__name__}_v{version}.pt"))
         model.eval()
 
         return model
