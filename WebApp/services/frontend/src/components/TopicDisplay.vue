@@ -24,7 +24,7 @@
   
   <style scoped>
  .topic-container{
-  background-color: #888;
+  background-color: #5fc163;
   border: 1px solid #ddd;
   padding: 15px;
   border-radius: 5px;

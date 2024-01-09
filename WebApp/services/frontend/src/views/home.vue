@@ -1,10 +1,12 @@
 <template>
   <Header />
+  <div :class="{ 'dark-mode': isDarkMode }">
   <div class="home-container">
     <div class="home-header">
       <header data-thq="thq-navbar" class="home-navbar-interactive">
         <div class="home-container01">
           <span class="home-logo">Alles auf einen Blick!</span>
+          <button ref="myButton1" @mouseover="changeCursor" @mouseleave="resetCursor"  @click="toggleDarkMode">Toggle Dark Mode</button>
         </div>
         <div class="home-container02">
           <div data-thq="thq-navbar-nav" class="home-desktop-menu"></div>
@@ -16,45 +18,6 @@
             </path>
           </svg>
         </div>
-        <div data-thq="thq-mobile-menu" class="home-mobile-menu">
-          <div class="home-nav">
-            <div class="home-top">
-              <span class="home-logo1">STOCKAI</span>
-              <div data-thq="thq-close-menu" class="home-close-menu">
-                <svg viewBox="0 0 1024 1024" class="home-icon04">
-                  <path d="M810 274l-238 238 238 238-60 60-238-238-238 238-60-60 238-238-238-238 60-60 238 238 238-238z">
-                  </path>
-                </svg>
-              </div>
-            </div>
-            <nav class="home-links">
-              <span class="home-nav1">About</span>
-              <span class="home-nav2">Features</span>
-              <span class="home-nav3">Pricing</span>
-              <span class="home-nav4">Team</span>
-              <span class="home-nav5">Blog</span>
-            </nav>
-            <div class="home-buttons">
-              <button class="home-login button">Login</button>
-              <button class="home-register button">Register</button>
-            </div>
-          </div>
-          <div>
-            <svg viewBox="0 0 950.8571428571428 1024" class="home-icon06">
-              <path
-                d="M925.714 233.143c-25.143 36.571-56.571 69.143-92.571 95.429 0.571 8 0.571 16 0.571 24 0 244-185.714 525.143-525.143 525.143-104.571 0-201.714-30.286-283.429-82.857 14.857 1.714 29.143 2.286 44.571 2.286 86.286 0 165.714-29.143 229.143-78.857-81.143-1.714-149.143-54.857-172.571-128 11.429 1.714 22.857 2.857 34.857 2.857 16.571 0 33.143-2.286 48.571-6.286-84.571-17.143-148-91.429-148-181.143v-2.286c24.571 13.714 53.143 22.286 83.429 23.429-49.714-33.143-82.286-89.714-82.286-153.714 0-34.286 9.143-65.714 25.143-93.143 90.857 112 227.429 185.143 380.571 193.143-2.857-13.714-4.571-28-4.571-42.286 0-101.714 82.286-184.571 184.571-184.571 53.143 0 101.143 22.286 134.857 58.286 41.714-8 81.714-23.429 117.143-44.571-13.714 42.857-42.857 78.857-81.143 101.714 37.143-4 73.143-14.286 106.286-28.571z">
-              </path>
-            </svg><svg viewBox="0 0 877.7142857142857 1024" class="home-icon08">
-              <path
-                d="M585.143 512c0-80.571-65.714-146.286-146.286-146.286s-146.286 65.714-146.286 146.286 65.714 146.286 146.286 146.286 146.286-65.714 146.286-146.286zM664 512c0 124.571-100.571 225.143-225.143 225.143s-225.143-100.571-225.143-225.143 100.571-225.143 225.143-225.143 225.143 100.571 225.143 225.143zM725.714 277.714c0 29.143-23.429 52.571-52.571 52.571s-52.571-23.429-52.571-52.571 23.429-52.571 52.571-52.571 52.571 23.429 52.571 52.571zM438.857 152c-64 0-201.143-5.143-258.857 17.714-20 8-34.857 17.714-50.286 33.143s-25.143 30.286-33.143 50.286c-22.857 57.714-17.714 194.857-17.714 258.857s-5.143 201.143 17.714 258.857c8 20 17.714 34.857 33.143 50.286s30.286 25.143 50.286 33.143c57.714 22.857 194.857 17.714 258.857 17.714s201.143 5.143 258.857-17.714c20-8 34.857-17.714 50.286-33.143s25.143-30.286 33.143-50.286c22.857-57.714 17.714-194.857 17.714-258.857s5.143-201.143-17.714-258.857c-8-20-17.714-34.857-33.143-50.286s-30.286-25.143-50.286-33.143c-57.714-22.857-194.857-17.714-258.857-17.714zM877.714 512c0 60.571 0.571 120.571-2.857 181.143-3.429 70.286-19.429 132.571-70.857 184s-113.714 67.429-184 70.857c-60.571 3.429-120.571 2.857-181.143 2.857s-120.571 0.571-181.143-2.857c-70.286-3.429-132.571-19.429-184-70.857s-67.429-113.714-70.857-184c-3.429-60.571-2.857-120.571-2.857-181.143s-0.571-120.571 2.857-181.143c3.429-70.286 19.429-132.571 70.857-184s113.714-67.429 184-70.857c60.571-3.429 120.571-2.857 181.143-2.857s120.571-0.571 181.143 2.857c70.286 3.429 132.571 19.429 184 70.857s67.429 113.714 70.857 184c3.429 60.571 2.857 120.571 2.857 181.143z">
-              </path>
-            </svg><svg viewBox="0 0 602.2582857142856 1024" class="home-icon10">
-              <path
-                d="M548 6.857v150.857h-89.714c-70.286 0-83.429 33.714-83.429 82.286v108h167.429l-22.286 169.143h-145.143v433.714h-174.857v-433.714h-145.714v-169.143h145.714v-124.571c0-144.571 88.571-223.429 217.714-223.429 61.714 0 114.857 4.571 130.286 6.857z">
-              </path>
-            </svg>
-          </div>
-        </div>
       </header>
     </div>
     <div class="home-container05">
@@ -63,6 +26,7 @@
           <div class="home-container20">
             <div class="home-container21">
               <div class="home-container22">
+                <div class="hover-effect">
                 <div class="home-container30">
                   <div class="home-container31">
                     <span>Aktie</span>
@@ -77,7 +41,8 @@
                           d="M384 447.957c35.413 0 64 28.672 64 64.043 0 35.413-28.587 63.957-64 63.957s-64-28.544-64-63.957c0-35.371 28.587-64.043 64-64.043M384 405.291c-58.795 0-106.667 47.872-106.667 106.709 0 58.795 47.872 106.624 106.667 106.624s106.667-47.829 106.667-106.624c0-58.837-47.872-106.709-106.667-106.709z">
                         </path>
                       </svg>
-                      <select>
+                      <div class="buttonBG">
+                      <select ref="myButton4" @mouseover="changeCursor" @mouseleave="resetCursor">
                         <option value="Option 1" selected>
                           E-Mart
                         </option>
@@ -85,6 +50,7 @@
                           Amazon
                         </option>
                       </select>
+                      </div>
                       <div class="search">
                         <search-bar ref="searchbar"></search-bar>
                       </div>
@@ -92,7 +58,10 @@
                   </div>
                 </div>
               </div>
+              </div>
+              <div class="seperator"></div>
               <div class="home-container25">
+                <div class="hover-effect">
                 <div class="home-container26">
                   <div class="home-container27">
                     <span>aktives Modell</span>
@@ -103,16 +72,21 @@
                         d="M512 682.667h-341.333c-11.776 0-22.4-4.736-30.165-12.501s-12.501-18.389-12.501-30.165v-426.667c0-11.776 4.736-22.4 12.501-30.165s18.389-12.501 30.165-12.501h682.667c11.776 0 22.4 4.736 30.165 12.501s12.501 18.389 12.501 30.165v426.667c0 11.776-4.736 22.4-12.501 30.165s-18.389 12.501-30.165 12.501zM469.333 768v85.333h-128c-23.552 0-42.667 19.115-42.667 42.667s19.115 42.667 42.667 42.667h341.333c23.552 0 42.667-19.115 42.667-42.667s-19.115-42.667-42.667-42.667h-128v-85.333h298.667c35.328 0 67.413-14.379 90.496-37.504s37.504-55.168 37.504-90.496v-426.667c0-35.328-14.379-67.413-37.504-90.496s-55.168-37.504-90.496-37.504h-682.667c-35.328 0-67.413 14.379-90.496 37.504s-37.504 55.168-37.504 90.496v426.667c0 35.328 14.379 67.413 37.504 90.496s55.168 37.504 90.496 37.504z">
                       </path>
                     </svg>
-                    <select>
+                    <div class="buttonBG">
+                    <select ref="myButton5" @mouseover="changeCursor" @mouseleave="resetCursor">
                       <option value="Option 1" selected>CNN</option>
                       <option value="Option 2">ANN</option>
                       <option value="Option 1">Transformer</option>
                       <option value="Option 2">LSTM</option>
                     </select>
+                    </div>
                   </div>
                 </div>
               </div>
+              </div>
+              <div class="seperator"></div>
               <div class="home-container29">
+                <div class="hover-effect">
                 <div class="home-container26">
                   <div class="home-container23">
                     <span>Modell Guthaben</span>
@@ -127,6 +101,9 @@
                   </div>
                 </div>
               </div>
+              </div>
+              <div class="seperator"></div>
+              <div class="hover-effect">
               <div class="home-container33">
                 <div class="home-container34">
                   <span>Los geht&apos;s!</span>
@@ -140,9 +117,41 @@
                       d="M670.824 644.34c-15.27-8.884-34.862-3.708-43.75 11.57-17.256 29.662-49.088 48.090-83.074 48.090h-128c-41.716 0-77.286-26.754-90.496-64h154.496c17.672 0 32-14.326 32-32s-14.328-32-32-32h-160v-64h160c17.672 0 32-14.328 32-32s-14.328-32-32-32h-154.496c13.21-37.246 48.78-64 90.496-64h128c33.986 0 65.818 18.426 83.074 48.090 8.888 15.276 28.478 20.456 43.752 11.568 15.276-8.888 20.456-28.476 11.568-43.752-28.672-49.288-81.702-79.906-138.394-79.906h-128c-77.268 0-141.914 55.056-156.78 128h-35.22c-17.672 0-32 14.328-32 32s14.328 32 32 32h32v64h-32c-17.672 0-32 14.326-32 32s14.328 32 32 32h35.22c14.866 72.944 79.512 128 156.78 128h128c56.692 0 109.72-30.62 138.394-79.91 8.888-15.276 3.708-34.864-11.57-43.75z">
                     </path>
                   </svg>
-                  <button type="button" class="button" @click="simulateProgress">Prognose</button>
+                  <button ref="myButton2" @mouseover="changeCursor" @mouseleave="resetCursor"  type="button" class="button" @click="simulateProgress">Prognose</button>
                 </div>
               </div>
+              </div>
+              <div class="seperator"></div>
+              <div class="hover-effect">
+              <div class="home-container70">
+               <div class="home-container33">
+                <div class="home-container34">
+                  <span>Der Agent empfiehlt:</span>
+                </div>
+                <button ref="myButton" @mouseover="changeCursor" @mouseleave="resetCursor" type="button" class="button">Aktie Kaufen!</button>
+               </div>
+              </div>
+              </div>
+            <div class="seperator"></div>
+            <div class="hover-effect">
+            <div class="home-container71">
+              <div class="home-container33">
+                <div class="home-container34">
+                  <span>Zuletzt angesehen</span>
+                </div>
+                <div class="home-container35">
+                 <select ref="myButton3" @mouseover="changeCursor" @mouseleave="resetCursor">
+                   <option value="Option 1" selected>
+                     E-Mart
+                   </option>
+                   <option value="Option 2">
+                    Amazon
+                   </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            </div>
             </div>
           </div>
           <div class="home-container36">
@@ -171,57 +180,12 @@
             </div>
             <div class="home-container40">
               <div class="home-container43">
+                <div class="home-container42">
+                 <span>Additional Information</span>
+                </div>
                 <span>Model Calculating...</span>
-                <ProgressBar ref="progressBar" />
-              </div>
-            </div>
-          </div>
-          <div class="home-container42">
-            <div class="home-container43">
-              <div class="home-container44">
-                <div class="home-container45">  
-                  <DxChart id="chart" :data-source="dataSource" title="Past Stock Price">
-                   <DxCommonSeriesSettings argument-field="date" type="stock" />
-                    <DxSeries name="E-Mart" open-value-field="o" high-value-field="h" low-value-field="l" close-value-field="c">
-                     <DxReduction color="red" />
-                    </DxSeries>
-                    <DxArgumentAxis :workdays-only="true">
-                      <DxLabel format="shortDate" />
-                    </DxArgumentAxis>
-                    <DxValueAxis :tick-interval="1">
-                      <DxTitle text="US dollars" />
-                      <DxLabel>
-                        <DxFormat :precision="0" type="currency" />
-                      </DxLabel>
-                    </DxValueAxis>
-                    <DxExport :enabled="true" />
-                    <DxTooltip :enabled="true" :customize-tooltip="customizeTooltip" location="edge" />
-                  </DxChart>
-                </div>
-              </div>
-            </div>
-            <div class="home-container70">
-              <div class="home-container33">
-                <div class="home-container34">
-                  <span>Der Agent empfiehlt:</span>
-                </div>
-                <button type="button" class="button">Aktie Kaufen!</button>
-              </div>
-            </div>
-            <div class="home-container71">
-              <div class="home-container33">
-                <div class="home-container34">
-                  <span>Zuletzt angesehen</span>
-                </div>
-                <div class="home-container35">
-                 <select>
-                   <option value="Option 1" selected>
-                     E-Mart
-                   </option>
-                   <option value="Option 2">
-                    Amazon
-                   </option>
-                  </select>
+                <div class="home-container12">
+                 <ProgressBar ref="progressBar" />
                 </div>
               </div>
             </div>
@@ -230,6 +194,7 @@
       </div>
     </div>
     <div class="home-container48"></div>
+  </div>
   </div>
 </template>
 
@@ -272,9 +237,29 @@ export default {
   data() {
     return {
       dataSource,
+      isDarkMode: false,
     };
   },
   methods: {
+    changeCursor() {
+      this.$refs.myButton.style.cursor = 'pointer'; // or any other cursor value
+      this.$refs.myButton1.style.cursor = 'pointer'; // or any other cursor value
+      this.$refs.myButton2.style.cursor = 'pointer'; // or any other cursor value
+      this.$refs.myButton3.style.cursor = 'pointer'; // or any other cursor value
+      this.$refs.myButton4.style.cursor = 'pointer'; // or any other cursor value
+      this.$refs.myButton5.style.cursor = 'pointer'; // or any other cursor value
+    },
+    resetCursor() {
+      this.$refs.myButton.style.cursor = 'auto'; // reset to the default cursor
+      this.$refs.myButton1.style.cursor = 'auto'; // reset to the default cursor
+      this.$refs.myButton2.style.cursor = 'auto'; // reset to the default cursor
+      this.$refs.myButton3.style.cursor = 'auto'; // reset to the default cursor
+      this.$refs.myButton4.style.cursor = 'auto'; // reset to the default cursor
+      this.$refs.myButton5.style.cursor = 'auto'; // reset to the default cursor
+    },
+    toggleDarkMode() {
+        this.isDarkMode = !this.isDarkMode;
+    },
     checkAuth() {
 
     },
@@ -295,7 +280,7 @@ export default {
       const progressBar = this.$refs.progressBar;
 
       const intervalId = setInterval(() => {
-        progress += 10;
+        progress += 20;
         progressBar.updateProgress(progress);
 
         if (progress >= 100) {
@@ -324,8 +309,28 @@ export default {
   overflow: auto;
   align-items: center;
   flex-direction: column;
-  background-color: #306197;
 }
+
+.dark-mode {
+    background-color: #333; /* Dark background color */
+    color: #fff; /* Light text color for better contrast */
+  }
+
+
+
+.loading-spinner {
+    border: 4px solid #f3f3f3; /* Light gray border */
+    border-top: 4px solid #3498db; /* Blue border for spinner animation */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite; /* Spinner animation */
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 
 #chart {
   height: 100%;
@@ -343,17 +348,7 @@ export default {
   align-items: center;
   flex-direction: row;
   justify-content: space-around;
-}
-
-home-header { 
-  width: 100vw;
-  display: flex;
-  align-items: center;
-  padding-top: var(--dl-space-space-oneandhalfunits);
-  flex-direction: row;
-  padding-bottom: var(--dl-space-space-oneandhalfunits);
-  justify-content: flex-end;
-  background-color: #ffffff;
+  margin-left: 10%;
 }
 
 .home-image {
@@ -370,24 +365,20 @@ home-header {
   padding-top: var(--dl-space-space-oneandhalfunits);
   padding-left: var(--dl-space-space-threeunits);
   padding-right: var(--dl-space-space-threeunits);
-  padding-bottom: var(--dl-space-space-oneandhalfunits);
   justify-content: space-between;
 }
 
 .home-container01 {
   flex: 0 0 auto;
-  width: 994px;
   height: 100px;
   display: flex;
-  box-shadow: 5px 5px 10px 5px #000000;
   align-items: flex-end;
   flex-direction: column;
   justify-content: center;
-  background-color: #ffffff;
 }
 
 .home-logo {
-  font-size: 2em;
+  font-size: 75px;
   align-self: flex-start;
   font-family: "Lato";
   font-weight: bold;
@@ -411,56 +402,6 @@ home-header {
   flex-direction: column;
 }
 
-.home-profile {
-  width: 144px;
-  height: 82px;
-  display: flex;
-  align-items: center;
-  padding-top: 5px;
-  border-color: #7e7e7e;
-  border-width: 1px;
-  flex-direction: row;
-  justify-content: flex-start;
-  border-left-width: 0px;
-  border-right-width: 0px;
-  border-bottom-width: 0px;
-}
-
-.home-container03 {
-  width: var(--dl-size-size-small);
-  height: var(--dl-size-size-small);
-  display: flex;
-  align-items: center;
-  border-radius: var(--dl-radius-radius-round);
-  justify-content: center;
-}
-
-.home-image1 {
-  width: 200px;
-  object-fit: cover;
-  margin-left: var(--dl-space-space-halfunit);
-  border-radius: var(--dl-radius-radius-round);
-}
-
-.home-container04 {
-  display: flex;
-  align-items: flex-start;
-  margin-left: var(--dl-space-space-halfunit);
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.home-text {
-  font-size: 1.15rem;
-  font-style: normal;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.home-text01 {
-  color: var(--dl-color-gray-500);
-  font-size: 0.75rem;
-}
 
 .home-desktop-menu {
   flex: 1;
@@ -490,7 +431,6 @@ home-header {
   border-radius: 50px;
   flex-direction: column;
   justify-content: space-between;
-  background-color: var(--dl-color-gray-white);
 }
 
 .home-nav {
@@ -518,12 +458,6 @@ home-header {
   justify-content: center;
 }
 
-.home-icon04 {
-  fill: var(--dl-color-gray-900);
-  width: var(--dl-size-size-xsmall);
-  cursor: pointer;
-  height: var(--dl-size-size-xsmall);
-}
 
 .home-links {
   flex: 0 0 auto;
@@ -533,30 +467,8 @@ home-header {
   flex-direction: column;
 }
 
-.home-nav1 {
-  color: var(--dl-color-gray-black);
-  margin-bottom: var(--dl-space-space-unit);
-}
 
-.home-nav2 {
-  color: var(--dl-color-gray-black);
-  margin-bottom: var(--dl-space-space-unit);
-}
 
-.home-nav3 {
-  color: var(--dl-color-gray-black);
-  margin-bottom: var(--dl-space-space-unit);
-}
-
-.home-nav4 {
-  color: var(--dl-color-gray-black);
-  margin-bottom: var(--dl-space-space-unit);
-}
-
-.home-nav5 {
-  color: var(--dl-color-gray-black);
-  margin-bottom: var(--dl-space-space-unit);
-}
 
 .home-buttons {
   display: flex;
@@ -567,7 +479,7 @@ home-header {
 }
 
 .home-login {
-  border-color: var(--dl-color-primary1-blue100);
+  border-color:  #E0E0E0;
   border-width: 1px;
   margin-right: var(--dl-space-space-twounits);
   padding-left: 1.5rem;
@@ -575,21 +487,6 @@ home-header {
   padding-right: 1.5rem;
 }
 
-.home-register {
-  color: var(--dl-color-gray-white);
-  transition: 0.3s;
-  border-color: var(--dl-color-primary1-blue100);
-  border-width: 1px;
-  padding-left: 1.5rem;
-  border-radius: 30px;
-  padding-right: 1.5rem;
-  background-color: var(--dl-color-primary1-blue100);
-}
-
-.home-register:hover {
-  border-color: #849492ff;
-  background-color: #849492ff;
-}
 
 .home-icon06 {
   width: var(--dl-size-size-xsmall);
@@ -615,213 +512,6 @@ home-header {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-}
-
-.home-container06 {
-  flex: 0 0 auto;
-  width: auto;
-  height: 80vh;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.home-sidebar {
-  width: 316px;
-  height: 923px;
-  display: flex;
-  padding: var(--dl-space-space-twounits);
-  box-shadow: 5px 5px 10px 0px #d4d4d4;
-  align-items: center;
-  flex-direction: column;
-  justify-content: flex-start;
-  background-color: #ffffff;
-}
-
-.home-container07 {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  justify-content: flex-end;
-}
-
-.home-container08 {
-  width: 152px;
-  height: 475px;
-  display: flex;
-  align-self: flex-start;
-  align-items: flex-start;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.home-container09 {
-  flex: 0 0 auto;
-  width: auto;
-  height: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.home-icon12 {
-  width: var(--dl-size-size-xsmall);
-  height: var(--dl-size-size-xsmall);
-  margin-right: var(--dl-space-space-halfunit);
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-text02 {
-  color: #04049c;
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-container10 {
-  flex: 0 0 auto;
-  width: auto;
-  height: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.home-icon14 {
-  width: 24px;
-  height: 24px;
-  margin-right: var(--dl-space-space-halfunit);
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-text03 {
-  color: #04049c;
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-container11 {
-  flex: 0 0 auto;
-  width: auto;
-  height: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.home-icon16 {
-  width: 24px;
-  height: 24px;
-  margin-right: var(--dl-space-space-halfunit);
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-text04 {
-  color: #04049c;
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-container12 {
-  flex: 0 0 auto;
-  width: auto;
-  height: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.home-icon18 {
-  width: 24px;
-  height: 24px;
-  margin-right: var(--dl-space-space-halfunit);
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-navlink {
-  color: #04049c;
-  margin-bottom: var(--dl-space-space-twounits);
-  text-decoration: none;
-}
-
-.home-container13 {
-  flex: 0 0 auto;
-  width: auto;
-  height: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.home-icon20 {
-  width: 24px;
-  height: 24px;
-  margin-right: var(--dl-space-space-halfunit);
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-text05 {
-  color: #04049c;
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-container14 {
-  flex: 0 0 auto;
-  width: auto;
-  height: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.home-container15 {
-  flex: 0 0 auto;
-  width: XSmall;
-  height: auto;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-}
-
-.home-icon22 {
-  width: 24px;
-  height: 24px;
-  margin-right: var(--dl-space-space-halfunit);
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-text06 {
-  color: #04049c;
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-container16 {
-  flex: 0 0 auto;
-  width: auto;
-  height: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.home-icon24 {
-  width: 24px;
-  height: 24px;
-  margin-right: var(--dl-space-space-halfunit);
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-text07 {
-  color: #04049c;
-  margin-bottom: var(--dl-space-space-twounits);
-}
-
-.home-container17 {
-  flex: 0 0 auto;
-  width: auto;
-  border: 2px dashed rgba(120, 120, 120, 0.4);
-  height: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
 }
 
 .home-container18 {
@@ -860,21 +550,20 @@ home-header {
   justify-content: space-between; /* Distribute items along the main axis with equal space */
 }
 
+.seperator{
+  border: 1px solid #E0E0E0;
+  height: 100%;
+}
+
 .home-container22 {
   flex: 0 0 auto;
-  width: 300px;
+  width: 320px;
   height: 100px;
   display: flex;
-  box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
   margin-left: var(--dl-space-space-unit);
-  border-color: var(--dl-color-gray-black);
-  border-style: groove;
-  border-width: 1px;
   flex-direction: column;
   justify-content: center;
-  background-color: #7e7e7e;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container23 {
@@ -908,30 +597,18 @@ home-header {
   width: 200px;
   height: 100px;
   display: flex;
-  box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
-  border-color: var(--dl-color-gray-black);
-  border-style: groove;
-  border-width: 1px;
   flex-direction: row;
   justify-content: center;
-  background-color: #7e7e7e;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container26 {
   width: 100%;
   height: 100px;
   display: flex;
-  box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
-  border-color: var(--dl-color-gray-black);
-  border-style: groove;
-  border-width: 1px;
   flex-direction: column;
   justify-content: center;
-  background-color: #7e7e7e;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container27 {
@@ -968,34 +645,22 @@ home-header {
 }
 
 .home-container29 {
-  width: 214px;
+  width: 234px;
   height: 100px;
-  box-shadow: 5px 5px 10px 0px #000000;
   display: flex;
   align-items: center;
-  border-color: var(--dl-color-gray-black);
-  border-style: groove;
-  border-width: 1px;
   flex-direction: row;
   justify-content: center;
-  background-color: #7e7e7e;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container30 {
   flex: 0 0 auto;
-  width: 300px;
+  width: 320px;
   height: 100px;
   display: flex;
-  box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
-  border-color: var(--dl-color-gray-black);
-  border-style: groove;
-  border-width: 1px;
   flex-direction: column;
   justify-content: center;
-  background-color: #7e7e7e;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container31 {
@@ -1026,7 +691,6 @@ home-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container71 {
@@ -1036,7 +700,6 @@ home-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
 }
 
 .home-icon30 {
@@ -1051,16 +714,10 @@ home-header {
   width: 200px;
   height: 100px;
   display: flex;
-  box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
-  border-color: var(--dl-color-gray-black);
-  border-style: groove;
-  border-width: 1px;
   margin-right: var(--dl-space-space-unit);
   flex-direction: column;
   justify-content: center;
-  background-color: #7e7e7e;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container34 {
@@ -1099,25 +756,28 @@ home-header {
 
 .home-container37 {
   flex: 0 0 auto;
-  width: 717px;
-  height: 298px;
+  width: 70%;
+  height: auto;
   display: flex;
-  align-self: center;
-  margin-top: var(--dl-space-space-unit);
+  align-self: top;
+  margin-top: 3%;
   align-items: center;
   margin-left: var(--dl-space-space-unit);
   margin-right: var(--dl-space-space-unit);
   margin-bottom: var(--dl-space-space-unit);
   flex-direction: column;
   justify-content: center;
-  background-color: #eff0f2;
 }
 
+.hover-effect:hover {
+    transform: scale(1.05); /* Adjust scale factor for the desired effect */
+    transition: transform 0.3s ease; /* Add a smooth transition */
+  }
+
 .home-container38 {
-  width: 721px;
-  height: 301px;
-  box-shadow: 5px 5px 10px 0px #000000;
-  border-color: var(--dl-color-gray-black);
+  width: 100%;
+  height: 100%;
+  border-color:  #E0E0E0;
   border-style: groove;
   border-width: 1px;
 }
@@ -1128,8 +788,8 @@ home-header {
 
 .home-container40 {
   flex: 0 0 auto;
-  width: 408px;
-  height: 235px;
+  width: 25%;
+  height: 60%;
   display: flex;
   align-self: center;
   align-items: space-between;
@@ -1143,7 +803,6 @@ home-header {
   height: 100%;
   display: flex;
   align-self: center;
-  box-shadow: 5px 5px 10px 0px #000000;
   align-items: center;
   margin-right: var(--dl-space-space-unit);
   flex-direction: column;
@@ -1182,32 +841,35 @@ home-header {
 
 .home-container42 {
   width: 100%;
-  height: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  Height: 100%;
+  font-size: 26px;
+  align-self: left;
+}
+
+
+.home-container12 {
+  width: 100%;
+  Height: 100%;
+  align-self: left;
 }
 
 .home-container43 {
   flex: 0 0 auto;
   width: auto;
-  height: 20vh;
+  height: 100%;
   display: flex;
   align-items: center;
   margin-left: var(--dl-space-space-unit);
-  border-color: var(--dl-color-gray-black);
+  border-color:  #E0E0E0;
   border-style: groove;
   border-width: 1px;
   flex-direction: column;
   justify-content: center;
-  background-color: #eff0f2;
-  box-shadow: 5px 5px 10px 0px #000000;
 }
 
 .home-container44 {
   width: 100%;
   height: 20vh;
-  box-shadow: 5px 5px 10px 0px #000000;
 }
 
 .home-container45 {
@@ -1220,11 +882,9 @@ home-header {
   border: 2px dashed rgba(120, 120, 120, 0.4);
   height: 100%;
   display: flex;
-  box-shadow: 5px 5px 10px 0px #000000;
   align-items: flex-start;
   margin-right: var(--dl-space-space-unit);
   flex-direction: column;
-  background-color: #eff0f2;
 }
 
 .home-container47 {
@@ -1233,11 +893,9 @@ home-header {
   border: 2px dashed rgba(120, 120, 120, 0.4);
   height: 100%;
   display: flex;
-  box-shadow: 5px 5px 10px 0px #000000;
   align-items: flex-start;
   margin-right: var(--dl-space-space-unit);
   flex-direction: column;
-  background-color: #eff0f2;
 }
 
 .home-container48 {
@@ -1331,8 +989,5 @@ home-header {
     font-size: 1.5em;
   }
 
-  .home-icon04 {
-    fill: var(--dl-color-gray-900);
-  }
 }
 </style>

@@ -51,7 +51,7 @@ export default defineComponent({
 }
 
 .Header {
-    background-color: #3c4e74;
+    background-color:  #3498db;
     height: 100px;
     border-bottom: 1px solid grey;
 }
@@ -86,7 +86,6 @@ export default defineComponent({
 
 .LoginPicText {
     background-color: white;
-    /* Set the background color to white */
     width: 18vh;
     height: 8vh;
     object-fit: cover;

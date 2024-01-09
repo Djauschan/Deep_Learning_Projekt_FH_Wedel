@@ -6,6 +6,7 @@
             <button @click="goToHome" class="menu-item">Home</button>
             <button @click="goToModelInformation" class="menu-item">Model Information</button>
             <button @click="goToStatistics" class="menu-item">Statistic</button>
+            <button @click="goToStockList" class="menu-item">StockList</button>
             <button type="submit" @click="logout" class="menu-item">Logout</button>
         </div>
         <div v-if="isDropdownOpen" class="background" @click="closeDropdown"></div>
@@ -41,6 +42,11 @@ export default defineComponent({
             router.push('/ModelInformation');
         };
 
+        const goToStockList = () => {
+            closeDropdown();
+            router.push('/StockList');
+        };
+
         const logout = () => {
             localStorage.removeItem('logged_user');
             localStorage.removeItem('logged_user_id');
@@ -59,6 +65,7 @@ export default defineComponent({
             goToHome,
             goToStatistics,
             goToModelInformation,
+            goToStockList,
             logout,
             closeDropdown
         };

@@ -1,31 +1,31 @@
 <template>
+  <div>
     <Header />
     <div class="background">
-        <div class="subhead">
-            <div class="uberschrift">
-                <span class="home-logo">Informationen zu den Modellen</span>
-            </div>
+      <div class="subhead">
+        <div class="uberschrift">
+          <span class="home-logo">Informationen zu den Modellen</span>
         </div>
-        <div id="topic">
-            <div class="row" v-for="(topic, index) in topics" :key="topic.id">
-                <TopicDisplay :topic="topic" />
-            </div>
-        </div>
+      </div>
+      <div class="topics-container">
+        <TopicDisplay v-for="(topic, index) in topics" :key="topic.id" :topic="topic" />
+      </div>
     </div>
-  </template>
-  <script>
-  
-  import Header from './Header.vue'
-  import TopicDisplay from '@/components/TopicDisplay.vue';
-  
-  export default {
-    components: {
-      Header,
-      TopicDisplay,
-    },
-    data() {
-      return {
-        topics: [
+  </div>
+</template>
+
+<script>
+import Header from './Header.vue'
+import TopicDisplay from '@/components/TopicDisplay.vue';
+
+export default {
+  components: {
+    Header,
+    TopicDisplay,
+  },
+  data() {
+    return {
+      topics: [
         {
           id: 1,
           title: 'Transformer',
@@ -42,44 +42,23 @@
           description: '<b>Input:</b><br> Forecast Horizon. <br> <b>Output:</b><br>  Dictionary, mit Angabe, welche Modelle welche Prognosen abgeben.',
         },
       ],
-      };
-    },
-  };
-  </script>
+    };
+  },
+};
+</script>
+
 <style>
-
-#topic { 
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  min-height: 40vh;
-  padding: 20px;
+.background {
+  height: 100%;
+  width: 100%;
+  background-color: #F5F5F5;
 }
 
-.topics-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  max-width: 400px;
-}
-
-#row {
-  width: calc(33.33% - 20px);
-  margin: 10px;
-}
-
-.subhead{
+.subhead {
   margin-top: 130px;
   width: 100%;
   justify-content: center;
   display: flex;
-}
-
-.background{
-  height: 100%;
-  width: 100%;
-  background-color: #306197;
 }
 
 .uberschrift {
@@ -87,11 +66,9 @@
   width: 994px;
   height: 100px;
   display: flex;
-  box-shadow: 5px 5px 10px 5px #000000;
   align-items: flex-end;
   flex-direction: column;
   justify-content: center;
-  background-color: #ffffff;
 }
 
 .home-logo {
@@ -101,5 +78,13 @@
   font-weight: bold;
   margin-left: var(--dl-space-space-unit);
   text-transform: uppercase;
+}
+
+.topics-container {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+  padding: 20px;
+  margin-left: 0px;
 }
 </style>
