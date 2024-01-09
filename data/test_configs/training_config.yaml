@@ -8,7 +8,7 @@ model_parameters:
     seq_len_decoder: 10
     dropout: 0.0
 training_parameters:
-  batch_size: 400
+  batch_size: 700
   epochs: 10000
   learning_rate: 0.005
   loss: "rmse" # Options: "mse", "rmse", "rmsle"
