@@ -52,6 +52,7 @@ class Trainer:
     learning_rate: float
     loss: Union[nn.MSELoss, nn.CrossEntropyLoss, RMSELoss, RMSLELoss]
     optimizer: Union[optim.SGD, optim.Adam]
+    weight_decay: float
     device: torch.device
     model: nn.Module
     logger: Logger
@@ -71,6 +72,7 @@ class Trainer:
             device: torch.device,
             loss: str = "mse",
             optimizer: str = "adam",
+            weight_decay: float = 0,
             momentum: float = 0,
             eval_mode: bool = False,
             seed: int = None,
@@ -93,6 +95,7 @@ class Trainer:
             device (torch.device): Whether to use the CPU or the GPU for training.
             loss (str, optional): Loss function to use. Defaults to "mse".
             optimizer (str, optional): Optimizer to use. Defaults to "adam".
+            weight_decay (float, optional): Weight decay for the optimizer. Defaults to 0.
             momentum (float, optional): Momentum for the optimizer. Defaults to 0.
             eval_mode (bool, optional): If the model is evaluated, the validation split is set to 1.
             seed (int, optional): Seed for the random number generator.
@@ -120,13 +123,13 @@ class Trainer:
         # Setting up the optimizer
         if optimizer == "adam":
             optimizer_instance = optim.Adam(
-                model.parameters(), lr=learning_rate)
+                model.parameters(), lr=learning_rate, weight_decay=weight_decay)
             if momentum != 0:
                 Logger.log_text(
                     f"Momentum {momentum} is not used since the optimizer is set to Adam")
         elif optimizer == "sgd":
             optimizer_instance = optim.SGD(
-                model.parameters(), lr=learning_rate, momentum=momentum
+                model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay
             )
         else:
             Logger.log_text(
@@ -146,6 +149,7 @@ class Trainer:
             learning_rate=learning_rate,
             loss=loss_instance,
             optimizer=optimizer_instance,
+            weight_decay=weight_decay,
             device=device,
             model=model,
             logger=Logger(),
