@@ -141,13 +141,13 @@ lr_train_predictions = lr_model.train_predict(X_train)
 lr_predictions, lr_indices = lr_model.predict(X_test, back_transform_test_data) #return predicted_close_values, indices # test prediction
 print("LR Model done \n")
 ############### RF ##################### 
-rf_model = RandomForestModel()
+rf_model = RandomForestModel(random_state=11)
 rf_model.fit(X_train, y_train)
 rf_train_predictions = rf_model.train_predict(X_train)
 rf_predictions, rf_indices = rf_model.predict(X_test, back_transform_test_data)
 print("RF Model done \n")
 ############### GBM ##################### 
-gbm_model = GradientBoostingModel()
+gbm_model = GradientBoostingModel(random_state=11)
 gbm_model.fit(X_train, y_train)
 gbm_train_predictions = gbm_model.train_predict(X_train)
 gbm_predictions, gbm_indices = gbm_model.predict(X_test, back_transform_test_data)
@@ -288,7 +288,7 @@ predictions_data = {
     "lr_prediction": lr_predictions,
     "rf_prediction": rf_predictions,
     "gbm_prediction": gbm_predictions,
-    #"svm_prediction": svm_predictions,
+    "svm_prediction": svm_predictions,
 }
 predictions_data
 

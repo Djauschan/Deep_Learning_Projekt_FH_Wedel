@@ -85,7 +85,7 @@ class BaseModel:
         }
         return evaluation_results
     
-    ############### ergänzung von train model, um train und test fehler zu vergleichen
+    ### Ergänzungen von Train Model, um Train und Test Fehler zu vergleichen
     #train
     def train_predict(self, X):
         return self.model.predict(X)
@@ -120,9 +120,9 @@ class LinearRegressionModel(BaseModel):
 
 ############### RF ##################### 
 class RandomForestModel(BaseModel):
-    hyperparameters = {"n_estimators": 10, "max_depth": 10, "min_samples_split": 10, "min_samples_leaf": 10}
+    hyperparameters = {"n_estimators": 10, "max_depth": 4, "min_samples_split": 2, "min_samples_leaf": 10}
 
-    def __init__(self):
+    def __init__(self, random_state=None):
         super().__init__(RandomForestRegressor(**RandomForestModel.hyperparameters))
     
     def get_feature_importances(self):
@@ -133,9 +133,9 @@ class RandomForestModel(BaseModel):
 
 ############### GBM ##################### 
 class GradientBoostingModel(BaseModel):
-    hyperparameters = {"n_estimators": 10, "max_depth": 10, "min_samples_split": 10, "min_samples_leaf": 10}
+    hyperparameters = {"n_estimators": 10, "max_depth": 4, "min_samples_split": 2, "min_samples_leaf": 10}
 
-    def __init__(self):
+    def __init__(self, random_state=None):
         super().__init__(GradientBoostingRegressor(**GradientBoostingModel.hyperparameters))
 
     def get_feature_importances(self):
