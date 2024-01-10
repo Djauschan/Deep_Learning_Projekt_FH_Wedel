@@ -18,7 +18,7 @@ class Xy_DataSplitter:
             self.y_test = self.test_data['close_PctChange']
 
             delete_columns = ['open', 'high', 'low', 'close', 'volume', 
-                        'open_PctChange', 'high_PctChange', 'low_PctChange', 'close_PctChange', 'volume_PctChange']
+                        'open_PctChange', 'high_PctChange', 'low_PctChange', 'close_PctChange', 'volume_PctChange', 'close_average_per_month']
             self.X_train.drop(delete_columns, axis=1, inplace=True)
             self.X_test.drop(delete_columns, axis=1, inplace=True)
         
