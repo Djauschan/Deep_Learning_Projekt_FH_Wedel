@@ -9,6 +9,10 @@ from sklearn.model_selection import TimeSeriesSplit
 from preprocessing.evaluation import Evaluation
 from models.neuralmodels import Nbeats
 from models.neuralmodels import Nhits
+from models.neuralmodels import Autoexp
+from statsforecast import StatsForecast
+from tqdm import tqdm
+tqdm.notebook.tqdm = tqdm
 
 test = DataReader({"READ_ALL_FILES": "READ_ALL_FILES"})
  
@@ -18,7 +22,7 @@ txt_files, symbols = test.get_txt_files()
 for i in symbols:
     print(i)
  
-test.current_file_idx = 0
+test.current_file_idx = 1
  
 df = test.read_next_txt()
 clean = DataCleaner(df)
@@ -31,25 +35,30 @@ df09Cleaned=clean.df_at_09
  
 nixtlaData= clean.transformForNixtla(df16Cleaned)
 
+
+
 y_test=nixtlaData[nixtlaData['ds']>"2021-01-03"]
 y_train=nixtlaData[nixtlaData['ds']<"2021-01-03"]
+print('die Länge von unserem Trainingsset')
+print(len(y_train))
 
-
-neural= Nhits(len(y_test),30)
+neural= Nhits(len(y_test))
 
 results= neural.forecast(y_train)
 
-print(results)
+print(results.head())
 
 
 
 
+# plt.style.use('fivethirtyeight')
+# plt.plot(list(range(1,len(results)+1)),list(results['NHITS']),marker='o', label='N-Hits')
+# plt.plot(list(range(1,len(results)+1)),list(y_test['y']),marker='x',label='echte Werte')
+# plt.xlabel('Prediction Horizon')
+# plt.ylabel('Stock Price in $')
+# plt.legend()
 
-plt.plot(list(range(1,len(results)+1)),list(results['NHITS']), label='N-Hits')
-plt.plot(list(range(1,len(results)+1)),list(y_test['y']),label='echte Werte')
-plt.legend()
-
-plt.show()
+# plt.show()
 
 
 
