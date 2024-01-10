@@ -1,21 +1,22 @@
 use_gpu: true
 model_parameters:
   mlp:
-    seq_len_encoder: 50
-    seq_len_decoder: 10   # Philipp gibt Info wie viele Zeitschritte wir predicten
+    seq_len_encoder: 96
+    seq_len_decoder: 24   # Philipp gibt Info wie viele Zeitschritte wir predicten
     hidden_dim: 200
     dropoutrate: 0.3
     # hier Parameter hinzufügen -> werden dem Modell als Parameter übergeben 
 training_parameters:
   batch_size: 50
-  epochs: 200
+  epochs: 750
   learning_rate: 0.0025
   loss: "mse" #Options: "mse", "rmse", "rmsle"
-  seed: 42
-  patience: 10000
-  log_image_frequency: 10 # so oft Bilder im logger speichern 
+  optimizer: "adam" # Options: "adam", "sgd"
   weight_decay: 0.3
   momentum: 0.1
+  seed: 42
+  patience: 10000
+  log_image_frequency: 40 # so oft Bilder im logger speichern 
 dataset_parameters:
   read_all_files: false
   first_date: 2019-01-01
@@ -45,14 +46,13 @@ dataset_parameters:
     - "DXY" # US Dollar Index
     - "SPX" # S&P 500
     - "DJCIGC" # Dow Jones Commodity Index Gold
-    # - "DJCISI" # Dow Jones Commodity Index Silver
-    # - "DJCIEN" # Dow Jones Commodity Index Energy
-    # - "DJCIIK" # Dow Jones Commodity Index Nickel
-    # - "DJI" # Dow Jones Industrial Average
-    
+    - "DJCISI" # Dow Jones Commodity Index Silver
+    - "DJCIEN" # Dow Jones Commodity Index Energy
+    - "DJCIIK" # Dow Jones Commodity Index Nickel
+    - "DJI" # Dow Jones Industrial Average
     - "DJINET" # Dow Jones Internet Composite Index
-    # - "COMP" # NASDAQ Composite
-    # - "W5000" # FT Wilshire 5000 Full Cap
+    - "COMP" # NASDAQ Composite
+    - "W5000" # FT Wilshire 5000 Full Cap
     # - art1
     # - art2
     # - sin
