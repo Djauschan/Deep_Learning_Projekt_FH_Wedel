@@ -8,7 +8,6 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.svm import SVR
 
-
 ##################### Basis Model#######################
 class BaseModel:
     #Länge der prediction --> i

@@ -13,7 +13,7 @@ from pipeline import ClassPipeline
 from split import DataSplitter
 from split_xy import Xy_DataSplitter
 
-from gridsearchCV_ml import ActualValues, BaseModel, LinearRegressionModel, RandomForestModel, GradientBoostingModel, SVMModel
+from gridsearchCV_ml import BaseModel, LinearRegressionModel, RandomForestModel, GradientBoostingModel, SVMModel
 
 #################################
 # Daten einlesen
