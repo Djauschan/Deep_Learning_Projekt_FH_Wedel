@@ -14,6 +14,7 @@ class Multi_Layer_Perceptron(nn.Module):
                  dim_decoder,
                  dim_encoder,
                  hidden_dim,
+                 dropoutrate,
                  device: torch.device):
         super(Multi_Layer_Perceptron, self).__init__()
         self.device = device
@@ -24,7 +25,7 @@ class Multi_Layer_Perceptron(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),  
             nn.ReLU(),
-            nn.Dropout(0.3),  # Dropout-Schicht mit 30% Wahrscheinlichkeit
+            nn.Dropout(dropoutrate),  
             nn.Linear(hidden_dim, hidden_dim),  
             nn.ReLU(),
             nn.Linear(hidden_dim, seq_len_decoder * dim_decoder),

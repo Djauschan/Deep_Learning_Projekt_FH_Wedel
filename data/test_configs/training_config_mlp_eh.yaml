@@ -2,27 +2,31 @@ use_gpu: true
 model_parameters:
   mlp:
     seq_len_encoder: 50
-    seq_len_decoder: 10
+    seq_len_decoder: 10   # Philipp gibt Info wie viele Zeitschritte wir predicten
     hidden_dim: 200
+    dropoutrate: 0.3
+    # hier Parameter hinzufügen -> werden dem Modell als Parameter übergeben 
 training_parameters:
   batch_size: 50
-  epochs: 750
+  epochs: 200
   learning_rate: 0.0025
   loss: "mse" #Options: "mse", "rmse", "rmsle"
   seed: 42
   patience: 10000
-  log_image_frequency: 5
+  log_image_frequency: 10 # so oft Bilder im logger speichern 
+  weight_decay: 0.3
+  momentum: 0.1
 dataset_parameters:
   read_all_files: false
-  first_date: 2021-01-03
-  last_date: 2021-01-04 # YYYY-MM-DD Last date of the data to be read in
-  data_usage_ratio: 0.3 # Only the last 1% of the read data are used in the dataset
-  subseries_amount: 1 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
-  validation_split: 0.2 # The last 10% of timestamps in a subseries are used for validation
+  first_date: 2019-01-01
+  last_date: 2021-01-03 # YYYY-MM-DD Last date of the data to be read in
+  data_usage_ratio: 0.99 # Only the last 1% of the read data are used in the dataset
+  subseries_amount: 10 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
+  validation_split: 0.1 # The last 10% of timestamps in a subseries are used for validation
   create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol.csv"
-  time_resolution: 30 # Time resolution of the data in minutes 
+  time_resolution: 120 # Time resolution of the data in minutes aktuell: 2 Stunden Schritte (120 Minuten)
   encoder_symbols:
   # stocks
     - "AAPL" # Apple
@@ -39,13 +43,14 @@ dataset_parameters:
     # - "ACWI" # iShares MSCI ACWI ETF
   # indices
     - "DXY" # US Dollar Index
-    # - "SPX" # S&P 500
-    # - "DJCIGC" # Dow Jones Commodity Index Gold
+    - "SPX" # S&P 500
+    - "DJCIGC" # Dow Jones Commodity Index Gold
     # - "DJCISI" # Dow Jones Commodity Index Silver
     # - "DJCIEN" # Dow Jones Commodity Index Energy
     # - "DJCIIK" # Dow Jones Commodity Index Nickel
     # - "DJI" # Dow Jones Industrial Average
-    # - "DJINET" # Dow Jones Internet Composite Index
+    
+    - "DJINET" # Dow Jones Internet Composite Index
     # - "COMP" # NASDAQ Composite
     # - "W5000" # FT Wilshire 5000 Full Cap
     # - art1
