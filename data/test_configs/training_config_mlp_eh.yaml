@@ -3,11 +3,12 @@ model_parameters:
   mlp:
     seq_len_encoder: 96
     seq_len_decoder: 24   # Philipp gibt Info wie viele Zeitschritte wir predicten
-    hidden_dim: 200
+    hidden_dim: 400
     dropoutrate: 0.3
+    hidden_layers: 8
     # hier Parameter hinzufügen -> werden dem Modell als Parameter übergeben 
 training_parameters:
-  batch_size: 100
+  batch_size: 500
   epochs: 5000
   learning_rate: 0.0025
   loss: "mse" #Options: "mse", "rmse", "rmsle"
