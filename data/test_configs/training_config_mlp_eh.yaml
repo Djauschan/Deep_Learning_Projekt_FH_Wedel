@@ -3,12 +3,13 @@ model_parameters:
   mlp:
     seq_len_encoder: 96
     seq_len_decoder: 24   # Philipp gibt Info wie viele Zeitschritte wir predicten
-    hidden_dim: 200
+    hidden_dim: 400
     dropoutrate: 0.3
+    hidden_layers: 8
     # hier Parameter hinzufügen -> werden dem Modell als Parameter übergeben 
 training_parameters:
-  batch_size: 50
-  epochs: 750
+  batch_size: 500
+  epochs: 5000
   learning_rate: 0.0025
   loss: "mse" #Options: "mse", "rmse", "rmsle"
   optimizer: "adam" # Options: "adam", "sgd"
@@ -22,8 +23,8 @@ dataset_parameters:
   first_date: 2019-01-01
   last_date: 2021-01-03 # YYYY-MM-DD Last date of the data to be read in
   data_usage_ratio: 0.99 # Only the last 1% of the read data are used in the dataset
-  subseries_amount: 10 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
-  validation_split: 0.1 # The last 10% of timestamps in a subseries are used for validation
+  subseries_amount: 3 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
+  validation_split: 0.2 # The last 10% of timestamps in a subseries are used for validation
   create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol.csv"
