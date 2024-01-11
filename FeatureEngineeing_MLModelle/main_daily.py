@@ -125,7 +125,7 @@ print("done, now ml-model \n") #nur zum testen
 ###################################### Verwendung der ML-Modelle ####################################################
 
 #Länge der Prediction
-prediction_length = 20
+prediction_length = 2
 
 # Letzter bekannter Wert
 last_known_open_value = back_transform_test_data['open'].iloc[0] # Letzter bekannter Open-Wert

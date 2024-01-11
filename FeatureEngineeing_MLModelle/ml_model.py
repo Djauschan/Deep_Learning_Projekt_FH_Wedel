@@ -168,7 +168,7 @@ class GradientBoostingModel(BaseModel):
         #
         Feature Importances: ist die Wichtigkeit der einzelnen Variablen
     '''
-    hyperparameters = {"n_estimators": 10, "max_depth": 2, "min_samples_split": 2, "min_samples_leaf": 50, "max_features": "auto", "random_state": 11}
+    hyperparameters = {"n_estimators": 10, "max_depth": 1, "min_samples_split": 2, "min_samples_leaf": 75, "max_features": "auto", "random_state": 11}
 
     def __init__(self, random_state=11, pred_length=1):
         super().__init__(GradientBoostingRegressor(**GradientBoostingModel.hyperparameters), pred_length=pred_length)
@@ -200,7 +200,7 @@ class SVMModel(BaseModel):
         dual_coef: gibt die Koeffizienten der Support-Vektoren in der dualen Darstellung zurück
             -> ein Maß, wie stark jeder Support-Vektor die Position der Entscheidungsgrenze beeinflusst
     '''
-    hyperparameters = {"kernel": 'rbf', "C": 1.0, "epsilon": 0.1}
+    hyperparameters = {"kernel": 'rbf', "C": 0.1, "epsilon": 0.5}
 
     def __init__(self, pred_length=1):
         super().__init__(SVR(**SVMModel.hyperparameters), pred_length=pred_length)
