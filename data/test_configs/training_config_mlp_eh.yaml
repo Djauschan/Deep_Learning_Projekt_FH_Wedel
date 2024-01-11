@@ -7,8 +7,8 @@ model_parameters:
     dropoutrate: 0.3
     # hier Parameter hinzufügen -> werden dem Modell als Parameter übergeben 
 training_parameters:
-  batch_size: 50
-  epochs: 750
+  batch_size: 200
+  epochs: 5000
   learning_rate: 0.0025
   loss: "mse" #Options: "mse", "rmse", "rmsle"
   optimizer: "adam" # Options: "adam", "sgd"
