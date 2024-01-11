@@ -1,7 +1,7 @@
 dataset_parameters:
   create_new_file: true
   data_file: data/output/Multi_Symbol_Predict3.csv
-  data_usage_ratio: 0.99
+  data_usage_ratio: 1
   decoder_symbols:
     - "AAPL" # Apple
     - "AAL" # American Airlines

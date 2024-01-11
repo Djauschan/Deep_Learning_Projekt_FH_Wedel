@@ -110,7 +110,7 @@ def get_all_dates(reader: DataReader, data_usage_ratio: float) -> pd.DataFrame:
     else:
         start_index = all_timestamps_length - used_timestamps_length - 1
 
-    used_timestamps = all_timestamps[start_index:all_timestamps_length - 1]
+    used_timestamps = all_timestamps[start_index:all_timestamps_length]
     used_timestamps_df = pd.DataFrame({'timestamp': used_timestamps})
 
     return used_timestamps_df
