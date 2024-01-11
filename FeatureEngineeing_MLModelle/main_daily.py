@@ -51,20 +51,21 @@ print("pip läuft \n")
 splitter = DataSplitter(data)
 #splitter.split_by_ratio(split_ratio=0.8)  # Split für 80% Trainingsdaten
 #splitter.split_by_date(pd.Timestamp('2019-12-31 16:00:00')) #Split zu diesen Datum
-splitter.split_by_date_lag20d(pd.Timestamp('2019-12-31 16:00:00')) #Split zu diesen Datum mit beachtung der 20 Tage
+splitter.split_by_date_lag20d(pd.Timestamp('2021-01-03')) #Split zu diesen Datum mit beachtung der 20 Tage
+    #Final 03.01.2021 
 
 train_data = splitter.get_train_data()
 test_data = splitter.get_test_data()
 
-print("Maximaler Index train_data:", train_data.index.max()) #2019-12-31
-print("Minimaler Index test_data:", test_data.index.min()) #2019-12-04 -> richtig beim splitt - 20 BD wegen den LagFeatures
+print("Maximaler Index train_data:", train_data.index.max()) #2021-01-01
+print("Minimaler Index test_data:", test_data.index.min()) #2020-12-07 -> beim splitt - 20 Business Days wegen den LagFeatures
 print("\n")
 
 print("Trainingsdaten:\n", train_data)
 print("Testdaten:\n", test_data)
 
 # Plot um die aufteilung anzusehen
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(12, 6))
 plt.plot(train_data.index, train_data['close'], label='Trainingsdaten')
 plt.plot(test_data.index, test_data['close'], label='Testdaten')
 plt.title('Aufteilung der Trainings- und Testdaten')
@@ -78,8 +79,8 @@ plt.legend()
 train_data = pipeline.fit_transform(train_data, 'busdaily')
 test_data = pipeline.fit_transform(test_data, 'busdaily')
 
-print("Maximaler Index train_data nach pip:", train_data.index.max()) #2019-12-31
-print("Minimaler Index test_data nach pip:", test_data.index.min()) #2020-01-01 -> passt
+print("Maximaler Index train_data nach pip:", train_data.index.max()) #2021-01-01 #Freitag
+print("Minimaler Index test_data nach pip:", test_data.index.min()) #2021-01-04 #Monatg -> passt, da Wochende kein Traden
 print("\n")
 
 print(train_data.columns)
@@ -102,10 +103,10 @@ y_train = splitter.get_y_train()
 y_test = splitter.get_y_test()
 
 #prints nur zum testen
-print("Maximaler Index train_data:", train_data.index.max()) #2019-12-31 
-print("Minimaler Index test_data:", test_data.index.min()) # 2020-01-01
-print("Maximaler Index X_train:", X_train.index.max()) #2019-12-31
-print("Minimaler Index X_test:", X_test.index.min()) #2020-01-01
+print("Maximaler Index train_data:", train_data.index.max())    # 2021-01-01
+print("Minimaler Index test_data:", test_data.index.min())      # 2021-01-04
+print("Maximaler Index X_train:", X_train.index.max())          # 2021-01-01
+print("Minimaler Index X_test:", X_test.index.min())            # 2021-01-04
 
 print("X_train")
 print(X_train.columns)
@@ -123,37 +124,38 @@ print("done, now ml-model \n") #nur zum testen
 ############################################################################################################################################################################
 ###################################### Verwendung der ML-Modelle ####################################################
 
+#Länge der Prediction
+prediction_length = 20
+
 # Letzter bekannter Wert
 last_known_open_value = back_transform_test_data['open'].iloc[0] # Letzter bekannter Open-Wert
 last_known_close_value = back_transform_test_data['close'].iloc[0] # Letzter bekannter Close-Wert
 
 # die Tatsächlicher Close-Wert für den entsprechenden Zeitpunkt
-actual_values_class = ActualValues()
+actual_values_class = ActualValues(pred_length=prediction_length)
 actual_close_values, actual_indices = actual_values_class.get_actual_values_test_close(X_test, back_transform_test_data)
 
 ####### Initialisierung und Training der Modelle #######
-### siehe in ml_model.py -> länge der prediction noch in ml_model jeweils anpassen / Hyperparameter
-
 ############### LR ##################### 
-lr_model = LinearRegressionModel()
+lr_model = LinearRegressionModel(pred_length=prediction_length)
 lr_model.fit(X_train, y_train)
 lr_train_predictions = lr_model.train_predict(X_train)
 lr_predictions, lr_indices = lr_model.predict(X_test, back_transform_test_data) #return predicted_close_values, indices # test prediction
 print("LR Model done \n")
 ############### RF ##################### 
-rf_model = RandomForestModel(random_state=11)
+rf_model = RandomForestModel(pred_length=prediction_length)
 rf_model.fit(X_train, y_train)
 rf_train_predictions = rf_model.train_predict(X_train)
 rf_predictions, rf_indices = rf_model.predict(X_test, back_transform_test_data)
 print("RF Model done \n")
 ############### GBM ##################### 
-gbm_model = GradientBoostingModel(random_state=11)
+gbm_model = GradientBoostingModel(pred_length=prediction_length)
 gbm_model.fit(X_train, y_train)
 gbm_train_predictions = gbm_model.train_predict(X_train)
 gbm_predictions, gbm_indices = gbm_model.predict(X_test, back_transform_test_data)
 print("GBM Model done \n")
 ############### SVM ##################### 
-svm_model = SVMModel()
+svm_model = SVMModel(pred_length=prediction_length)
 svm_model.fit(X_train, y_train)
 svm_train_predictions = svm_model.train_predict(X_train)
 svm_predictions, svm_indices = svm_model.predict(X_test, back_transform_test_data)
@@ -184,7 +186,7 @@ svm_dual_coef = svm_model.get_dual_coef()
 print("SVM Support Vectors:", svm_support_vectors)
 print("SVM Number of Support Vectors per Class:", svm_n_support)
 print("SVM Dual Coefficients:", svm_dual_coef)
-
+print("\n")
 ##########################################################
 ############### Evaluation MAE, RMSE##################### 
 print("Evaluation der Fehlermetricen:\n")
@@ -255,7 +257,7 @@ model_colors = {
     'SVM_Test': '#FFA500',  # Orange
 }
 
-plt.figure(figsize=(18, 8))
+plt.figure(figsize=(12, 6))
 
 # Berechnen Sie die X-Achsen-Positionen für jedes Modell
 x = np.arange(n_metrics) * (n_models + 1) * bar_width
@@ -301,11 +303,15 @@ plt.plot(actual_indices, rf_predictions, label='RF Vorhergesagte Werte', color='
 plt.plot(actual_indices, gbm_predictions, label='GBM Vorhergesagte Werte', color='blue')
 plt.plot(actual_indices, svm_predictions, label='SVM Vorhergesagte Werte', color='orange')
 
+plt.scatter(actual_indices, actual_close_values, color='black')
+plt.scatter(actual_indices, lr_predictions, color='red')
+plt.scatter(actual_indices, rf_predictions, color='green')
+plt.scatter(actual_indices, gbm_predictions, color='blue')
+plt.scatter(actual_indices, svm_predictions, color='orange')
+
 plt.title('Vergleich der vorhergesagten und tatsächlichen Close-Werte')
 plt.xlabel('Zeitpunkt')
 plt.ylabel('Close-Wert')
 plt.legend()
-#plt.xticks(rotation=45)  # Drehen der X-Achsen-Beschriftungen für bessere Lesbarkeit
 plt.show()
-
 
