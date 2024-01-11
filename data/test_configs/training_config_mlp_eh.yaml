@@ -7,7 +7,7 @@ model_parameters:
     dropoutrate: 0.3
     # hier Parameter hinzufügen -> werden dem Modell als Parameter übergeben 
 training_parameters:
-  batch_size: 200
+  batch_size: 100
   epochs: 5000
   learning_rate: 0.0025
   loss: "mse" #Options: "mse", "rmse", "rmsle"
@@ -22,8 +22,8 @@ dataset_parameters:
   first_date: 2019-01-01
   last_date: 2021-01-03 # YYYY-MM-DD Last date of the data to be read in
   data_usage_ratio: 0.99 # Only the last 1% of the read data are used in the dataset
-  subseries_amount: 10 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
-  validation_split: 0.1 # The last 10% of timestamps in a subseries are used for validation
+  subseries_amount: 3 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
+  validation_split: 0.2 # The last 10% of timestamps in a subseries are used for validation
   create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol.csv"
