@@ -40,34 +40,26 @@ class PredictionDataset(Dataset):
     """
 
     data: pd.DataFrame
-    encoder_dimensions: int
-    decoder_dimensions: int
-    encoder_input_length: int
-    decoder_target_length: int
 
     @classmethod
     def create_from_config(
         cls: type["PredictionDataset"],
-        timestamp_start: pd.DataFrame,
         data: pd.DataFrame,
+        first_index: int
     ) -> "PredictionDataset":
-        print(timestamp_start)
-        print(timestamp_start.date())
-        print(timestamp_start.value)
-        print(data.iloc[0, 0])
 
-        print(data[data["posix_time"] > timestamp_start.value / 1e9])
+        # print(data)
 
         # Load the data from the csv (timestamp start - encoder length)
+        dataset_data = data.iloc[first_index - 96 : first_index, :]
+        dataset_data = dataset_data.set_index("posix_time")
+
+        # print(dataset_data)
 
         # Store the start prices in a class variable
 
         return cls(
-            data=data,
-            encoder_dimensions=10,
-            decoder_dimensions=1,
-            encoder_input_length=96,
-            decoder_target_length=24,
+            data=dataset_data
         )
 
     def __len__(self) -> int:

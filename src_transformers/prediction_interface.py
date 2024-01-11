@@ -1,13 +1,12 @@
 """
 This module contains the TransformerInterface class and the MultiSymbolDataset class.
 """
-import csv
-from dataclasses import dataclass
+import pickle
 from pathlib import Path
 
 import pandas as pd
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 
 from src_transformers.abstract_model import AbstractModel
 from src_transformers.preprocessing.prediction_dataset import PredictionDataset
@@ -54,59 +53,71 @@ class TransformerInterface(AbstractModel):
         self.load_data(timestamp_start)
         # self.preprocess()
         self.load_model()
-
-        predictions = []
-        data_loader = DataLoader(self.dataset, shuffle=False)
         self.model.eval()
 
-        with torch.no_grad():
-            for encoder_input, _ in data_loader:
-                encoder_input = encoder_input.to(torch.device("cuda"))
-                output = self.model(encoder_input)
-                # Squeeze the batch dimension
-                predictions.append(torch.squeeze(output, 0))
+        data_loader = DataLoader(self.dataset, shuffle=False)
+        model_input = next(iter(data_loader))
 
-        prediction = torch.cat(predictions, dim=0).cpu()
-        # Set the column names to the symbol names and the index to the timestamps
-        prediction = pd.DataFrame(prediction.numpy())
+        with torch.no_grad():
+            output = self.model(model_input)
+
+        output = torch.squeeze(output, 0)
+        prediction = output.cpu().numpy()
 
         # TODO: Calculate absolute prices (start_price from where?)
         # self.calculate_absolut_prices(prediction)
+
+        columns = []
+        for dataset_column in self.dataset.data.columns:
+            if "close" in dataset_column:
+                columns.append(dataset_column)
+
+        prediction = pd.DataFrame(prediction, columns=columns)
+
+        for symbol, price in self.prices_before_prediction.items():
+            absolute_prices = self.calculate_absolut_prices(prediction[f"close {symbol}"], price)
+            prediction[f"close {symbol}"] = round(absolute_prices, 2)
 
         return prediction
 
     def load_data(self, timestamp_start: pd.Timestamp) -> None:
         """load data from database and stores it in a class variable"""
-        data_path = Path("data", "output", "Multi_Symbol.csv")
+        data_path = Path("data", "output", "Multi_Symbol_Predict3.csv")
         data = pd.read_csv(data_path.as_posix())
 
-        print(data.info())
+        print(data)
 
-        PredictionDataset.create_from_config(timestamp_start, data)
+        prices_before_data = pickle.load(open("data/output/prices.pkl", "rb"))
+        print(prices_before_data)
 
-        with open(data_path, "r", newline="", encoding="utf-8") as file:
-            csv_reader = csv.reader(file)
-            # Get the column names of the csv file (includes posix_time)
-            encoder_dimensions = len(next(csv_reader)) - 1
-            length = sum(1 for _ in csv_reader)
+        # self.dataset = PredictionDataset.create_from_config(timestamp_start, data, prices_before_data)
 
-        decoder_dimensions = 1
+        data_after_start = data[data["posix_time"] > timestamp_start.value / 1e9].copy()
+        first_index = data_after_start.index[0]
 
-        self.dataset = MultiSymbolDataset(
-            length=length,
-            encoder_dimensions=encoder_dimensions,
-            decoder_dimensions=decoder_dimensions,
-            encoder_input_length=30,
-            decoder_target_length=30,
-            data_file=data_path.as_posix(),
-            time_resolution=30,
-        )
+        data_before_start = data.iloc[:first_index, :].copy()
+
+        prices_before_prediction = {}
+        for symbol, price in prices_before_data.items():
+            absolut_prices = self.calculate_absolut_prices(data_before_start[f"close {symbol}"], price)
+            prices_before_prediction[symbol] = round(absolut_prices.values[-1], 2)
+
+        print(prices_before_prediction)
+        self.prices_before_prediction = prices_before_prediction
+        self.dataset = PredictionDataset.create_from_config(data, first_index)
 
     def preprocess(self) -> None:
         """preprocess data and stores it in a class variable"""
-        pass
 
     def load_model(self) -> None:
         """load model from file and stores it in a class variable"""
-        model_path = Path("data", "output", "models", "TransformerModel_v4.pt")
+        model_path = Path("data", "output", "models", "TransformerModel_v6.pt")
         self.model = torch.load(model_path)
+        self.model.device = torch.device("cpu")
+
+        self.model.to(torch.device("cpu"))
+
+
+if __name__ == "__main__":
+    pred = TransformerInterface().predict(pd.to_datetime('2021-01-30'), pd.to_datetime('2021-02-01'))
+    print(pred)
