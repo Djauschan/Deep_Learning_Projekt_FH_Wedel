@@ -6,59 +6,54 @@
     <button class="button-stock" @click="updateChart">Show Stock</button>
     <!-- Add checkboxes for additional data points -->
     <div class="checkboxes">
-    <label>
-      <input type="checkbox" v-model="showCNNLine"> CNN
-    </label>
-    <label>
-      <input type="checkbox" v-model="showTransformerLine"> Transformer
-    </label>
+      <label>
+        <input type="checkbox" v-model="showCNNLine"> CNN
+      </label>
+      <label>
+        <input type="checkbox" v-model="showTransformerLine"> Transformer
+      </label>
     </div>
   </div>
   <div class="newChart">
-  <DxChart v-if="showChart" id="chart" :data-source="dataSource" title="Stock Price">
-    <DxCommonSeriesSettings argument-field="date" type="stock" />
-    <DxSeries :name="selectedStock" open-value-field="open" high-value-field="high" low-value-field="low"
-      close-value-field="close" axis="price" :customize-point="customizeStockPoint">
-    </DxSeries>
-    <!-- Add another series for prediction line -->
-    <DxSeries v-if="showCNNLine" :name="'CNN Prediction - ' + selectedStock" :data-source="CNNpredictionData" type="line"
-     value-field="predictedValue" argument-field="date">
-    </DxSeries>
-    <DxSeries v-if="showTransformerLine" :name="'Transformer Prediction - ' + selectedStock" :data-source="TransformerpredictionData" type="line"
-     value-field="predictedValue" argument-field="date">
-    </DxSeries>
-    <DxSeries class="volume-chart" name="Volume" value-field="volume" argument-field="date" type="bar" axis="volume"
-      :bar-width="5">
-    </DxSeries>
-    <DxArgumentAxis :workdays-only="true">
-      <DxLabel format="shortDate" />
-    </DxArgumentAxis>
-    <DxValueAxis name="price" position="left" :min="priceRange.min" :max="priceRange.max" :key="priceRangeKey">
-      <DxTitle text="US dollars" />
-      <DxLabel>
-        <DxFormat type="currency" />
-      </DxLabel>
-    </DxValueAxis>
-    <DxValueAxis name="volume" position="right" :visualRange="volumeRange">
-      <DxTitle text="Volume" />
-    </DxValueAxis>
-    <DxExport :enabled="true" />
-    <DxTooltip :enabled="true" :customize-tooltip="customizeTooltip" location="edge" />
-  </DxChart>
+    <DxChart v-if="showChart" id="chart" :data-source="dataSource" title="Stock Price">
+      <DxCommonSeriesSettings argument-field="date" type="stock" />
+      <DxSeries :name="selectedStock" open-value-field="open" high-value-field="high" low-value-field="low"
+        close-value-field="close" axis="price" :customize-point="customizeStockPoint">
+      </DxSeries>
+      <!-- Add another series for prediction line -->
+      <DxSeries v-if="showCNNLine" :name="'CNN Prediction - ' + selectedStock" :data-source="dummyData" type="line"
+        value-field="value" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showTransformerLine" :name="'Transformer Prediction - ' + selectedStock"
+        :data-source="TransformerpredictionData" type="line" value-field="value" argument-field="date">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left" :min="priceRange.min" :max="priceRange.max" :key="priceRangeKey">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxExport :enabled="true" />
+      <DxTooltip :enabled="true" :customize-tooltip="customizeTooltip" location="edge" />
+    </DxChart>
   </div>
   <div class="newChart">
-  <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="lineChartDataSource" title="CNN Chart">
-    <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'Line Chart'" value-field="lineChartDataField" argument-field="date" type="line">
-    </DxSeries>
-  </DxChart>
+    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="dummyData" title="CNN Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'Line Chart'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+    </DxChart>
   </div>
   <div class="newChart">
-  <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="lineChartDataSource" title="Transformer Chart">
-    <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'Line Chart'" value-field="lineChartDataField" argument-field="date" type="line">
-    </DxSeries>
-  </DxChart>
+    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="lineChartDataSource"
+      title="Transformer Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'Line Chart'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+    </DxChart>
   </div>
 </template>
 <script>
@@ -98,16 +93,15 @@ export default {
     DxTooltip,
   },
   async created() {
-    this.dataSource = null;
+    //this.dataSource = null;
     this.selectedDays = null;
   },
   data() {
     return {
-      dataSource,
+      dummyData: dataSource,
       selectedStock: "",
       selectedDays: null,
       showChart: false,
-      volumeRange: { startValue: 0, endValue: null },
       priceRange: { min: null, max: null },
       showCNNLine: false,
       showTransformerLine: false,
@@ -192,9 +186,6 @@ export default {
         this.dataSource = await this.get_stock_data(this.selectedStock, this.selectedDays);
 
         if (this.dataSource) {
-          const maxVolume = Math.max(...this.dataSource.map(data => data.volume));
-          this.volumeRange.endValue = maxVolume * 5;
-
           const prices = this.dataSource.flatMap(data => [data.open, data.close]);
           this.priceRange = {
             min: Math.min(...prices) * 0.5,
@@ -202,10 +193,6 @@ export default {
           };
           this.priceRangeKey = Math.random();
           console.log(this.priceRange)
-        }
-        if (this.showPredictionLine) {
-         await this.updateCNNPredictionData();
-         await this.updateTransformerPredictionData();
         }
 
         this.showChart = true;
@@ -219,11 +206,11 @@ export default {
   height: 30%;
 }
 
-.newChart{
+.newChart {
   margin-top: 2%;
 }
 
-.checkboxes{
+.checkboxes {
   margin-left: 1%;
   align-items: center;
   display: flex;

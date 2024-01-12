@@ -14,22 +14,22 @@ const router = createRouter({
     {
       path: "/",
       component: Home,
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
     },
     {
       path: "/statistik",
       component: Statistik,
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
     },
     {
       path: "/ModelInformation",
       component: ModelInformation,
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
     },
     {
       path: "/StockList",
       component: StockList,
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
     },
     {
       path: "/login",
