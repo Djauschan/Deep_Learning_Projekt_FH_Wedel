@@ -58,6 +58,7 @@ class Trainer:
     logger: Logger
     eval_mode: bool
     seed: int
+    batch_shuffle: bool
     patience: int
     log_image_frequency: int
 
@@ -76,6 +77,7 @@ class Trainer:
             momentum: float = 0,
             eval_mode: bool = False,
             seed: int = None,
+            batch_shuffle: bool= False,
             patience: int = 50,
             log_image_frequency: int = 10
     ) -> "Trainer":
@@ -99,6 +101,7 @@ class Trainer:
             momentum (float, optional): Momentum for the optimizer. Defaults to 0.
             eval_mode (bool, optional): If the model is evaluated, the validation split is set to 1.
             seed (int, optional): Seed for the random number generator.
+            batch_shuffle (bool): Whether to shuffle the batches.
             patience (int, optional): Number of epochs to wait for improvement before stopping. Defaults to 50.
             log_image_frequency (int, optional): Frequency of logging images. Defaults to 10.
 
@@ -155,6 +158,7 @@ class Trainer:
             logger=Logger(),
             eval_mode=eval_mode,
             seed=seed,
+            batch_shuffle=batch_shuffle,
             patience=patience,
             log_image_frequency=log_image_frequency
         )
@@ -200,8 +204,8 @@ class Trainer:
         """
         Sets up the data loaders holding the training and validation datasets.
 
-        This method splits the dataset into training and validation subsets using the dataset's 
-        `get_subset_indices` method. It then creates data loaders for the training and validation 
+        This method splits the dataset into training and validation subsets using the dataset's
+        `get_subset_indices` method. It then creates data loaders for the training and validation
         subsets with the specified batch size and without shuffling.
 
         Returns:
@@ -215,10 +219,10 @@ class Trainer:
 
         # Create torch data loaders
         train_loader = DataLoader(
-            train_dataset, batch_size=self.batch_size, shuffle=False
+            train_dataset, batch_size=self.batch_size, shuffle=self.batch_shuffle
         )
         validation_loader = DataLoader(
-            validation_dataset, batch_size=self.batch_size, shuffle=False
+            validation_dataset, batch_size=self.batch_size, shuffle=self.batch_shuffle
         )
 
         return train_loader, validation_loader
