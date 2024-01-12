@@ -21,8 +21,8 @@ class MultiHeadAttention(nn.Module):
         super(MultiHeadAttention, self).__init__()
         # Ensure that the model dimension (d_model) is divisible by the number
         # of heads
-        assert d_model % num_heads == 0, "d_model must be divisible by num_heads"
 
+        assert d_model % num_heads == 0, f"d_model (here: {d_model}) must be divisible by num_heads (here: {num_heads})"
         # Initialize dimensions
         self.d_model = d_model  # Model's dimension
         self.num_heads = num_heads  # Number of attention heads
@@ -97,8 +97,8 @@ class MultiHeadAttention_Modified(nn.Module):
         super(MultiHeadAttention_Modified, self).__init__()
         # Ensure that the model dimension (d_model) is divisible by the number
         # of heads
-        assert dim_encoder % num_heads == 0, "d_model must be divisible by num_heads"
-        assert dim_decoder % num_heads == 0, "d_model must be divisible by num_heads"
+        assert dim_encoder % num_heads == 0, f"d_model (here: {dim_encoder}) must be divisible by num_heads (here: {num_heads})"
+        assert dim_decoder % num_heads == 0, f"d_model (here: {dim_decoder}) must be divisible by num_heads (here: {num_heads})"
 
         # Initialize dimensions
         self.dim_encoder = dim_encoder  # Encoder dimension
