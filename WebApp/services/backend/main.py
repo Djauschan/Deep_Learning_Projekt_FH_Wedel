@@ -133,4 +133,21 @@ def check_login(email: str, password: str, db: Session = Depends(get_db)):
     
     if user:
         raise HTTPException(status_code=400, detail="Email does not exist")
+    
+@app.get("/predict/transformer")
+def predict_transformer(stock_symbol: str):
+    return "predict_transformer"
+
+@app.get("/predict/cnn")
+def predict_cnn(stock_symbol: str):
+    return crud.predict_cnn(stock_symbol=stock_symbol)
+
+@app.get("/predict/lstm")
+def predict_lstm(stock_symbol: str):
+    return crud.predict_lstm(stock_symbol=stock_symbol)
+
+@app.get("/predict/arima")
+def predict_arima(stock_symbol: str):
+    return crud.predict_arima(stock_symbol=stock_symbol)
+
 
