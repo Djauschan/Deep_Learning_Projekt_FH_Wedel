@@ -215,18 +215,24 @@ class Logger():
 
         fig = plot_absolute_predictions(targets, predictions)
 
-        os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+        if fig is not None:
 
-        # Save image in Logger
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        image = Image.open(buf)
-        image = ToTensor()(image)
-        self._summary_writer.add_image(f"image/abs_chart_{name}", image, epoch)
+            os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-        print(f"[Logger]: Absolute chart for {name} saved.")
-        plt.close('all')
+            # Save image in Logger
+            buf = io.BytesIO()
+            try:
+                plt.savefig(buf, format='png')
+                buf.seek(0)
+                image = Image.open(buf)
+                image = ToTensor()(image)
+                self._summary_writer.add_image(f"image/abs_chart_{name}", image, epoch)
+
+                print(f"[Logger]: Absolute chart for {name} saved.")
+                plt.close('all')
+            except:
+                print(f"[Logger]: Absolute chart for {name} could not be saved.")
+                plt.close('all')
 
     def log_model_path(self, model_path: str) -> None:
         """
