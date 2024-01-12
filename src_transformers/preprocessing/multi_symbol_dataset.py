@@ -5,6 +5,7 @@ financial data.
 import pickle
 from dataclasses import dataclass
 from datetime import date
+import pandas as pd
 
 import torch
 from torch.utils.data import Dataset
@@ -108,6 +109,11 @@ class MultiSymbolDataset(Dataset):
                 f"Created a dataframe from the selected {len(data_df)} timestamps, "
                 + f"since the user specified a data usage ratio of {data_usage_ratio}.")
             cls.stocks, cls.prices, data_df = fill_dataframe(data_df, data_reader, time_resolution)
+
+            # Select Data for Prediction Interface
+            # Only Select timestamp index is greater or equal to 2020-12-22 04:00:00
+            data_df = data_df[(data_df['timestamp'] >= pd.to_datetime("2020-12-22 04:00:00", format="%Y-%m-%d %H:%M:%S"))]
+
             Logger.log_text(
                 "Filled the timestamp dataframe with data from the selected stocks and symbols.")
             data_df = add_time_information(data_df)
@@ -147,19 +153,19 @@ class MultiSymbolDataset(Dataset):
                                                 time_resolution=time_resolution)
 
             ## Normalization
-            scaler = SCALER_OPTIONS[scaler]()
+            # scaler = SCALER_OPTIONS[scaler]()
 
             # Get all columns that contain volume and indeces in train set
             volume_cols = [item for item in data_df.columns if "volume" in item]
-            train_indeces, validation_indecies = instance_multi_symbol_dataset.get_subset_indices()
+            # train_indeces, validation_indecies = instance_multi_symbol_dataset.get_subset_indices()
 
             # NOTE: This is only to create the dataset for the prediction interface
-            # scaler = pickle.load(open("data/output/Multi_Symbol_Train_scaler.pkl", "rb"))
-            # with open("data/output/prices.pkl", 'wb') as file:
-            #     pickle.dump(instance_multi_symbol_dataset.prices, file)
+            scaler = pickle.load(open("data/output/Multi_Symbol_Train_scaler.pkl", "rb"))
+            with open("data/output/prices.pkl", 'wb') as file:
+                pickle.dump(instance_multi_symbol_dataset.prices, file)
 
             # Fit scaler to each volume column only with train data
-            scaler.fit(data_df[volume_cols].iloc[train_indeces])
+            # scaler.fit(data_df[volume_cols].iloc[train_indeces])
 
             # Transform train and test data
             data_df[volume_cols] = scaler.transform(data_df[volume_cols])
