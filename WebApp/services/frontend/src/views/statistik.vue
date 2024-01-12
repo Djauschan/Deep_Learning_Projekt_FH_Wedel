@@ -14,6 +14,7 @@
     </label>
     </div>
   </div>
+  <div class="newChart">
   <DxChart v-if="showChart" id="chart" :data-source="dataSource" title="Stock Price">
     <DxCommonSeriesSettings argument-field="date" type="stock" />
     <DxSeries :name="selectedStock" open-value-field="open" high-value-field="high" low-value-field="low"
@@ -44,6 +45,21 @@
     <DxExport :enabled="true" />
     <DxTooltip :enabled="true" :customize-tooltip="customizeTooltip" location="edge" />
   </DxChart>
+  </div>
+  <div class="newChart">
+  <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="lineChartDataSource" title="CNN Chart">
+    <DxCommonSeriesSettings argument-field="date" type="line" />
+    <DxSeries :name="'Line Chart'" value-field="lineChartDataField" argument-field="date" type="line">
+    </DxSeries>
+  </DxChart>
+  </div>
+  <div class="newChart">
+  <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="lineChartDataSource" title="Transformer Chart">
+    <DxCommonSeriesSettings argument-field="date" type="line" />
+    <DxSeries :name="'Line Chart'" value-field="lineChartDataField" argument-field="date" type="line">
+    </DxSeries>
+  </DxChart>
+  </div>
 </template>
 <script>
 
@@ -201,6 +217,10 @@ export default {
 <style>
 #chart {
   height: 30%;
+}
+
+.newChart{
+  margin-top: 2%;
 }
 
 .checkboxes{
