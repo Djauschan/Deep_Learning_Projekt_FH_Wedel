@@ -15,7 +15,7 @@ from torch.utils.tensorboard.writer import SummaryWriter
 from torchvision.transforms import ToTensor
 from tqdm import tqdm
 
-from src_transformers.utils.viz_training import plot_evaluation, plot_loss_horizon
+from src_transformers.utils.viz_training import plot_evaluation, plot_loss_horizon, plot_absolute_predictions
 
 
 class Logger():
@@ -198,6 +198,34 @@ class Logger():
         self._summary_writer.add_image(f"image/horizon_chart_{name}", image, epoch)
 
         print(f"[Logger]: Horizon chart for {name} saved.")
+        plt.close('all')
+
+    def save_abs_prediction_chart(self, targets: np.array, predictions: np.array, epoch: int, name: str = "validation_set") -> None:
+        """
+        Saves a chart of the predictions and targets for each feature of the absolute values to the TensorBoard log file.
+        Args:
+            targets: Targets of the model (relative change).
+            predictions: Predictions of the model (relative change).
+            epoch: Epoch, in which the predictions were made.
+            name: Name of the chart. Defaults to "validation_set".
+
+        Returns: None
+
+        """
+
+        fig = plot_absolute_predictions(targets, predictions)
+
+        os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+        # Save image in Logger
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image = Image.open(buf)
+        image = ToTensor()(image)
+        self._summary_writer.add_image(f"image/abs_chart_{name}", image, epoch)
+
+        print(f"[Logger]: Absolute chart for {name} saved.")
         plt.close('all')
 
     def log_model_path(self, model_path: str) -> None:
