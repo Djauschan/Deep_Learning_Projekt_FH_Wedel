@@ -11,8 +11,7 @@ from models.neuralmodels import Nbeats
 from models.neuralmodels import Nhits
 from models.neuralmodels import Autoexp
 from statsforecast import StatsForecast
-from tqdm import tqdm
-tqdm.notebook.tqdm = tqdm
+import os
 
 test = DataReader({"READ_ALL_FILES": "READ_ALL_FILES"})
  
@@ -38,15 +37,28 @@ nixtlaData= clean.transformForNixtla(df16Cleaned)
 
 
 y_test=nixtlaData[nixtlaData['ds']>"2021-01-03"]
-y_train=nixtlaData[nixtlaData['ds']<"2021-01-03"]
-print('die Länge von unserem Trainingsset')
-print(len(y_train))
+y_train=nixtlaData[nixtlaData['ds']<="2021-01-03"]
 
-neural= Nhits(len(y_test))
 
-results= neural.forecast(y_train)
 
-print(results.head())
+
+modell=Arima(y_train)
+modell.fitAndSave(y_train)
+ergebnis= modell.loadAndPredict('statisticmodels\models\savedModels\AutoARIMA.pkl',2)
+print(ergebnis.head())
+# result= modell.fitAndSave(y_train)
+# print(result)
+
+
+
+
+
+
+# neural= Nhits(len(y_test))
+
+# results= neural.forecast(y_train)
+
+# print(results.head())
 
 
 

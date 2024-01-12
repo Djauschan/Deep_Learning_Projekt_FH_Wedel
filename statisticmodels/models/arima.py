@@ -3,6 +3,9 @@ import pandas as pd
 from statsforecast import StatsForecast
 from statsforecast.models import AutoARIMA
 import matplotlib.pyplot as plt
+import pickle
+from statsforecast import StatsForecast
+import os
 
 class Arima():
    
@@ -16,8 +19,17 @@ class Arima():
         """
         self.y_values= y_values
         self.arimaModell= AutoARIMA(max_p=15,max_q=15)
-       
-       
+        self.path='statisticmodels\models\savedModels'
+
+    def fitAndSave(self, trainData):
+        modell=StatsForecast([AutoARIMA(max_p=15,max_q=15)],freq='B')
+        modell.fit(trainData)
+        path='statisticmodels\models\savedModels\AutoARIMA.pkl'
+        return modell.save(path)
+
+    def loadAndPredict(self, path,horizon):
+        model= StatsForecast.load(path)
+        return model.predict(horizon)
        
  
     def forecast(self, forecasthorizon:int, trainData):
