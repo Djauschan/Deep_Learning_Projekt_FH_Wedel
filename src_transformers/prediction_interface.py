@@ -7,9 +7,14 @@ from pathlib import Path
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
+from typing import List
+from datetime import timedelta
 
 from src_transformers.abstract_model import AbstractModel
 from src_transformers.preprocessing.prediction_dataset import PredictionDataset
+
+INTERVAL_MINUTES = 120
+NUM_INTERVALS = 48
 
 
 class TransformerInterface(AbstractModel):
@@ -49,6 +54,7 @@ class TransformerInterface(AbstractModel):
         # first_date = timestamp_start.strftime("%Y-%m-%d")
         # last_date = timestamp_end.strftime("%Y-%m-%d")
         # TODO: Use interval?
+        timestamps = _generate_timestamps(timestamp_start, INTERVAL_MINUTES, NUM_INTERVALS)
 
         self.load_data(timestamp_start)
         # self.preprocess()
@@ -73,6 +79,8 @@ class TransformerInterface(AbstractModel):
                 columns.append(dataset_column)
 
         prediction = pd.DataFrame(prediction, columns=columns)
+        # Set timestamps as index
+        prediction.index = timestamps
 
         for symbol, price in self.prices_before_prediction.items():
             absolute_prices = self.calculate_absolut_prices(prediction[f"close {symbol}"], price)
@@ -116,6 +124,22 @@ class TransformerInterface(AbstractModel):
         self.model.device = torch.device("cpu")
 
         self.model.to(torch.device("cpu"))
+
+
+def _generate_timestamps(start_timestamp: pd.Timestamp, interval_minutes: int, num_intervals: int) -> List[pd.Timestamp]:
+    """
+    Generate a list of timestamps starting at start_timestamp and ending at start_timestamp + interval_minutes * (num_intervals - 1)
+
+    Args:
+        start_timestamp (pd.Timestamp): Datetime to start at
+        interval_minutes (int): Duration of each interval in minutes
+        num_intervals (int): Number of intervals to generate
+
+    Returns:
+        List[pd.Timestamp]: List of timestamps
+    """
+    timestamps = [start_timestamp + timedelta(minutes=i * interval_minutes) for i in range(num_intervals)]
+    return timestamps
 
 
 if __name__ == "__main__":

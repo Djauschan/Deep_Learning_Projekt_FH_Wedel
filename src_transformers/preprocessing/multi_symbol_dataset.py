@@ -5,6 +5,7 @@ financial data.
 import pickle
 from dataclasses import dataclass
 from datetime import date
+import pandas as pd
 
 import torch
 from torch.utils.data import Dataset
@@ -121,6 +122,11 @@ class MultiSymbolDataset(Dataset):
                 f"Created a dataframe from the selected {len(data_df)} timestamps, "
                 + f"since the user specified a data usage ratio of {data_usage_ratio}.")
             cls.stocks, cls.prices, data_df = fill_dataframe(data_df, data_reader, time_resolution)
+
+            # Select Data for Prediction Interface
+            # Only Select timestamp index is greater or equal to 2020-12-22 04:00:00
+            # data_df = data_df[(data_df['timestamp'] >= pd.to_datetime("2020-12-22 04:00:00", format="%Y-%m-%d %H:%M:%S"))]
+
             Logger.log_text(
                 "Filled the timestamp dataframe with data from the selected stocks and symbols.")
             data_df = add_time_information(data_df)
