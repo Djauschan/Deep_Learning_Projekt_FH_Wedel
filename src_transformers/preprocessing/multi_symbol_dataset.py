@@ -96,6 +96,19 @@ class MultiSymbolDataset(Dataset):
 
             length, encoder_dimensions = get_csv_shape(data_file)
             decoder_dimensions = len(decoder_symbols)
+
+            # Create the instance of the MultiSymbolDataset
+            instance_multi_symbol_dataset = cls(length=length,
+                                                subseries_amount=subseries_amount,
+                                                validation_split=validation_split,
+                                                encoder_dimensions=encoder_dimensions,
+                                                decoder_dimensions=decoder_dimensions,
+                                                encoder_input_length=encoder_input_length,
+                                                decoder_target_length=decoder_target_length,
+                                                data_file=data_file,
+                                                scaler=scaler,
+                                                time_resolution=time_resolution)
+
         else:
             Logger.log_text(
                 "Data pre-processing for the multi symbol dataset was started.")
