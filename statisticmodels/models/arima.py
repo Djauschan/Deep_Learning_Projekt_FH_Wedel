@@ -21,10 +21,11 @@ class Arima():
         self.arimaModell= AutoARIMA(max_p=15,max_q=15)
         self.path='statisticmodels\models\savedModels'
 
-    def fitAndSave(self, trainData):
+    def fitAndSave(self, trainData, currentSymbol):
         modell=StatsForecast([AutoARIMA(max_p=15,max_q=15)],freq='B')
         modell.fit(trainData)
-        path='statisticmodels\models\savedModels\AutoARIMA.pkl'
+        
+        path="statisticmodels\models\savedModels\\"+currentSymbol+'.pkl' 
         return modell.save(path)
 
     def loadAndPredict(self, path,horizon):

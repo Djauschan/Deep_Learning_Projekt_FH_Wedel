@@ -14,7 +14,7 @@ class DataCleaner:
         self.nunique_dates = len(np.unique(self.raw_data.index.date))
         self.days_to_remove=[]
         self.df_at_16 = self.closeCleanedData()
-        self.df_at_09 = self.openCleanedData()
+        #self.df_at_09 = self.openCleanedData()
         
 
     def calculate_diff(self, time:str, intervall):
