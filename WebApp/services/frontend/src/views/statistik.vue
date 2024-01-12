@@ -4,56 +4,54 @@
     <input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
     <button class="button-stock" @click="updateChart">Show Stock</button>
+    <button class="button-stock" @click="useTestData">Use Test Data</button>
     <!-- Add checkboxes for additional data points -->
     <div class="checkboxes">
-      <label>
-        <input type="checkbox" v-model="showCNNLine"> CNN
-      </label>
-      <label>
-        <input type="checkbox" v-model="showTransformerLine"> Transformer
-      </label>
+    <label>
+      <input type="checkbox" v-model="showCNNLine"> CNN
+    </label>
+    <label>
+      <input type="checkbox" v-model="showTransformerLine"> Transformer
+    </label>
+    <label>
+      <input type="checkbox" v-model="showRandomLine"> Random Line
+    </label>
     </div>
   </div>
-  <div class="newChart">
-    <DxChart v-if="showChart" id="chart" :data-source="dataSource" title="Stock Price">
-      <DxCommonSeriesSettings argument-field="date" type="stock" />
-      <DxSeries :name="selectedStock" open-value-field="open" high-value-field="high" low-value-field="low"
-        close-value-field="close" axis="price" :customize-point="customizeStockPoint">
-      </DxSeries>
-      <!-- Add another series for prediction line -->
-      <DxSeries v-if="showCNNLine" :name="'CNN Prediction - ' + selectedStock" :data-source="dummyData" type="line"
-        value-field="value" argument-field="date">
-      </DxSeries>
-      <DxSeries v-if="showTransformerLine" :name="'Transformer Prediction - ' + selectedStock"
-        :data-source="TransformerpredictionData" type="line" value-field="value" argument-field="date">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left" :min="priceRange.min" :max="priceRange.max" :key="priceRangeKey">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxExport :enabled="true" />
-      <DxTooltip :enabled="true" :customize-tooltip="customizeTooltip" location="edge" />
-    </DxChart>
+   <!-- Combined Chart -->
+   <div class="newChart">
+      <DxChart v-if="showChart" :data-source="combinedData" title="Stock Price">
+        <DxCommonSeriesSettings argument-field="date" type="stock" />
+        <DxSeries :name="selectedStock" open-value-field="open" high-value-field="high" low-value-field="low"
+          close-value-field="close" argument-field="date">
+        </DxSeries>
+        <DxSeries v-if="showRandomLine" :name="'Random Line - ' + selectedStock" :data-source="combinedData" type="line"
+          value-field="randomValue" argument-field="date">
+        </DxSeries>
+        <DxArgumentAxis :workdays-only="true">
+          <DxLabel format="shortDate" />
+        </DxArgumentAxis>
+        <DxValueAxis name="price" position="left">
+          <DxTitle text="US dollars" />
+          <DxLabel>
+            <DxFormat type="currency" />
+          </DxLabel>
+        </DxValueAxis>
+      </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="dummyData" title="CNN Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Line Chart'" value-field="value" argument-field="date" type="line">
-      </DxSeries>
-    </DxChart>
+  <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="lineChartDataSource" title="CNN Chart">
+    <DxCommonSeriesSettings argument-field="date" type="line" />
+    <DxSeries :name="'Line Chart'" value-field="lineChartDataField" argument-field="date" type="line">
+    </DxSeries>
+  </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="lineChartDataSource"
-      title="Transformer Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Line Chart'" value-field="value" argument-field="date" type="line">
-      </DxSeries>
-    </DxChart>
+  <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="lineChartDataSource" title="Transformer Chart">
+    <DxCommonSeriesSettings argument-field="date" type="line" />
+    <DxSeries :name="'Line Chart'" value-field="lineChartDataField" argument-field="date" type="line">
+    </DxSeries>
+  </DxChart>
   </div>
 </template>
 <script>
@@ -93,13 +91,13 @@ export default {
     DxTooltip,
   },
   async created() {
-    //this.dataSource = null;
+    this.dataSource = null;
     this.selectedDays = null;
   },
   data() {
     return {
-      dummyData: dataSource,
-      selectedStock: "",
+      dataSource,
+            selectedStock: "",
       selectedDays: null,
       showChart: false,
       priceRange: { min: null, max: null },
@@ -107,9 +105,73 @@ export default {
       showTransformerLine: false,
       CNNpredictionData: [], // Add this property to store prediction data
       TransformerpredictionData: [],
+      showRandomLine: false,
+      randomLineData: [],
     };
   },
+  computed: {
+    combinedData() {
+      const combinedData = this.dataSource.map(data => {
+        const randomValue = this.showRandomLine ? Math.random() * 80 + 70: 0;
+        return {
+          date: data.date,
+          open: data.open,
+          high: data.high,
+          low: data.low,
+          close: data.close,
+          volume: data.volume,
+          randomValue: randomValue,
+        };
+      });
+      return combinedData;
+    },
+  },
   methods: {
+    async useTestData() {
+    // Replace this with your actual test data for stock prices
+const testData = [
+  { date: '2022-01-01', open: 100, close: 110, high: 120, low: 90, volume: 1000000 },
+  { date: '2022-01-02', open: 110, close: 105, high: 115, low: 100, volume: 1200000 },
+  { date: '2022-01-03', open: 105, close: 112, high: 115, low: 100, volume: 900000 },
+  { date: '2022-01-04', open: 112, close: 115, high: 120, low: 105, volume: 1100000 },
+  // Add more test data as needed
+];
+
+// Set the data source with the test data
+this.dataSource = testData;
+
+// Dummy data for CNN prediction
+const CNNpredictionTestData = [
+  { date: '2022-01-01', predictedValue: 105 },
+  { date: '2022-01-02', predictedValue: 108 },
+  { date: '2022-01-03', predictedValue: 110 },
+  { date: '2022-01-04', predictedValue: 113 },
+  // Add more dummy data as needed
+];
+this.CNNpredictionData = CNNpredictionTestData;
+
+// Dummy data for Transformer prediction
+const TransformerpredictionTestData = [
+  { date: '2022-01-01', predictedValue: 102 },
+  { date: '2022-01-02', predictedValue: 107 },
+  { date: '2022-01-03', predictedValue: 105 },
+  { date: '2022-01-04', predictedValue: 110 },
+  // Add more dummy data as needed
+];
+this.TransformerpredictionData = TransformerpredictionTestData;
+
+// Customize other properties as needed
+this.showChart = true;
+const maxVolume = Math.max(...this.dataSource.map(data => data.volume));
+
+const prices = this.dataSource.flatMap(data => [data.open, data.close]);
+this.priceRange = {
+  min: Math.min(...prices) * 0.5,
+  max: Math.max(...prices) * 2
+};
+this.priceRangeKey = Math.random()
+  },
+
     customizeTooltip(pointInfo) {
       if (!pointInfo.valueText.includes('h:')) {
         return {
@@ -186,6 +248,7 @@ export default {
         this.dataSource = await this.get_stock_data(this.selectedStock, this.selectedDays);
 
         if (this.dataSource) {
+
           const prices = this.dataSource.flatMap(data => [data.open, data.close]);
           this.priceRange = {
             min: Math.min(...prices) * 0.5,
@@ -206,11 +269,11 @@ export default {
   height: 30%;
 }
 
-.newChart {
+.newChart{
   margin-top: 2%;
 }
 
-.checkboxes {
+.checkboxes{
   margin-left: 1%;
   align-items: center;
   display: flex;
