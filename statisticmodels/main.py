@@ -43,7 +43,6 @@ for i in symbols:
     modell.fitAndSave(y_train, i)
     #ergebnis= modell.loadAndPredict('statisticmodels\models\savedModels\AutoARIMA.pkl',2)
     #print(ergebnis.head())
-    test.current_file_idx += 1
 
     # result= modell.fitAndSave(y_train)
     # print(result)
