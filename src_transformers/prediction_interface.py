@@ -1,15 +1,15 @@
 """
 This module contains the TransformerInterface class and the MultiSymbolDataset class.
 """
-import csv
-from dataclasses import dataclass
+import pickle
 from pathlib import Path
 
 import pandas as pd
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 
 from src_transformers.abstract_model import AbstractModel
+from src_transformers.preprocessing.prediction_dataset import PredictionDataset
 
 
 class TransformerInterface(AbstractModel):
@@ -28,7 +28,12 @@ class TransformerInterface(AbstractModel):
         dataset (MultiSymbolDataset): The dataset to use for predictions.
     """
 
-    def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int = 0) -> pd.DataFrame:
+    def predict(
+        self,
+        timestamp_start: pd.Timestamp,
+        timestamp_end: pd.Timestamp,
+        interval: int = 0,
+    ) -> pd.DataFrame:
         """predict stock price for a given time interval
 
         Args:
@@ -45,153 +50,74 @@ class TransformerInterface(AbstractModel):
         # last_date = timestamp_end.strftime("%Y-%m-%d")
         # TODO: Use interval?
 
-        self.load_data()
+        self.load_data(timestamp_start)
         # self.preprocess()
         self.load_model()
-
-        predictions = []
-        data_loader = DataLoader(self.dataset, shuffle=False)
         self.model.eval()
 
-        with torch.no_grad():
-            for encoder_input, _ in data_loader:
-                encoder_input = encoder_input.to(torch.device("cuda"))
-                output = self.model(encoder_input)
-                # Squeeze the batch dimension
-                predictions.append(torch.squeeze(output, 0))
+        data_loader = DataLoader(self.dataset, shuffle=False)
+        model_input = next(iter(data_loader))
 
-        prediction = torch.cat(predictions, dim=0).cpu()
-        # Set the column names to the symbol names and the index to the timestamps
-        prediction = pd.DataFrame(prediction.numpy())
+        with torch.no_grad():
+            output = self.model(model_input)
+
+        output = torch.squeeze(output, 0)
+        prediction = output.cpu().numpy()
 
         # TODO: Calculate absolute prices (start_price from where?)
         # self.calculate_absolut_prices(prediction)
 
+        columns = []
+        for dataset_column in self.dataset.data.columns:
+            if "close" in dataset_column:
+                columns.append(dataset_column)
+
+        prediction = pd.DataFrame(prediction, columns=columns)
+
+        for symbol, price in self.prices_before_prediction.items():
+            absolute_prices = self.calculate_absolut_prices(prediction[f"close {symbol}"], price)
+            prediction[f"close {symbol}"] = round(absolute_prices, 2)
+
         return prediction
 
-    def load_data(self) -> None:
-        """load data from database and stores it in a class variable
+    def load_data(self, timestamp_start: pd.Timestamp) -> None:
+        """load data from database and stores it in a class variable"""
+        data_path = Path("data", "output", "Multi_Symbol_Predict3.csv")
+        data = pd.read_csv(data_path.as_posix())
 
-        """
-        data_path = Path("data", "output", "Multi_Symbol_Train.csv")
+        print(data)
 
-        with open(data_path, 'r', newline='', encoding='utf-8') as file:
-            csv_reader = csv.reader(file)
-            # Get the column names of the csv file (includes posix_time)
-            encoder_dimensions = len(next(csv_reader)) - 1
-            length = sum(1 for _ in csv_reader)
+        prices_before_data = pickle.load(open("data/output/prices.pkl", "rb"))
+        print(prices_before_data)
 
-        decoder_dimensions = 1
+        # self.dataset = PredictionDataset.create_from_config(timestamp_start, data, prices_before_data)
 
-        self.dataset = MultiSymbolDataset(length=length,
-                                          encoder_dimensions=encoder_dimensions,
-                                          decoder_dimensions=decoder_dimensions,
-                                          encoder_input_length=30,
-                                          decoder_target_length=30,
-                                          data_file=data_path.as_posix(),
-                                          time_resolution=30)
+        data_after_start = data[data["posix_time"] > timestamp_start.value / 1e9].copy()
+        first_index = data_after_start.index[0]
+
+        data_before_start = data.iloc[:first_index, :].copy()
+
+        prices_before_prediction = {}
+        for symbol, price in prices_before_data.items():
+            absolut_prices = self.calculate_absolut_prices(data_before_start[f"close {symbol}"], price)
+            prices_before_prediction[symbol] = round(absolut_prices.values[-1], 2)
+
+        print(prices_before_prediction)
+        self.prices_before_prediction = prices_before_prediction
+        self.dataset = PredictionDataset.create_from_config(data, first_index)
 
     def preprocess(self) -> None:
-        """preprocess data and stores it in a class variable
-
-        """
-        pass
+        """preprocess data and stores it in a class variable"""
 
     def load_model(self) -> None:
-        """load model from file and stores it in a class variable
-
-        """
-        model_path = Path("data", "output", "models", "TransformerModel_v4.pt")
+        """load model from file and stores it in a class variable"""
+        model_path = Path("data", "output", "models", "TransformerModel_v6.pt")
         self.model = torch.load(model_path)
+        self.model.device = torch.device("cpu")
 
-
-@dataclass
-class MultiSymbolDataset(Dataset):
-    """
-    A PyTorch Dataset for multi-symbol financial data.
-
-    This class handles multi-symbol financial data. It supports creating a new dataset
-    from a configuration file and loading existing data from a csv file, if set to do so
-    in the configuration file. The dataset is designed to deliver data for a Transformer.
-
-    Attributes:
-        length (int): The number of samples in the dataset.
-        encoder_dimensions (int): The number of dimensions in the encoder input.
-        decoder_dimensions (int): The number of dimensions in the decoder input.
-        encoder_input_length (int): The length of the encoder input sequence.
-        decoder_input_length (int): The length of the decoder input sequence.
-        data_file (str): The path to the file to store the data in or to load the data from.
-    """
-
-    length: int
-    encoder_dimensions: int
-    decoder_dimensions: int
-    encoder_input_length: int
-    decoder_target_length: int
-    data_file: str
-    time_resolution: int
-
-    def __len__(self) -> int:
-        """
-        Returns the number of samples in the dataset.
-
-        The number of samples is calculated as the total length of the data minus
-        the length of the encoder and decoder input sequences plus one.
-
-        Returns:
-            int: The number of samples in the dataset.
-        """
-        return self.length - self.encoder_input_length - self.decoder_target_length + 1
-
-    def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
-        """
-        Returns time series sequences as input for the encoder and decoder from the dataset
-        starting at the specified index.
-
-        The encoder input sequence starts at the specified index and has a length of
-        `self.encoder_input_length`. The decoder target sequence starts immediately after the
-        input sequence and has a length of `self.decoder_target_length`.
-
-        The method reads a chunk of data from the data file, starting at `encoder_input_start`
-        and ending at `decoder_target_end`. It then extracts the encoder input and decoder target
-        from this chunk and converts them to PyTorch tensors.
-
-        Args:
-            index (int): The index of the sample in the dataset.
-
-        Returns:
-            torch.Tensor: The encoder input sequence.
-            torch.Tensor: The decoder target sequence.
-        """
-        # Calculate the start of the encoder input and the end of the decoder target
-        # from the given index to load the correct data from the file
-        encoder_input_start, encoder_input_end = index, index + self.encoder_input_length
-        decoder_target_end = encoder_input_end + self.decoder_target_length
-
-        num_rows_to_read = decoder_target_end - encoder_input_start
-
-        # Load the data from the file, offset by the given index
-        data = pd.read_csv(self.data_file, skiprows=encoder_input_start,
-                           nrows=num_rows_to_read, index_col=0)
-
-        encoder_input = data.to_numpy()
-
-        # Get the encoder input from 0 to self.input_length
-        encoder_input = encoder_input[0:self.encoder_input_length]
-        encoder_input = torch.tensor(encoder_input, dtype=torch.float32)
-
-        # Only keep the decoder symbols (which are at the end) for the decoder target
-        decoder_target = data.iloc[:, -self.decoder_dimensions:]
-        decoder_target = decoder_target.to_numpy()
-
-        # Get the decoder target (starting from the end of encoder input)
-        decoder_target = decoder_target[self.encoder_input_length:self.encoder_input_length
-                                        + self.decoder_target_length]
-        decoder_target = torch.tensor(decoder_target, dtype=torch.float32)
-
-        return encoder_input, decoder_target
+        self.model.to(torch.device("cpu"))
 
 
 if __name__ == "__main__":
-    pred = TransformerInterface().predict(pd.to_datetime('2021-01-04'), pd.to_datetime('2021-02-01'))
+    pred = TransformerInterface().predict(pd.to_datetime('2021-01-30'), pd.to_datetime('2021-02-01'))
     print(pred)

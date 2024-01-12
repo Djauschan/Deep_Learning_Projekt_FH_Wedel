@@ -15,9 +15,9 @@ from src_transformers.preprocessing.data_processing import (
     fill_dataframe,
     get_all_dates,
 )
+from src_transformers.preprocessing.preprocessing_constants import SCALER_OPTIONS
 from src_transformers.preprocessing.txtReader import DataReader
 from src_transformers.utils.logger import Logger
-from src_transformers.preprocessing.preprocessing_constants import SCALER_OPTIONS
 
 
 @dataclass
@@ -153,6 +153,10 @@ class MultiSymbolDataset(Dataset):
             volume_cols = [item for item in data_df.columns if "volume" in item]
             train_indeces, validation_indecies = instance_multi_symbol_dataset.get_subset_indices()
 
+            # NOTE: This is only to create the dataset for the prediction interface
+            # scaler = pickle.load(open("data/output/Multi_Symbol_Train_scaler.pkl", "rb"))
+            # with open("data/output/prices.pkl", 'wb') as file:
+            #     pickle.dump(instance_multi_symbol_dataset.prices, file)
 
             # Fit scaler to each volume column only with train data
             scaler.fit(data_df[volume_cols].iloc[train_indeces])

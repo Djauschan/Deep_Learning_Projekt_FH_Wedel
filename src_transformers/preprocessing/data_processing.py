@@ -104,9 +104,13 @@ def get_all_dates(reader: DataReader, data_usage_ratio: float) -> pd.DataFrame:
     all_timestamps = sorted(all_timestamps)
     all_timestamps_length = len(all_timestamps)
     used_timestamps_length = int(all_timestamps_length * data_usage_ratio)
-    start_index = all_timestamps_length - used_timestamps_length - 1
 
-    used_timestamps = all_timestamps[start_index:all_timestamps_length - 1]
+    if all_timestamps_length == used_timestamps_length:
+        start_index = 0
+    else:
+        start_index = all_timestamps_length - used_timestamps_length - 1
+
+    used_timestamps = all_timestamps[start_index:all_timestamps_length]
     used_timestamps_df = pd.DataFrame({'timestamp': used_timestamps})
 
     return used_timestamps_df

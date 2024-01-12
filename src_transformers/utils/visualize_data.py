@@ -22,6 +22,7 @@ def visualize_data(config: dict) -> None:
     data_parameters.pop("subseries_amount")
     data_parameters.pop("validation_split")
     data_parameters.pop("scaler")
+    data_parameters.pop("time_resolution")
     txt_reader = DataReader(**data_parameters)
     data = txt_reader.read_next_txt()
     # As long as there is data and the user does not stop, data will be

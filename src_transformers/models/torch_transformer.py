@@ -27,9 +27,15 @@ class TransformerModel(nn.Module):
             dropout (float): Dropout probability.
             device (torch.device): Whether to use GPU or CPU.
         """
-
         super().__init__()
+
+        # Throw value Error if seq_len_decoder is larger than seq_len_encoder
+        if seq_len_decoder > seq_len_encoder:
+            raise ValueError('seq_len_decoder must be smaller or equal to seq_len_encoder')
+
         self.model_type = 'Transformer'
+        self.seq_len_encoder = seq_len_encoder
+        self.seq_len_decoder = seq_len_decoder
         self.pos_encoder = PositionalEncoding(
             dim_encoder, dropout, max(seq_len_encoder, seq_len_decoder))
         encoder_layers = TransformerEncoderLayer(
@@ -75,7 +81,10 @@ class TransformerModel(nn.Module):
         output = self.transformer_encoder(src, src_mask)
         output = self.linear(output)
 
-        return output
+        # The output sequence is artificially shortened so that it is possible to have a shorter output sequence than the input sequence.
+        output_sequence = output[:, :self.seq_len_decoder, :]
+
+        return output_sequence
 
 
 class PositionalEncoding(nn.Module):
