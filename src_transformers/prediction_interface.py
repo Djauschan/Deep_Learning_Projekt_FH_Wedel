@@ -14,7 +14,7 @@ from src_transformers.abstract_model import AbstractModel
 from src_transformers.preprocessing.prediction_dataset import PredictionDataset
 
 INTERVAL_MINUTES = 120
-NUM_INTERVALS = 48
+NUM_INTERVALS = 24
 
 
 class TransformerInterface(AbstractModel):
@@ -90,7 +90,7 @@ class TransformerInterface(AbstractModel):
 
     def load_data(self, timestamp_start: pd.Timestamp) -> None:
         """load data from database and stores it in a class variable"""
-        data_path = Path("data", "output", "Multi_Symbol_Predict3.csv")
+        data_path = Path("data", "output", "Multi_Symbol_Train.csv")
         data = pd.read_csv(data_path.as_posix())
 
         print(data)
@@ -143,5 +143,5 @@ def _generate_timestamps(start_timestamp: pd.Timestamp, interval_minutes: int, n
 
 
 if __name__ == "__main__":
-    pred = TransformerInterface().predict(pd.to_datetime('2021-01-30'), pd.to_datetime('2021-02-01'))
+    pred = TransformerInterface().predict(pd.to_datetime('2021-01-04'), pd.to_datetime('2021-01-06'))
     print(pred)

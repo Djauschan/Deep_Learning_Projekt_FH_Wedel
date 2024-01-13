@@ -63,5 +63,6 @@ class AbstractModel(ABC):
             if i == 0:
                 prices[i] = start_price * (1 + price_change)
             else:
-                prices[i] = prices[i - 1] * (1 + price_change)
+                prices_before = prices[i - 1]
+                prices[i] = prices_before * (1 + price_change)
         return prices
