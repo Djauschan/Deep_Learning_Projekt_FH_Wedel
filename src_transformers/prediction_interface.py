@@ -78,13 +78,16 @@ class TransformerInterface(AbstractModel):
             if "close" in dataset_column:
                 columns.append(dataset_column)
 
+        columns = ["close AAPL","close AAL","close AMD","close C","close MRNA","close NIO","close NVDA","close SNAP","close SQ","close TSLA"]
+
         prediction = pd.DataFrame(prediction, columns=columns)
         # Set timestamps as index
         prediction.index = timestamps
 
         for symbol, price in self.prices_before_prediction.items():
-            absolute_prices = self.calculate_absolut_prices(prediction[f"close {symbol}"], price)
-            prediction[f"close {symbol}"] = round(absolute_prices, 2)
+            if symbol in f"close {symbol}" in columns:
+                absolute_prices = self.calculate_absolut_prices(prediction[f"close {symbol}"], price)
+                prediction[f"close {symbol}"] = round(absolute_prices, 2)
 
         return prediction
 
@@ -119,7 +122,7 @@ class TransformerInterface(AbstractModel):
 
     def load_model(self) -> None:
         """load model from file and stores it in a class variable"""
-        model_path = Path("data", "output", "models", "TransformerModel_v6.pt")
+        model_path = Path("data", "output", "models", "TransformerModel_v7.pt")
         self.model = torch.load(model_path)
         self.model.device = torch.device("cpu")
 
