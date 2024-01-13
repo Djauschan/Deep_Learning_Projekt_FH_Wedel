@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
+import pickle
 
 #classe / other scripts
 from txtReader import DataReader
@@ -128,7 +129,7 @@ print("done, now ml-model \n") #nur zum testen
 prediction_length = 2
 
 # Letzter bekannter Wert
-last_known_open_value = back_transform_test_data['open'].iloc[0] # Letzter bekannter Open-Wert
+#last_known_open_value = back_transform_test_data['open'].iloc[0] # Letzter bekannter Open-Wert
 last_known_close_value = back_transform_test_data['close'].iloc[0] # Letzter bekannter Close-Wert
 
 # die Tatsächlicher Close-Wert für den entsprechenden Zeitpunkt
@@ -223,6 +224,28 @@ print("Testfehler für das GBM-Modell:", gbm_evaluation_results)
 ### SVM evaluation  
 svm_evaluation_results = svm_model.evaluate(svm_predictions, actual_close_values)
 print("Testfehler für das SVM-Modell:", svm_evaluation_results)
+
+
+############################## speichern der Modelle ##############################
+
+# die 4 ML_Modelle speichern
+with open('lr_model.pkl', 'wb') as file:
+    pickle.dump(lr_model, file)
+
+with open('rf_model.pkl', 'wb') as file:
+    pickle.dump(rf_model, file)
+
+with open('gbm_model.pkl', 'wb') as file:
+    pickle.dump(gbm_model, file)
+
+with open('svm_model.pkl', 'wb') as file:
+    pickle.dump(svm_model, file)
+
+print("\nAlle Modelle wurden gespeichert.\n")
+
+X_test.to_pickle('X_test.pkl')
+y_test.to_pickle('y_test.pkl')
+back_transform_test_data.to_pickle('back_transform_test_data.pkl')
 
 ####################### plot ######################## 
 ###### Train + Test plot der evaluation
