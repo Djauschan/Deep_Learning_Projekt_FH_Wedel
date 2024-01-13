@@ -24,7 +24,6 @@ class Arima():
     def fitAndSave(self, trainData, currentSymbol):
         modell=StatsForecast([AutoARIMA(max_p=15,max_q=15)],freq='B')
         modell.fit(trainData)
-        
         path="statisticmodels\models\savedModels\\"+currentSymbol+'.pkl' 
         return modell.save(path)
 
