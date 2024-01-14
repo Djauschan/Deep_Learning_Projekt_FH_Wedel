@@ -150,4 +150,14 @@ def predict_lstm(stock_symbol: str):
 def predict_arima(stock_symbol: str):
     return crud.predict_arima(stock_symbol=stock_symbol)
 
+@app.get("/load/data")
+def load_data():
+    allColumns = ["DateTime", "Open", "Close", "High", "Low"], 
+    relevantColumns = ["DateTime", "Open", "Close", "High", "Low"]
+    start_date = DT.datetime(2021, 1, 4)
+    end_date = DT.datetime(2021, 1, 6)
+
+    return crud.loadDataFromFile(start_date=start_date, end_date=end_date, rsc_completePath="", 
+                                 ALL_DATA_COLUMNS=allColumns, COLUMNS_TO_KEEP=relevantColumns)
+
 
