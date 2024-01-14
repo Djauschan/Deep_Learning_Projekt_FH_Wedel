@@ -1,2 +1,3 @@
-# Deep_Learning
-Repository für das Projekt Deep Learning im Wintersemester 2023/2024 an der FH Wedel.
+docker build -t frontend .
+
+docker run -p 8080:8080 --rm frontend
