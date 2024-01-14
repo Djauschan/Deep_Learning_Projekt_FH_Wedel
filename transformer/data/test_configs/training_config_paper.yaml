@@ -1,0 +1,18 @@
+batch_size: 16
+# mse as loss function
+epochs: 1000
+# adam optimizer with learning rate 0.0001
+learning_rate: 0.0001
+validation_split: 0.1
+use_gpu: True
+# The code expects the model to always be the last variable in the configuration file.
+transformer:
+  src_vocab_size: 5000
+  tgt_vocab_size: 5000
+  output_dim: 2
+  d_model: 2
+  num_heads: 1
+  num_layers: 2
+  d_ff: 200
+  seq_len_encoder: 197
+  dropout: 0.1
