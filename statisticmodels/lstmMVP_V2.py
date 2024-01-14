@@ -124,7 +124,6 @@ class StockModel:
             # Update des Zeitstempels zum nächsten Geschäftstag
             current_timestamp += BDay(1)
 
-        # Konvertieren der Liste in ein DataFrame
         predictions = pd.DataFrame(prediction_data)
         return predictions
     
