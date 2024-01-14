@@ -1,6 +1,6 @@
 from abstract_model import AbstractModel
-import statisticmodels.lstmMVPV1 as lstmMVPV1
-from tensorflow.keras.models import load_model
+import lstmMVP_V2 as lstmMVP
+#from tensorflow.keras.models import load_model
 import pandas as pd 
 import os
 
@@ -11,7 +11,7 @@ class LstmInterface(AbstractModel):
         
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
-        path = "statisticmodels/models/savedModelsLSTM/"
+        path = "statisticmodels/lstmMVP_V2.py"
         all_predictions = pd.DataFrame()
         
         # Erzeugen eines Datumsbereichs für Geschäftstage
@@ -24,14 +24,15 @@ class LstmInterface(AbstractModel):
             if filename.endswith(".h5"):  
                 model_path = os.path.join(path, filename)
                 # LSTM modell laden
-                model = lstmMVPV1.load_model(model_path)                
-                prediction = model.predict_x_days(days_difference)  
+                model = lstmMVP.load_model(model_path)                
+                prediction = model.predict_x_days(days_difference, timestamp_start)  
 
                 prediction['ds'] =  business_days_series
                 prediction['symbol'] = filename[:-4]
 
                 all_predictions = pd.concat([all_predictions, prediction], ignore_index=True)
-
+                print(all_predictions)
+                
         return all_predictions 
     
     def load_data(self) -> None:
