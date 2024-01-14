@@ -1,5 +1,4 @@
 import datetime as DT
-
 import bcrypt
 import crud
 import models
@@ -10,6 +9,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from transformer_interface import TransformerInterface
+from CNN.model_exe import ModelExe
 
 # Create tables in the database based on the model definitions
 models.Base.metadata.create_all(bind=engine)
@@ -34,8 +34,6 @@ app.add_middleware(
 )
 
 # DB Dependency
-
-
 def get_db():
     db = SessionLocal()
 
@@ -44,15 +42,12 @@ def get_db():
     finally:
         db.close()
 
-
 # test method to get Stock data for n days
 @app.get("/getStock/")
 def get_stock_days(stock_symbol: str, days_back: int, db: Session = Depends(get_db)):
     return crud.get_stock_days(stock_symbol=stock_symbol, n=days_back, db=db)
 
 # post method to delete table "users"
-
-
 @app.post("/deleteUsers/")
 def delete_users(db: Session = Depends(get_db)):
     db_delete_users = crud.delete_users(db)
@@ -61,8 +56,6 @@ def delete_users(db: Session = Depends(get_db)):
     # return crud.get_users(db=db, skip=0, limit=100)
 
 # post method to delete a single user from table "users" by id
-
-
 @app.post("/deleteUser/{username}")
 def delete_user(username: str, db: Session = Depends(get_db)):
     db_delete_user = crud.delete_user(db, username)
@@ -71,8 +64,6 @@ def delete_user(username: str, db: Session = Depends(get_db)):
     return {"message": "User deleted successfully", "status_code": 200}
 
 # post method to create a user into table "users"
-
-
 @app.post("/createUser/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user_email = crud.get_user_by_email(db, email=user.email)
@@ -172,8 +163,17 @@ def predict_transformer(stock_symbol: str):
 
 
 @app.get("/predict/cnn")
-def predict_cnn(stock_symbol: str):
-    return crud.predict_cnn(stock_symbol=stock_symbol)
+def predict_cnn():
+    print("starting to predict")
+
+    cnn_interface = ModelExe()
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-04")
+
+    prediction = cnn_interface.predict(start_date, end_date, 120)
+    print(prediction)
+
+    return prediction
 
 
 @app.get("/predict/lstm")

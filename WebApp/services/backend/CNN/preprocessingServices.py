@@ -146,7 +146,6 @@ class GafService:
         return X_gasf
 
     def saveGAFimg(self, data: np.ndarray, savePath: str):
-        print('data: single imageData')
         # [[-0.95823126  0.14451426 -0.99999702 -0.14451428 -0.95746452 -0.80345206],
         # [ 0.14451426  1.         -0.14210009 -1.         -0.42388929 -0.70522997],
         # [-0.99999702 -0.14210009 -0.95961513  0.14210007 -0.83628839 -0.60157087],
@@ -170,7 +169,6 @@ class NormalisationService:
     '''
 
     def normMinusPlusOne(self, data: np.ndarray) -> np.ndarray:
-        print('normMinusPlusOne DATA')
         i = 0
         len_data = len(data)
         _min = np.min(data)
@@ -197,7 +195,6 @@ class TimeModificationService:
         data.insert(loc=0, column='posixMinute', value=conti_minute_arr)
         if dropDateTime:
             data.drop(columns=['DateTime'], inplace=True)
-        print(data.columns)
         return data
 
     def addPosixTimeStamp(self, df_DateTimeColumn):
@@ -279,9 +276,11 @@ class TimeSeriesBuilder:
                     previousCandidateIdx = candidateIdx
                     x += 1
                 else:
+                    print("No valid candidate found")
                     previousCandidate = df.iloc[i]
                     previousCandidateIdx = i
-                    x = 0
+                    x = length
+                    
 
             if x == length - 1:
                 validSeries = False
@@ -412,9 +411,13 @@ class ModelImportService:
     """
 
     def loadModel(self, full_path):
-        model = torch.jit.load(full_path)
+
+        device = torch.device('cpu')
+        model = torch.jit.load(full_path, map_location=device)
+
+        #model = torch.jit.load(full_path)
         model.eval()
-        model.to(torch.device('cpu'))
+        #model.to(torch.device('cpu'))
         return model
 
 
@@ -458,6 +461,7 @@ class Preprocessor:
                 data = self.__getAndMergeFeatureDataWithMainData(startDate, endDate, feature_path,
                                                                  FEATURES_DATA_TO_LOAD, stock_data)
                 data, dateTimeArr = self.timeSeriesBuilderService.buildTimeSeries(data, FEATURES)
+                print(dateTimeArr)
                 # All feature Data will be differenced
                 data = self.differenceService.transformSeries(data)
                 # Only the Data will be normalised

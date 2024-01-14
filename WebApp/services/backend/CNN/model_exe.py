@@ -3,16 +3,16 @@ from abc import ABC
 import numpy as np
 import pandas as pd
 
-from predictionApi.abstract_model import AbstractModel
-from predictionApi.preprocessingServices import Preprocessor, ModelImportService, ConfigService
+from CNN.abstract_model import AbstractModel
+from CNN.preprocessingServices import Preprocessor, ModelImportService, ConfigService
 
 
 class ModelExe(AbstractModel):
 
     def __init__(self):
         self.configService = ConfigService()
-        #configPath = "../../../CNN/predictionApi/configDir/PredictionConfig.yml"
-        configPath = "C:\\Projekte\ProjectDeepLearning_CNN\\project_deeplearning\\src\\predictionApi\\configDir\\PredictionConfig.yml"
+        configPath = "./CNN/configDir/PredictionConfig.yml"
+        #configPath = "C:\\Projekte\ProjectDeepLearning_CNN\\project_deeplearning\\src\\predictionApi\\configDir\\PredictionConfig.yml"
         self.parameters = self.configService.loadModelConfig(configPath)
         self.preprocessor = Preprocessor(self.parameters)
         self.gafData = np.zeros((1, 1))
@@ -39,6 +39,7 @@ class ModelExe(AbstractModel):
         Returns:
             pd.DataFrame: dataframe with columns: timestamp, 1-n prices of stock_symbols
         """
+        print("TEST1++++++++++++++++++++++++++++++")
         toReturnDataFrame = pd.DataFrame(columns=["Timestamp", "AAPL"])
         interval = 480  # can not be changed, model is trained on this specific interval
         modelInputList, endPriceList = self.preprocessor.pipeline(timestamp_start, timestamp_end)
@@ -49,7 +50,7 @@ class ModelExe(AbstractModel):
             y_price = self._calcThePriceFromChange(y_change.item(), endPriceList[i])
             toReturnDataFrame.loc[i] = [calcTimeStamp, y_price]
             i += 1
-
+        print("TEST2++++++++++++++++++++++++++++++")
         return toReturnDataFrame
 
 
@@ -73,12 +74,3 @@ class ModelExe(AbstractModel):
 
         """
         pass
-
-
-model_Exe = ModelExe()
-
-# model_Exe.predict(pd.Timestamp(year=2022, month=1, ))
-startDate = pd.Timestamp("2021-01-04 04:00:00")
-endDate = pd.Timestamp("2021-03-04 04:00:00")
-t = model_Exe.predict(startDate, endDate, 120)
-print(t)
