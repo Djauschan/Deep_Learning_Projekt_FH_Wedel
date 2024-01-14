@@ -122,7 +122,7 @@ class TransformerInterface(AbstractModel):
 
     def load_model(self) -> None:
         """load model from file and stores it in a class variable"""
-        model_path = Path("data", "output", "models", "TransformerModel_v7.pt")
+        model_path = Path("data", "output", "models", "TransformerModel_v1.pt")
         self.model = torch.load(model_path)
         self.model.device = torch.device("cpu")
 
