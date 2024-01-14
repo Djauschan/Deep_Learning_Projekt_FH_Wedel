@@ -315,6 +315,32 @@ this.priceRangeKey = Math.random()
         }
       }
     },
+    async load_data() {
+      try {
+        const response = await axios.get(store.API + "/load/data", {
+        });
+        console.log([response.data])
+        return response.data
+      } catch (error) {
+        Swal.fire({
+          title: "Error at getting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.detail
+        ) {
+          console.log(error.response.data.detail);
+        } else {
+          console.log(error);
+        }
+      }
+    },
     async updateChart() {
       if (this.selectedStock == "" || !this.selectedDays) {
         Swal.fire({
@@ -327,7 +353,8 @@ this.priceRangeKey = Math.random()
         });
       } else {
         console.log(this.selectedStock, this.selectedDays)
-        this.dataSource = await this.get_stock_data(this.selectedStock, this.selectedDays);
+        //this.dataSource = await this.get_stock_data(this.selectedStock, this.selectedDays);
+        this.dataSource = await this.load_data();
 
         if (this.dataSource) {
 

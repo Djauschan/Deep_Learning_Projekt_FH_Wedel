@@ -124,9 +124,8 @@ def get_stock_days(db: Session, stock_symbol: str, n: int):
     return return_data
 
 # method to load data from csv file
-def loadDataFromFile(self, start_date: pd.Timestamp, end_date: pd.Timestamp, rsc_completePath: str,
-
-    ALL_DATA_COLUMNS: list, COLUMNS_TO_KEEP: list) -> pd.DataFrame:
+def loadDataFromFile(start_date: pd.Timestamp, end_date: pd.Timestamp, rsc_completePath: str,
+                    ALL_DATA_COLUMNS: list, COLUMNS_TO_KEEP: list) -> pd.DataFrame:
 
     df = pd.read_csv(rsc_completePath, sep=",", names=ALL_DATA_COLUMNS, index_col=False)
 

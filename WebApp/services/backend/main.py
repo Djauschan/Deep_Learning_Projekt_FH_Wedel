@@ -5,6 +5,8 @@ import crud, models, schemas
 from database import SessionLocal, engine
 import bcrypt
 import datetime as DT
+import pandas as pd
+import os
 
 # Create tables in the database based on the model definitions
 models.Base.metadata.create_all(bind=engine)
@@ -152,12 +154,12 @@ def predict_arima(stock_symbol: str):
 
 @app.get("/load/data")
 def load_data():
-    allColumns = ["DateTime", "Open", "Close", "High", "Low"], 
+    allColumns = ["DateTime", "Open", "Close", "High", "Low", "a"]
     relevantColumns = ["DateTime", "Open", "Close", "High", "Low"]
-    start_date = DT.datetime(2021, 1, 4)
-    end_date = DT.datetime(2021, 1, 6)
+    start_date = pd.Timestamp("2021-01-04")
+    end_date = pd.Timestamp("2021-01-06")
 
-    return crud.loadDataFromFile(start_date=start_date, end_date=end_date, rsc_completePath="", 
+    return crud.loadDataFromFile(start_date=start_date, end_date=end_date, rsc_completePath="../../../data/Aktien/AAPL_1min.txt", 
                                  ALL_DATA_COLUMNS=allColumns, COLUMNS_TO_KEEP=relevantColumns)
 
 
