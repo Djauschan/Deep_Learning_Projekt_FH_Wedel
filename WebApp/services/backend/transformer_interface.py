@@ -95,12 +95,12 @@ class TransformerInterface(AbstractModel):
         """
         self.interval_minutes = 120
         self.num_intervals = 24
-        self.model_path = Path("transformer", "prediction_resources",
-                               "torch_transformer.pt")
-        self.data_path = Path("transformer", "prediction_resources",
-                              "preprocessed_data_prediction.csv")
-        self.prices_path = Path("transformer", "prediction_resources",
-                                "prices_prediction.pkl")
+        self.model_path = Path(Path.cwd(), "transformer",
+                               "prediction_resources", "torch_transformer.pt")
+        self.data_path = Path(Path.cwd(), "transformer",
+                              "prediction_resources", "preprocessed_data_prediction.csv")
+        self.prices_path = Path(Path.cwd(), "transformer",
+                                "prediction_resources", "prices_prediction.pkl")
 
     def predict(self,
                 timestamp_start: pd.Timestamp,
