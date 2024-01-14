@@ -281,7 +281,7 @@ class TimeSeriesBuilder:
                 else:
                     previousCandidate = df.iloc[i]
                     previousCandidateIdx = i
-                    x = 0
+                    x = length
 
             if x == length - 1:
                 validSeries = False
@@ -412,13 +412,11 @@ class ModelImportService:
     """
 
     def loadModel(self, full_path):
-
         device = torch.device('cpu')
         model = torch.jit.load(full_path, map_location=device)
-
         #model = torch.jit.load(full_path)
-        model.eval()
         #model.to(torch.device('cpu'))
+        model.eval()
         return model
 
 
@@ -461,10 +459,13 @@ class Preprocessor:
                 # load ETF-feature data & join data & features
                 data = self.__getAndMergeFeatureDataWithMainData(startDate, endDate, feature_path,
                                                                  FEATURES_DATA_TO_LOAD, stock_data)
+
                 data, dateTimeArr = self.timeSeriesBuilderService.buildTimeSeries(data, FEATURES)
+                print(dateTimeArr)
                 # All feature Data will be differenced
-                print("#####################################################################")
-                print(data)
+                if len(data) != 20:
+                    return -1, -1
+
                 data = self.differenceService.transformSeries(data)
                 # Only the Data will be normalised
                 data = self.normalisationService.normMinusPlusOne(data)

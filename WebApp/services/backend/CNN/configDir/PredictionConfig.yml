@@ -1,10 +1,10 @@
 # Model Config
 ### TEST CONFIG FOR MVP
 
-RSC_ROOT: "../../../data/"
-STOCK_FOLDER: "Aktien/"
-ETF_FOLDER: "ETF/"
-MODEL_FOLDER: "./CNN/modelDir/"
+RSC_ROOT: "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\rsc\\data\\validation\\"
+STOCK_FOLDER: "Aktien\\"
+ETF_FOLDER: "ETF\\"
+MODEL_FOLDER: "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\src\\CNN\\modelDir\\"
 MODELS_TO_LOAD: [
   "20_120_1_AAPL1412024_1623.pt"
 ]

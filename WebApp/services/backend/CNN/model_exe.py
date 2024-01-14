@@ -11,8 +11,8 @@ class ModelExe(AbstractModel):
 
     def __init__(self):
         self.configService = ConfigService()
-        configPath = "./CNN/configDir/PredictionConfig.yml"
-        #configPath = "C:\\Projekte\ProjectDeepLearning_CNN\\project_deeplearning\\src\\predictionApi\\configDir\\PredictionConfig.yml"
+        #configPath = "../../../CNN/predictionApi/configDir/PredictionConfig.yml"
+        configPath = "C:\\Projekte\ProjectDeepLearning_CNN\\project_deeplearning\\src\\CNN\\configDir\\PredictionConfig.yml"
         self.parameters = self.configService.loadModelConfig(configPath)
         self.preprocessor = Preprocessor(self.parameters)
         self.gafData = np.zeros((1, 1))
@@ -42,6 +42,10 @@ class ModelExe(AbstractModel):
         toReturnDataFrame = pd.DataFrame(columns=["Timestamp", "AAPL"])
         interval = 480  # can not be changed, model is trained on this specific interval
         modelInputList, endPriceList = self.preprocessor.pipeline(timestamp_start, timestamp_end)
+        if modelInputList == -1:
+            toReturnDataFrame.iloc[0] = [timestamp_start, -1]
+            return toReturnDataFrame #if -1 => timeRange to small
+
         i = 0
         for model in self.modelCollection:
             calcTimeStamp = timestamp_end + pd.Timedelta(minutes=(i+1) * interval)
