@@ -1,0 +1,64 @@
+dataset_parameters:
+  create_new_file: true
+  data_file: data/output/Multi_Symbol_Predict3.csv
+  data_usage_ratio: 1
+  decoder_symbols:
+    - "AAPL" # Apple
+    - "AAL" # American Airlines
+    - "AMD" # Advanced Micro Devices
+    - "C" # Citigroup
+    - "MRNA" # Moderna
+    - "NIO" # NIO
+    - "NVDA" # NVIDIA
+    - "SNAP" # Snap
+    - "SQ" # Block
+    - "TSLA" # Tesla
+  encoder_symbols:
+  # stocks
+    - "AAPL" # Apple
+    - "AAL" # American Airlines
+    - "AMD" # Advanced Micro Devices
+    - "C" # Citigroup
+    - "MRNA" # Moderna
+    - "NIO" # NIO
+    - "NVDA" # NVIDIA
+    - "SNAP" # Snap
+    - "SQ" # Block
+    - "TSLA" # Tesla
+  # ETFs
+    - "ACWI" # iShares MSCI ACWI ETF
+  # indices
+    - "DXY" # US Dollar Index
+    - "SPX" # S&P 500
+    - "DJCIGC" # Dow Jones Commodity Index Gold
+    - "DJCISI" # Dow Jones Commodity Index Silver
+    - "DJCIEN" # Dow Jones Commodity Index Energy
+    - "DJCIIK" # Dow Jones Commodity Index Nickel
+    - "DJI" # Dow Jones Industrial Average
+    - "DJINET" # Dow Jones Internet Composite Index
+    - "COMP" # NASDAQ Composite
+    - "W5000" # FT Wilshire 5000 Full Cap
+  first_date: '2021-01-04'
+  last_date: '2021-02-01'
+  read_all_files: false
+  scaler: MinMaxScaler
+  subseries_amount: 1
+  time_resolution: 120
+  validation_split: 0.3
+model_parameters:
+  torch_transformer:
+    d_ff: 30
+    dropout: 0
+    num_heads: 1
+    num_layers: 1
+    seq_len_decoder: 24
+    seq_len_encoder: 96
+training_parameters:
+  batch_size: 50
+  epochs: 2
+  learning_rate: 0.0025
+  log_image_frequency: 5
+  loss: mse
+  patience: 10000
+  seed: 42
+use_gpu: true
