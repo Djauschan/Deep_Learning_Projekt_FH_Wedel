@@ -97,8 +97,8 @@ class TransformerInterface(AbstractModel):
         self.interval_minutes = 120
         self.num_intervals = 24
         self.model_path = Path("data", "output", "models", "TransformerModel_v1.pt")
-        self.data_path = Path("data", "output", "Multi_Symbol_Train.csv")
-        self.prices_path = Path("data", "output", "prices.pkl")
+        self.data_path = Path("data", "output", "preprocessed_data_prediction.csv")
+        self.prices_path = Path("data", "output", "prices_prediction.pkl")
 
     def predict(self,
                 timestamp_start: pd.Timestamp,
@@ -141,9 +141,7 @@ class TransformerInterface(AbstractModel):
         timestamps = self.generate_timestamps(timestamp_start,
                                               self.interval_minutes,
                                               self.num_intervals)
-        prediction.set_index(timestamps, inplace=True)
-        # Fallback if it does not work
-        # prediction.index = timestamps
+        prediction.index = pd.Index(timestamps)
 
         # Convert the relative prices to absolute prices
         for symbol, price in prices_before_prediction.items():
@@ -238,6 +236,5 @@ class TransformerInterface(AbstractModel):
 
 if __name__ == "__main__":
     interface = TransformerInterface()
-    prediction = interface.predict(pd.to_datetime('2021-01-04'),
-                                   pd.to_datetime('2021-01-06'))
-    print(prediction)
+    print(interface.predict(pd.to_datetime('2021-01-04'),
+                            pd.to_datetime('2021-01-06')))
