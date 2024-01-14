@@ -11,9 +11,11 @@ class ModelExe(AbstractModel):
 
     def __init__(self):
         self.configService = ConfigService()
-        self.parameters = self.configService.loadModelConfig("config/CNN/PredictionConfig.yml")
+        #configPath = "../../../CNN/predictionApi/configDir/PredictionConfig.yml"
+        configPath = "C:\\Projekte\ProjectDeepLearning_CNN\\project_deeplearning\\src\\predictionApi\\configDir\\PredictionConfig.yml"
+        self.parameters = self.configService.loadModelConfig(configPath)
         self.preprocessor = Preprocessor(self.parameters)
-        self.gafData = np.zeros(1, 1)
+        self.gafData = np.zeros((1, 1))
         """
             a collection of multiple models. Each Model can only predict a single value,
             in order to get a series of multiple timeStamps, multiple Models will predict values 
@@ -24,6 +26,7 @@ class ModelExe(AbstractModel):
             => model 6 => predict 6* 480min ahead = 2Tage
         """
         self.modelCollection = []
+        self.load_model()
 
     def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
         """predict stock price for a given time interval
@@ -38,16 +41,17 @@ class ModelExe(AbstractModel):
         """
         toReturnDataFrame = pd.DataFrame(columns=["Timestamp", "AAPL"])
         interval = 480  # can not be changed, model is trained on this specific interval
-        gafData, endPrice = self.preprocessor.pipeline(timestamp_start, timestamp_end)
-        counter = 1
+        modelInputList, endPriceList = self.preprocessor.pipeline(timestamp_start, timestamp_end)
+        i = 0
         for model in self.modelCollection:
-            calcTimeStamp = timestamp_end + pd.Timedelta(minutes=counter * interval)
-            y_change = model.predict(gafData)
-            y_price = self._calcThePriceFromChange(y_change, endPrice)
-            toReturnDataFrame.add(calcTimeStamp, y_price)
-            counter += 1
+            calcTimeStamp = timestamp_end + pd.Timedelta(minutes=(i+1) * interval)
+            y_change = model.forward(modelInputList[i])
+            y_price = self._calcThePriceFromChange(y_change.item(), endPriceList[i])
+            toReturnDataFrame.loc[i] = [calcTimeStamp, y_price]
+            i += 1
 
         return toReturnDataFrame
+
 
     def _calcThePriceFromChange(self, y_change, endPrice):
         return 1 + y_change * endPrice
@@ -72,8 +76,9 @@ class ModelExe(AbstractModel):
 
 
 model_Exe = ModelExe()
-#
+
 # model_Exe.predict(pd.Timestamp(year=2022, month=1, ))
 startDate = pd.Timestamp("2021-01-04 04:00:00")
 endDate = pd.Timestamp("2021-03-04 04:00:00")
-model_Exe.predict(startDate, endDate, 120)
+t = model_Exe.predict(startDate, endDate, 120)
+print(t)

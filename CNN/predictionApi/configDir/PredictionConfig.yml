@@ -1,12 +1,12 @@
 # Model Config
 ### TEST CONFIG FOR MVP
 
-RSC_ROOT: "/data/"
+RSC_ROOT: "../../../data/"
 STOCK_FOLDER: "Aktien/"
 ETF_FOLDER: "ETF/"
-MODEL_FOLDER: "modelDir"
+MODEL_FOLDER: "../../../CNN/predictionApi/modelDir/"
 MODELS_TO_LOAD: [
-  "model_30_480_1.pt", "model_30_480_2.pt", "model_30_480_3.pt", "model_30_480_4.pt"
+  "30_480_1_AAPL1312024_159.pt", "30_480_6_AAPL1312024_1644.pt"
 ]
 
 RSC_DATA_FILES: [

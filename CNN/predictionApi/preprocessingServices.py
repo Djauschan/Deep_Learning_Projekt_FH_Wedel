@@ -1,11 +1,12 @@
 import os
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import numpy as np
 import pandas as pd
 import torch
 import yaml
 from matplotlib import pyplot as plt
+from numpy import float32
 from pyts.image import GramianAngularField
 from yaml import SafeLoader
 
@@ -57,12 +58,21 @@ class DifferencingService:
         pass
 
     def transformSeries(self, data):
-        i = 0
         len_data = len(data)
         # Y = anz daten; anz ele in  zeitreihe, anz features in einem ele
-        differencedData = np.zeros((len(data), len(data[0]) - 1, len(data[0][0])))
+        differencedData = np.zeros((len_data, len(data[0])))
+        currRow = data[0]
+        i = 1
         while i < len_data:
-            differencedData[i], _ = self._transformSingleSeries(data[i], 0.0)
+            prevRow = data[i - 1]
+            currRow = data[i]
+            x = 0
+            while x < len(prevRow):
+                prevValInRow = prevRow[x]
+                currentValInRow = currRow[x]
+                diffVal = self._calcPercentageDifference(prevValInRow, currentValInRow)
+                differencedData[i][x] = diffVal
+                x += 1
             i = i + 1
 
         data = differencedData
@@ -74,7 +84,7 @@ class DifferencingService:
 
     def _transformSingleSeries(self, series, label):
         # dimension = length of series -1; anz features. Differencing removes first ele
-        differenceArray = np.zeros((len(series) - 1, len(series[0])))
+        differenceArray = np.zeros((len(series)-1))
         i = 1
         curr = series[i]
         while i < len(series):
@@ -207,7 +217,7 @@ class TimeSeriesBuilder:
         pass
 
     def buildTimeSeries(self, df: pd.DataFrame, features, length: int = 20, interval: int = 120,
-                        tolerance: int = 50) -> np.ndarray:
+                        tolerance: int = 30) -> tuple[np.ndarray, np.ndarray]:
         """
             create 1 single valid series, out of given dataframe.
             :param
@@ -222,50 +232,63 @@ class TimeSeriesBuilder:
         COUNT_OF_FEATURES = len(features)
         RETRY_TRESHOLD = 5
         df_length = len(df)
-        first_ele = df[0]
-        last_ele = df[df_length - 1]
+        first_ele = df.iloc[0]
+        last_ele = df.iloc[(df_length - 1)]
         current_ele = first_ele
         resultNp = np.zeros((length, COUNT_OF_FEATURES))
+        dateTimeArr = np.zeros(length).astype(datetime)
         # First and Last element are selected from User and are filtered within dataLoadingProcess
         resultNp[0] = first_ele[[*features]].values
-        resultNp[9] = last_ele[[*features]].values
+        resultNp[(length - 1)] = last_ele[[*features]].values
         previousCandidate = first_ele
         previousCandidateIdx = 0
-        i: int = 0 #counter for entire df <=> index of df
-        x: int = 0 #counter for series entry
-        while i < df_length:
-            while x < length:
+        i: int = 0  # counter for entire df <=> index of df
+        x: int = 0  # counter for series entry
+        validSeries = True
+        while i < df_length and validSeries:
+            while x < length - 1:
                 optimal_minute = int(previousCandidate['posixMinute']) + interval
-                #get the index of candidate with optimal distance, or the clostest alternative
+                # get the index of candidate with optimal distance, or the clostest alternative
                 candidateIdx, minimalAbw, closestCandidateIdx = self._binary_search(df, i, df_length - 1,
                                                                                     optimal_minute, 1440, -1)
-                #if optimal candidate not found
+                # if optimal candidate not found
                 if candidateIdx == -1:
-                    #check if in tolerance range, if so take alternative value
+                    # check if in tolerance range, if so take alternative value
                     if abs(minimalAbw) < tolerance:
                         candidateIdx = closestCandidateIdx
                     else:
-                        reTryCounter: int = 2
-                        while reTryCounter < RETRY_TRESHOLD and abs(minimalAbw) > tolerance:
-                            optimalDateTimeFromPosix = pd.Timestamp.fromtimestamp(optimal_minute * 60)
+                        reTryCounter: int = 1
+                        noValidAlternativeFound = True
+                        while reTryCounter < RETRY_TRESHOLD and noValidAlternativeFound:
+                            optimalDateTimeFromPosix = pd.Timestamp.fromtimestamp(optimal_minute * 60) - \
+                                                                                pd.Timedelta(hours=1)
                             nextDayStartDay = self._getNextDayVal(optimalDateTimeFromPosix, reTryCounter)
-                            self._binary_search_dateTime(df, previousCandidateIdx, df_length - 1, nextDayStartDay,
-                                                         1000000, -1, True)
+                            candidateIdx, minimalAbw, closestCandidateIdx = \
+                                self._binary_search_dateTime(df, previousCandidateIdx, df_length - 1,
+                                                             nextDayStartDay, 1000000, -1, True)
+                            reTryCounter += 1
+                            if abs(minimalAbw) <= 180: #in seconds = 180second = 3min is allowed on next day
+                                candidateIdx = closestCandidateIdx
+                                noValidAlternativeFound = False
 
                 if candidateIdx != -1:
                     candidate = df.iloc[candidateIdx]
-                    resultNp[i] = candidate[[*features]].values
+                    resultNp[x] = candidate[[*features]].values
+                    dateTimeArr[x] = candidate['DateTime']
                     previousCandidate = candidate
                     previousCandidateIdx = candidateIdx
+                    x += 1
                 else:
                     previousCandidate = df.iloc[i]
                     previousCandidateIdx = i
+                    x = 0
 
-                x += 1
+            if x == length - 1:
+                validSeries = False
 
             i += 1
 
-        return resultNp
+        return resultNp, dateTimeArr
 
     def _binary_search(self, df: pd.DataFrame, lowIdx: int, highIdx: int, optimalTimeToFind: int, minimal_abw: int,
                        closestIdx: int) -> tuple[int, int, int]:
@@ -326,7 +349,7 @@ class TimeSeriesBuilder:
                     closestIdx = midIdx
 
             # If element is present at the middle itself
-            if tmpAbw < 10*60: #if two dates in same minute => they are equal
+            if tmpAbw < 60:  # if two dates in same minute => they are equal
                 return midIdx, minimal_abw, closestIdx
 
             if midVal > optimalDateToFind:
@@ -387,9 +410,11 @@ class ModelImportService:
     """
         load jit torch model from given path
     """
+
     def loadModel(self, full_path):
         model = torch.jit.load(full_path)
         model.eval()
+        model.to(torch.device('cpu'))
         return model
 
 
@@ -409,8 +434,6 @@ class Preprocessor:
         self.normalisationService = NormalisationService()
         self.GAFservice = GafService()
 
-
-
     def pipeline(self, startDate: pd.Timestamp, endDate: pd.Timestamp):
         RSC_ROOT = self.modelParameters['RSC_ROOT']
         STOCK_FOLDER = self.modelParameters['STOCK_FOLDER']
@@ -418,8 +441,8 @@ class Preprocessor:
         RSC_DATA_FILES = self.modelParameters['RSC_DATA_FILES']
         FEATURES_DATA_TO_LOAD = self.modelParameters['FEATURES_DATA_TO_LOAD']
         FEATURES = self.modelParameters['FEATURES']
-        gafData = []
-        lastRow = []
+        modelInputList = []
+        endPriceList = []
         for i in RSC_DATA_FILES:
             for k, v in i.items():
                 fileName = v[0]
@@ -430,25 +453,30 @@ class Preprocessor:
                 stock_data = self.dataLoaderService.loadDataFromFile(startDate, endDate, stock_path + fileName,
                                                                      allDataColumns, column_featureName)
                 stock_data = self.timeModificationService.transformTimestap(stock_data, False)
-                lastRow = stock_data[len(stock_data-1)]['Open']
+                endPriceList.append(stock_data.iloc[len(stock_data) - 1]['Open'])
                 # load ETF-feature data & join data & features
                 data = self.__getAndMergeFeatureDataWithMainData(startDate, endDate, feature_path,
                                                                  FEATURES_DATA_TO_LOAD, stock_data)
-                data = self.timeSeriesBuilderService.buildTimeSeries(data, FEATURES)
+                data, dateTimeArr = self.timeSeriesBuilderService.buildTimeSeries(data, FEATURES)
                 # All feature Data will be differenced
-                data, labels = self.differenceService.transformSeries(data)
+                data = self.differenceService.transformSeries(data)
                 # Only the Data will be normalised
                 data = self.normalisationService.normMinusPlusOne(data)
                 # the final model inputData
                 gafData = self.GAFservice.createGAFfromMultivariateTimeSeries(data)
+                #toTensor
+                arr = np.array(gafData).astype(float32)
+                modelInputList.append(torch.unsqueeze(torch.from_numpy(arr), 0).to(torch.device('cpu')))
 
-        return gafData, lastRow
+        return modelInputList, endPriceList
+
 
     def reshapeData(self, data: np.ndarray) -> list:
         dataList = [data]
         return dataList
 
-    def __getAndMergeFeatureDataWithMainData(self, startate: pd.Timestamp, endDate, rsc_folder: str, FEATURES_TO_LOAD: list,
+    def __getAndMergeFeatureDataWithMainData(self, startate: pd.Timestamp, endDate, rsc_folder: str,
+                                             FEATURES_TO_LOAD: list,
                                              main_df: pd.DataFrame) -> pd.DataFrame:
         mergedDf = main_df
         for oData in FEATURES_TO_LOAD:
@@ -461,3 +489,32 @@ class Preprocessor:
                 feature_df = self.timeModificationService.transformTimestap(feature_df, True)
                 mergedDf = self.featureDataMergeService.mergeFeatureData(mergedDf, feature_df)
         return mergedDf
+
+'''
+    PreProcessing Data Before transforming into tensor
+'''
+class CorrectData(object):
+    def __call__(self, sample):
+        return sample
+
+
+'''
+    Convert ndarrays in sample to Tensors.
+'''
+class ToTensor(object):
+
+    def __call__(self, sample):
+        arr = np.array(sample['data'])
+        '''
+        für 1 = channal = 1 feature
+        return {
+            #from 1, 10, 10 -> 1, 1, 10, 10 (in chanals added
+            'x': torch.unsqueeze(torch.from_numpy(arr), 0),
+            'y': torch.tensor(np.array(sample['label']))
+        }        
+        '''
+        return {
+            #from 1, 10, 10 -> 1, 1, 10, 10 (in chanals added
+            'x': torch.from_numpy(arr),
+            'y': torch.tensor(np.array(sample['label']))
+        }
