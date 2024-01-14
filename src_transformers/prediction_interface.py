@@ -14,7 +14,7 @@ from src_transformers.abstract_model import AbstractModel
 from src_transformers.preprocessing.prediction_dataset import PredictionDataset
 
 INTERVAL_MINUTES = 120
-NUM_INTERVALS = 48
+NUM_INTERVALS = 24
 
 
 class TransformerInterface(AbstractModel):
@@ -78,19 +78,22 @@ class TransformerInterface(AbstractModel):
             if "close" in dataset_column:
                 columns.append(dataset_column)
 
+        columns = ["close AAPL","close AAL","close AMD","close C","close MRNA","close NIO","close NVDA","close SNAP","close SQ","close TSLA"]
+
         prediction = pd.DataFrame(prediction, columns=columns)
         # Set timestamps as index
         prediction.index = timestamps
 
         for symbol, price in self.prices_before_prediction.items():
-            absolute_prices = self.calculate_absolut_prices(prediction[f"close {symbol}"], price)
-            prediction[f"close {symbol}"] = round(absolute_prices, 2)
+            if symbol in f"close {symbol}" in columns:
+                absolute_prices = self.calculate_absolut_prices(prediction[f"close {symbol}"], price)
+                prediction[f"close {symbol}"] = round(absolute_prices, 2)
 
         return prediction
 
     def load_data(self, timestamp_start: pd.Timestamp) -> None:
         """load data from database and stores it in a class variable"""
-        data_path = Path("data", "output", "Multi_Symbol_Predict3.csv")
+        data_path = Path("data", "output", "Multi_Symbol_Train.csv")
         data = pd.read_csv(data_path.as_posix())
 
         print(data)
@@ -119,7 +122,7 @@ class TransformerInterface(AbstractModel):
 
     def load_model(self) -> None:
         """load model from file and stores it in a class variable"""
-        model_path = Path("data", "output", "models", "TransformerModel_v6.pt")
+        model_path = Path("data", "output", "models", "TransformerModel_v1.pt")
         self.model = torch.load(model_path)
         self.model.device = torch.device("cpu")
 
@@ -143,5 +146,5 @@ def _generate_timestamps(start_timestamp: pd.Timestamp, interval_minutes: int, n
 
 
 if __name__ == "__main__":
-    pred = TransformerInterface().predict(pd.to_datetime('2021-01-30'), pd.to_datetime('2021-02-01'))
+    pred = TransformerInterface().predict(pd.to_datetime('2021-01-04'), pd.to_datetime('2021-01-06'))
     print(pred)
