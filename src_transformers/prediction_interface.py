@@ -96,7 +96,7 @@ class TransformerInterface(AbstractModel):
         """
         self.interval_minutes = 120
         self.num_intervals = 24
-        self.model_path = Path("data", "output", "models", "TransformerModel_v1.pt")
+        self.model_path = Path("data", "output", "models", "TransformerModel_v1_jit.tjm")
         self.data_path = Path("data", "output", "preprocessed_data_prediction.csv")
         self.prices_path = Path("data", "output", "prices_prediction.pkl")
 
@@ -204,7 +204,7 @@ class TransformerInterface(AbstractModel):
         Returns:
             nn.Module: The loaded PyTorch model.
         """
-        model = torch.load(self.model_path)
+        model = torch.jit.load(self.model_path)
         model.to(torch.device("cpu"))
         # Set model device attribute to CPU so that masks are on CPU as well
         model.device = torch.device("cpu")
