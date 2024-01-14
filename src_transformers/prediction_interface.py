@@ -96,7 +96,7 @@ class TransformerInterface(AbstractModel):
         """
         self.interval_minutes = 120
         self.num_intervals = 24
-        self.model_path = Path("data", "output", "models", "TransformerModel_v7.pt")
+        self.model_path = Path("data", "output", "models", "TransformerModel_v1.pt")
         self.data_path = Path("data", "output", "Multi_Symbol_Train.csv")
         self.prices_path = Path("data", "output", "prices.pkl")
 
