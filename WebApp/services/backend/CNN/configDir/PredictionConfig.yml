@@ -4,9 +4,9 @@
 RSC_ROOT: "../../../data/"
 STOCK_FOLDER: "Aktien/"
 ETF_FOLDER: "ETF/"
-MODEL_FOLDER: "../../../CNN/predictionApi/modelDir/"
+MODEL_FOLDER: "./CNN/modelDir/"
 MODELS_TO_LOAD: [
-  "30_480_1_AAPL1312024_159.pt", "30_480_6_AAPL1312024_1644.pt"
+  "20_120_1_AAPL1412024_1623.pt"
 ]
 
 RSC_DATA_FILES: [

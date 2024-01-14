@@ -412,9 +412,13 @@ class ModelImportService:
     """
 
     def loadModel(self, full_path):
-        model = torch.jit.load(full_path)
+
+        device = torch.device('cpu')
+        model = torch.jit.load(full_path, map_location=device)
+
+        #model = torch.jit.load(full_path)
         model.eval()
-        model.to(torch.device('cpu'))
+        #model.to(torch.device('cpu'))
         return model
 
 
@@ -459,6 +463,8 @@ class Preprocessor:
                                                                  FEATURES_DATA_TO_LOAD, stock_data)
                 data, dateTimeArr = self.timeSeriesBuilderService.buildTimeSeries(data, FEATURES)
                 # All feature Data will be differenced
+                print("#####################################################################")
+                print(data)
                 data = self.differenceService.transformSeries(data)
                 # Only the Data will be normalised
                 data = self.normalisationService.normMinusPlusOne(data)

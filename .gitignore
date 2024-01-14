@@ -1,3 +1,6 @@
+#CNN
+CNN/__pycache__/
+
 # Custom
 runs/
 *.deb

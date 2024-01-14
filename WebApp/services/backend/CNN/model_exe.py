@@ -3,16 +3,16 @@ from abc import ABC
 import numpy as np
 import pandas as pd
 
-from predictionApi.abstract_model import AbstractModel
-from predictionApi.preprocessingServices import Preprocessor, ModelImportService, ConfigService
+from CNN.abstract_model import AbstractModel
+from CNN.preprocessingServices import Preprocessor, ModelImportService, ConfigService
 
 
 class ModelExe(AbstractModel):
 
     def __init__(self):
         self.configService = ConfigService()
-        #configPath = "../../../CNN/predictionApi/configDir/PredictionConfig.yml"
-        configPath = "C:\\Projekte\ProjectDeepLearning_CNN\\project_deeplearning\\src\\predictionApi\\configDir\\PredictionConfig.yml"
+        configPath = "./CNN/configDir/PredictionConfig.yml"
+        #configPath = "C:\\Projekte\ProjectDeepLearning_CNN\\project_deeplearning\\src\\predictionApi\\configDir\\PredictionConfig.yml"
         self.parameters = self.configService.loadModelConfig(configPath)
         self.preprocessor = Preprocessor(self.parameters)
         self.gafData = np.zeros((1, 1))
