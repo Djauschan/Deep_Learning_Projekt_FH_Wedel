@@ -5,8 +5,11 @@
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
     <button class="button-stock" @click="updateChart">Show Stock</button>
     <button class="button-stock" @click="useTestData">Use Test Data</button>
+    <button class="button-stock" @click="showAll">Show All</button>
+    <button class="button-stock" @click="hideAll">Hide All</button>
     <!-- Add checkboxes for additional data points -->
     <div class="checkboxes">
+      <div class="checkboxes1">
     <label>
       <input type="checkbox" v-model="showCNNLine"> CNN
     </label>
@@ -16,18 +19,18 @@
     <label>
       <input type="checkbox" v-model="showLSTMLine"> LSTM
     </label>
+  </div>
+      <div class="checkboxes2">
     <label>
       <input type="checkbox" v-model="showArimaLine"> Arima
     </label>
     <label>
-      <input type="checkbox" v-model="showstatistischeMethodenLine"> Statistische Methoden
+      <input type="checkbox" v-model="showStatistischeMethodenLine"> Statistische Methoden
     </label>
     <label>
       <input type="checkbox" v-model="showRandomLine"> Random Line
     </label>
-    <label>
-      <input type="checkbox" v-model="showAll"> show All
-    </label>
+  </div>
     </div>
   </div>
    <!-- Combined Chart -->
@@ -188,6 +191,24 @@ export default {
     },
   },
   methods: {
+    async hideAll(){
+      this.showCNNLine = false;
+      this.showTransformerLine = false;
+      this.showLSTMLine = false;
+      this.showArimaLine = false;
+      this.showStatistischeMethodenLine = false;
+      this.showRandomLine = false;
+    },
+
+    async showAll(){
+      this.showCNNLine = true;
+      this.showTransformerLine = true;
+      this.showLSTMLine = true;
+      this.showArimaLine = true;
+      this.showStatistischeMethodenLine = true;
+      this.showRandomLine = true;
+    },
+
     async useTestData() {
     // Replace this with your actual test data for stock prices
 const testData = [
@@ -337,8 +358,18 @@ this.priceRangeKey = Math.random()
 .checkboxes{
   margin-left: 1%;
   margin-right: 1%;
-  align-items: center;
   padding: 0.5%;
+  display: flex;
+  justify-content: center;
+}
+
+.checkboxes label {
+    display: flex;
+    align-items: center;
+}
+
+.checkboxes input {
+    margin-right: 5px; /* Adjust the margin as needed */
 }
 
 .center {
