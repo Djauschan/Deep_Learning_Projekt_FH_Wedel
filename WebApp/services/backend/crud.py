@@ -11,6 +11,7 @@ from yahoo_fin.stock_info import get_data
 import pandas_market_calendars as mcal
 import yfinance as yf
 import pandas as pd
+import numpy as np
 
 # method to delete the table "users"
 def delete_users(db: Session):
@@ -140,4 +141,23 @@ def loadDataFromFile(start_date: pd.Timestamp, end_date: pd.Timestamp, rsc_compl
     data['DateTime'] = pd.to_datetime(data['DateTime'])
 
     data = data[(data['DateTime'] >= start_date) & (data['DateTime'] <= end_date)]
-    return data
+
+    # Set 'DateTime' as the index (required for resampling)
+    data.set_index('DateTime', inplace=True)
+
+    # Resample to 30-minute intervals
+    data = data.resample('30T').mean()
+
+    # Replace non-compliant values with a compliant value (e.g., None)
+    data.replace([np.inf, -np.inf, np.nan], None, inplace=True)
+
+    # Filter out data from 20:00 to 04:00
+    data = data[(data.index.hour < 20) & (data.index.hour >= 4)]
+
+    # Reset the index
+    data.reset_index(inplace=True)
+
+    # Convert the DataFrame to a list of dictionaries
+    return_data = data.to_dict(orient='records')
+
+    return return_data
