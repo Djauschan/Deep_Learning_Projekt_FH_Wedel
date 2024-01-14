@@ -261,9 +261,6 @@ class Trainer:
                         predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
                     self.logger.save_horizon_chart(
                         predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
-                    self.logger.save_abs_prediction_chart(
-                        predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set"
-                    )
 
                 validation_loss, validation_results = self.calculate_validation_loss(
                     validation_loader)
@@ -277,9 +274,6 @@ class Trainer:
                     self.logger.save_horizon_chart(
                         predictions=validation_results[0], targets=validation_results[1], epoch=epoch,
                         name="validation_set")
-                    self.logger.save_abs_prediction_chart(
-                        predictions=validation_results[0], targets=validation_results[1], epoch=epoch, name="validation_set"
-                    )
 
                 # Early stopping
                 if min_loss > validation_loss:
