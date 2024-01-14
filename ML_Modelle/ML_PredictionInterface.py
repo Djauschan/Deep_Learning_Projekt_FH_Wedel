@@ -8,9 +8,14 @@ from abstract_model import AbstractModel
 from ml_model_abc import LinearRegressionModel, RandomForestModel, GradientBoostingModel, SVMModel
 
 #Implementieren der ML-Modelle von: LR, RF, GBM, SVM
+
 class ABC_LinearRegressionModel(AbstractModel):
 
     def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
+        
+        #Model laden
+        self.load_model()
+        
         #Modelle sind bis zum 3.1.21 trainiert -> prediction ab 4.1 möglich
         prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end)
         predicted_values = []
@@ -42,7 +47,7 @@ class ABC_LinearRegressionModel(AbstractModel):
             indices.append(X_test.index[i])
 
         # Erstellen eines DataFrames für die Vorhersageergebnisse
-        prediction_df = pd.DataFrame({'Predicted_Close': predicted_values}, index=indices)
+        prediction_df = pd.DataFrame({'AAPL_Predicted_Close': predicted_values}, index=indices)
         return prediction_df
 
     def load_data(self) -> None:
@@ -73,6 +78,10 @@ class ABC_LinearRegressionModel(AbstractModel):
 class ABC_RandomForestModel(AbstractModel):
 
     def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
+
+        #Model laden
+        self.load_model()
+
         #Modelle sind bis zum 3.1.21 trainiert -> prediction ab 4.1 möglich
         prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end)
         predicted_values = []
@@ -131,10 +140,13 @@ class ABC_RandomForestModel(AbstractModel):
             print("Modell-Datei nicht gefunden.")
             self.model = None
 
-
 class ABC_GradientBoostingModel(AbstractModel):
 
     def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
+
+        #Model laden
+        self.load_model()
+
         #Modelle sind bis zum 3.1.21trainiert -> prediction ab 4.1 möglich
         prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end)
         predicted_values = []
@@ -197,6 +209,10 @@ class ABC_GradientBoostingModel(AbstractModel):
 class ABC_SVMModel(AbstractModel):
 
     def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
+        
+        #Model laden
+        self.load_model()
+
         #Modelle sind bis zum 3.1.21 trainiert -> prediction ab 4.1 möglich
         prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end)
         predicted_values = []
