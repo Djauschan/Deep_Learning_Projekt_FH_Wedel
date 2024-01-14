@@ -2,6 +2,12 @@
 runs/
 *.deb
 
+# MacOs attribute file
+.DS_Store
+
+# database
+sql_app.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
