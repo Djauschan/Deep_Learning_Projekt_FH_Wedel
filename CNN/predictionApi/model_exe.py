@@ -1,0 +1,79 @@
+from abc import ABC
+
+import numpy as np
+import pandas as pd
+
+from predictionApi.abstract_model import AbstractModel
+from predictionApi.preprocessingServices import Preprocessor, ModelImportService, ConfigService
+
+
+class ModelExe(AbstractModel):
+
+    def __init__(self):
+        self.configService = ConfigService()
+        self.parameters = self.configService.loadModelConfig("config/CNN/PredictionConfig.yml")
+        self.preprocessor = Preprocessor(self.parameters)
+        self.gafData = np.zeros(1, 1)
+        """
+            a collection of multiple models. Each Model can only predict a single value,
+            in order to get a series of multiple timeStamps, multiple Models will predict values 
+            within a range of 480min
+            => model 1 => predict 1* 480min ahead
+            => model 2 => predict 2* 480min ahead
+            => model 2 => predict 3* 480min ahead
+            => model 6 => predict 6* 480min ahead = 2Tage
+        """
+        self.modelCollection = []
+
+    def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
+        """predict stock price for a given time interval
+
+        Args:
+            timestamp_start (pd.Timestamp): start time of the time period
+            timestamp_end (pd.Timestamp): end time of the time period
+            interval (int): interval in minutes
+
+        Returns:
+            pd.DataFrame: dataframe with columns: timestamp, 1-n prices of stock_symbols
+        """
+        toReturnDataFrame = pd.DataFrame(columns=["Timestamp", "AAPL"])
+        interval = 480  # can not be changed, model is trained on this specific interval
+        gafData, endPrice = self.preprocessor.pipeline(timestamp_start, timestamp_end)
+        counter = 1
+        for model in self.modelCollection:
+            calcTimeStamp = timestamp_end + pd.Timedelta(minutes=counter * interval)
+            y_change = model.predict(gafData)
+            y_price = self._calcThePriceFromChange(y_change, endPrice)
+            toReturnDataFrame.add(calcTimeStamp, y_price)
+            counter += 1
+
+        return toReturnDataFrame
+
+    def _calcThePriceFromChange(self, y_change, endPrice):
+        return 1 + y_change * endPrice
+
+    def load_model(self) -> None:
+        modelImportService = ModelImportService(self.parameters)
+        listOfModelsToLoad = modelImportService.getSavedModelsPaths()
+        for model_path in listOfModelsToLoad:
+            self.modelCollection.append(modelImportService.loadModel(model_path))
+
+    def preprocess(self) -> None:
+        """preprocess data and stores it in a class variable"""
+        """ not used, bc start & endtime needed, directly in "predict executed" 
+        """
+        pass
+
+    def load_data(self) -> None:
+        """load data from database and stores it in a class variable
+
+        """
+        pass
+
+
+model_Exe = ModelExe()
+#
+# model_Exe.predict(pd.Timestamp(year=2022, month=1, ))
+startDate = pd.Timestamp("2021-01-04 04:00:00")
+endDate = pd.Timestamp("2021-03-04 04:00:00")
+model_Exe.predict(startDate, endDate, 120)
