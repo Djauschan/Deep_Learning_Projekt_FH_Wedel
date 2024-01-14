@@ -14,7 +14,19 @@
       <input type="checkbox" v-model="showTransformerLine"> Transformer
     </label>
     <label>
+      <input type="checkbox" v-model="showLSTMLine"> LSTM
+    </label>
+    <label>
+      <input type="checkbox" v-model="showArimaLine"> Arima
+    </label>
+    <label>
+      <input type="checkbox" v-model="showstatistischeMethodenLine"> Statistische Methoden
+    </label>
+    <label>
       <input type="checkbox" v-model="showRandomLine"> Random Line
+    </label>
+    <label>
+      <input type="checkbox" v-model="showAll"> show All
     </label>
     </div>
   </div>
@@ -24,6 +36,21 @@
         <DxCommonSeriesSettings argument-field="date" type="stock" />
         <DxSeries :name="selectedStock" open-value-field="open" high-value-field="high" low-value-field="low"
           close-value-field="close" argument-field="date">
+        </DxSeries>
+        <DxSeries v-if="showCNNLine" :name="'CNN Line - ' + selectedStock" :data-source="combinedData" type="line"
+          value-field="CNNValue" argument-field="date">
+        </DxSeries>
+        <DxSeries v-if="showTransformerLine" :name="'Transformer Line - ' + selectedStock" :data-source="combinedData" type="line"
+          value-field="TransformerValue" argument-field="date">
+        </DxSeries>
+        <DxSeries v-if="showLSTMLine" :name="'LSTM Line - ' + selectedStock" :data-source="combinedData" type="line"
+          value-field="LSTMValue" argument-field="date">
+        </DxSeries>
+        <DxSeries v-if="showArimaLine" :name="'Arima Line - ' + selectedStock" :data-source="combinedData" type="line"
+          value-field="ArimaValue" argument-field="date">
+        </DxSeries>
+        <DxSeries v-if="showStatistischeMethodenLine" :name="'Statistische Methoden Line - ' + selectedStock" :data-source="combinedData" type="line"
+          value-field="StatistischeMethodenValue" argument-field="date">
         </DxSeries>
         <DxSeries v-if="showRandomLine" :name="'Random Line - ' + selectedStock" :data-source="combinedData" type="line"
           value-field="randomValue" argument-field="date">
@@ -42,12 +69,40 @@
   <div class="newChart">
   <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="lineChartDataSource" title="CNN Chart">
     <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'Line Chart'" value-field="lineChartDataField" argument-field="date" type="line">
+    <DxSeries :name="'CNN Line'" value-field="lineChartDataField" argument-field="date" type="line">
     </DxSeries>
   </DxChart>
   </div>
   <div class="newChart">
   <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="lineChartDataSource" title="Transformer Chart">
+    <DxCommonSeriesSettings argument-field="date" type="line" />
+    <DxSeries :name="'Transformer Line'" value-field="lineChartDataField" argument-field="date" type="line">
+    </DxSeries>
+  </DxChart>
+  </div>
+  <div class="newChart">
+  <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="lineChartDataSource" title="LSTM Chart">
+    <DxCommonSeriesSettings argument-field="date" type="line" />
+    <DxSeries :name="'LSTM Line'" value-field="lineChartDataField" argument-field="date" type="line">
+    </DxSeries>
+  </DxChart>
+  </div>
+  <div class="newChart">
+  <DxChart v-if="showArimaLine && showChart" id="Arima-chart" :data-source="lineChartDataSource" title="Arima Chart">
+    <DxCommonSeriesSettings argument-field="date" type="line" />
+    <DxSeries :name="'Arima Line'" value-field="lineChartDataField" argument-field="date" type="line">
+    </DxSeries>
+  </DxChart>
+  </div>
+  <div class="newChart">
+  <DxChart v-if="showStatistischeMethodenLine && showChart" id="Statistische Methoden-chart" :data-source="lineChartDataSource" title="Statistische Methoden Chart">
+    <DxCommonSeriesSettings argument-field="date" type="line" />
+    <DxSeries :name="'StatistischeMethoden Line'" value-field="lineChartDataField" argument-field="date" type="line">
+    </DxSeries>
+  </DxChart>
+  </div>
+  <div class="newChart">
+  <DxChart v-if="showRandomLine && showChart" id="Random-chart" :data-source="lineChartDataSource" title="Random Chart">
     <DxCommonSeriesSettings argument-field="date" type="line" />
     <DxSeries :name="'Line Chart'" value-field="lineChartDataField" argument-field="date" type="line">
     </DxSeries>
@@ -97,14 +152,20 @@ export default {
   data() {
     return {
       dataSource,
-            selectedStock: "",
+      selectedStock: "",
       selectedDays: null,
       showChart: false,
       priceRange: { min: null, max: null },
       showCNNLine: false,
-      showTransformerLine: false,
       CNNpredictionData: [], // Add this property to store prediction data
+      showTransformerLine: false,
       TransformerpredictionData: [],
+      showLSTMLine: false,
+      LSTMpredictionData: [],
+      showArimaLine: false,
+      ArimapredictionData: [],
+      showStatistischeMethodenLine: false,
+      StatistischeMethodenpredictionData: [],
       showRandomLine: false,
       randomLineData: [],
     };
@@ -275,8 +336,9 @@ this.priceRangeKey = Math.random()
 
 .checkboxes{
   margin-left: 1%;
+  margin-right: 1%;
   align-items: center;
-  display: flex;
+  padding: 0.5%;
 }
 
 .center {
