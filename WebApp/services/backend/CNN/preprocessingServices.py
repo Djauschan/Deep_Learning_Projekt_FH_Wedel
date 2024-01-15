@@ -83,8 +83,11 @@ class DifferencingService:
     '''
 
     def _transformSingleSeries(self, series, label):
+        """
+            muss jede column = curr_featureColumn - vorherige_featureColumn !todo check
+        """
         # dimension = length of series -1; anz features. Differencing removes first ele
-        differenceArray = np.zeros((len(series)-1))
+        differenceArray = np.zeros((len(series) - 1))
         i = 1
         curr = series[i]
         while i < len(series):
@@ -99,7 +102,7 @@ class DifferencingService:
         return differenceArray, labelVal
 
     def _calcPercentageDifference(self, baseVal, newVal):
-        return ((newVal - baseVal) / baseVal) * 100
+        return ((newVal - baseVal) / baseVal) * 1000 #to increase distance !was trained that way
 
 
 class GafService:
@@ -143,9 +146,10 @@ class GafService:
         [-0.95746452 -0.42388929 -0.83628839  0.42388927 -0.64063574,   -0.34319245],  
         [-0.80345206 -0.70522997 -0.60157087  0.70522995 -0.34319245,   -0.00530138]]]
         '''
+        #self.saveGAFimg(X_gasf[0], "")
         return X_gasf
 
-    def saveGAFimg(self, data: np.ndarray, savePath: str):
+    def saveGAFimg(self, data, savePath: str):
         print('data: single imageData')
         # [[-0.95823126  0.14451426 -0.99999702 -0.14451428 -0.95746452 -0.80345206],
         # [ 0.14451426  1.         -0.14210009 -1.         -0.42388929 -0.70522997],
@@ -170,15 +174,21 @@ class NormalisationService:
     '''
 
     def normMinusPlusOne(self, data: np.ndarray) -> np.ndarray:
-        print('normMinusPlusOne DATA')
+        """
+            muss jede featureColumn einzelnd normaliseren !todo check
+        """
         i = 0
-        len_data = len(data)
-        _min = np.min(data)
-        _max = np.max(data)
+        _tmpData = data.copy()
+        _tmpData = _tmpData.transpose()
+        len_data = len(_tmpData)
         while i < len_data:
-            data[i] = ((data[i] - _max) + (data[i] - _min)) / (_max - _min)
-            i = i + 1
+            featureRow = _tmpData[i]
+            _min = np.min(featureRow)
+            _max = np.max(featureRow)
+            _tmpData[i] = ((_tmpData[i] - _max) + (_tmpData[i] - _min)) / (_max - _min)
+            i += 1
 
+        data = _tmpData.transpose()
         return data
 
 
@@ -261,13 +271,16 @@ class TimeSeriesBuilder:
                         noValidAlternativeFound = True
                         while reTryCounter < RETRY_TRESHOLD and noValidAlternativeFound:
                             optimalDateTimeFromPosix = pd.Timestamp.fromtimestamp(optimal_minute * 60) - \
-                                                                                pd.Timedelta(hours=1)
+                                                       pd.Timedelta(hours=1)
                             nextDayStartDay = self._getNextDayVal(optimalDateTimeFromPosix, reTryCounter)
                             candidateIdx, minimalAbw, closestCandidateIdx = \
                                 self._binary_search_dateTime(df, previousCandidateIdx, df_length - 1,
                                                              nextDayStartDay, 1000000, -1, True)
                             reTryCounter += 1
-                            if abs(minimalAbw) <= 180: #in seconds = 180second = 3min is allowed on next day
+                            if candidateIdx != -1:
+                                noValidAlternativeFound = False
+
+                            if not noValidAlternativeFound and abs(minimalAbw) <= 180:  # in seconds = 180second = 3min is allowed on next day
                                 candidateIdx = closestCandidateIdx
                                 noValidAlternativeFound = False
 
@@ -338,7 +351,7 @@ class TimeSeriesBuilder:
             midIdx = (highIdx + lowIdx) // 2
             midVal = df.iloc[midIdx]['DateTime']
 
-            tmpAbw = pd.Timedelta(midVal - optimalDateToFind).seconds
+            tmpAbw = abs(midVal.timestamp() - optimalDateToFind.timestamp())
             if tmpAbw < minimal_abw:
                 if closestVal_isBigger:
                     if optimalDateToFind < midVal:
@@ -349,7 +362,7 @@ class TimeSeriesBuilder:
                     closestIdx = midIdx
 
             # If element is present at the middle itself
-            if tmpAbw < 60:  # if two dates in same minute => they are equal
+            if tmpAbw < 60*10:  # if two dates in same minute => they are equal
                 return midIdx, minimal_abw, closestIdx
 
             if midVal > optimalDateToFind:
@@ -414,8 +427,8 @@ class ModelImportService:
     def loadModel(self, full_path):
         device = torch.device('cpu')
         model = torch.jit.load(full_path, map_location=device)
-        #model = torch.jit.load(full_path)
-        #model.to(torch.device('cpu'))
+        # model = torch.jit.load(full_path)
+        # model.to(torch.device('cpu'))
         model.eval()
         return model
 
@@ -445,6 +458,7 @@ class Preprocessor:
         FEATURES = self.modelParameters['FEATURES']
         modelInputList = []
         endPriceList = []
+        # Todo timeseries builder start end of date not begin...
         for i in RSC_DATA_FILES:
             for k, v in i.items():
                 fileName = v[0]
@@ -471,12 +485,11 @@ class Preprocessor:
                 data = self.normalisationService.normMinusPlusOne(data)
                 # the final model inputData
                 gafData = self.GAFservice.createGAFfromMultivariateTimeSeries(data)
-                #toTensor
+                # toTensor
                 arr = np.array(gafData).astype(float32)
                 modelInputList.append(torch.unsqueeze(torch.from_numpy(arr), 0).to(torch.device('cpu')))
 
         return modelInputList, endPriceList
-
 
     def reshapeData(self, data: np.ndarray) -> list:
         dataList = [data]
@@ -497,9 +510,12 @@ class Preprocessor:
                 mergedDf = self.featureDataMergeService.mergeFeatureData(mergedDf, feature_df)
         return mergedDf
 
+
 '''
     PreProcessing Data Before transforming into tensor
 '''
+
+
 class CorrectData(object):
     def __call__(self, sample):
         return sample
@@ -508,6 +524,8 @@ class CorrectData(object):
 '''
     Convert ndarrays in sample to Tensors.
 '''
+
+
 class ToTensor(object):
 
     def __call__(self, sample):
@@ -521,7 +539,7 @@ class ToTensor(object):
         }        
         '''
         return {
-            #from 1, 10, 10 -> 1, 1, 10, 10 (in chanals added
+            # from 1, 10, 10 -> 1, 1, 10, 10 (in chanals added
             'x': torch.from_numpy(arr),
             'y': torch.tensor(np.array(sample['label']))
         }
