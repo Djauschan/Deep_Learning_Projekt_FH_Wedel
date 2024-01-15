@@ -13,26 +13,32 @@ class LstmInterface(AbstractModel):
         days_difference = len(business_days)
         path = "statisticmodels/lstmMVP_V2.py"
         all_predictions = pd.DataFrame()
-        
+       
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
-
         # Konvertieren in eine pandas Series
         business_days_series = list(business_days)
+        #all_predictions = prediction
+        # print(all_predictions)
+        #initialisierung der StockModel Klasse
+        stock_model = lstmMVP.StockModel("AAPL")
+        all_predictions = stock_model.predict_x_days(days_difference, pd.to_datetime(timestamp_start))
+        print(all_predictions)
 
-        for filename in os.listdir(path):
-            if filename.endswith(".h5"):  
-                model_path = os.path.join(path, filename)
-                # LSTM modell laden
-                model = lstmMVP.load_model(model_path)                
-                prediction = model.predict_x_days(days_difference, timestamp_start)  
+        # Da Nur Apple genommen wird, wird alles vorerst kommentiert
+        # for filename in os.listdir(path):
+        #     if filename.endswith(".h5"):  
+        #         model_path = os.path.join(path, filename)
+        #         # LSTM modell laden
+        #         model = lstmMVP.load_model(model_path)                
+        #         prediction = model.predict_x_days(2, "2021-01-04")  
 
-                prediction['ds'] =  business_days_series
-                prediction['symbol'] = filename[:-4]
-
-                all_predictions = pd.concat([all_predictions, prediction], ignore_index=True)
-                print(all_predictions)
-                
+        #         prediction['ds'] =  business_days_series
+        #         prediction['symbol'] = filename[:-4]
+          
+        #         all_predictions = pd.concat([all_predictions, prediction], ignore_index=True)
+        #         print(all_predictions)
+        
         return all_predictions 
     
     def load_data(self) -> None:
