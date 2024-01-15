@@ -3,16 +3,15 @@ from abc import ABC
 import numpy as np
 import pandas as pd
 
-from predictionApi.abstract_model import AbstractModel
-from predictionApi.preprocessingServices import Preprocessor, ModelImportService, ConfigService
+from CNN.abstract_model import AbstractModel
+from CNN.preprocessingServices import Preprocessor, ModelImportService, ConfigService
 
 
 class ModelExe(AbstractModel):
 
     def __init__(self):
         self.configService = ConfigService()
-        #configPath = "../../../CNN/predictionApi/configDir/PredictionConfig.yml"
-        configPath = "C:\\Projekte\ProjectDeepLearning_CNN\\project_deeplearning\\src\\predictionApi\\configDir\\PredictionConfig.yml"
+        configPath = "./CNN/predictionApi/configDir/PredictionConfig.yml"
         self.parameters = self.configService.loadModelConfig(configPath)
         self.preprocessor = Preprocessor(self.parameters)
         self.gafData = np.zeros((1, 1))
@@ -41,7 +40,14 @@ class ModelExe(AbstractModel):
         """
         toReturnDataFrame = pd.DataFrame(columns=["Timestamp", "AAPL"])
         interval = 480  # can not be changed, model is trained on this specific interval
+        '''
+            ModelInput muss (1,9,20,20) sein => (batch, anz_feat, length_singleTs, length_singleTs)
+        '''
         modelInputList, endPriceList = self.preprocessor.pipeline(timestamp_start, timestamp_end)
+        if modelInputList == -1:
+            toReturnDataFrame.iloc[0] = [timestamp_start, -1]
+            return toReturnDataFrame #if -1 => timeRange to small
+
         i = 0
         for model in self.modelCollection:
             calcTimeStamp = timestamp_end + pd.Timedelta(minutes=(i+1) * interval)
@@ -74,11 +80,3 @@ class ModelExe(AbstractModel):
         """
         pass
 
-
-model_Exe = ModelExe()
-
-# model_Exe.predict(pd.Timestamp(year=2022, month=1, ))
-startDate = pd.Timestamp("2021-01-04 04:00:00")
-endDate = pd.Timestamp("2021-03-04 04:00:00")
-t = model_Exe.predict(startDate, endDate, 120)
-print(t)
