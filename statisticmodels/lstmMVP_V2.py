@@ -1,6 +1,6 @@
 # Import der benötigten Bibliotheken
 import os
-#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # Ignoriert die Tensorflow-Warnungen
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # Ignoriert die Tensorflow-Warnungen
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -22,6 +22,7 @@ class StockModel:
         else:
             self.model = self.build_model((30, 1))
 
+        
     #Load data from Djauschan & Kevin
     # def loadDataNew(self):
         
@@ -115,7 +116,7 @@ class StockModel:
             predicted_close_price = last_known_close + predicted_price_change
 
             # Hinzufügen des Datums und des geschätzten Schlusskurses zur Liste
-            prediction_data.append({'DateTime': current_timestamp, 'Close': predicted_close_price})
+            prediction_data.append({'DateTime': current_timestamp, 'AAPL': predicted_close_price})
 
             new_row = np.array([predicted_price_change])
             scaled_data = np.append(scaled_data, new_row)[-30:]
@@ -152,10 +153,12 @@ class StockModel:
         except Exception as e:
             print(f"Fehler beim Laden des Modells: {e}")
             return None
+        
+     
 
 # Instanz der StockModel Klasse erstellen
 # Wenn die TF Nachrichten zu viel werden: tf.keras.utils.disable_interactive_logging()
-file_path = "/Users/umutkurucay/Documents/Developer/LSTM_testing/Data/SQ_1min.txt"  # Pfad zur Datei
+file_path = "/Users/umutkurucay/Documents/Developer/LSTM_testing/Data/AAPL_1min.txt"  # Pfad zur Datei
 cut_off_date = '2021-01-03'  # Cut-off-Datum
 stock_name = file_path.split('/')[-1].split('_')[0] # Hier wird der Name der Aktie aus dem Dateipfad extrahiert
 #bei laden wird das Modell geladen, bei generieren wird ein neues Modell erstellt
@@ -174,9 +177,10 @@ else:
     print("Neues Modell wird generiert")
 
 stock_model = StockModel(file_path, cut_off_date)
-
+#Nicht so sauber, aber funktioniert für den MVP
+predictionTest = stock_model.predict_x_days(2, "2021-01-04")
+print(predictionTest)
 # Echten Close-Preis für die nächsten X Tage holen (nach dem Cut-off-Datum) mit dem Timestamp
-
 
 # Trainieren des Modells
 if not laden_statt_generieren:
@@ -198,6 +202,7 @@ if save_model:
 # Pfad zum geladenen Modell, None wenn ein neues Modell erstellt werden soll
 stock_model = StockModel(file_path, cut_off_date, load_model_path=load_model_path)
 
+
 def manualStart():
     timestamp_start = '2021-01-04'
     x_days = 2  # Anzahl der Tage, die vorhergesagt werden sollen
@@ -211,3 +216,4 @@ def manualStart():
     
 if False: #AUF TRUE SETZEN WENN DIESE KLASSE MANUELL GESTARTET WERDEN SOLL
     manualStart()
+
