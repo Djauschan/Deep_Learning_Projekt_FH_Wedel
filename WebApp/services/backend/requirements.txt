@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+httpx
+sqlalchemy
+pydantic==1.10.7
+bcrypt
+requests
+yahoo_fin
+yfinance
+pandas_market_calenda
+vue==3.2.45
+@vue/cli@5.0.8
