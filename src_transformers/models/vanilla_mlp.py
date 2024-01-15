@@ -17,6 +17,7 @@ class ResidualBlock(nn.Module):
        
         residual = x
         out = self.linear(x)
+        out = self.batch_norm(out)
         out = self.relu(out)
         out = out + residual # ursprünglichen Input zum Output addieren
         return out
@@ -38,7 +39,7 @@ class Multi_Layer_Perceptron(nn.Module):
         layers = [nn.Linear(seq_len_encoder * dim_encoder, hidden_dim), nn.ReLU()]
 
         # Residual Layers
-        for _ in range(6):  # 6-mal für die 6 versteckten Layer
+        for _ in range(2):  # 6-mal für die 6 versteckten Layer
             layers.append(ResidualBlock(hidden_dim))
             # Optional: Dropout einfügen
             # if dropoutrate > 0:

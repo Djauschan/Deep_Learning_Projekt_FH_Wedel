@@ -3,7 +3,7 @@ model_parameters:
   mlp:
     seq_len_encoder: 50 #96
     seq_len_decoder: 10 #24   # Philipp gibt Info wie viele Zeitschritte wir predicten
-    hidden_dim: 400
+    hidden_dim: 200
     dropoutrate: 0.3
     # hier Parameter hinzufügen -> werden dem Modell als Parameter übergeben 
 training_parameters:
@@ -12,7 +12,7 @@ training_parameters:
   learning_rate: 0.0025
   loss: "mse" #Options: "mse", "rmse", "rmsle"
   optimizer: "adam" # Options: "adam", "sgd"
-  weight_decay: 0.3
+  weight_decay: 0.0
   momentum: 0.1
   seed: 42
   patience: 10000
