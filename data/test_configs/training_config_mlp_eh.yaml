@@ -31,7 +31,7 @@ dataset_parameters:
   encoder_symbols:
   # stocks
     - "AAPL" # Apple
-    # - "AAL" # American Airlines
+    - "AAL" # American Airlines
     # - "AMD" # Advanced Micro Devices
     # - "C" # Citigroup
     # - "MRNA" # Moderna
@@ -59,7 +59,7 @@ dataset_parameters:
     # - cos
   decoder_symbols:
     - "AAPL" # Apple
-    # - "AAL" # American Airlines
+    - "AAL" # American Airlines
     # - "AMD" # Advanced Micro Devices
     # - "C" # Citigroup
     # - "MRNA" # Moderna
