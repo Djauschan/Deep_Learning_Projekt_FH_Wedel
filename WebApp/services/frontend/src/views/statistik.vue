@@ -107,6 +107,7 @@
         :data-source="combinedData" type="line" value-field="ETSValue" argument-field="date">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
       <DxValueAxis name="price" position="left">
@@ -114,7 +115,7 @@
         <DxLabel>
           <DxFormat type="currency" />
         </DxLabel>
-      </DxValueAxis>7
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -123,6 +124,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'CNN Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -131,6 +142,16 @@
     <DxCommonSeriesSettings argument-field="date" type="line" />
     <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line">
     </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
    </DxChart>
   </div>
@@ -139,6 +160,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'LSTM Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -147,6 +178,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'Arima Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -156,6 +197,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'historicAverage Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -165,6 +216,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'windowAverage Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -174,6 +235,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'naive Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -183,6 +254,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'theta Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -192,6 +273,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'ETS Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -201,6 +292,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'linearRegression Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -210,6 +311,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -219,6 +330,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
@@ -228,6 +349,16 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'svm Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
