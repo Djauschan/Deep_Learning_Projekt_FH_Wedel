@@ -208,8 +208,9 @@ def predict_cnn():
     prediction = prediction.astype("Float64")
     print(prediction)
 
+    prediction_data = prediction["AAPL"]
     data = [{"date": date, "value": value}
-            for date, value in prediction.items()]
+            for date, value in prediction_data.items()]
 
     return data
 
