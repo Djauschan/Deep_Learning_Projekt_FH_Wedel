@@ -207,7 +207,6 @@ class TimeModificationService:
         data.insert(loc=0, column='posixMinute', value=conti_minute_arr)
         if dropDateTime:
             data.drop(columns=['DateTime'], inplace=True)
-        print(data.columns)
         return data
 
     def addPosixTimeStamp(self, df_DateTimeColumn):
@@ -239,12 +238,12 @@ class TimeSeriesBuilder:
             :returns
                 a numpy array, with dimension (length, len(features)), where the filtered series is in
         """
+        length = length + 1 #add 1 more item bc differencing removing first
         COUNT_OF_FEATURES = len(features)
         RETRY_TRESHOLD = 5
         df_length = len(df)
         first_ele = df.iloc[0]
         last_ele = df.iloc[(df_length - 1)]
-        current_ele = first_ele
         resultNp = np.zeros((length, COUNT_OF_FEATURES))
         dateTimeArr = np.zeros(length).astype(datetime)
         # First and Last element are selected from User and are filtered within dataLoadingProcess
@@ -256,7 +255,7 @@ class TimeSeriesBuilder:
         x: int = 0  # counter for series entry
         validSeries = True
         while i < df_length and validSeries:
-            while x < length - 1:
+            while x < length:
                 optimal_minute = int(previousCandidate['posixMinute']) + interval
                 # get the index of candidate with optimal distance, or the clostest alternative
                 candidateIdx, minimalAbw, closestCandidateIdx = self._binary_search(df, i, df_length - 1,
@@ -296,7 +295,7 @@ class TimeSeriesBuilder:
                     previousCandidateIdx = i
                     x = length
 
-            if x == length - 1:
+            if x == length:
                 validSeries = False
 
             i += 1
@@ -427,8 +426,6 @@ class ModelImportService:
     def loadModel(self, full_path):
         device = torch.device('cpu')
         model = torch.jit.load(full_path, map_location=device)
-        # model = torch.jit.load(full_path)
-        # model.to(torch.device('cpu'))
         model.eval()
         return model
 
@@ -475,12 +472,16 @@ class Preprocessor:
                                                                  FEATURES_DATA_TO_LOAD, stock_data)
 
                 data, dateTimeArr = self.timeSeriesBuilderService.buildTimeSeries(data, FEATURES)
-                print(dateTimeArr)
-                # All feature Data will be differenced
-                if len(data) != 20:
+                #debug timeseries dateTime Array
+                #print(dateTimeArr)
+
+                # if not (length + 1) -> data not correct
+                if len(data) != 21:
                     return -1, -1
 
                 data = self.differenceService.transformSeries(data)
+                #remove first item difference of 0
+                data = data[1:]
                 # Only the Data will be normalised
                 data = self.normalisationService.normMinusPlusOne(data)
                 # the final model inputData
@@ -490,10 +491,6 @@ class Preprocessor:
                 modelInputList.append(torch.unsqueeze(torch.from_numpy(arr), 0).to(torch.device('cpu')))
 
         return modelInputList, endPriceList
-
-    def reshapeData(self, data: np.ndarray) -> list:
-        dataList = [data]
-        return dataList
 
     def __getAndMergeFeatureDataWithMainData(self, startate: pd.Timestamp, endDate, rsc_folder: str,
                                              FEATURES_TO_LOAD: list,
@@ -509,37 +506,3 @@ class Preprocessor:
                 feature_df = self.timeModificationService.transformTimestap(feature_df, True)
                 mergedDf = self.featureDataMergeService.mergeFeatureData(mergedDf, feature_df)
         return mergedDf
-
-
-'''
-    PreProcessing Data Before transforming into tensor
-'''
-
-
-class CorrectData(object):
-    def __call__(self, sample):
-        return sample
-
-
-'''
-    Convert ndarrays in sample to Tensors.
-'''
-
-
-class ToTensor(object):
-
-    def __call__(self, sample):
-        arr = np.array(sample['data'])
-        '''
-        für 1 = channal = 1 feature
-        return {
-            #from 1, 10, 10 -> 1, 1, 10, 10 (in chanals added
-            'x': torch.unsqueeze(torch.from_numpy(arr), 0),
-            'y': torch.tensor(np.array(sample['label']))
-        }        
-        '''
-        return {
-            # from 1, 10, 10 -> 1, 1, 10, 10 (in chanals added
-            'x': torch.from_numpy(arr),
-            'y': torch.tensor(np.array(sample['label']))
-        }
