@@ -1,7 +1,7 @@
 use_gpu: true
 model_parameters:
   transformer:
-    num_heads: 4
+    num_heads: 1
     num_layers: 2
     d_ff: 200
     seq_len_encoder: 96
@@ -24,7 +24,7 @@ dataset_parameters:
   first_date: '2019-01-01'
   last_date: '2020-12-31' # YYYY-MM-DD Last date of the data to be read in
   data_usage_ratio: 1 # Only the last 50% of the read data are used in the dataset
-  subseries_amount: 2 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
+  subseries_amount: 1 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
   validation_split: 0.2 # The last 10% of timestamps in a subseries are used for validation
   create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
   scaler: "QuantileTransformer" # Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
