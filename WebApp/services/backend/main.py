@@ -1,16 +1,30 @@
 import datetime as DT
+
 import bcrypt
 import crud
 import models
 import pandas as pd
 import schemas
+from ann.ML_Modelle.ML_PredictionInterface import (
+    ABC_GradientBoostingModel,
+    ABC_LinearRegressionModel,
+    ABC_RandomForestModel,
+    ABC_SVMModel,
+)
+from ann.statisticmodels.PredicitonInterface import (
+    ArimaInterface,
+    ETSInterface,
+    NaiveInterface,
+    ThetaInterface,
+    WindowAverageInterface,
+    historicAverageInterface,
+)
+from CNN.model_exe import ModelExe
 from database import SessionLocal, engine
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from transformer_interface import TransformerInterface
-from CNN.model_exe import ModelExe
-from ann.statisticmodels.PredicitonInterface import ArimaInterface, ETSInterface, historicAverageInterface, ThetaInterface, NaiveInterface, WindowAverageInterface
 
 # Create tables in the database based on the model definitions
 models.Base.metadata.create_all(bind=engine)
@@ -35,6 +49,8 @@ app.add_middleware(
 )
 
 # DB Dependency
+
+
 def get_db():
     db = SessionLocal()
 
@@ -44,11 +60,15 @@ def get_db():
         db.close()
 
 # test method to get Stock data for n days
+
+
 @app.get("/getStock/")
 def get_stock_days(stock_symbol: str, days_back: int, db: Session = Depends(get_db)):
     return crud.get_stock_days(stock_symbol=stock_symbol, n=days_back, db=db)
 
 # post method to delete table "users"
+
+
 @app.post("/deleteUsers/")
 def delete_users(db: Session = Depends(get_db)):
     db_delete_users = crud.delete_users(db)
@@ -57,6 +77,8 @@ def delete_users(db: Session = Depends(get_db)):
     # return crud.get_users(db=db, skip=0, limit=100)
 
 # post method to delete a single user from table "users" by id
+
+
 @app.post("/deleteUser/{username}")
 def delete_user(username: str, db: Session = Depends(get_db)):
     db_delete_user = crud.delete_user(db, username)
@@ -65,6 +87,8 @@ def delete_user(username: str, db: Session = Depends(get_db)):
     return {"message": "User deleted successfully", "status_code": 200}
 
 # post method to create a user into table "users"
+
+
 @app.post("/createUser/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user_email = crud.get_user_by_email(db, email=user.email)
@@ -162,7 +186,8 @@ def predict_transformer(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"close {stock_symbol.upper()}"]
-    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
 
     return data
 
@@ -199,7 +224,8 @@ def predict_arima(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
 
     return data
 
@@ -217,7 +243,8 @@ def predict_ets(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
 
     return data
 
@@ -235,9 +262,11 @@ def predict_historicAverage(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
 
     return data
+
 
 @app.get("/predict/theta")
 def predict_theta(stock_symbol: str):
@@ -252,9 +281,11 @@ def predict_theta(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
 
     return data
+
 
 @app.get("/predict/naive")
 def predict_naive(stock_symbol: str):
@@ -269,9 +300,11 @@ def predict_naive(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
 
     return data
+
 
 @app.get("/predict/windowAverage")
 def predict_windowAverage(stock_symbol: str):
@@ -286,7 +319,72 @@ def predict_windowAverage(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
+
+    return data
+
+
+@app.get("/predict/linearRegression")
+def predict_linearRegression(stock_symbol: str):
+    linear_regression_interface = ABC_LinearRegressionModel()
+
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-05")
+    prediction = linear_regression_interface.predict(start_date, end_date, 120)
+
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction[f"{stock_symbol.upper()}_Predicted_Close"]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
+
+    return data
+
+
+@app.get("/predict/randomForest")
+def predict_randomForest(stock_symbol: str):
+    random_forest_interface = ABC_RandomForestModel()
+
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-05")
+    prediction = random_forest_interface.predict(start_date, end_date, 120)
+
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction[f"{stock_symbol.upper()}_Predicted_Close"]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
+
+    return data
+
+
+@app.get("/predict/gradientBoost")
+def predict_gradientBoost(stock_symbol: str):
+    gradient_boost_interface = ABC_GradientBoostingModel()
+
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-05")
+    prediction = gradient_boost_interface.predict(start_date, end_date, 120)
+
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction[f"{stock_symbol.upper()}_Predicted_Close"]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
+
+    return data
+
+
+@app.get("/predict/svm")
+def predict_svm(stock_symbol: str):
+    svm_interface = ABC_SVMModel()
+
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-05")
+    prediction = svm_interface.predict(start_date, end_date, 120)
+
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction["Predicted_Close"]
+    data = [{"date": date, "value": value}
+            for date, value in prediction_data.items()]
 
     return data
 
