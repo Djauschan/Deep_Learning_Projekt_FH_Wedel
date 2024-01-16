@@ -19,6 +19,7 @@ from ann.statisticmodels.PredicitonInterface import (
     WindowAverageInterface,
     historicAverageInterface,
 )
+# from ann.statisticmodels.lstm_predictionInterface import LstmInterface
 from CNN.model_exe import ModelExe
 from database import SessionLocal, engine
 from fastapi import Depends, FastAPI, HTTPException
@@ -206,9 +207,10 @@ def predict_cnn():
     return prediction
 
 
-@app.get("/predict/lstm")
-def predict_lstm(stock_symbol: str):
-    return crud.predict_lstm(stock_symbol=stock_symbol)
+# @app.get("/predict/lstm")
+# def predict_lstm(stock_symbol: str):
+#     lstm = LstmInterface()
+#     return lstm.predict('2021-01-04', '2021-01-06', 120)
 
 
 @app.get("/predict/arima")
@@ -350,7 +352,7 @@ def predict_randomForest(stock_symbol: str):
     prediction = random_forest_interface.predict(start_date, end_date, 120)
 
     # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"{stock_symbol.upper()}_Predicted_Close"]
+    prediction_data = prediction[f"Predicted_Close"]
     data = [{"date": date, "value": value}
             for date, value in prediction_data.items()]
 
@@ -365,8 +367,10 @@ def predict_gradientBoost(stock_symbol: str):
     end_date = pd.to_datetime("2021-01-05")
     prediction = gradient_boost_interface.predict(start_date, end_date, 120)
 
+    print(prediction)
+    
     # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"{stock_symbol.upper()}_Predicted_Close"]
+    prediction_data = prediction[f"Predicted_Close"]
     data = [{"date": date, "value": value}
             for date, value in prediction_data.items()]
 

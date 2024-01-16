@@ -1,5 +1,5 @@
 from abstract_model import AbstractModel
-import lstmMVP_V2 as lstmMVP
+import ann.statisticmodels.lstmMVP_V2 as lstmMVP
 #from tensorflow.keras.models import load_model
 import pandas as pd 
 import os
@@ -21,9 +21,9 @@ class LstmInterface(AbstractModel):
         #all_predictions = prediction
         # print(all_predictions)
         #initialisierung der StockModel Klasse
-        stock_model = lstmMVP.StockModel("AAPL")
+        stock_model = lstmMVP.StockModel("..\..\..\data\Aktien\AAPL_1min.txt", '2021-03-03')
         all_predictions = stock_model.predict_x_days(days_difference, pd.to_datetime(timestamp_start))
-        print(all_predictions)
+        return all_predictions
 
         # Da Nur Apple genommen wird, wird alles vorerst kommentiert
         # for filename in os.listdir(path):
@@ -49,3 +49,11 @@ class LstmInterface(AbstractModel):
 
     def load_model(self) -> None:
         pass
+
+
+def main():
+    test = LstmInterface()
+    print(test.predict('2021-01-04', '2021-01-06', 120))
+
+if __name__ == '__main__':
+    main()
