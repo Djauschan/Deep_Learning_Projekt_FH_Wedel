@@ -11,7 +11,7 @@ MODELS_TO_LOAD: [
 
 RSC_DATA_FILES: [
   #key: [fileName, [columns in file], [relevant feature columns], y-variable]
-  AAPL: ["AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "d"], ["DateTime", "Open"]]
+  AAPL: ["AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]]
 ]
 
 FEATURES_DATA_TO_LOAD : [

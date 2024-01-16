@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from transformer_interface import TransformerInterface
 from CNN.model_exe import ModelExe
+from ann.statisticmodels.PredicitonInterface import ArimaInterface, ETSInterface, historicAverageInterface, ThetaInterface, NaiveInterface, WindowAverageInterface
 
 # Create tables in the database based on the model definitions
 models.Base.metadata.create_all(bind=engine)
@@ -159,6 +160,7 @@ def predict_transformer(stock_symbol: str):
     end_date = pd.to_datetime("2021-01-06")
     prediction = transformer_interface.predict(start_date, end_date)
 
+
     return prediction[f"close {stock_symbol.upper()}"]
 
 
@@ -167,8 +169,8 @@ def predict_cnn():
     print("starting to predict")
 
     cnn_interface = ModelExe()
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-02-06")
+    start_date = pd.to_datetime("2021-2-01")
+    end_date = pd.to_datetime("2021-03-03")
 
     prediction = cnn_interface.predict(start_date, end_date, 120)
     print(prediction)
@@ -183,7 +185,83 @@ def predict_lstm(stock_symbol: str):
 
 @app.get("/predict/arima")
 def predict_arima(stock_symbol: str):
-    return crud.predict_arima(stock_symbol=stock_symbol)
+    arima_interface = ArimaInterface()
+
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-05")
+    prediction = arima_interface.predict(start_date, end_date, 120)
+    prediction.set_index('ds', inplace=True)
+
+    prediction = prediction.astype("Float64")
+
+    return prediction[f"{stock_symbol.upper()}"]
+
+
+@app.get("/predict/ETS")
+def predict_ets(stock_symbol: str):
+    ets_interface = ETSInterface()
+
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-05")
+    prediction = ets_interface.predict(start_date, end_date, 120)
+    prediction.set_index('ds', inplace=True)
+
+    prediction = prediction.astype("Float64")
+
+    return prediction[f"{stock_symbol.upper()}"]
+
+
+@app.get("/predict/historicAverage")
+def predict_historicAverage(stock_symbol: str):
+    historicAverage_interface = historicAverageInterface()
+
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-05")
+    prediction = historicAverage_interface.predict(start_date, end_date, 120)
+    prediction.set_index('ds', inplace=True)
+
+    prediction = prediction.astype("Float64")
+
+    return prediction[f"{stock_symbol.upper()}"]
+
+@app.get("/predict/theta")
+def predict_theta(stock_symbol: str):
+    theta_interface = ThetaInterface()
+
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-05")
+    prediction = theta_interface.predict(start_date, end_date, 120)
+    prediction.set_index('ds', inplace=True)
+
+    prediction = prediction.astype("Float64")
+
+    return prediction[f"{stock_symbol.upper()}"]
+
+@app.get("/predict/naive")
+def predict_naive(stock_symbol: str):
+    naive_interface = NaiveInterface()
+
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-05")
+    prediction = naive_interface.predict(start_date, end_date, 120)
+    prediction.set_index('ds', inplace=True)
+
+    prediction = prediction.astype("Float64")
+
+    return prediction[f"{stock_symbol.upper()}"]
+
+@app.get("/predict/windowAverage")
+def predict_windowAverage(stock_symbol: str):
+    windowAverage_interface = WindowAverageInterface()
+
+    start_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-01-05")
+    prediction = windowAverage_interface.predict(start_date, end_date, 120)
+    prediction.set_index('ds', inplace=True)
+
+    prediction = prediction.astype("Float64")
+
+    return prediction[f"{stock_symbol.upper()}"]
 
 
 @app.get("/load/data")
