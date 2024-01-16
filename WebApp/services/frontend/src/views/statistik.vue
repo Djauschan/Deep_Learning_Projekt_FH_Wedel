@@ -708,8 +708,8 @@ export default {
       this.showETSLine = true;
       this.showlinearRegressionLine = true;
       this.showsvmLine = true;
-      //this.showrandomForestLine = true;
-      //this.showgradientBoostLine = true;
+      this.showrandomForestLine = true;
+      this.showgradientBoostLine = true;
       //this.showLSTMLine = true;
       //this.showCNNLine = true;
     },
@@ -1121,8 +1121,8 @@ export default {
       this.ETSData = await this.load_ETS_data();
       this.linearRegressionData = await this.load_linearRegression_data();
       this.svmData = await this.load_svm_data();
-      //this.randomForestData = await this.load_randomForest_data();
-      //this.gradientBoostData = await this.load_gradientBoost_data();
+      this.randomForestData = await this.load_randomForest_data();
+      this.gradientBoostData = await this.load_gradientBoost_data();
       //this.LSTMData = await this.load_LSTM_data();
       //this.CNNData = await this.load_CNN_data();
       
