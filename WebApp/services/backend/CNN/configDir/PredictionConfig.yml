@@ -1,0 +1,31 @@
+# Model Config
+### TEST CONFIG FOR MVP
+
+RSC_ROOT: "../../../data/"
+STOCK_FOLDER: "Aktien/"
+ETF_FOLDER: "ETF/"
+MODEL_FOLDER: "./CNN\/modelDir/"
+MODELS_TO_LOAD: [
+  "20_120_1_AAPL1412024_1623.pt"
+]
+
+RSC_DATA_FILES: [
+  #key: [fileName, [columns in file], [relevant feature columns], y-variable]
+  AAPL: ["AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "d"], ["DateTime", "Open"]]
+]
+
+FEATURES_DATA_TO_LOAD : [
+  #key: [fileName, [columns in file], [relevant feature columns]
+  EWA: ["EWA_1min.txt", ["DateTime", "Open_EWA", "a", "b", "c", "d"], ["DateTime", "Open_EWA"]],
+  EWC: ["EWC_1min.txt", ["DateTime", "Open_EWC", "a", "b", "c", "d"], ["DateTime", "Open_EWC"]],
+  EWG: ["EWG_1min.txt", ["DateTime", "Open_EWG", "a", "b", "c", "d"], ["DateTime", "Open_EWG"]],
+  EWJ: ["EWJ_1min.txt", ["DateTime", "Open_EWJ", "a", "b", "c", "d"], ["DateTime", "Open_EWJ"]],
+  EWU: ["EWU_1min.txt", ["DateTime", "Open_EWU", "a", "b", "c", "d"], ["DateTime", "Open_EWU"]],
+  INDA: ["INDA_1min.txt", ["DateTime", "Open_INDA", "a", "b", "c", "d"], ["DateTime", "Open_INDA"]],
+  MCHI: ["MCHI_1min.txt", ["DateTime", "Open_MCHI", "a", "b", "c", "d"], ["DateTime", "Open_MCHI"]]
+]
+
+FEATURES: [
+  "Open", "Open_EWA", "Open_EWC", "Open_EWG", "Open_EWJ", "Open_EWU", "Open_INDA", "Open_MCHI"
+]
+
