@@ -114,7 +114,8 @@
         <DxLabel>
           <DxFormat type="currency" />
         </DxLabel>
-      </DxValueAxis>
+      </DxValueAxis>7
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -122,6 +123,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'CNN Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -129,6 +131,7 @@
     <DxCommonSeriesSettings argument-field="date" type="line" />
     <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line">
     </DxSeries>
+      <DxTooltip :enabled="true" />
    </DxChart>
   </div>
   <div class="newChart">
@@ -136,6 +139,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'LSTM Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -143,6 +147,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'Arima Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -151,6 +156,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'historicAverage Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -159,6 +165,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'windowAverage Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -167,6 +174,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'naive Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -175,6 +183,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'theta Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -183,6 +192,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'ETS Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -191,6 +201,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'linearRegression Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -199,6 +210,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -207,6 +219,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
@@ -215,6 +228,7 @@
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'svm Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
+      <DxTooltip :enabled="true" />
     </DxChart>
   </div>
 </template>
@@ -320,6 +334,12 @@ export default {
       combinedData: [],
       store: useMyPiniaStore(),
     };
+  },
+  computed: {
+    tooltip: {
+          enabled: true,
+          // Customize tooltip appearance or behavior if needed
+        },
   },
   methods: {
     async updateCombinedData() {
@@ -563,36 +583,6 @@ export default {
       //this.showCNNLine = true;
     },
 
-    customizeTooltip(pointInfo) {
-      if (!pointInfo.valueText.includes('h:')) {
-        return {
-          text: `Volume: ${(pointInfo.valueText / 1000000).toFixed(2)}M`
-        };
-      } else {
-        return {
-          text:
-            `
-            Date: $${(pointInfo.argument)}<br/>
-            Open: $${Number(pointInfo.openValue).toFixed(2)}<br/>
-            Close: $${Number(pointInfo.closeValue).toFixed(2)}<br/>
-            High: $${Number(pointInfo.highValue).toFixed(2)}<br/>
-            Low: $${Number(pointInfo.lowValue).toFixed(2)}<br/>
-            `,
-        };
-      }
-    },
-    customizeStockPoint(point) {
-      const stockData = this.dataSource.find(data => data.date === point.argument);
-      if (stockData) {
-        const color = stockData.close >= stockData.open ? 'green' : 'red';
-        return {
-          color: color,
-          hoverStyle: {
-            color: color
-          }
-        };
-      }
-    },
     async get_stock_data(stock_symbol, days_back) {
       try {
         const response = await axios.get(this.store.API + "/getStock", {
