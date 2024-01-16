@@ -110,17 +110,6 @@ def get_stock_days(db: Session, stock_symbol: str, n: int):
 
     for index, row in stock_data.iterrows():
         return_data.append({"date": index.strftime('%m/%d/%y'), "open": row["Open"], "high": row["High"], "low": row["Low"], "close": row["Close"], "volume": row["Volume"]})
-
-    us_dollar = "x"
-    s_p500 = "^GSPC"
-    nasdaq = "^IXIC"
-    gold = "GC=F"
-    silver = "SI=F"
-    energy = "^DJUSEN"
-    nickel = "NICKELUSD=X"
-    industrial_average = "^DJI"
-    internet = "x"
-    whilshire = "x"
     
     return return_data
 

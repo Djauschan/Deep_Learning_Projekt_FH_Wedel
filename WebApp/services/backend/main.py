@@ -160,8 +160,11 @@ def predict_transformer(stock_symbol: str):
     end_date = pd.to_datetime("2021-01-06")
     prediction = transformer_interface.predict(start_date, end_date)
 
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction[f"close {stock_symbol.upper()}"]
+    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
 
-    return prediction[f"close {stock_symbol.upper()}"]
+    return data
 
 
 @app.get("/predict/cnn")
@@ -194,7 +197,11 @@ def predict_arima(stock_symbol: str):
 
     prediction = prediction.astype("Float64")
 
-    return prediction[f"{stock_symbol.upper()}"]
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction[f"{stock_symbol.upper()}"]
+    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+
+    return data
 
 
 @app.get("/predict/ETS")
@@ -208,7 +215,11 @@ def predict_ets(stock_symbol: str):
 
     prediction = prediction.astype("Float64")
 
-    return prediction[f"{stock_symbol.upper()}"]
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction[f"{stock_symbol.upper()}"]
+    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+
+    return data
 
 
 @app.get("/predict/historicAverage")
@@ -222,7 +233,11 @@ def predict_historicAverage(stock_symbol: str):
 
     prediction = prediction.astype("Float64")
 
-    return prediction[f"{stock_symbol.upper()}"]
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction[f"{stock_symbol.upper()}"]
+    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+
+    return data
 
 @app.get("/predict/theta")
 def predict_theta(stock_symbol: str):
@@ -235,7 +250,11 @@ def predict_theta(stock_symbol: str):
 
     prediction = prediction.astype("Float64")
 
-    return prediction[f"{stock_symbol.upper()}"]
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction[f"{stock_symbol.upper()}"]
+    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+
+    return data
 
 @app.get("/predict/naive")
 def predict_naive(stock_symbol: str):
@@ -248,7 +267,11 @@ def predict_naive(stock_symbol: str):
 
     prediction = prediction.astype("Float64")
 
-    return prediction[f"{stock_symbol.upper()}"]
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction[f"{stock_symbol.upper()}"]
+    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+
+    return data
 
 @app.get("/predict/windowAverage")
 def predict_windowAverage(stock_symbol: str):
@@ -261,7 +284,11 @@ def predict_windowAverage(stock_symbol: str):
 
     prediction = prediction.astype("Float64")
 
-    return prediction[f"{stock_symbol.upper()}"]
+    # Convert the prediction to a list of dictionaries
+    prediction_data = prediction[f"{stock_symbol.upper()}"]
+    data = [{"date": date, "value": value} for date, value in prediction_data.items()]
+
+    return data
 
 
 @app.get("/load/data")
