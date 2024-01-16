@@ -51,7 +51,7 @@ class Multi_Layer_Perceptron(nn.Module):
         self.layer_stack = nn.Sequential(*layers)
 
     def forward(self, x, _):
-        x.to(self.device)
+        x.to(self.device) #TODO: Check if required else: delete (@Eira)
 
         # Flatten the input (batch_size, seq_len, dim) -> (batch_size, seq_len * dim)
         # The volume of the stock and the encoding for start off date an end of date are still in the input

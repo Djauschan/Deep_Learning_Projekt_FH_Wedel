@@ -371,6 +371,8 @@ class Transformer(nn.Module):
 
     def forward(self, src, tgt):
 
+        self.device = src.device
+
         # Generate masks for Inputs (src) and Targets (tgt)
         src_mask = self.generate_mask(src, no_peak=False)
         tgt_mask = self.generate_mask(tgt, no_peak=True)
@@ -383,7 +385,6 @@ class Transformer(nn.Module):
         n_tgt_feature = tgt.shape[2]
         dec_input = torch.cat(
             (src[:, -1, -n_tgt_feature:].unsqueeze(1), tgt[:, :-1, :]), dim=1)
-        #dec_input = tgt #TODO: remove this line
 
         dec_mask.to(self.device)
         dec_input.to(self.device)
@@ -397,8 +398,6 @@ class Transformer(nn.Module):
         tgt_embedded = self.dropout(
             self.positional_encoding_decoder(dec_input)
         )
-        # src_embedded = src
-        # tgt_embedded = dec_input
 
         # Forward encoder layers
         enc_output = src_embedded
