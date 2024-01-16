@@ -25,7 +25,6 @@ from PredicitonInterface import NaiveInterface
 from PredicitonInterface import WindowAverageInterface
 
 
-
 model = WindowAverageInterface()
 print(model.predict(pd.to_datetime('2021-01-04'), pd.to_datetime('2021-01-06'), 4))
 

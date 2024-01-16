@@ -22,7 +22,7 @@ class Exponentialsmoothing():
     def fitAndSave(self, trainData, currentSymbol):
         model=StatsForecast([AutoETS()], freq='B')
         model.fit(trainData)
-        path="statisticmodels\models\savedModels\\"+currentSymbol+'_ETS.pkl' 
+        path="statisticmodels\models\savedModelsETS\\"+currentSymbol+'.pkl' 
         return model.save(path)
 
     def loadAndPredict(self, path,horizon):
