@@ -39,10 +39,11 @@ class ModelExe(AbstractModel):
         #10.01.2022 start
         #13.01.2022 end
         tmpTimeStampStart = timestamp_start
-        timestamp_start = timestamp_start - pd.Timedelta(days=10)
+        timestamp_start = timestamp_start - pd.Timedelta(days=13)
         ts_timeStampEnd = tmpTimeStampStart
         toReturnDataFrame = pd.DataFrame(columns=["Timestamp", "AAPL"])
-        ahead = [1, 4, 8] #3 models predict, 1*interval ahead, 3*interval..
+        timeStamp = [pd.Timestamp("2021-01-04 9:30"), pd.Timestamp("2021-01-04 16:00"), pd.Timestamp("2021-01-05 9:30")]
+        # ahead = [1, 4, 8] #3 models predict, 1*interval ahead, 3*interval..
         interval = 120 #fixed, model trained on
         '''
         ModelInput muss (1,9,20,20) sein => (batch, anz_feat, length_singleTs, length_singleTs)
@@ -52,12 +53,13 @@ class ModelExe(AbstractModel):
         i = 0
         calcTimeStamp = tmpTimeStampStart
         for model in self.modelCollection:
-            calcTimeStamp = calcTimeStamp + pd.Timedelta(minutes=(interval * ahead[i]))
-            if 9 > calcTimeStamp.hour or calcTimeStamp.hour > 17:
-                nextDay: pd.Timestamp = calcTimeStamp + timedelta(days=1)
-                nextDayStartDay: pd.Timestamp = pd.Timestamp(year=nextDay.year, month=nextDay.month, day=nextDay.day,
-                hour=9, minute=30, second=0)
-                calcTimeStamp = nextDayStartDay
+            # calcTimeStamp = calcTimeStamp + pd.Timedelta(minutes=(interval * ahead[i]))
+            # if 9 > calcTimeStamp.hour or calcTimeStamp.hour > 17:
+            #     nextDay: pd.Timestamp = calcTimeStamp + timedelta(days=1)
+            #     nextDayStartDay: pd.Timestamp = pd.Timestamp(year=nextDay.year, month=nextDay.month, day=nextDay.day,
+            #     hour=9, minute=30, second=0)
+
+            calcTimeStamp = timeStamp[i]
             # different input per Modell possible, but not for MVP
             y_change = model.forward(modelInputList[0])
             y_price = self._calcThePriceFromChange(y_change.item(), endPriceList[0])

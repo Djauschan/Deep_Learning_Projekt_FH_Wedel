@@ -226,9 +226,9 @@ def predict_arima(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value}
+    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
-
+    
     return data
 
 
@@ -245,7 +245,7 @@ def predict_ets(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value}
+    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
 
     return data
@@ -264,7 +264,7 @@ def predict_historicAverage(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value}
+    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
 
     return data
@@ -283,7 +283,7 @@ def predict_theta(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value}
+    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
 
     return data
@@ -302,7 +302,7 @@ def predict_naive(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value}
+    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
 
     return data
@@ -321,7 +321,7 @@ def predict_windowAverage(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": date, "value": value}
+    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
 
     return data
@@ -337,7 +337,7 @@ def predict_linearRegression(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"{stock_symbol.upper()}_Predicted_Close"]
-    data = [{"date": date, "value": value}
+    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
 
     return data
@@ -353,7 +353,7 @@ def predict_randomForest(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"Predicted_Close"]
-    data = [{"date": date, "value": value}
+    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
 
     return data
@@ -371,7 +371,7 @@ def predict_gradientBoost(stock_symbol: str):
     
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"Predicted_Close"]
-    data = [{"date": date, "value": value}
+    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
 
     return data
@@ -387,7 +387,7 @@ def predict_svm(stock_symbol: str):
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction["Predicted_Close"]
-    data = [{"date": date, "value": value}
+    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
 
     return data
