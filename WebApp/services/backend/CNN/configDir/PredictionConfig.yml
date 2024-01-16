@@ -23,4 +23,3 @@ FEATURES_DATA_TO_LOAD : [
 FEATURES: [
   "Open", "Volume", "Open_MCHI", "Open_IVV"
 ]
-

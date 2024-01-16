@@ -1,6 +1,7 @@
-from abc import ABC, abstractmethod
-import pandas as pd
 import typing
+from abc import ABC, abstractmethod
+
+import pandas as pd
 
 
 class AbstractModel(ABC):
@@ -11,8 +12,11 @@ class AbstractModel(ABC):
     If you have useful methods that will be usefull for all child classes, please talk to me and we can add them as non abstract methods here.
 
     """
+
     @abstractmethod
-    def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
+    def predict(
+        self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int
+    ) -> pd.DataFrame:
         """predict stock price for a given time interval
 
         Args:
@@ -27,23 +31,17 @@ class AbstractModel(ABC):
 
     @abstractmethod
     def load_data(self) -> None:
-        """load data from database and stores it in a class variable
-
-        """
+        """load data from database and stores it in a class variable"""
         pass
 
     @abstractmethod
     def preprocess(self) -> None:
-        """preprocess data and stores it in a class variable
-
-        """
+        """preprocess data and stores it in a class variable"""
         pass
 
     @abstractmethod
     def load_model(self) -> None:
-        """load model from file and stores it in a class variable
-
-        """
+        """load model from file and stores it in a class variable"""
         pass
 
     @staticmethod
