@@ -209,8 +209,7 @@ class TransformerInterface(AbstractModel):
         Returns:
             nn.Module: The loaded PyTorch model.
         """
-        model = torch.jit.load(self.model_path)
-        model.to(torch.device("cpu"))
+        model = torch.jit.load(self.model_path, map_location=torch.device("cpu"))
         # Set model device attribute to CPU so that masks are on CPU as well
         model.device = torch.device("cpu")
         model.eval()

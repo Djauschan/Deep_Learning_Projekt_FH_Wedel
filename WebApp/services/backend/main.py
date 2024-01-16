@@ -159,7 +159,7 @@ def predict_transformer(stock_symbol: str):
     end_date = pd.to_datetime("2021-01-06")
     prediction = transformer_interface.predict(start_date, end_date)
 
-    return prediction[f"close {stock_symbol}"]
+    return prediction[f"close {stock_symbol.upper()}"]
 
 
 @app.get("/predict/cnn")
@@ -168,7 +168,7 @@ def predict_cnn():
 
     cnn_interface = ModelExe()
     start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-04")
+    end_date = pd.to_datetime("2021-02-06")
 
     prediction = cnn_interface.predict(start_date, end_date, 120)
     print(prediction)

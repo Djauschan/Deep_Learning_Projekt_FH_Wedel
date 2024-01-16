@@ -9,7 +9,7 @@ from CNN.preprocessingServices import ConfigService, ModelImportService, Preproc
 class ModelExe(AbstractModel):
     def __init__(self):
         self.configService = ConfigService()
-        configPath = "./CNN/predictionApi/configDir/PredictionConfig.yml"
+        configPath = "./CNN/configDir/PredictionConfig.yml"
         # configPath = "C:\\Projekte\ProjectDeepLearning_CNN\\project_deeplearning\\src\\CNN\\configDir\\PredictionConfig.yml"
         self.parameters = self.configService.loadModelConfig(configPath)
         self.preprocessor = Preprocessor(self.parameters)
