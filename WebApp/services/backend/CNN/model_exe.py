@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from CNN.abstract_model import AbstractModel
 from CNN.preprocessingServices import ConfigService, ModelImportService, Preprocessor
+from datetime import timedelta
 
 
 class ModelExe(AbstractModel):
@@ -25,6 +26,7 @@ class ModelExe(AbstractModel):
         self.modelCollection = []
         self.load_model()
 
+        
     def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
         """predict stock price for a given time interval
         Args:
@@ -48,8 +50,14 @@ class ModelExe(AbstractModel):
         modelInputList, endPriceList = self.preprocessor.pipeline(timestamp_start, ts_timeStampEnd)
         #toReturnDataFrame.loc[1] = [timestamp_end, -1.0]
         i = 0
+        calcTimeStamp = tmpTimeStampStart
         for model in self.modelCollection:
-            calcTimeStamp = tmpTimeStampStart + pd.Timedelta(minutes=(interval * ahead[i]))
+            calcTimeStamp = calcTimeStamp + pd.Timedelta(minutes=(interval * ahead[i]))
+            if 9 > calcTimeStamp.hour or calcTimeStamp.hour > 17:
+                nextDay: pd.Timestamp = calcTimeStamp + timedelta(days=1)
+                nextDayStartDay: pd.Timestamp = pd.Timestamp(year=nextDay.year, month=nextDay.month, day=nextDay.day,
+                hour=9, minute=30, second=0)
+                calcTimeStamp = nextDayStartDay
             # different input per Modell possible, but not for MVP
             y_change = model.forward(modelInputList[0])
             y_price = self._calcThePriceFromChange(y_change.item(), endPriceList[0])
