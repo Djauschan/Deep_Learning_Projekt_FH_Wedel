@@ -149,7 +149,7 @@ class GafService:
         #self.saveGAFimg(X_gasf[0], "")
         return X_gasf
 
-    def saveGAFimg(self, data: np.ndarray, savePath: str):
+    def saveGAFimg(self, data, savePath: str):
         print('data: single imageData')
         # [[-0.95823126  0.14451426 -0.99999702 -0.14451428 -0.95746452 -0.80345206],
         # [ 0.14451426  1.         -0.14210009 -1.         -0.42388929 -0.70522997],
@@ -291,7 +291,6 @@ class TimeSeriesBuilder:
                     previousCandidateIdx = candidateIdx
                     x += 1
                 else:
-                    print("No valid candidate found")
                     previousCandidate = df.iloc[i]
                     previousCandidateIdx = i
                     x = length
