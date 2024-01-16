@@ -1,3 +1,6 @@
+#CNN
+WebApp/services/backend/CNN/__pycache__/
+
 # Custom
 runs/
 *.deb
