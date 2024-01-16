@@ -25,58 +25,36 @@ class ModelExe(AbstractModel):
         self.modelCollection = []
         self.load_model()
 
-    def predict(
-        self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int
-    ) -> pd.DataFrame:
+    def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
         """predict stock price for a given time interval
-
         Args:
-            timestamp_start (pd.Timestamp): start time of the time period
-            timestamp_end (pd.Timestamp): end time of the time period
-            interval (int): interval in minutes
-
+        timestamp_start (pd.Timestamp): start time of the time period
+        timestamp_end (pd.Timestamp): end time of the time period
+        interval (int): interval in minutes
         Returns:
-            pd.DataFrame: dataframe with columns: timestamp, 1-n prices of stock_symbols
+        pd.DataFrame: dataframe with columns: timestamp, 1-n prices of stock_symbols
         """
+        #10.01.2022 start
+        #13.01.2022 end
+        tmpTimeStampStart = timestamp_start
+        timestamp_start = timestamp_start - pd.Timedelta(days=10)
+        ts_timeStampEnd = tmpTimeStampStart
         toReturnDataFrame = pd.DataFrame(columns=["Timestamp", "AAPL"])
-        ahead = [1, 4, 8]  # 3 models predict, 1*interval ahead, 3*interval..
-        interval = 120  # fixed, model trained on
-        """
-            ModelInput muss (1,9,20,20) sein => (batch, anz_feat, length_singleTs, length_singleTs)
-        """
-        DAYS_REQUIRED = 9
-        timeRangeInSeconds = timestamp_end.timestamp() - timestamp_start.timestamp()
-        daysInTimeRange = timeRangeInSeconds / (60 * 60 * 24)
-        # print(timeRangeInSeconds)
-        # check if selected dateRange is big enough to create valid series,
-        # 8 is a randomly tested Value, can differer if holidays are in timerange
-        if daysInTimeRange >= DAYS_REQUIRED:
-            """
-            reset the time range. As building the series, starts from frist date and can only take in
-            series of length 20 with 120min interval. The Model should get the most current data within
-            the given range
-            """
-            daysBefore = daysInTimeRange - DAYS_REQUIRED
-            timestamp_start = timestamp_start + pd.Timedelta(days=daysBefore)
-            modelInputList, endPriceList = self.preprocessor.pipeline(
-                timestamp_start, timestamp_end
-            )
-            if modelInputList == -1:
-                toReturnDataFrame.loc[1] = [timestamp_end, -1]
-                return toReturnDataFrame
-        else:
-            toReturnDataFrame.loc[1] = [timestamp_end, -1]
-            return toReturnDataFrame
-
+        ahead = [1, 4, 8] #3 models predict, 1*interval ahead, 3*interval..
+        interval = 120 #fixed, model trained on
+        '''
+        ModelInput muss (1,9,20,20) sein => (batch, anz_feat, length_singleTs, length_singleTs)
+        '''
+        modelInputList, endPriceList = self.preprocessor.pipeline(timestamp_start, ts_timeStampEnd)
+        #toReturnDataFrame.loc[1] = [timestamp_end, -1.0]
         i = 0
         for model in self.modelCollection:
-            calcTimeStamp = timestamp_end + pd.Timedelta(minutes=(interval * ahead[i]))
+            calcTimeStamp = tmpTimeStampStart + pd.Timedelta(minutes=(interval * ahead[i]))
             # different input per Modell possible, but not for MVP
             y_change = model.forward(modelInputList[0])
             y_price = self._calcThePriceFromChange(y_change.item(), endPriceList[0])
             toReturnDataFrame.loc[i] = [calcTimeStamp, y_price]
             i += 1
-
         return toReturnDataFrame
 
     def _calcThePriceFromChange(self, y_change, endPrice):

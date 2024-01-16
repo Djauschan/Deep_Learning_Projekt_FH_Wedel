@@ -198,7 +198,7 @@ def predict_cnn():
     print("starting to predict")
 
     cnn_interface = ModelExe()
-    start_date = pd.to_datetime("2021-2-01")
+    start_date = pd.to_datetime("2021-02-01")
     end_date = pd.to_datetime("2021-03-03")
 
     prediction = cnn_interface.predict(start_date, end_date, 120)
