@@ -121,6 +121,8 @@ class MultiHeadAttention_Modified(nn.Module):
         """
         This function calculates the Self-Attention for one head.
         """
+        self.device = Q.device
+
         # Calculate attention scores (i.e. similarity scores between query and
         # keys)
         attn_scores = torch.matmul(
