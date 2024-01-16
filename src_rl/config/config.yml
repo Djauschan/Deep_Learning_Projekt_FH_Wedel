@@ -5,7 +5,7 @@ directories:
 agent_types: ['ma5', 'ma30', 'ma200', 'rsi']
 
 aggregation:
-  aggregation_state_size: 4 #Inputsize from each agent
+  aggregation_state_size: 5 #Inputsize from each agent
   
 q_models: # Path to q-models
   ma5: models/ma5_agent_model.pkl
@@ -16,9 +16,9 @@ q_models: # Path to q-models
 
 
 train_parameters:
-  epochs: 150 # Number of epochs to train
+  epochs: 20  # 150 # Number of epochs to train
   state_size: 20  # Number of different states that an agent can distinguish 
-  action_size: 3   # Possible actions: sell (-1), hold (0), buy (+1)
+  action_size: 3   # Possible actions: sell (+1), hold (0), buy (+2)
 
   #monitor the Portfoliovalue over the trainingcycle:
   start_cash_monitoring: 1000 #monitor the cashvalue over the trainingcycle

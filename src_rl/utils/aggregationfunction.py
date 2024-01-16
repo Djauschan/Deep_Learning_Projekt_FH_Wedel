@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def aggregate_actions(aggregation_agent, actions):
     weighted_actions = np.zeros(3)  # Angenommen, es gibt 3 mögliche Aktionen
     for i, action in enumerate(actions):
@@ -10,6 +11,8 @@ def aggregate_actions(aggregation_agent, actions):
         return np.random.choice(len(weighted_actions))
     else:
         return np.argmax(weighted_actions)
+  
+
 
 """
 #Aggregationfunction

@@ -8,6 +8,30 @@ from utils.aggregationfunction import aggregate_actions
 from environments.TraidingEnvironment_q_learning import TradingEnvironment
 from utils.read_config import Config_reader
 
+class Preprocess:
+    #RSI---------------------------------------------------------------------
+    def calculate_RSI(data, period=14):
+        if len(data) < period:
+            return 50  # Neutraler RSI-Wert bei unzureichenden Daten
+
+        delta = data['close'].diff()
+        gain = (delta.clip(lower=0)).rolling(window=period).mean()
+        loss = (-delta.clip(upper=0)).rolling(window=period).mean()
+
+        RS = gain.fillna(0) / loss.fillna(0)
+        RSI = 100 - (100 / (1 + RS))
+        return RSI.iloc[-1]  # Rückgabe des letzten RSI-Wertes
+
+    def determine_action_based_on_RSI(RSI, low_threshold=30, high_threshold=70):
+        if RSI < low_threshold:
+            return 1
+        elif RSI > high_threshold:
+            return 2
+        else:
+            return 0
+        
+
+
 class Portfolio:
     def __init__(self, cash, stocks):
         self.cash = cash
@@ -63,21 +87,17 @@ def main():
                 ma200_agent.act(state['ma200'])
             ]
 
-            # RSI-basierte Aktion hinzufügen
-            rsi_value = test_data['rsi'].iloc[env.current_step]
-            previous_rsi = test_data['rsi'].iloc[env.current_step - 1] if env.current_step > 0 else rsi_value
-            rsi_action = 0  # Halten
-            current_price = test_data['close'].iloc[env.current_step]
-            previous_price = test_data['close'].iloc[env.current_step - 1] if env.current_step > 0 else current_price
-
-            if (rsi_value < 25 and current_price > previous_price) or (previous_rsi >= 25 and rsi_value < 25):
-                rsi_action = 1  # Kaufen
-            elif (rsi_value > 75 and current_price < previous_price) or (previous_rsi <= 75 and rsi_value > 75):
-                rsi_action = 2  # Verkaufen
-            #individual_actions.append(rsi_action)
+            # RSI-basierte Aktion hinzufügen----------------------------------------------------
+            rsi_value = Preprocess.calculate_RSI(test_data.iloc[:env.current_step + 1])
+            rsi_action = Preprocess.determine_action_based_on_RSI(rsi_value)
+            individual_actions.append(rsi_action)  # Füge RSI-basierte Aktion hinzu
+            #-----------------------------------------------------------------------------------
 
             proposed_action = aggregate_actions(aggregation_agent, individual_actions)
 
+            current_price = test_data['close'].iloc[env.current_step]
+            #previous_price = test_data['close'].iloc[env.current_step - 1] if env.current_step > 0 else current_price
+            
             # Überprüfen, ob die vorgeschlagene Aktion durchführbar ist
             if (proposed_action == 1 and portfolio.last_action == 'buy') or \
                (proposed_action == 2 and portfolio.last_action == 'sell'):
@@ -99,13 +119,6 @@ def main():
             # Aktualisieren der individual_agent_actions
             for i, agent_type in enumerate(['ma5', 'ma30', 'ma200']): #, 'rsi'
                 individual_agent_actions[agent_type].append(individual_actions[i])
-
-
-    # Ergebnisse ausgeben
-    #for agent_type, agent_actions in individual_agent_actions.items():
-    #    print(f"Aktionen: {agent_actions}")
-                
-
 
     # Visualisierung
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), gridspec_kw={'height_ratios': [2, 1]})
