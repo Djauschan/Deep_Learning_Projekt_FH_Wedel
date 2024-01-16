@@ -4,7 +4,7 @@
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
     <button class="button-stock" @click="updateChart">Show Stock</button>!-->
-    <button class="button-stock" @click="updateChart">Use Test Data</button>
+    <button class="button-stock" @click="updateChart">One Click Solution</button>
     <button class="button-stock" @click="showAll">Show All</button>
     <button class="button-stock" @click="hideAll">Hide All</button>
     <!-- Add checkboxes for additional data points -->
@@ -26,9 +26,6 @@
         </label>
         <label>
           <input type="checkbox" v-model="showStatistischeMethodenLine"> Statistische Methoden
-        </label>
-        <label>
-          <input type="checkbox" v-model="showRandomLine"> Random Line
         </label>
       </div>
     </div>
@@ -54,9 +51,6 @@
       </DxSeries>
       <DxSeries v-if="showStatistischeMethodenLine" :name="'Statistische Methoden Line - ' + selectedStock"
         :data-source="combinedData" type="line" value-field="StatistischeMethodenValue" argument-field="date">
-      </DxSeries>
-      <DxSeries v-if="showRandomLine" :name="'Random Line - ' + selectedStock" :data-source="combinedData" type="line"
-        value-field="randomValue" argument-field="date">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxLabel format="shortDate" />
@@ -103,13 +97,6 @@
       :data-source="lineChartDataSource" title="Statistische Methoden Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'StatistischeMethoden Line'" value-field="lineChartDataField" argument-field="date" type="line">
-      </DxSeries>
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showRandomLine && showChart" id="Random-chart" :data-source="lineChartDataSource" title="Random Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Line Chart'" value-field="lineChartDataField" argument-field="date" type="line">
       </DxSeries>
     </DxChart>
   </div>
@@ -171,8 +158,6 @@ export default {
       ArimapredictionData: [],
       showStatistischeMethodenLine: false,
       StatistischeMethodenpredictionData: [],
-      showRandomLine: false,
-      randomLineData: [],
       combinedData: [],
       store: useMyPiniaStore(),
     };
@@ -206,7 +191,6 @@ export default {
       this.showLSTMLine = false;
       this.showArimaLine = false;
       this.showStatistischeMethodenLine = false;
-      this.showRandomLine = false;
     },
 
     async showAll() {
@@ -215,7 +199,6 @@ export default {
       this.showLSTMLine = true;
       this.showArimaLine = true;
       this.showStatistischeMethodenLine = true;
-      this.showRandomLine = true;
     },
 
     /*
