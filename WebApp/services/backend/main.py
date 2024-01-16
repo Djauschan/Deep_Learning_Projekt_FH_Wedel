@@ -201,10 +201,17 @@ def predict_cnn():
     start_date = pd.to_datetime("2021-02-01")
     end_date = pd.to_datetime("2021-03-03")
 
+
     prediction = cnn_interface.predict(start_date, end_date, 120)
+
+    prediction.set_index('Timestamp', inplace=True)
+    prediction = prediction.astype("Float64")
     print(prediction)
 
-    return prediction
+    data = [{"date": date, "value": value}
+            for date, value in prediction.items()]
+
+    return data
 
 
 # @app.get("/predict/lstm")
