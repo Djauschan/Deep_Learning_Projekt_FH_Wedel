@@ -92,9 +92,9 @@ def plot_absolute_predictions(targets: np.array, predictions: np.array):
     half_prediction_horizon = prediction_horizon // 2
 
     fig, axes = plt.subplots(
-        ncols=1, nrows=n_target_features, figsize=(20, n_target_features * 2.5))
+        ncols=1, nrows=n_target_features, figsize=(18, n_target_features * 2.5))
 
-    colors = cm.tab20c(range(20))
+    colors = cm.tab10(range(4))
 
     if n_target_features == 1:
         axes = [axes]
@@ -120,15 +120,22 @@ def plot_absolute_predictions(targets: np.array, predictions: np.array):
 
 
     for feature_idx in range(n_target_features):
-        color_idx = (feature_idx * 4) % 20
+        y_ax_min = abs_target[:, feature_idx].min()
+        y_ax_max = abs_target[:, feature_idx].max()
+        y_ax_range = y_ax_max - y_ax_min
+        y_ax_min -= y_ax_range * 0.1
+        y_ax_max += y_ax_range * 0.1
+
+        color_idx = feature_idx % 4
         axes[feature_idx].plot(
-            abs_pred_step1[:, feature_idx], c=colors[color_idx], label='prediction 1 step')
+            abs_pred_step1[:, feature_idx], c="#33608D", label='prediction 1 step')
         axes[feature_idx].plot(
-            abs_pred_step2[:, feature_idx], c=colors[color_idx], label=f'prediction {half_prediction_horizon} step')
+            abs_pred_step2[:, feature_idx], c="#26AC81", label=f'prediction {half_prediction_horizon} step')
         axes[feature_idx].plot(
-            abs_pred_step3[:, feature_idx], c=colors[color_idx], label=f'prediction {prediction_horizon} step')
+            abs_pred_step3[:, feature_idx], c="#95D73F", label=f'prediction {prediction_horizon} step')
         axes[feature_idx].plot(abs_target[:, feature_idx],
-                               c='black', label='target')
+                               c="#471567", label='target')
         axes[feature_idx].legend()
+        axes[feature_idx].set_ylim(y_ax_min, y_ax_max)
 
     return fig
