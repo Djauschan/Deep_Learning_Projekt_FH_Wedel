@@ -6,33 +6,26 @@ from ML_PredictionInterface import ABC_LinearRegressionModel, ABC_RandomForestMo
 
 #test LR
 lr_model = ABC_LinearRegressionModel()
-lr_model.load_model()
-
 lr_predictions = lr_model.predict(pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)  
 print("lr_predictions")
 print(lr_predictions)
 
 #test RF
 rf_model = ABC_RandomForestModel()
-rf_model.load_model()
-
 rf_predictions = rf_model.predict(pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)  
 print("rf_predictions")
 print(rf_predictions)
 
 #test GBM
 gbm_model = ABC_GradientBoostingModel()
-gbm_model.load_model()
-
 gbm_predictions = gbm_model.predict(pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)  
 print("gbm_predictions")
 print(gbm_predictions)
 
 #test SVM
 svm_model = ABC_SVMModel()
-svm_model.load_model()
-
 svm_predictions = svm_model.predict(pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)  
 print("svm_predictions")
 print(svm_predictions)
+
 
