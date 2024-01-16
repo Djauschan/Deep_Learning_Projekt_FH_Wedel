@@ -1,12 +1,11 @@
 # Import der benötigten Bibliotheken
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # Ignoriert die Tensorflow-Warnungen
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # Ignoriert die Tensorflow-Warnungen
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 import datetime
-from pandas.tseries.offsets import BDay
 
 class StockModel:
     def __init__(self, file_path, cut_off_date, load_model_path=None):
@@ -22,7 +21,6 @@ class StockModel:
         else:
             self.model = self.build_model((30, 1))
 
-        
     #Load data from Djauschan & Kevin
     # def loadDataNew(self):
         
@@ -100,13 +98,12 @@ class StockModel:
         predicted_close_price = self.last_known_close + predicted_price_change
         return predicted_close_price
 
-    def predict_x_days(self, x_days, timestamp_start):
-        # Eine Liste zur Speicherung der Vorhersagedaten
-        prediction_data = []
+    def predict_x_days(self, x_days):
+        predictions = []
+        # Die PredictionWerte werden in einem PD Dataframe gespeichert
+        
         scaled_data = self.scaled_train_data.copy()
         last_known_close = self.last_known_close
-
-        current_timestamp = pd.to_datetime(timestamp_start)
 
         for _ in range(x_days):
             last_sequence = scaled_data[-30:].reshape(1, 30, 1)
@@ -114,20 +111,14 @@ class StockModel:
             predicted_price_change = self.scaler.inverse_transform(predicted_scaled)[0, 0]
 
             predicted_close_price = last_known_close + predicted_price_change
-
-            # Hinzufügen des Datums und des geschätzten Schlusskurses zur Liste
-            prediction_data.append({'DateTime': current_timestamp, 'AAPL': predicted_close_price})
+            predictions.append(predicted_close_price)
 
             new_row = np.array([predicted_price_change])
             scaled_data = np.append(scaled_data, new_row)[-30:]
             last_known_close = predicted_close_price
 
-            # Update des Zeitstempels zum nächsten Geschäftstag
-            current_timestamp += BDay(1)
-
-        predictions = pd.DataFrame(prediction_data)
         return predictions
-    
+
         #Speicherung des Modells im H5-Format
     def save_model_asH5(self, file_path_saving, stock_name):
         timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -153,12 +144,10 @@ class StockModel:
         except Exception as e:
             print(f"Fehler beim Laden des Modells: {e}")
             return None
-        
-     
 
 # Instanz der StockModel Klasse erstellen
 # Wenn die TF Nachrichten zu viel werden: tf.keras.utils.disable_interactive_logging()
-file_path = "/Users/umutkurucay/Documents/Developer/LSTM_testing/Data/AAPL_1min.txt"  # Pfad zur Datei
+file_path = "/Users/umutkurucay/Documents/Developer/LSTM_testing/Data/SQ_1min.txt"  # Pfad zur Datei
 cut_off_date = '2021-01-03'  # Cut-off-Datum
 stock_name = file_path.split('/')[-1].split('_')[0] # Hier wird der Name der Aktie aus dem Dateipfad extrahiert
 #bei laden wird das Modell geladen, bei generieren wird ein neues Modell erstellt
@@ -177,10 +166,11 @@ else:
     print("Neues Modell wird generiert")
 
 stock_model = StockModel(file_path, cut_off_date)
-#Nicht so sauber, aber funktioniert für den MVP
-predictionTest = stock_model.predict_x_days(2, "2021-01-04")
-print(predictionTest)
+
 # Echten Close-Preis für die nächsten X Tage holen (nach dem Cut-off-Datum) mit dem Timestamp
+print("Echter Close-Preis für die nächsten 5 Tage:")
+for day, price in enumerate(stock_model.test_data['Close'].values[:5], start=1):
+    print(f"Tag {day}: {price}")
 
 # Trainieren des Modells
 if not laden_statt_generieren:
@@ -202,18 +192,20 @@ if save_model:
 # Pfad zum geladenen Modell, None wenn ein neues Modell erstellt werden soll
 stock_model = StockModel(file_path, cut_off_date, load_model_path=load_model_path)
 
-
 def manualStart():
-    timestamp_start = '2021-01-04'
-    x_days = 2  # Anzahl der Tage, die vorhergesagt werden sollen
-    print("Echter Close-Preis für die nächsten x Tage:")
-    for day, price in enumerate(stock_model.test_data['Close'].values[:x_days], start=1):
-        print(f"Tag {day}: {price}")
-    predictions = stock_model.predict_x_days(x_days, timestamp_start)
+    # Vorhersage für X Tage
+    x_days = 5  # Anzahl der Tage, die vorhergesagt werden sollen
+    predictions = stock_model.predict_x_days(x_days)
     print("...........")
     print(predictions)
     print("...........")
+    print("Vorhergesagte Preise für die nächsten Tage:")
+    for day, price in enumerate(predictions, start=1):
+        print(f"Tag {day}: {price}")
     
-if False: #AUF TRUE SETZEN WENN DIESE KLASSE MANUELL GESTARTET WERDEN SOLL
-    manualStart()
+        
 
+    # TODO: Werte mit TimeStamp ausgeben statt nur die Preise
+    
+if True: #AUF TRUE SETZEN WENN DIESE KLASSE MANUELL GESTARTET WERDEN SOLL
+    manualStart()

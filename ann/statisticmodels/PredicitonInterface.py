@@ -12,28 +12,31 @@ class ArimaInterface(AbstractModel):
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
         path = "statisticmodels/models/savedModelsARIMA/"
-        all_predictions = pd.DataFrame()
-        
+    
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
 
         # Konvertieren in eine pandas Series
         business_days_series = list(business_days)
-    
+        merged_df = pd.DataFrame(business_days_series, columns=['ds'])
 
         for filename in os.listdir(path):
             if filename.endswith(".pkl"):  
                 model_path = os.path.join(path, filename)
                 model = StatsForecast.load(model_path)
-                prediction = model.predict(days_difference)  
+                prediction = model.predict(days_difference)
 
-                prediction['ds'] =  business_days_series
-                prediction['symbol'] = filename[:-4]
+                symbol = filename[:-4]  
+
+                prediction.rename(columns={'AutoARIMA': symbol}, inplace=True)
+                prediction['ds']=business_days_series
 
 
-                all_predictions = pd.concat([all_predictions, prediction], ignore_index=True)
+                merged_df = pd.merge(merged_df, prediction[['ds', symbol]], on='ds', how='left')
+    
 
-        return all_predictions 
+        return merged_df
+    
     
     def load_data(self) -> None:
         pass
@@ -46,33 +49,37 @@ class ArimaInterface(AbstractModel):
 
 
 class ETSInterface(AbstractModel):
+    
     def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> DataFrame:
         
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
         path = "statisticmodels/models/savedModelsETS/"
-        all_predictions = pd.DataFrame()
-        
+    
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
 
         # Konvertieren in eine pandas Series
         business_days_series = list(business_days)
-    
+        merged_df = pd.DataFrame(business_days_series, columns=['ds'])
 
         for filename in os.listdir(path):
             if filename.endswith(".pkl"):  
                 model_path = os.path.join(path, filename)
                 model = StatsForecast.load(model_path)
-                prediction = model.predict(days_difference)  
+                prediction = model.predict(days_difference)
 
-                prediction['ds'] =  business_days_series
-                prediction['symbol'] = filename[:-4]
+                symbol = filename[:-4]  
+
+                prediction.rename(columns={'AutoETS': symbol}, inplace=True)
+                prediction['ds']=business_days_series
 
 
-                all_predictions = pd.concat([all_predictions, prediction], ignore_index=True)
+                merged_df = pd.merge(merged_df, prediction[['ds', symbol]], on='ds', how='left')
+    
 
-        return all_predictions
+        return merged_df
+   
     
     def load_data(self) -> None:
         pass
@@ -90,28 +97,30 @@ class historicAverageInterface(AbstractModel):
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
         path = "statisticmodels/models/savedModelshistoricAverage/"
-        all_predictions = pd.DataFrame()
-        
+    
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
 
         # Konvertieren in eine pandas Series
         business_days_series = list(business_days)
-    
+        merged_df = pd.DataFrame(business_days_series, columns=['ds'])
 
         for filename in os.listdir(path):
             if filename.endswith(".pkl"):  
                 model_path = os.path.join(path, filename)
                 model = StatsForecast.load(model_path)
-                prediction = model.predict(days_difference)  
+                prediction = model.predict(days_difference)
 
-                prediction['ds'] =  business_days_series
-                prediction['symbol'] = filename[:-4]
+                symbol = filename[:-4]  
+
+                prediction.rename(columns={'HistoricAverage': symbol}, inplace=True)
+                prediction['ds']=business_days_series
 
 
-                all_predictions = pd.concat([all_predictions, prediction], ignore_index=True)
+                merged_df = pd.merge(merged_df, prediction[['ds', symbol]], on='ds', how='left')
+    
 
-        return all_predictions
+        return merged_df
     
     def load_data(self) -> None:
         pass
@@ -123,33 +132,39 @@ class historicAverageInterface(AbstractModel):
         pass
 
 class ThetaInterface(AbstractModel):
+
+    
+
     def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> DataFrame:
         
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
         path = "statisticmodels/models/savedModelsTheta/"
-        all_predictions = pd.DataFrame()
-        
+    
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
 
         # Konvertieren in eine pandas Series
         business_days_series = list(business_days)
-    
+        merged_df = pd.DataFrame(business_days_series, columns=['ds'])
 
         for filename in os.listdir(path):
             if filename.endswith(".pkl"):  
                 model_path = os.path.join(path, filename)
                 model = StatsForecast.load(model_path)
-                prediction = model.predict(days_difference)  
+                prediction = model.predict(days_difference)
 
-                prediction['ds'] =  business_days_series
-                prediction['symbol'] = filename[:-4]
+                symbol = filename[:-4]  
+
+                prediction.rename(columns={'AutoTheta': symbol}, inplace=True)
+                prediction['ds']=business_days_series
 
 
-                all_predictions = pd.concat([all_predictions, prediction], ignore_index=True)
+                merged_df = pd.merge(merged_df, prediction[['ds', symbol]], on='ds', how='left')
+    
 
-        return all_predictions
+        return merged_df
+    
     
     def load_data(self) -> None:
         pass
@@ -166,28 +181,30 @@ class NaiveInterface(AbstractModel):
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
         path = "statisticmodels/models/savedModelsNaive/"
-        all_predictions = pd.DataFrame()
-        
+    
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
 
         # Konvertieren in eine pandas Series
         business_days_series = list(business_days)
-    
+        merged_df = pd.DataFrame(business_days_series, columns=['ds'])
 
         for filename in os.listdir(path):
             if filename.endswith(".pkl"):  
                 model_path = os.path.join(path, filename)
                 model = StatsForecast.load(model_path)
-                prediction = model.predict(days_difference)  
+                prediction = model.predict(days_difference)
 
-                prediction['ds'] =  business_days_series
-                prediction['symbol'] = filename[:-4]
+                symbol = filename[:-4]  
+
+                prediction.rename(columns={'Naive': symbol}, inplace=True)
+                prediction['ds']=business_days_series
 
 
-                all_predictions = pd.concat([all_predictions, prediction], ignore_index=True)
+                merged_df = pd.merge(merged_df, prediction[['ds', symbol]], on='ds', how='left')
+    
 
-        return all_predictions 
+        return merged_df
     
     def load_data(self) -> None:
         pass
@@ -199,33 +216,37 @@ class NaiveInterface(AbstractModel):
         pass
 
 class WindowAverageInterface(AbstractModel):
+
     def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> DataFrame:
         
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
         path = "statisticmodels/models/savedModelsWindowAverage/"
-        all_predictions = pd.DataFrame()
-        
+    
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(start=timestamp_start, end=timestamp_end)
 
         # Konvertieren in eine pandas Series
         business_days_series = list(business_days)
-    
+        merged_df = pd.DataFrame(business_days_series, columns=['ds'])
 
         for filename in os.listdir(path):
             if filename.endswith(".pkl"):  
                 model_path = os.path.join(path, filename)
                 model = StatsForecast.load(model_path)
-                prediction = model.predict(days_difference)  
+                prediction = model.predict(days_difference)
 
-                prediction['ds'] =  business_days_series
-                prediction['symbol'] = filename[:-4]
+                symbol = filename[:-4]  
+
+                prediction.rename(columns={'WindowAverage': symbol}, inplace=True)
+                prediction['ds']=business_days_series
 
 
-                all_predictions = pd.concat([all_predictions, prediction], ignore_index=True)
+                merged_df = pd.merge(merged_df, prediction[['ds', symbol]], on='ds', how='left')
+    
 
-        return all_predictions
+        return merged_df
+    
     
     def load_data(self) -> None:
         pass
