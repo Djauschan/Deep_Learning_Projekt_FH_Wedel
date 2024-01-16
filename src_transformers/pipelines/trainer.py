@@ -222,7 +222,7 @@ class Trainer:
             train_dataset, batch_size=self.batch_size, shuffle=self.batch_shuffle
         )
         validation_loader = DataLoader(
-            validation_dataset, batch_size=self.batch_size, shuffle=self.batch_shuffle
+            validation_dataset, batch_size=self.batch_size, shuffle=False
         )
 
         return train_loader, validation_loader
