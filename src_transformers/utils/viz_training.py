@@ -99,15 +99,35 @@ def plot_absolute_predictions(targets: np.array, predictions: np.array):
     if n_target_features == 1:
         axes = [axes]
 
+    abs_target = np.ones((len(targets) + 1, targets.shape[2])) * 100
+
+    abs_pred_step1 = np.ones((len(predictions) + 1, predictions.shape[2])) * 100
+    abs_pred_step2 = np.ones((len(predictions) + 1, predictions.shape[2])) * 100
+    abs_pred_step3 = np.ones((len(predictions) + 1, predictions.shape[2])) * 100
+    abs_pred_changes = np.ones_like(predictions) * 100
+
+
+    for i in range(len(targets)):
+        abs_target[i + 1] = abs_target[i] * (1 + targets[i, 0])
+        abs_pred_step1[i + 1] = abs_target[i] * (1 + predictions[i, 0])
+        for j in range(prediction_horizon):
+            if i <= j:
+                abs_pred_changes[i, j+1] = abs_pred_changes[i, j] * (1 + predictions[i, j])
+        if i <= len(targets) - half_prediction_horizon:
+            abs_pred_step2[i+half_prediction_horizon] = abs_target[i,0] * abs_pred_changes[i, half_prediction_horizon] / 100
+        if i <= len(targets) - prediction_horizon:
+            abs_pred_step3[i+prediction_horizon] = abs_target[i,0] * abs_pred_changes[i, prediction_horizon] / 100
+
+
     for feature_idx in range(n_target_features):
         color_idx = (feature_idx * 4) % 20
         axes[feature_idx].plot(
-            np.cumprod(predictions[:, 0, feature_idx] + 1) * 100, c=colors[color_idx], label='prediction 1 step')
+            abs_pred_step1[:, feature_idx], c=colors[color_idx], label='prediction 1 step')
         axes[feature_idx].plot(
-            np.cumprod(predictions[:, half_prediction_horizon, feature_idx] + 1) * 100, c=colors[color_idx + 1], label=f'prediction {half_prediction_horizon} step')
+            abs_pred_step2[:, feature_idx], c=colors[color_idx], label=f'prediction {half_prediction_horizon} step')
         axes[feature_idx].plot(
-            np.cumprod(predictions[:, prediction_horizon, feature_idx] + 1) * 100, c=colors[color_idx + 2], label=f'prediction {prediction_horizon} step')
-        axes[feature_idx].plot(np.cumprod(targets[:, 0, feature_idx] + 1) * 100,
+            abs_pred_step3[:, feature_idx], c=colors[color_idx], label=f'prediction {prediction_horizon} step')
+        axes[feature_idx].plot(abs_target[:, feature_idx],
                                c='black', label='target')
         axes[feature_idx].legend()
 
