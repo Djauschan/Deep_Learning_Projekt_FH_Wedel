@@ -41,6 +41,17 @@ train_parameters:
   threshold_penalty: -1
   threshold_reward: 1
 
+#Use manual Stopp loss orders:
+stopp_loss:
+  use_stopp_loss: TRUE #TRUE #FALSE
+  buy_stop_loss_under_buy_price: 0.1 #0.1 Percent
+  stopp_under_sell_price: 0.01 #0.01 Percent
+
+
+traiding:
+  startvalue: 10000
+
+
 
 
 

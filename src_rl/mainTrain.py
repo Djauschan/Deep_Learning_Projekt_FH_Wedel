@@ -64,8 +64,6 @@ def train_individual_agent(agent, agent_type, num_episodes, env, config, cumulat
         cumulative_rewards[agent_type][episode] = episode_rewards
         portfolio_values[agent_type][episode].append(env.calculate_portfolio_value(agent_type))
 
-def get_actions_from_other_agents():
-    return 0
 
 def train_aggregation_agent(price_train_data, aggregation_agent, ql_agents, agent_types, num_episodes, env, config, cumulative_rewards, portfolio_values):
     for episode in tqdm(range(num_episodes), desc="Training Aggregation Agent"):
@@ -82,7 +80,6 @@ def train_aggregation_agent(price_train_data, aggregation_agent, ql_agents, agen
             current_data = price_train_data.iloc[:current_step + 1]  # Daten bis zum aktuellen Schritt
             RSI = Preprocess.calculate_RSI(current_data)
             rsi_action = Preprocess.determine_action_based_on_RSI(RSI)
-        
 
             # Hinzufügen der RSI-Aktion zu den Agentenaktionen
             all_actions = individual_actions + [rsi_action]
@@ -135,33 +132,12 @@ def visualize_performance(agent_types, cumulative_rewards, portfolio_values, con
     plt.legend()
     plt.show()
 
-"""
-def update_aggregation_state(current_state, agent_actions, rsi_action):
-    print("aktuell", current_state)
-    new_state = list(current_state)
-    # Aktualisieren mit Agentenaktionen
-    for i, action in enumerate(agent_actions):
-        new_state[i] = action
-    
-    # Hinzufügen der der Aktionen weiterer Agenten--------------------------------------------------------
-    #RSI-Aktion
-    new_state.append(rsi_action)
-    return new_state
-"""
 def update_aggregation_state(current_state, agent_actions, rsi_action):
     # Erstellen eines neuen Zustands mit der aktuellen Aktion jedes Agenten und der RSI-Aktion
     new_state = agent_actions.copy() # Kopiert die aktuellen Aktionen der Agenten
     new_state.append(rsi_action)     # Fügt die RSI-Aktion hinzu
     return new_state
 
-
-"""
-def update_aggregation_state(current_state, actions):
-    new_state = list(current_state)
-    for i, action in enumerate(actions):
-        new_state[i] = action
-    return new_state
-"""
 
 if __name__ == "__main__":
     main()
