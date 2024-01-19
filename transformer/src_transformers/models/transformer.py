@@ -7,6 +7,7 @@ import numpy as np
 
 torch.autograd.set_detect_anomaly(True)
 
+
 class MultiHeadAttention(nn.Module):
     """
     This module contains one multi-head attention layer of the transformer model.
@@ -321,6 +322,11 @@ class Transformer(nn.Module):
         super(Transformer, self).__init__()
 
         self.device = device
+
+        self.seq_len_encoder = seq_len_encoder  # Required to save the model
+        self.seq_len_decoder = seq_len_decoder  # Required to save the model
+        self.dim_encoder = dim_encoder  # Required to save the model
+        self.dim_decoder = dim_decoder  # Required to save the model
 
         # Positional encoding
         self.positional_encoding_encoder = PositionalEncoding(

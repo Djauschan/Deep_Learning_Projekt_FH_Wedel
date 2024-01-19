@@ -77,7 +77,7 @@ class Trainer:
             momentum: float = 0,
             eval_mode: bool = False,
             seed: int = None,
-            batch_shuffle: bool= False,
+            batch_shuffle: bool = False,
             patience: int = 50,
             log_image_frequency: int = 10
     ) -> "Trainer":
@@ -252,7 +252,8 @@ class Trainer:
         finish_reason = "Training terminated before training loop ran through."
         for epoch in tqdm(range(self.epochs)):
             try:
-                train_loss, train_results = self.calculate_train_loss(train_loader)
+                train_loss, train_results = self.calculate_train_loss(
+                    train_loader)
 
                 # Logging loss and charts of results
                 self.logger.log_training_loss(train_loss, epoch)
@@ -426,8 +427,7 @@ class Trainer:
         After the model is saved, the method logs a message to the console with the path
         to the file.
         """
-        path = ModelService.save_model(self.model)
-        # TODO: log only once (with naming of model)
+        path = ModelService.save_model(self.model, self.device)
         self.logger.log_model_path(model_path=path)
         Logger.log_text(f"Model saved to '{path}'.")
 
