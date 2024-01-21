@@ -11,7 +11,7 @@ training_parameters:
   batch_size: 1000
   epochs: 800
   learning_rate: 0.001
-  loss: "mse" #Options: "mse", "rmse", "rmsle"
+  loss: "expmse" #Options: "mse", "rmse", "rmsle", "expmse"
   seed: 42
   patience: 10000
   log_image_frequency: 5
