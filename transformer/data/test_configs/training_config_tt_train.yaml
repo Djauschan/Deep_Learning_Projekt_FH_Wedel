@@ -11,7 +11,7 @@ training_parameters:
   batch_size: 1000
   epochs: 800
   learning_rate: 0.001
-  loss: "mse" #Options: "mse", "rmse", "rmsle"
+  loss: "expmse" #Options: "mse", "rmse", "rmsle", "expmse"
   seed: 42
   patience: 10000
   log_image_frequency: 5
@@ -26,18 +26,19 @@ dataset_parameters:
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol_Train.csv"
   time_resolution: 120 # Time resolution of the data in minutes 
+  ignore_nights: true # If true, the data between 20:00 and 04:00 is ignored
   encoder_symbols:
   # stocks
     - "AAPL" # Apple
     - "AAL" # American Airlines
-    # - "AMD" # Advanced Micro Devices
-    # - "C" # Citigroup
-    # - "MRNA" # Moderna
-    # - "NIO" # NIO
-    # - "NVDA" # NVIDIA
-    # - "SNAP" # Snap
-    # - "SQ" # Block
-    # - "TSLA" # Tesla
+    - "AMD" # Advanced Micro Devices
+    - "C" # Citigroup
+    - "MRNA" # Moderna
+    - "NIO" # NIO
+    - "NVDA" # NVIDIA
+    - "SNAP" # Snap
+    - "SQ" # Block
+    - "TSLA" # Tesla
   # ETFs
     # - "ACWI" # iShares MSCI ACWI ETF
   # indices
@@ -58,14 +59,14 @@ dataset_parameters:
   decoder_symbols:
     - "AAPL" # Apple
     - "AAL" # American Airlines
-    # - "AMD" # Advanced Micro Devices
-    # - "C" # Citigroup
-    # - "MRNA" # Moderna
-    # - "NIO" # NIO
-    # - "NVDA" # NVIDIA
-    # - "SNAP" # Snap
-    # - "SQ" # Block
-    # - "TSLA" # Tesla
+    - "AMD" # Advanced Micro Devices
+    - "C" # Citigroup
+    - "MRNA" # Moderna
+    - "NIO" # NIO
+    - "NVDA" # NVIDIA
+    - "SNAP" # Snap
+    - "SQ" # Block
+    - "TSLA" # Tesla
     # - art1
     # - art2
     # - sin

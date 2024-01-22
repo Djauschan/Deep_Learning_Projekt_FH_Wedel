@@ -13,7 +13,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
 
-from src_transformers.models.loss import RMSELoss, RMSLELoss
+from src_transformers.models.loss import RMSELoss, RMSLELoss, ExpMSELoss
 from src_transformers.pipelines.model_service import ModelService
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
@@ -40,7 +40,7 @@ class Trainer:
         epochs (int): The number of epochs to train for.
         learning_rate (float): The learning rate for the optimizer.
         validation_split (float): The fraction of the data to use for validation.
-        loss (nn.MSELoss | nn.CrossEntropyLoss): The loss function to use.
+        loss (nn.MSELoss | nn.CrossEntropyLoss | RMSELoss | RMSLELoss | ExpMSELoss): The loss function to use.
         optimizer (optim.SGD | optim.Adam): The optimizer to use.
         device (torch.device): Whether to use the CPU or the GPU.
         model (nn.Module): The PyTorch model to train.
@@ -50,7 +50,8 @@ class Trainer:
     batch_size: int
     epochs: int
     learning_rate: float
-    loss: Union[nn.MSELoss, nn.CrossEntropyLoss, RMSELoss, RMSLELoss]
+    loss: Union[nn.MSELoss, nn.CrossEntropyLoss,
+                RMSELoss, RMSLELoss, ExpMSELoss]
     optimizer: Union[optim.SGD, optim.Adam]
     weight_decay: float
     device: torch.device
@@ -118,6 +119,8 @@ class Trainer:
             loss_instance = RMSELoss()
         elif loss == "rmsle":
             loss_instance = RMSLELoss()
+        elif loss == "expmse":
+            loss_instance = ExpMSELoss()
         else:
             Logger.log_text(f"Loss {loss} is not valid, defaulting to MSELoss")
             loss_instance = nn.MSELoss()

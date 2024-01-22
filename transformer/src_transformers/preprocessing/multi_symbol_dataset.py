@@ -49,6 +49,7 @@ class MultiSymbolDataset(Dataset):
     data_file: str
     scaler: str
     time_resolution: int
+    ignore_nights: bool
 
     @classmethod
     def create_from_config(cls,
@@ -66,6 +67,7 @@ class MultiSymbolDataset(Dataset):
                            decoder_target_length: int,
                            scaler: str = "MinMaxScaler",
                            time_resolution: int = 1,
+                           ignore_nights: bool = False,
                            time_feature: dict = None
                            ):
         """
@@ -87,6 +89,7 @@ class MultiSymbolDataset(Dataset):
             decoder_target_length (int): The length of the decoder target sequence.
             scaler (str, optional): The scaler to use for the data. Defaults to "MinMaxScaler".
             time_resolution (int, optional): The time resolution of the data in minutes.
+            ignore_nights (bool, optional): Whether to ignore the night hours in the data.
             time_feature (dict, optional): The time feature to use for the data. Defaults to None.
 
         Returns:
@@ -111,7 +114,8 @@ class MultiSymbolDataset(Dataset):
                                                 decoder_target_length=decoder_target_length,
                                                 data_file=data_file,
                                                 scaler=scaler,
-                                                time_resolution=time_resolution)
+                                                time_resolution=time_resolution,
+                                                ignore_nights=ignore_nights)
 
         else:
             Logger.log_text(
@@ -124,7 +128,8 @@ class MultiSymbolDataset(Dataset):
             Logger.log_text(
                 f"Created a dataframe from the selected {len(data_df)} timestamps, "
                 + f"since the user specified a data usage ratio of {data_usage_ratio}.")
-            cls.stocks, cls.prices, data_df = fill_dataframe(data_df, data_reader, time_resolution)
+            cls.stocks, cls.prices, data_df = fill_dataframe(
+                data_df, data_reader, time_resolution, ignore_nights)
 
             # Select Data for Prediction Interface
             # Only Select timestamp index is greater or equal to 2020-12-22 04:00:00
@@ -166,13 +171,15 @@ class MultiSymbolDataset(Dataset):
                                                 decoder_target_length=decoder_target_length,
                                                 data_file=data_file,
                                                 scaler=scaler,
-                                                time_resolution=time_resolution)
+                                                time_resolution=time_resolution,
+                                                ignore_nights=ignore_nights)
 
-            ## Normalization
+            # Normalization
             scaler = SCALER_OPTIONS[scaler]()
 
             # Get all columns that contain volume and indeces in train set
-            volume_cols = [item for item in data_df.columns if "volume" in item]
+            volume_cols = [
+                item for item in data_df.columns if "volume" in item]
             train_indeces, validation_indecies = instance_multi_symbol_dataset.get_subset_indices()
 
             # NOTE: This is only to create the dataset for the prediction interface
@@ -187,7 +194,8 @@ class MultiSymbolDataset(Dataset):
             data_df[volume_cols] = scaler.transform(data_df[volume_cols])
 
             # Store scaler in pickle file
-            scaler_path = instance_multi_symbol_dataset.data_file.replace('.csv', f'_scaler.pkl')
+            scaler_path = instance_multi_symbol_dataset.data_file.replace(
+                '.csv', f'_scaler.pkl')
             with open(scaler_path, 'wb') as file:
                 pickle.dump(scaler, file)
 
