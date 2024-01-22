@@ -65,7 +65,9 @@ class MultiSymbolDataset(Dataset):
                            encoder_input_length: int,
                            decoder_target_length: int,
                            scaler: str = "MinMaxScaler",
-                           time_resolution: int = 1):
+                           time_resolution: int = 1,
+                           time_feature: dict = None
+                           ):
         """
         This method either creates a new MultiSymbolDataset by preprocessing financial data for
         multiple symbols (using information from the configuration file) or creates the dataset
@@ -85,6 +87,7 @@ class MultiSymbolDataset(Dataset):
             decoder_target_length (int): The length of the decoder target sequence.
             scaler (str, optional): The scaler to use for the data. Defaults to "MinMaxScaler".
             time_resolution (int, optional): The time resolution of the data in minutes.
+            time_feature (dict, optional): The time feature to use for the data. Defaults to None.
 
         Returns:
             MultiSymbolDataset: The created or loaded dataset.
@@ -129,7 +132,7 @@ class MultiSymbolDataset(Dataset):
 
             Logger.log_text(
                 "Filled the timestamp dataframe with data from the selected stocks and symbols.")
-            data_df = add_time_information(data_df)
+            data_df = add_time_information(data_df, time_feature)
             Logger.log_text(
                 "Added more precise time information to the dataframe.")
 
