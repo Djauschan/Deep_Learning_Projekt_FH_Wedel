@@ -185,13 +185,19 @@ class Trainer:
         self.model.to(self.device)
         self.loss.to(self.device)
 
-        config_str = f"batch_size: {self.batch_size}\
-            epochs: {self.epochs}\
-            learning rate: {self.learning_rate}\
-            loss: {self.loss}\
-            optimizer: {self.optimizer}\
-            device: {self.device}"
-        self.logger.write_text("Trainer configuration", config_str)
+        # Get string with all object variables from trainer
+        trainer_dict = vars(self)
+        trainer_dict.pop("model")
+        trainer_dict.pop("logger")
+        trainer_str = str(trainer_dict).replace("'", "")
+
+        # Get string with all object variables from dataset
+        dataset_dict = vars(self._dataset)
+        dataset_str = str(dataset_dict).replace("'", "")
+
+        # Logg object variables
+        self.logger.write_text("Trainer variables", trainer_str)
+        self.logger.write_text("Dataset variables", dataset_str)
         self.logger.write_model(self.model)
 
         # Creating training and validation data loaders from the given data
