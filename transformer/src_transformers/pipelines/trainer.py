@@ -186,18 +186,18 @@ class Trainer:
         self.loss.to(self.device)
 
         # Get string with all object variables from trainer
-        trainer_dict = vars(self)
+        trainer_dict = vars(self).copy()
         trainer_dict.pop("model")
         trainer_dict.pop("logger")
         trainer_str = str(trainer_dict).replace("'", "")
 
         # Get string with all object variables from dataset
-        dataset_dict = vars(self._dataset)
+        dataset_dict = vars(self._dataset).copy()
         dataset_str = str(dataset_dict).replace("'", "")
 
         # Logg object variables
-        self.logger.write_text("Trainer variables", trainer_str)
-        self.logger.write_text("Dataset variables", dataset_str)
+        self.logger.write_text("config_settings/Trainer_variables", trainer_str)
+        self.logger.write_text("config_settings/dataset_variables", dataset_str)
         self.logger.write_model(self.model)
 
         # Creating training and validation data loaders from the given data

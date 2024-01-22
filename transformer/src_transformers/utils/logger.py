@@ -17,6 +17,7 @@ from tqdm import tqdm
 
 from src_transformers.utils.viz_training import plot_evaluation, plot_loss_horizon, plot_absolute_predictions
 
+first_name_logging = True
 
 class Logger():
     """
@@ -243,4 +244,9 @@ class Logger():
         Returns: None
 
         """
-        self._summary_writer.add_text("model/mode_path", model_path)
+        global first_name_logging
+
+        if first_name_logging:
+            self._summary_writer.add_text("model/mode_path", model_path)
+            first_name_logging = False
+
