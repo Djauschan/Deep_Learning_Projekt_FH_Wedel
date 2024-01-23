@@ -251,19 +251,19 @@ class EncoderLayer(nn.Module):
         super(EncoderLayer, self).__init__()
         self.self_attn = MultiHeadAttention(d_model, num_heads)
         self.feed_forward = PositionWiseFeedForward(d_model, d_ff)
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
+        self.norm1 = nn.BatchNorm2d(d_model)
+        self.norm2 = nn.BatchNorm2d(d_model)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, mask):
         # Forward attention layer
-        x = self.norm1(x)
+        #x = self.norm1(x)
         attn_output = self.self_attn(x, x, x, mask)
         x = x + self.dropout(attn_output)
         # Add + normalize + dropout
 
         # Forward feed forward layer
-        x = self.norm2(x)
+        #x = self.norm2(x)
         ff_output = self.feed_forward(x)
         x = x + self.dropout(ff_output)
 
@@ -278,15 +278,15 @@ class DecoderLayer(nn.Module):
         self.cross_attn = MultiHeadAttention_Modified(
             dim_encoder, dim_decoder, num_heads, device)
         self.feed_forward = PositionWiseFeedForward(dim_decoder, d_ff)
-        self.norm1 = nn.LayerNorm(dim_decoder)
-        self.norm2 = nn.LayerNorm(dim_decoder)
-        self.norm3 = nn.LayerNorm(dim_decoder)
+        self.norm1 = nn.BatchNorm2d(dim_decoder)
+        self.norm2 = nn.BatchNorm2d(dim_decoder)
+        self.norm3 = nn.BatchNorm2d(dim_decoder)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, enc_output, src_mask,
                 tgt_mask):
         # Forward self attention layer for tgt inputs
-        x = self.norm1(x)
+        #x = self.norm1(x)
         attn_output = self.self_attn(x, x, x, tgt_mask)
         x = x + self.dropout(attn_output)
 
@@ -294,7 +294,7 @@ class DecoderLayer(nn.Module):
         # Encoders outputs are used as keys and values
         # The decoder's outputs are used as queries
         # TODO: unmcommend the following lines
-        x = self.norm2(x)
+        #x = self.norm2(x)
         attn_output = self.cross_attn(
             x, enc_output, enc_output, src_mask)
         x = x + self.dropout(attn_output)
