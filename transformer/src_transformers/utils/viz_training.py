@@ -111,13 +111,14 @@ def plot_absolute_predictions(targets: np.array, predictions: np.array):
         abs_target[i + 1] = abs_target[i] * (1 + targets[i, 0])
         abs_pred_step1[i + 1] = abs_target[i] * (1 + predictions[i, 0])
         for j in range(prediction_horizon):
-            if i <= j:
+            if i >= j:
                 abs_pred_changes[i, j+1] = abs_pred_changes[i, j] * (1 + predictions[i, j])
         if i <= len(targets) - half_prediction_horizon:
-            abs_pred_step2[i+half_prediction_horizon] = abs_target[i,0] * abs_pred_changes[i, half_prediction_horizon] / 100
+            abs_pred_step2[i+half_prediction_horizon] = abs_target[i] * abs_pred_changes[i, half_prediction_horizon] / 100
         if i <= len(targets) - prediction_horizon:
-            abs_pred_step3[i+prediction_horizon] = abs_target[i,0] * abs_pred_changes[i, prediction_horizon] / 100
+            abs_pred_step3[i+prediction_horizon] = abs_target[i] * abs_pred_changes[i, prediction_horizon] / 100
 
+    test = abs_target[i,0]
 
     for feature_idx in range(n_target_features):
         y_ax_min = abs_target[:, feature_idx].min()
