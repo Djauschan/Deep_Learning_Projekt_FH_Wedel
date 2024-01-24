@@ -257,14 +257,14 @@ class EncoderLayer(nn.Module):
 
     def forward(self, x, mask):
         # Forward attention layer
-        #x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
+        x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
         #x = self.norm1(x)
         attn_output = self.self_attn(x, x, x, mask)
         x = x + self.dropout(attn_output)
         # Add + normalize + dropout
 
         # Forward feed forward layer
-        #x = self.norm2(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
+        x = self.norm2(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
         #x = self.norm2(x)
         ff_output = self.feed_forward(x)
         x = x + self.dropout(ff_output)
@@ -288,7 +288,7 @@ class DecoderLayer(nn.Module):
     def forward(self, x, enc_output, src_mask,
                 tgt_mask):
         # Forward self attention layer for tgt inputs
-        #x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
+        x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
         #x = self.norm1(x)
         attn_output = self.self_attn(x, x, x, tgt_mask)
         x = x + self.dropout(attn_output)
@@ -297,14 +297,14 @@ class DecoderLayer(nn.Module):
         # Encoders outputs are used as keys and values
         # The decoder's outputs are used as queries
         # TODO: unmcommend the following lines
-        #x = self.norm2(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
+        x = self.norm2(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
         #x = self.norm2(x)
         attn_output = self.cross_attn(
             x, enc_output, enc_output, src_mask)
         x = x + self.dropout(attn_output)
 
         # Forward feed forward layer
-        #x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
+        x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
         #x = self.norm3(x)
         ff_output = self.feed_forward(x)
         x = x + self.dropout(ff_output)
