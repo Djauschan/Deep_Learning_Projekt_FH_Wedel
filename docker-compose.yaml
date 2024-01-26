@@ -13,8 +13,8 @@ services:
       - "8000:8000"
     volumes:
       - ./WebApp/services/backend:/code
-    environment:
-      - DATABASE_URL=sqlite:///./data/app.db
+    entrypoint:
+      ["bash", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000"]
     networks:
       - backend_network
 
@@ -37,6 +37,29 @@ services:
     # Set the entrypoint of the container to start a Uvicorn server running the app defined in 'api' of 'src_transformers' directory
     entrypoint:
       ["bash", "-c", "cd src_transformers && uvicorn api:app --host 0.0.0.0 --port 8000"]
+    networks:
+      - backend_network
+
+  # Service to use a trained transformer model to predict
+  predict_cnn:
+    # Specify the build context for this service (current directory)
+    build:
+      context: ./CNN
+      dockerfile: Dockerfile
+    
+    # Bind mount the current directory to /app in the container
+    volumes:
+      - ./CNN:/app
+      - ./data:/data
+    
+    # Map port 5001 on the host to port 5000 in the container
+    ports:
+      - 5001:5000
+      - 8002:8000
+
+    # Set the entrypoint of the container to start a Uvicorn server running the app defined in 'api' of 'src_transformers' directory
+    entrypoint:
+      ["bash", "-c", "uvicorn api:app --host 0.0.0.0 --port 8000"]
     networks:
       - backend_network
 

@@ -1,16 +1,16 @@
 from abc import ABC
+from datetime import timedelta
 
 import numpy as np
 import pandas as pd
-from CNN.abstract_model import AbstractModel
-from CNN.preprocessingServices import ConfigService, ModelImportService, Preprocessor
-from datetime import timedelta
+from abstract_model import AbstractModel
+from preprocessingServices import ConfigService, ModelImportService, Preprocessor
 
 
 class ModelExe(AbstractModel):
     def __init__(self):
         self.configService = ConfigService()
-        configPath = "./CNN/configDir/PredictionConfig.yml"
+        configPath = "./configDir/PredictionConfig.yml"
         # configPath = "C:\\Projekte\ProjectDeepLearning_CNN\\project_deeplearning\\src\\CNN\\configDir\\PredictionConfig.yml"
         self.parameters = self.configService.loadModelConfig(configPath)
         self.preprocessor = Preprocessor(self.parameters)
@@ -26,7 +26,6 @@ class ModelExe(AbstractModel):
         self.modelCollection = []
         self.load_model()
 
-        
     def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
         """predict stock price for a given time interval
         Args:
@@ -36,20 +35,22 @@ class ModelExe(AbstractModel):
         Returns:
         pd.DataFrame: dataframe with columns: timestamp, 1-n prices of stock_symbols
         """
-        #10.01.2022 start
-        #13.01.2022 end
+        # 10.01.2022 start
+        # 13.01.2022 end
         tmpTimeStampStart = timestamp_start
         timestamp_start = timestamp_start - pd.Timedelta(days=13)
         ts_timeStampEnd = tmpTimeStampStart
         toReturnDataFrame = pd.DataFrame(columns=["Timestamp", "AAPL"])
-        timeStamp = [pd.Timestamp("2021-01-04 9:30"), pd.Timestamp("2021-01-04 16:00"), pd.Timestamp("2021-01-05 9:30")]
+        timeStamp = [pd.Timestamp(
+            "2021-01-04 9:30"), pd.Timestamp("2021-01-04 16:00"), pd.Timestamp("2021-01-05 9:30")]
         # ahead = [1, 4, 8] #3 models predict, 1*interval ahead, 3*interval..
-        interval = 120 #fixed, model trained on
+        interval = 120  # fixed, model trained on
         '''
         ModelInput muss (1,9,20,20) sein => (batch, anz_feat, length_singleTs, length_singleTs)
         '''
-        modelInputList, endPriceList = self.preprocessor.pipeline(timestamp_start, ts_timeStampEnd)
-        #toReturnDataFrame.loc[1] = [timestamp_end, -1.0]
+        modelInputList, endPriceList = self.preprocessor.pipeline(
+            timestamp_start, ts_timeStampEnd)
+        # toReturnDataFrame.loc[1] = [timestamp_end, -1.0]
         i = 0
         calcTimeStamp = tmpTimeStampStart
         for model in self.modelCollection:
@@ -62,7 +63,8 @@ class ModelExe(AbstractModel):
             calcTimeStamp = timeStamp[i]
             # different input per Modell possible, but not for MVP
             y_change = model.forward(modelInputList[0])
-            y_price = self._calcThePriceFromChange(y_change.item(), endPriceList[0])
+            y_price = self._calcThePriceFromChange(
+                y_change.item(), endPriceList[0])
             toReturnDataFrame.loc[i] = [calcTimeStamp, y_price]
             i += 1
         return toReturnDataFrame
@@ -75,7 +77,8 @@ class ModelExe(AbstractModel):
         modelImportService = ModelImportService(self.parameters)
         listOfModelsToLoad = modelImportService.getSavedModelsPaths()
         for model_path in listOfModelsToLoad:
-            self.modelCollection.append(modelImportService.loadModel(model_path))
+            self.modelCollection.append(
+                modelImportService.loadModel(model_path))
 
     def preprocess(self) -> None:
         """preprocess data and stores it in a class variable"""
