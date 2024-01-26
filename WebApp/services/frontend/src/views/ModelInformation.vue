@@ -38,7 +38,7 @@ export default {
         },
         {
           id: 3,
-          title: 'CNN',
+          title: 'ANN',
           description: '<b>Input:</b><br> Forecast Horizon. <br> <b>Output:</b><br>  Dictionary, mit Angabe, welche Modelle welche Prognosen abgeben.',
         },
       ],
@@ -86,5 +86,7 @@ export default {
   max-width: 100%;
   padding: 20px;
   margin-left: 0px;
+  max-height: 70%;
 }
+
 </style>
