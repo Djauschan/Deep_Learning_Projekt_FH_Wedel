@@ -4,6 +4,7 @@ import bcrypt
 import crud
 import models
 import pandas as pd
+import requests
 import schemas
 from ann.ML_Modelle.ML_PredictionInterface import (
     ABC_GradientBoostingModel,
@@ -19,13 +20,13 @@ from ann.statisticmodels.PredicitonInterface import (
     WindowAverageInterface,
     historicAverageInterface,
 )
+
 # from ann.statisticmodels.lstm_predictionInterface import LstmInterface
 from CNN.model_exe import ModelExe
 from database import SessionLocal, engine
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from transformer_interface import TransformerInterface
 
 # Create tables in the database based on the model definitions
 models.Base.metadata.create_all(bind=engine)
@@ -179,18 +180,19 @@ def check_login(email: str, password: str, db: Session = Depends(get_db)):
 
 @app.get("/predict/transformer")
 def predict_transformer(stock_symbol: str):
-    transformer_interface = TransformerInterface()
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_transformer:8000/predict"
+    response = requests.get(api_url, params=data_to_send)
 
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-06")
-    prediction = transformer_interface.predict(start_date, end_date)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
 
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"close {stock_symbol.upper()}"]
-    data = [{"date": date, "value": value}
-            for date, value in prediction_data.items()]
-
-    return data
+    return response.json()
 
 
 @app.get("/predict/cnn")
@@ -200,7 +202,6 @@ def predict_cnn():
     cnn_interface = ModelExe()
     start_date = pd.to_datetime("2021-02-01")
     end_date = pd.to_datetime("2021-03-03")
-
 
     prediction = cnn_interface.predict(start_date, end_date, 120)
 
@@ -236,7 +237,7 @@ def predict_arima(stock_symbol: str):
     prediction_data = prediction[f"{stock_symbol.upper()}"]
     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
             for date, value in prediction_data.items()]
-    
+
     return data
 
 
@@ -376,7 +377,7 @@ def predict_gradientBoost(stock_symbol: str):
     prediction = gradient_boost_interface.predict(start_date, end_date, 120)
 
     print(prediction)
-    
+
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"Predicted_Close"]
     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}

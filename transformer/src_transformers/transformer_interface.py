@@ -95,13 +95,13 @@ class TransformerInterface(AbstractModel):
         """
         self.interval_minutes = 120
         self.num_intervals = 24
-        root_directory = Path.cwd().parent.parent.parent
-        self.model_path = Path(root_directory, "transformer",
-                               "prediction_resources", "torch_transformer.tjm")
-        self.data_path = Path(root_directory, "transformer",
-                              "prediction_resources", "preprocessed_data_prediction.csv")
-        self.prices_path = Path(root_directory, "transformer",
-                                "prediction_resources", "prices_prediction.pkl")
+        root_directory = Path.cwd().parent
+        self.model_path = Path(
+            root_directory, "prediction_resources", "torch_transformer.tjm")
+        self.data_path = Path(
+            root_directory, "prediction_resources", "preprocessed_data_prediction.csv")
+        self.prices_path = Path(
+            root_directory, "prediction_resources", "prices_prediction.pkl")
 
     def predict(self,
                 timestamp_start: pd.Timestamp,
@@ -209,7 +209,8 @@ class TransformerInterface(AbstractModel):
         Returns:
             nn.Module: The loaded PyTorch model.
         """
-        model = torch.jit.load(self.model_path, map_location=torch.device("cpu"))
+        model = torch.jit.load(
+            self.model_path, map_location=torch.device("cpu"))
         # Set model device attribute to CPU so that masks are on CPU as well
         model.device = torch.device("cpu")
         model.eval()
