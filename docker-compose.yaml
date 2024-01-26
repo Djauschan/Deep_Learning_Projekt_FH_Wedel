@@ -1,0 +1,80 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./WebApp/services/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./WebApp/services/backend:/code
+    environment:
+      - DATABASE_URL=sqlite:///./data/app.db
+
+  base_service:
+    # Specify the NVIDIA runtime for GPU support
+    runtime: nvidia
+    environment:
+      # Specify which GPUs to use
+      - NVIDIA_VISIBLE_DEVICES=all
+      # Specify the default configuration file
+      # - CONFIG_PATH=data/test_configs/training_config_tt_train.yaml
+    
+    # Specify the build context for this service (current directory)
+    build:
+      context: .
+    
+
+  # Service to use a trained transformer model to predict
+  predict_transformer:
+    # This service extends the base_service
+    # extends:
+    #   service: base_service
+    # Specify the NVIDIA runtime for GPU support
+    runtime: nvidia
+    
+
+    # Specify the build context for this service (current directory)
+    build:
+      context: ./transformer
+      dockerfile: Dockerfile
+    
+    # Bind mount the current directory to /app in the container
+    volumes:
+      - ./transformer:/app
+    environment:
+      # Specify which GPUs to use
+      - NVIDIA_VISIBLE_DEVICES=all
+      # Specify the default configuration file
+      # - CONFIG_PATH=data/test_configs/training_config_tt_train.yaml
+
+    # Map port 5000 on the host to port 5000 in the container
+    ports:
+      - 5000:5000
+
+    # Specify the command to run when the container starts
+    # This command starts the prediction process
+    command:
+      [
+        "python",
+        "-m",
+        "src_transformers.main",
+        "-c",
+        "data/test_configs/training_config_tt_train.yaml",
+        "-p",
+        "predict"
+      ]
+
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: services/frontend/Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./services/frontend:/app
+  #   environment:
+  #     - VUE_APP_API_URL=http://localhost:8000
+  #   depends_on:
+  #     - backend
