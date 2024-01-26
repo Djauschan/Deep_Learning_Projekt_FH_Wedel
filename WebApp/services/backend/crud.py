@@ -1,6 +1,3 @@
-
-import datetime as DT
-import socket
 from datetime import datetime
 
 import bcrypt
@@ -11,11 +8,11 @@ import pandas as pd
 import schemas
 
 # import pandas_market_calendars as mcal
-import yfinance as yf
+# import yfinance as yf
+# from yahoo_fin.stock_info import get_data
 from fastapi import HTTPException
 from sqlalchemy import MetaData, Table
 from sqlalchemy.orm import Session
-from yahoo_fin.stock_info import get_data
 
 
 # method to delete the table "users"
@@ -136,18 +133,17 @@ def get_logins_by_user_id(db: Session, owner_id: int):
 # method to get stock data of specific stock symbol for n days
 
 
-def get_stock_days(db: Session, stock_symbol: str, n: int):
-    # Download historical data from Yahoo Finance
-    stock_data = yf.download(stock_symbol, period=f"{n}d")
-    stock_data["Volume"] = stock_data["Volume"].astype(float)
-    return_data = []
+# def get_stock_days(db: Session, stock_symbol: str, n: int):
+#     # Download historical data from Yahoo Finance
+#     stock_data = yf.download(stock_symbol, period=f"{n}d")
+#     stock_data["Volume"] = stock_data["Volume"].astype(float)
+#     return_data = []
 
-    for index, row in stock_data.iterrows():
-        return_data.append({"date": index.strftime(
-            '%m/%d/%y'), "open": row["Open"], "high": row["High"], "low": row["Low"], "close": row["Close"], "volume": row["Volume"]})
+#     for index, row in stock_data.iterrows():
+#         return_data.append({"date": index.strftime(
+#             '%m/%d/%y'), "open": row["Open"], "high": row["High"], "low": row["Low"], "close": row["Close"], "volume": row["Volume"]})
 
-    return return_data
-
+#     return return_data
 # method to load data from csv file
 
 

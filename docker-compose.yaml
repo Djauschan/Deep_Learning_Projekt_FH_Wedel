@@ -13,8 +13,26 @@ services:
       - 8000:8000
     volumes:
       - ./WebApp/services/backend:/app
+      - ./data:/data
     entrypoint:
       ["bash", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000"]
+    networks:
+      - backend_network
+
+  frontend:
+    build:
+      context: ./WebApp/services/frontend
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - ./WebApp/services/frontend:/app
+    # Set the entrypoint of the container to build and start the frontend
+    # This could take a few seconds
+    entrypoint:
+      ["bash", "-c", "npm run build && npm run serve"]
+    depends_on:
+      - backend
     networks:
       - backend_network
 
@@ -80,16 +98,3 @@ services:
       ["bash", "-c", "uvicorn api:app --host 0.0.0.0 --port 8000"]
     networks:
       - backend_network
-
-  # frontend:
-  #   build:
-  #     context: .
-  #     dockerfile: services/frontend/Dockerfile
-  #   ports:
-  #     - "8080:8080"
-  #   volumes:
-  #     - ./services/frontend:/app
-  #   environment:
-  #     - VUE_APP_API_URL=http://localhost:8000
-  #   depends_on:
-  #     - backend

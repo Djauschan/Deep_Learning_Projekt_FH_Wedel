@@ -1,5 +1,3 @@
-import datetime as DT
-
 import bcrypt
 import crud
 import models
@@ -378,5 +376,5 @@ def load_data():
     start_date = pd.Timestamp("2021-01-04")
     end_date = pd.Timestamp("2021-01-06")
 
-    return crud.loadDataFromFile(start_date=start_date, end_date=end_date, rsc_completePath="../../../data/Aktien/AAPL_1min.txt",
+    return crud.loadDataFromFile(start_date=start_date, end_date=end_date, rsc_completePath="../data/Aktien/AAPL_1min.txt",
                                  ALL_DATA_COLUMNS=allColumns, COLUMNS_TO_KEEP=relevantColumns)
