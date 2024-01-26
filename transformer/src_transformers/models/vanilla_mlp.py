@@ -35,11 +35,18 @@ class Multi_Layer_Perceptron(nn.Module):
                  device: torch.device):
         super(Multi_Layer_Perceptron, self).__init__()
         self.device = device
-
-        self.seq_len_encoder = seq_len_encoder  # Required to save the model
-        self.seq_len_decoder = seq_len_decoder  # Required to save the model
-        self.dim_encoder = dim_encoder  # Required to save the model
-        self.dim_decoder = dim_decoder  # Required to save the model
+        self.seq_len_encoder = seq_len_encoder
+        self.seq_len_decoder = seq_len_decoder
+        # save constructor arguments to enable model saving/loading
+        self.params = {
+            'seq_len_encoder': seq_len_encoder,
+            'seq_len_decoder': seq_len_decoder,
+            'dim_decoder': dim_decoder,
+            'dim_encoder': dim_encoder,
+            'hidden_dim': hidden_dim,
+            'dropoutrate': dropoutrate,
+            'device': device
+        }
 
         # Erster Layer
         layers = [nn.Linear(seq_len_encoder * dim_encoder,

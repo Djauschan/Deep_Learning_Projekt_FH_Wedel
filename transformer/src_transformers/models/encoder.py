@@ -24,7 +24,8 @@ class TransformerBatchNormEncoderLayer(nn.Module):
         super(TransformerBatchNormEncoderLayer, self).__init__()
 
         # Self attention block
-        self.self_attn = MultiheadAttention(dim_encoder, num_heads, dropout=dropout, batch_first=True)
+        self.self_attn = MultiheadAttention(
+            dim_encoder, num_heads, dropout=dropout, batch_first=True)
 
         # MLP Block
         self.linear1 = nn.Linear(dim_encoder, d_ff)
@@ -55,7 +56,8 @@ class TransformerBatchNormEncoderLayer(nn.Module):
         src = src.permute(0, 2, 1)
 
         # Self attention block
-        src2 = self.self_attn(src, src, src, attn_mask=src_mask, key_padding_mask=src_key_padding_mask)[0]
+        src2 = self.self_attn(src, src, src, attn_mask=src_mask,
+                              key_padding_mask=src_key_padding_mask)[0]
         src = src + self.dropout1(src2)
 
         # Batch norm
@@ -108,24 +110,25 @@ class TransformerEncoder(nn.Module):
                 'seq_len_decoder must be smaller or equal to seq_len_encoder')
 
         self.model_type = 'TransformerEncoder'
-
-        self.seq_len_encoder = seq_len_encoder  # Required to save the model
-        self.seq_len_decoder = seq_len_decoder  # Required to save the model
-        self.dim_encoder = dim_encoder  # Required to save the model
-        self.dim_decoder = dim_decoder  # Required to save the model
+        self.seq_len_encoder = seq_len_encoder
+        self.seq_len_decoder = seq_len_decoder
         self.norm = norm
 
         self.pos_encoder = PositionalEncoding(
             dim_encoder, dropout, max(seq_len_encoder, seq_len_decoder))
 
         if self.norm == 'layer_norm':
-            encoder_layer = nn.TransformerEncoderLayer(dim_encoder, num_heads, d_ff, dropout, norm_first=True, batch_first=True)
+            encoder_layer = nn.TransformerEncoderLayer(
+                dim_encoder, num_heads, d_ff, dropout, norm_first=True, batch_first=True)
         elif self.norm == 'batch_norm':
-            encoder_layer = TransformerBatchNormEncoderLayer(dim_encoder, num_heads, d_ff, dropout)
+            encoder_layer = TransformerBatchNormEncoderLayer(
+                dim_encoder, num_heads, d_ff, dropout)
         else:
-            raise ValueError('norm must be either "layer_norm" or "batch_norm".')
+            raise ValueError(
+                'norm must be either "layer_norm" or "batch_norm".')
 
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers)
+        self.transformer_encoder = nn.TransformerEncoder(
+            encoder_layer, num_layers)
 
         self.embedding = nn.Linear(dim_encoder, dim_encoder)
         self.d_model = dim_encoder
@@ -133,6 +136,20 @@ class TransformerEncoder(nn.Module):
         self.device = device
 
         self.init_weights()
+
+        # save constructor arguments to enable model saving/loading
+        self.params = {
+            'dim_encoder': dim_encoder,
+            'dim_decoder': dim_decoder,
+            'num_heads': num_heads,
+            'num_layers': num_layers,
+            'd_ff': d_ff,
+            'seq_len_encoder': seq_len_encoder,
+            'seq_len_decoder': seq_len_decoder,
+            'dropout': dropout,
+            'device': device,
+            'norm': norm
+        }
 
     def init_weights(self) -> None:
         """

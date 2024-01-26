@@ -35,10 +35,8 @@ class TransformerModel(nn.Module):
                 'seq_len_decoder must be smaller or equal to seq_len_encoder')
 
         self.model_type = 'Transformer'
-        self.seq_len_encoder = seq_len_encoder # Required to save the model
-        self.seq_len_decoder = seq_len_decoder # Required to save the model
-        self.dim_encoder = dim_encoder  # Required to save the model
-        self.dim_decoder = dim_decoder  # Required to save the model
+        self.seq_len_encoder = seq_len_encoder
+        self.seq_len_decoder = seq_len_decoder
         self.pos_encoder = PositionalEncoding(
             dim_encoder, dropout, max(seq_len_encoder, seq_len_decoder))
         encoder_layers = TransformerEncoderLayer(
@@ -52,6 +50,19 @@ class TransformerModel(nn.Module):
         self.device = device
 
         self.init_weights()
+
+        # save constructor arguments to enable model saving/loading
+        self.params = {
+            'dim_encoder': dim_encoder,
+            'dim_decoder': dim_decoder,
+            'num_heads': num_heads,
+            'num_layers': num_layers,
+            'd_ff': d_ff,
+            'seq_len_encoder': seq_len_encoder,
+            'seq_len_decoder': seq_len_decoder,
+            'dropout': dropout,
+            'device': device
+        }
 
     def init_weights(self) -> None:
         """

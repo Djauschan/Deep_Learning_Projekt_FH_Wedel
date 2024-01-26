@@ -257,15 +257,17 @@ class EncoderLayer(nn.Module):
 
     def forward(self, x, mask):
         # Forward attention layer
-        x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
-        #x = self.norm1(x)
+        x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(
+            x.shape[0], x.shape[1], x.shape[2])
+        # x = self.norm1(x)
         attn_output = self.self_attn(x, x, x, mask)
         x = x + self.dropout(attn_output)
         # Add + normalize + dropout
 
         # Forward feed forward layer
-        x = self.norm2(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
-        #x = self.norm2(x)
+        x = self.norm2(x.view(x.shape[0], x.shape[2], x.shape[1])).view(
+            x.shape[0], x.shape[1], x.shape[2])
+        # x = self.norm2(x)
         ff_output = self.feed_forward(x)
         x = x + self.dropout(ff_output)
 
@@ -288,8 +290,9 @@ class DecoderLayer(nn.Module):
     def forward(self, x, enc_output, src_mask,
                 tgt_mask):
         # Forward self attention layer for tgt inputs
-        x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
-        #x = self.norm1(x)
+        x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(
+            x.shape[0], x.shape[1], x.shape[2])
+        # x = self.norm1(x)
         attn_output = self.self_attn(x, x, x, tgt_mask)
         x = x + self.dropout(attn_output)
 
@@ -297,15 +300,17 @@ class DecoderLayer(nn.Module):
         # Encoders outputs are used as keys and values
         # The decoder's outputs are used as queries
         # TODO: unmcommend the following lines
-        x = self.norm2(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
-        #x = self.norm2(x)
+        x = self.norm2(x.view(x.shape[0], x.shape[2], x.shape[1])).view(
+            x.shape[0], x.shape[1], x.shape[2])
+        # x = self.norm2(x)
         attn_output = self.cross_attn(
             x, enc_output, enc_output, src_mask)
         x = x + self.dropout(attn_output)
 
         # Forward feed forward layer
-        x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(x.shape[0], x.shape[1], x.shape[2])
-        #x = self.norm3(x)
+        x = self.norm1(x.view(x.shape[0], x.shape[2], x.shape[1])).view(
+            x.shape[0], x.shape[1], x.shape[2])
+        # x = self.norm3(x)
         ff_output = self.feed_forward(x)
         x = x + self.dropout(ff_output)
         return x
@@ -327,11 +332,8 @@ class Transformer(nn.Module):
         super(Transformer, self).__init__()
 
         self.device = device
-
-        self.seq_len_encoder = seq_len_encoder  # Required to save the model
-        self.seq_len_decoder = seq_len_decoder  # Required to save the model
-        self.dim_encoder = dim_encoder  # Required to save the model
-        self.dim_decoder = dim_decoder  # Required to save the model
+        self.seq_len_encoder = seq_len_encoder
+        self.seq_len_decoder = seq_len_decoder
 
         # Positional encoding
         self.positional_encoding_encoder = PositionalEncoding(
@@ -351,6 +353,19 @@ class Transformer(nn.Module):
         self.fc1 = nn.Linear(dim_decoder, dim_decoder)
         self.fc2 = nn.Linear(d_ff, dim_decoder)
         self.dropout = nn.Dropout(dropout)
+
+        # save constructor arguments to enable model saving/loading
+        self.params = {
+            'dim_encoder': dim_encoder,
+            'dim_decoder': dim_decoder,
+            'num_heads': num_heads,
+            'num_layers': num_layers,
+            'd_ff': d_ff,
+            'seq_len_encoder': seq_len_encoder,
+            'seq_len_decoder': seq_len_decoder,
+            'dropout': dropout,
+            'device': device
+        }
 
     def generate_mask(self, seq, no_peak: bool):
         """

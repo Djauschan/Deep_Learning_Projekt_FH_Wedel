@@ -196,8 +196,10 @@ class Trainer:
         dataset_str = str(dataset_dict).replace("'", "")
 
         # Logg object variables
-        self.logger.write_text("config_settings/Trainer_variables", trainer_str)
-        self.logger.write_text("config_settings/dataset_variables", dataset_str)
+        self.logger.write_text(
+            "config_settings/Trainer_variables", trainer_str)
+        self.logger.write_text(
+            "config_settings/dataset_variables", dataset_str)
         self.logger.write_model(self.model)
 
         # Creating training and validation data loaders from the given data
@@ -436,7 +438,7 @@ class Trainer:
         After the model is saved, the method logs a message to the console with the path
         to the file.
         """
-        path = ModelService.save_model(self.model, self.device)
+        path = ModelService.save_model(self.model)
         self.logger.log_model_path(model_path=path)
         Logger.log_text(f"Model saved to '{path}'.")
 
