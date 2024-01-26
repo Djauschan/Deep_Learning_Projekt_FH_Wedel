@@ -1,5 +1,6 @@
+matplotlib
 numpy
 pandas
+PyYAML
+torch
 tqdm
-
-# numpy==1.3.4 meine Version
