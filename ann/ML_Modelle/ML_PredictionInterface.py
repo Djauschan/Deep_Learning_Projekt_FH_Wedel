@@ -3,8 +3,8 @@ import pickle
 from abc import ABC, abstractmethod
 
 import pandas as pd
-from abstract_model import AbstractModel
-from ann.ML_Modelle.ml_model_abc import (
+from ML_Modelle.abstract_model import AbstractModel
+from ML_Modelle.ml_model_abc import (
     GradientBoostingModel,
     LinearRegressionModel,
     RandomForestModel,
@@ -63,7 +63,7 @@ class ABC_LinearRegressionModel(AbstractModel):
         return prediction_df
 
     def load_data(self) -> None:
-        file_path = 'ann/ML_Modelle/saved_pkl/Data'
+        file_path = 'ML_Modelle/saved_pkl/Data'
         data = {}  # Dictionary zum Speichern der geladenen Dataframes
 
         if os.path.exists(file_path):
@@ -78,7 +78,7 @@ class ABC_LinearRegressionModel(AbstractModel):
         pass
 
     def load_model(self) -> None:
-        model_path = 'ann/ML_Modelle/saved_pkl/LR-Model/lr_model.pkl'
+        model_path = 'ML_Modelle/saved_pkl/LR-Model/lr_model.pkl'
         if os.path.exists(model_path):
             with open(model_path, 'rb') as file:
                 self.model = pickle.load(file)
@@ -136,7 +136,7 @@ class ABC_RandomForestModel(AbstractModel):
         return prediction_df
 
     def load_data(self) -> None:
-        file_path = 'ann/ML_Modelle/saved_pkl/Data'
+        file_path = 'ML_Modelle/saved_pkl/Data'
         data = {}  # Dictionary zum Speichern der geladenen Dataframes
 
         if os.path.exists(file_path):
@@ -151,7 +151,7 @@ class ABC_RandomForestModel(AbstractModel):
         pass
 
     def load_model(self) -> None:
-        model_path = 'ann/ML_Modelle/saved_pkl/RF-Model/rf_model.pkl'
+        model_path = 'ML_Modelle/saved_pkl/RF-Model/rf_model.pkl'
         if os.path.exists(model_path):
             with open(model_path, 'rb') as file:
                 self.model = pickle.load(file)
@@ -209,7 +209,7 @@ class ABC_GradientBoostingModel(AbstractModel):
         return prediction_df
 
     def load_data(self) -> None:
-        file_path = 'ann/ML_Modelle/saved_pkl/Data'
+        file_path = 'ML_Modelle/saved_pkl/Data'
         data = {}  # Dictionary zum Speichern der geladenen Dataframes
 
         if os.path.exists(file_path):
@@ -224,7 +224,7 @@ class ABC_GradientBoostingModel(AbstractModel):
         pass
 
     def load_model(self) -> None:
-        model_path = 'ann/ML_Modelle/saved_pkl/GBM-Model/gbm_model.pkl'
+        model_path = 'ML_Modelle/saved_pkl/GBM-Model/gbm_model.pkl'
         if os.path.exists(model_path):
             with open(model_path, 'rb') as file:
                 self.model = pickle.load(file)
@@ -282,7 +282,7 @@ class ABC_SVMModel(AbstractModel):
         return prediction_df
 
     def load_data(self) -> None:
-        file_path = 'ann/ML_Modelle/saved_pkl/Data'
+        file_path = 'ML_Modelle/saved_pkl/Data'
         data = {}  # Dictionary zum Speichern der geladenen Dataframes
 
         if os.path.exists(file_path):
@@ -297,7 +297,7 @@ class ABC_SVMModel(AbstractModel):
         pass
 
     def load_model(self) -> None:
-        model_path = 'ann/ML_Modelle/saved_pkl/SVM-Model/svm_model.pkl'
+        model_path = 'ML_Modelle/saved_pkl/SVM-Model/svm_model.pkl'
         if os.path.exists(model_path):
             with open(model_path, 'rb') as file:
                 self.model = pickle.load(file)

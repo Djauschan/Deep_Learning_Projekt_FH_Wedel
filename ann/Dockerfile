@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Use the official Python image with a specified version 3.11.6
-ARG PYTHON_VERSION=3.11.6
+ARG PYTHON_VERSION=3.9.18
 FROM python:${PYTHON_VERSION}-slim as base
 
 # Prevent Python from writing .pyc files.

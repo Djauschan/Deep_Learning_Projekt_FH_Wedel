@@ -6,26 +6,10 @@ import models
 import pandas as pd
 import requests
 import schemas
-from ann.ML_Modelle.ML_PredictionInterface import (
-    ABC_GradientBoostingModel,
-    ABC_LinearRegressionModel,
-    ABC_RandomForestModel,
-    ABC_SVMModel,
-)
-from ann.statisticmodels.PredicitonInterface import (
-    ArimaInterface,
-    ETSInterface,
-    NaiveInterface,
-    ThetaInterface,
-    WindowAverageInterface,
-    historicAverageInterface,
-)
 from database import SessionLocal, engine
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-
-# from ann.statisticmodels.lstm_predictionInterface import LstmInterface
 
 # Create tables in the database based on the model definitions
 models.Base.metadata.create_all(bind=engine)
@@ -217,184 +201,185 @@ def predict_cnn():
 #     return lstm.predict('2021-01-04', '2021-01-06', 120)
 
 
-@app.get("/predict/arima")
-def predict_arima(stock_symbol: str):
-    arima_interface = ArimaInterface()
+# @app.get("/predict/arima")
+# def predict_arima(stock_symbol: str):
+#     arima_interface = ArimaInterface()
 
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-05")
-    prediction = arima_interface.predict(start_date, end_date, 120)
-    prediction.set_index('ds', inplace=True)
+#     start_date = pd.to_datetime("2021-01-04")
+#     end_date = pd.to_datetime("2021-01-05")
+#     prediction = arima_interface.predict(start_date, end_date, 120)
+#     prediction.set_index('ds', inplace=True)
 
-    prediction = prediction.astype("Float64")
+#     prediction = prediction.astype("Float64")
 
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-            for date, value in prediction_data.items()]
+#     # Convert the prediction to a list of dictionaries
+#     prediction_data = prediction[f"{stock_symbol.upper()}"]
+#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
+#             for date, value in prediction_data.items()]
 
-    return data
-
-
-@app.get("/predict/ETS")
-def predict_ets(stock_symbol: str):
-    ets_interface = ETSInterface()
-
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-05")
-    prediction = ets_interface.predict(start_date, end_date, 120)
-    prediction.set_index('ds', inplace=True)
-
-    prediction = prediction.astype("Float64")
-
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-            for date, value in prediction_data.items()]
-
-    return data
+#     return data
 
 
-@app.get("/predict/historicAverage")
-def predict_historicAverage(stock_symbol: str):
-    historicAverage_interface = historicAverageInterface()
+# @app.get("/predict/ETS")
+# def predict_ets(stock_symbol: str):
+#     ets_interface = ETSInterface()
 
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-05")
-    prediction = historicAverage_interface.predict(start_date, end_date, 120)
-    prediction.set_index('ds', inplace=True)
+#     start_date = pd.to_datetime("2021-01-04")
+#     end_date = pd.to_datetime("2021-01-05")
+#     prediction = ets_interface.predict(start_date, end_date, 120)
+#     prediction.set_index('ds', inplace=True)
 
-    prediction = prediction.astype("Float64")
+#     prediction = prediction.astype("Float64")
 
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-            for date, value in prediction_data.items()]
+#     # Convert the prediction to a list of dictionaries
+#     prediction_data = prediction[f"{stock_symbol.upper()}"]
+#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
+#             for date, value in prediction_data.items()]
 
-    return data
-
-
-@app.get("/predict/theta")
-def predict_theta(stock_symbol: str):
-    theta_interface = ThetaInterface()
-
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-05")
-    prediction = theta_interface.predict(start_date, end_date, 120)
-    prediction.set_index('ds', inplace=True)
-
-    prediction = prediction.astype("Float64")
-
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-            for date, value in prediction_data.items()]
-
-    return data
+#     return data
 
 
-@app.get("/predict/naive")
-def predict_naive(stock_symbol: str):
-    naive_interface = NaiveInterface()
+# @app.get("/predict/historicAverage")
+# def predict_historicAverage(stock_symbol: str):
+#     historicAverage_interface = historicAverageInterface()
 
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-05")
-    prediction = naive_interface.predict(start_date, end_date, 120)
-    prediction.set_index('ds', inplace=True)
+#     start_date = pd.to_datetime("2021-01-04")
+#     end_date = pd.to_datetime("2021-01-05")
+#     prediction = historicAverage_interface.predict(start_date, end_date, 120)
+#     prediction.set_index('ds', inplace=True)
 
-    prediction = prediction.astype("Float64")
+#     prediction = prediction.astype("Float64")
 
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-            for date, value in prediction_data.items()]
+#     # Convert the prediction to a list of dictionaries
+#     prediction_data = prediction[f"{stock_symbol.upper()}"]
+#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
+#             for date, value in prediction_data.items()]
 
-    return data
+#     return data
 
 
-@app.get("/predict/windowAverage")
-def predict_windowAverage(stock_symbol: str):
-    windowAverage_interface = WindowAverageInterface()
+# @app.get("/predict/theta")
+# def predict_theta(stock_symbol: str):
+#     theta_interface = ThetaInterface()
 
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-05")
-    prediction = windowAverage_interface.predict(start_date, end_date, 120)
-    prediction.set_index('ds', inplace=True)
+#     start_date = pd.to_datetime("2021-01-04")
+#     end_date = pd.to_datetime("2021-01-05")
+#     prediction = theta_interface.predict(start_date, end_date, 120)
+#     prediction.set_index('ds', inplace=True)
 
-    prediction = prediction.astype("Float64")
+#     prediction = prediction.astype("Float64")
 
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"{stock_symbol.upper()}"]
-    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-            for date, value in prediction_data.items()]
+#     # Convert the prediction to a list of dictionaries
+#     prediction_data = prediction[f"{stock_symbol.upper()}"]
+#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
+#             for date, value in prediction_data.items()]
 
-    return data
+#     return data
+
+
+# @app.get("/predict/naive")
+# def predict_naive(stock_symbol: str):
+#     naive_interface = NaiveInterface()
+
+#     start_date = pd.to_datetime("2021-01-04")
+#     end_date = pd.to_datetime("2021-01-05")
+#     prediction = naive_interface.predict(start_date, end_date, 120)
+#     prediction.set_index('ds', inplace=True)
+
+#     prediction = prediction.astype("Float64")
+
+#     # Convert the prediction to a list of dictionaries
+#     prediction_data = prediction[f"{stock_symbol.upper()}"]
+#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
+#             for date, value in prediction_data.items()]
+
+#     return data
+
+
+# @app.get("/predict/windowAverage")
+# def predict_windowAverage(stock_symbol: str):
+#     windowAverage_interface = WindowAverageInterface()
+
+#     start_date = pd.to_datetime("2021-01-04")
+#     end_date = pd.to_datetime("2021-01-05")
+#     prediction = windowAverage_interface.predict(start_date, end_date, 120)
+#     prediction.set_index('ds', inplace=True)
+
+#     prediction = prediction.astype("Float64")
+
+#     # Convert the prediction to a list of dictionaries
+#     prediction_data = prediction[f"{stock_symbol.upper()}"]
+#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
+#             for date, value in prediction_data.items()]
+
+#     return data
 
 
 @app.get("/predict/linearRegression")
 def predict_linearRegression(stock_symbol: str):
-    linear_regression_interface = ABC_LinearRegressionModel()
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_ann:8000/predict/linearRegression"
+    response = requests.get(api_url, params=data_to_send)
 
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-05")
-    prediction = linear_regression_interface.predict(start_date, end_date, 120)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
 
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"{stock_symbol.upper()}_Predicted_Close"]
-    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-            for date, value in prediction_data.items()]
-
-    return data
-
-
-@app.get("/predict/randomForest")
-def predict_randomForest(stock_symbol: str):
-    random_forest_interface = ABC_RandomForestModel()
-
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-05")
-    prediction = random_forest_interface.predict(start_date, end_date, 120)
-
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"Predicted_Close"]
-    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-            for date, value in prediction_data.items()]
-
-    return data
+    return response.json()
 
 
-@app.get("/predict/gradientBoost")
-def predict_gradientBoost(stock_symbol: str):
-    gradient_boost_interface = ABC_GradientBoostingModel()
+# @app.get("/predict/randomForest")
+# def predict_randomForest(stock_symbol: str):
+#     random_forest_interface = ABC_RandomForestModel()
 
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-05")
-    prediction = gradient_boost_interface.predict(start_date, end_date, 120)
+#     start_date = pd.to_datetime("2021-01-04")
+#     end_date = pd.to_datetime("2021-01-05")
+#     prediction = random_forest_interface.predict(start_date, end_date, 120)
 
-    print(prediction)
+#     # Convert the prediction to a list of dictionaries
+#     prediction_data = prediction[f"Predicted_Close"]
+#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
+#             for date, value in prediction_data.items()]
 
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction[f"Predicted_Close"]
-    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-            for date, value in prediction_data.items()]
-
-    return data
+#     return data
 
 
-@app.get("/predict/svm")
-def predict_svm(stock_symbol: str):
-    svm_interface = ABC_SVMModel()
+# @app.get("/predict/gradientBoost")
+# def predict_gradientBoost(stock_symbol: str):
+#     gradient_boost_interface = ABC_GradientBoostingModel()
 
-    start_date = pd.to_datetime("2021-01-04")
-    end_date = pd.to_datetime("2021-01-05")
-    prediction = svm_interface.predict(start_date, end_date, 120)
+#     start_date = pd.to_datetime("2021-01-04")
+#     end_date = pd.to_datetime("2021-01-05")
+#     prediction = gradient_boost_interface.predict(start_date, end_date, 120)
 
-    # Convert the prediction to a list of dictionaries
-    prediction_data = prediction["Predicted_Close"]
-    data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-            for date, value in prediction_data.items()]
+#     print(prediction)
 
-    return data
+#     # Convert the prediction to a list of dictionaries
+#     prediction_data = prediction[f"Predicted_Close"]
+#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
+#             for date, value in prediction_data.items()]
+
+#     return data
+
+
+# @app.get("/predict/svm")
+# def predict_svm(stock_symbol: str):
+#     svm_interface = ABC_SVMModel()
+
+#     start_date = pd.to_datetime("2021-01-04")
+#     end_date = pd.to_datetime("2021-01-05")
+#     prediction = svm_interface.predict(start_date, end_date, 120)
+
+#     # Convert the prediction to a list of dictionaries
+#     prediction_data = prediction["Predicted_Close"]
+#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
+#             for date, value in prediction_data.items()]
+
+#     return data
 
 
 @app.get("/load/data")
