@@ -60,3 +60,26 @@ class RMSLELoss(nn.Module):
         rmsle_loss = torch.sqrt(mse_loss)
 
         return rmsle_loss
+
+
+class ExpMSELoss(nn.Module):
+    def __init__(self):
+        """
+        Initializes the ExpMSELoss class.
+        """
+        super().__init__()
+
+    def forward(self, prediction: torch.tensor, target: torch.tensor) -> torch.tensor:
+        """
+        Calculates the exponential of the mean squared error (MSE) between the prediction and the target.
+
+        Args:
+            prediction (torch.tensor): Prediction of the model.
+            target (torch.tensor): Correct target values.
+
+        Returns:
+            torch.tensor: The exponential MSE loss.
+        """
+        mse_loss = nn.MSELoss()(prediction, target)
+        exp_mse_loss = torch.exp(mse_loss)
+        return exp_mse_loss

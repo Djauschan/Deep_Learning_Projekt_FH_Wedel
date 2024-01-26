@@ -25,14 +25,3 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements_torch.txt,target=requirements_torch.txt \
     python -m pip install -r requirements_torch.txt
-
-# Copy the requirements file into the container at /app.
-# Note: Not necessary if using a bind mount for requirements.txt.
-# COPY requirements.txt .
-
-# Copy the source code into the container.
-# Note: Not necessary if using a bind mount for the entire application.
-# COPY . .
-
-# Expose the port that the application listens on.
-EXPOSE 5000

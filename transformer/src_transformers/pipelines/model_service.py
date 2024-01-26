@@ -104,7 +104,7 @@ class ModelService():
         return None
 
     @classmethod
-    def save_model(cls, model: nn.Module) -> str:
+    def save_model(cls, model: nn.Module, device: torch.device) -> str:
         """
         Saves the specified PyTorch model to a file in the `MODEL_OUTPUT_PATH` directory.
 
@@ -116,6 +116,7 @@ class ModelService():
 
         Args:
             model (nn.Module): The PyTorch model to be saved.
+            device (torch.device): Whether to use the GPU or CPU.
 
         Returns:
             str: The absolute path to the saved model file.
@@ -134,7 +135,17 @@ class ModelService():
             path = Path(MODEL_OUTPUT_PATH,
                         f'{model_class_name}_v{version + 1}.pt')
             first_save = False
-        torch.save(model, path)
+
+        # Save the model to the specified path
+        # Demo data for the input and target tensors is needed to trace the model
+        encoder_dimensions = model.dim_encoder
+        seq_len_encoder = model.seq_len_encoder
+        seq_len_decoder = model.seq_len_decoder
+        decoder_dimensions = model.dim_decoder
+        input = torch.ones(1, seq_len_encoder, encoder_dimensions).to(device)
+        target = torch.ones(1, seq_len_decoder, decoder_dimensions).to(device)
+        traced_model = torch.jit.trace(model, (input, target))
+        torch.jit.save(traced_model, path)
 
         return str(path.absolute())
 
@@ -164,7 +175,7 @@ class ModelService():
             raise ValueError(
                 f'No model of class {model.__name__} found in {MODEL_OUTPUT_PATH}')
 
-        model = torch.load(
+        model = torch.jit.load(
             Path(MODEL_OUTPUT_PATH, f"{model.__name__}_v{version}.pt"))
         model.eval()
 

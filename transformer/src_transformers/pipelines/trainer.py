@@ -13,7 +13,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
 
-from src_transformers.models.loss import RMSELoss, RMSLELoss
+from src_transformers.models.loss import RMSELoss, RMSLELoss, ExpMSELoss
 from src_transformers.pipelines.model_service import ModelService
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
@@ -40,7 +40,7 @@ class Trainer:
         epochs (int): The number of epochs to train for.
         learning_rate (float): The learning rate for the optimizer.
         validation_split (float): The fraction of the data to use for validation.
-        loss (nn.MSELoss | nn.CrossEntropyLoss): The loss function to use.
+        loss (nn.MSELoss | nn.CrossEntropyLoss | RMSELoss | RMSLELoss | ExpMSELoss): The loss function to use.
         optimizer (optim.SGD | optim.Adam): The optimizer to use.
         device (torch.device): Whether to use the CPU or the GPU.
         model (nn.Module): The PyTorch model to train.
@@ -50,7 +50,8 @@ class Trainer:
     batch_size: int
     epochs: int
     learning_rate: float
-    loss: Union[nn.MSELoss, nn.CrossEntropyLoss, RMSELoss, RMSLELoss]
+    loss: Union[nn.MSELoss, nn.CrossEntropyLoss,
+                RMSELoss, RMSLELoss, ExpMSELoss]
     optimizer: Union[optim.SGD, optim.Adam]
     weight_decay: float
     device: torch.device
@@ -77,7 +78,7 @@ class Trainer:
             momentum: float = 0,
             eval_mode: bool = False,
             seed: int = None,
-            batch_shuffle: bool= False,
+            batch_shuffle: bool = False,
             patience: int = 50,
             log_image_frequency: int = 10
     ) -> "Trainer":
@@ -118,6 +119,8 @@ class Trainer:
             loss_instance = RMSELoss()
         elif loss == "rmsle":
             loss_instance = RMSLELoss()
+        elif loss == "expmse":
+            loss_instance = ExpMSELoss()
         else:
             Logger.log_text(f"Loss {loss} is not valid, defaulting to MSELoss")
             loss_instance = nn.MSELoss()
@@ -182,13 +185,19 @@ class Trainer:
         self.model.to(self.device)
         self.loss.to(self.device)
 
-        config_str = f"batch_size: {self.batch_size}\
-            epochs: {self.epochs}\
-            learning rate: {self.learning_rate}\
-            loss: {self.loss}\
-            optimizer: {self.optimizer}\
-            device: {self.device}"
-        self.logger.write_text("Trainer configuration", config_str)
+        # Get string with all object variables from trainer
+        trainer_dict = vars(self).copy()
+        trainer_dict.pop("model")
+        trainer_dict.pop("logger")
+        trainer_str = str(trainer_dict).replace("'", "")
+
+        # Get string with all object variables from dataset
+        dataset_dict = vars(self._dataset).copy()
+        dataset_str = str(dataset_dict).replace("'", "")
+
+        # Logg object variables
+        self.logger.write_text("config_settings/Trainer_variables", trainer_str)
+        self.logger.write_text("config_settings/dataset_variables", dataset_str)
         self.logger.write_model(self.model)
 
         # Creating training and validation data loaders from the given data
@@ -222,7 +231,7 @@ class Trainer:
             train_dataset, batch_size=self.batch_size, shuffle=self.batch_shuffle
         )
         validation_loader = DataLoader(
-            validation_dataset, batch_size=self.batch_size, shuffle=self.batch_shuffle
+            validation_dataset, batch_size=self.batch_size, shuffle=False
         )
 
         return train_loader, validation_loader
@@ -252,7 +261,8 @@ class Trainer:
         finish_reason = "Training terminated before training loop ran through."
         for epoch in tqdm(range(self.epochs)):
             try:
-                train_loss, train_results = self.calculate_train_loss(train_loader)
+                train_loss, train_results = self.calculate_train_loss(
+                    train_loader)
 
                 # Logging loss and charts of results
                 self.logger.log_training_loss(train_loss, epoch)
@@ -260,6 +270,8 @@ class Trainer:
                     self.logger.save_prediction_chart(
                         predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
                     self.logger.save_horizon_chart(
+                        predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
+                    self.logger.save_abs_prediction_chart(
                         predictions=train_results[0], targets=train_results[1], epoch=epoch, name="train_set")
 
                 validation_loss, validation_results = self.calculate_validation_loss(
@@ -274,6 +286,10 @@ class Trainer:
                     self.logger.save_horizon_chart(
                         predictions=validation_results[0], targets=validation_results[1], epoch=epoch,
                         name="validation_set")
+                    self.logger.save_abs_prediction_chart(
+                        predictions=validation_results[0], targets=validation_results[1], epoch=epoch,
+                        name="validation_set"
+                    )
 
                 # Early stopping
                 if min_loss > validation_loss:
@@ -420,8 +436,7 @@ class Trainer:
         After the model is saved, the method logs a message to the console with the path
         to the file.
         """
-        path = ModelService.save_model(self.model)
-        # TODO: log only once (with naming of model)
+        path = ModelService.save_model(self.model, self.device)
         self.logger.log_model_path(model_path=path)
         Logger.log_text(f"Model saved to '{path}'.")
 

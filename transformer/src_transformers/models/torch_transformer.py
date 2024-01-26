@@ -31,11 +31,14 @@ class TransformerModel(nn.Module):
 
         # Throw value Error if seq_len_decoder is larger than seq_len_encoder
         if seq_len_decoder > seq_len_encoder:
-            raise ValueError('seq_len_decoder must be smaller or equal to seq_len_encoder')
+            raise ValueError(
+                'seq_len_decoder must be smaller or equal to seq_len_encoder')
 
         self.model_type = 'Transformer'
-        self.seq_len_encoder = seq_len_encoder
-        self.seq_len_decoder = seq_len_decoder
+        self.seq_len_encoder = seq_len_encoder # Required to save the model
+        self.seq_len_decoder = seq_len_decoder # Required to save the model
+        self.dim_encoder = dim_encoder  # Required to save the model
+        self.dim_decoder = dim_decoder  # Required to save the model
         self.pos_encoder = PositionalEncoding(
             dim_encoder, dropout, max(seq_len_encoder, seq_len_decoder))
         encoder_layers = TransformerEncoderLayer(

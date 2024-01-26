@@ -42,12 +42,13 @@ def lookup_symbol(symbol: str, symbol_type: str) -> Optional[str]:
         return None
 
 
-def add_time_information(df: pd.DataFrame) -> pd.DataFrame:
+def add_time_information(df: pd.DataFrame, time_feature: dict[str]=None) -> pd.DataFrame:
     """
     Adds additional time information to the passed data frame in the form of additional columns.
 
     Args:
         df (pd.DataFrame): Data frame to which additional time information is to be added.
+        time_feature (dict[str], optional): Dictionary with the names of the time features to be added as keys and the
 
     Returns:
         pd.DataFrame: Data frame with additional time information.
@@ -57,6 +58,22 @@ def add_time_information(df: pd.DataFrame) -> pd.DataFrame:
         df['timestamp'].dt.date).cumcount() == 0
     df['last of day'] = df.groupby(
         df['timestamp'].dt.date).cumcount(ascending=False) == 0
+
+    # Add additional time features.
+    if time_feature is not None:
+        for feature, required in time_feature.items():
+            if required:
+                if feature == 'hour':
+                    df[feature] = df['timestamp'].apply(lambda ts: ts.hour)
+                elif feature == 'month':
+                    df[feature] = df['timestamp'].apply(lambda ts: ts.month)
+                elif feature == 'day_of_week':
+                    df[feature] = df['timestamp'].apply(lambda ts: ts.dayofweek)
+
+                # onehot encoding
+                df = pd.get_dummies(df, columns=[feature], dtype=float)
+
+
 
     # Convert boolean to integer.
     df['first of day'] = df['first of day'].astype(int)
@@ -116,8 +133,8 @@ def get_all_dates(reader: DataReader, data_usage_ratio: float) -> pd.DataFrame:
     return used_timestamps_df
 
 
-def fill_dataframe(all_dates: pd.DataFrame,
-                   reader: DataReader, time_resolution: int) -> tuple[list, pd.DataFrame]:
+def fill_dataframe(all_dates: pd.DataFrame, reader: DataReader,
+                   time_resolution: int, ignore_nights: bool) -> tuple[list, pd.DataFrame]:
     """
     A data frame is created that contains the values required for training for all files that are to be read in.
     The columns are filled so that values are available for all files for all timestamps.
@@ -130,6 +147,7 @@ def fill_dataframe(all_dates: pd.DataFrame,
         all_dates (pd.DataFrame): Data frame that contains the union of all timestamps of all read-in files.
         reader (DataReader): DataReader object that reads in the files.
         time_resolution (int): Time resolution to which the data frame is to be resampled.
+        ignore_nights (bool): If True, the data frame is only filled with values between 4 a.m. and 8 p.m.
 
     Returns:
         tuple[list, dict, pd.DataFrame]:
@@ -174,6 +192,10 @@ def fill_dataframe(all_dates: pd.DataFrame,
 
     # Set Timestamp as index.
     all_dates.set_index('timestamp', inplace=True)
+
+    # Only use the dates between 4 a.m. and 8 p.m., as trading only takes place during this period.
+    if ignore_nights:
+        all_dates = all_dates.between_time('04:00', '20:00', inclusive="left")
 
     # Absolute prices of the last known time step (offset) are saved.
     offset = 0
