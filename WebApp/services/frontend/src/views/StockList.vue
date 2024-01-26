@@ -129,11 +129,10 @@ export default {
 
 .topics-container {
   display: flex;
-  flex-wrap: wrap;
-  max-width: 80%;
+  max-width: 100%;
   padding: 20px;
   margin-left: 0px;
   overflow-y: auto; /* Add this line to enable vertical scrolling */
-  max-height: 70%;
+  max-height: 60%;
 }
 </style>

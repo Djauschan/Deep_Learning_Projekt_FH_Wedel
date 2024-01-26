@@ -1,115 +1,366 @@
 <template>
   <Header />
   <div class="center">
-    <input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
+    <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
-    <button class="button-stock" @click="updateChart">Show Stock</button>
-    <button class="button-stock" @click="useTestData">Use Test Data</button>
+    <button class="button-stock" @click="updateChart">Show Stock</button>!-->
+    <button class="button-stock" @click="updateChart">One Click Solution</button>
     <button class="button-stock" @click="showAll">Show All</button>
     <button class="button-stock" @click="hideAll">Hide All</button>
     <!-- Add checkboxes for additional data points -->
     <div class="checkboxes">
       <div class="checkboxes1">
-    <label>
-      <input type="checkbox" v-model="showCNNLine"> CNN
-    </label>
-    <label>
-      <input type="checkbox" v-model="showTransformerLine"> Transformer
-    </label>
-    <label>
-      <input type="checkbox" v-model="showLSTMLine"> LSTM
-    </label>
-  </div>
+        <label>
+          <input type="checkbox" v-model="showCNNLine"> CNN
+        </label>
+        <label>
+          <input type="checkbox" v-model="showTransformerLine"> Transformer
+        </label>
+        <label>
+          <input type="checkbox" v-model="showLSTMLine"> LSTM
+        </label>
+      </div>
       <div class="checkboxes2">
-    <label>
-      <input type="checkbox" v-model="showArimaLine"> Arima
-    </label>
-    <label>
-      <input type="checkbox" v-model="showStatistischeMethodenLine"> Statistische Methoden
-    </label>
-    <label>
-      <input type="checkbox" v-model="showRandomLine"> Random Line
-    </label>
-  </div>
+        <label>
+          <input type="checkbox" v-model="showArimaLine"> Arima
+        </label>
+        <label>
+          <input type="checkbox" v-model="showhistoricAverageLine"> historic Average
+        </label>
+        <label>
+          <input type="checkbox" v-model="showwindowAverageLine"> windowAverage
+        </label>
+      </div>
+      <div class="checkboxes3">
+        <label>
+          <input type="checkbox" v-model="shownaiveLine"> Naive
+        </label>
+        <label>
+          <input type="checkbox" v-model="showthetaLine"> Theta
+        </label>
+        <label>
+          <input type="checkbox" v-model="showETSLine"> ETS
+        </label>
+      </div>
+      <div class="checkboxes4">
+        <label>
+          <input type="checkbox" v-model="showlinearRegressionLine"> Linear Regression
+        </label>
+        <label>
+          <input type="checkbox" v-model="showrandomForestLine"> Random Forest
+        </label>
+        <label>
+          <input type="checkbox" v-model="showgradientBoostLine"> gradient Boost
+        </label>
+      </div>
+      <div class="checkboxes5">
+        <label>
+          <input type="checkbox" v-model="showsvmLine"> SVM
+        </label>
+      </div>
     </div>
   </div>
-   <!-- Combined Chart -->
-   <div class="newChart">
-      <DxChart v-if="showChart" :data-source="combinedData" title="Stock Price">
-        <DxCommonSeriesSettings argument-field="date" type="stock" />
-        <DxSeries :name="selectedStock" open-value-field="open" high-value-field="high" low-value-field="low"
-          close-value-field="close" argument-field="date">
-        </DxSeries>
-        <DxSeries v-if="showCNNLine" :name="'CNN Line - ' + selectedStock" :data-source="combinedData" type="line"
-          value-field="CNNValue" argument-field="date">
-        </DxSeries>
-        <DxSeries v-if="showTransformerLine" :name="'Transformer Line - ' + selectedStock" :data-source="combinedData" type="line"
-          value-field="TransformerValue" argument-field="date">
-        </DxSeries>
-        <DxSeries v-if="showLSTMLine" :name="'LSTM Line - ' + selectedStock" :data-source="combinedData" type="line"
-          value-field="LSTMValue" argument-field="date">
-        </DxSeries>
-        <DxSeries v-if="showArimaLine" :name="'Arima Line - ' + selectedStock" :data-source="combinedData" type="line"
-          value-field="ArimaValue" argument-field="date">
-        </DxSeries>
-        <DxSeries v-if="showStatistischeMethodenLine" :name="'Statistische Methoden Line - ' + selectedStock" :data-source="combinedData" type="line"
-          value-field="StatistischeMethodenValue" argument-field="date">
-        </DxSeries>
-        <DxSeries v-if="showRandomLine" :name="'Random Line - ' + selectedStock" :data-source="combinedData" type="line"
-          value-field="randomValue" argument-field="date">
-        </DxSeries>
-        <DxArgumentAxis :workdays-only="true">
-          <DxLabel format="shortDate" />
-        </DxArgumentAxis>
-        <DxValueAxis name="price" position="left">
-          <DxTitle text="US dollars" />
-          <DxLabel>
-            <DxFormat type="currency" />
-          </DxLabel>
-        </DxValueAxis>
-      </DxChart>
+  <!-- Combined Chart -->
+  <div class="newChart">
+    <DxChart v-if="showChart" :data-source="combinedData" title="Stock Price">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name="'aapl'" open-value-field="Open" high-value-field="High" low-value-field="Low"
+        close-value-field="Close" argument-field="DateTime">
+      </DxSeries>
+      <DxSeries v-if="showCNNLine" :name="'CNN Line - ' + selectedStock" :data-source="combinedData" type="line"
+        value-field="CNNValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showTransformerLine" :name="'Transformer Line - ' + selectedStock" :data-source="combinedData"
+        type="line" value-field="TransformerValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showLSTMLine" :name="'LSTM Line - ' + selectedStock" :data-source="combinedData" type="line"
+        value-field="LSTMValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showArimaLine" :name="'Arima Line - ' + selectedStock" :data-source="combinedData" type="line"
+        value-field="arimaValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showhistoricAverageLine" :name="'historicAverage Line - ' + selectedStock"
+        :data-source="combinedData" type="line" value-field="historicAverageValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showlinearRegressionLine" :name="'linearRegression Line - ' + selectedStock"
+        :data-source="combinedData" type="line" value-field="linearRegressionValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showrandomForestLine" :name="'randomForest Line - ' + selectedStock"
+        :data-source="combinedData" type="line" value-field="randomForestValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost Line - ' + selectedStock"
+        :data-source="combinedData" type="line" value-field="gradientBoostValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showsvmLine" :name="'svm Line - ' + selectedStock"
+        :data-source="combinedData" type="line" value-field="svmValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showwindowAverageLine" :name="'Window Average Line - ' + selectedStock"
+        :data-source="combinedData" type="line" value-field="windowAverageValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="shownaiveLine" :name="'Naive Line - ' + selectedStock"
+        :data-source="combinedData" type="line" value-field="naiveValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showthetaLine" :name="'Theta Line - ' + selectedStock"
+        :data-source="combinedData" type="line" value-field="thetaValue" argument-field="date">
+      </DxSeries>
+      <DxSeries v-if="showETSLine" :name="'ETS Line - ' + selectedStock"
+        :data-source="combinedData" type="line" value-field="ETSValue" argument-field="date">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
   </div>
   <div class="newChart">
-  <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="lineChartDataSource" title="CNN Chart">
-    <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'CNN Line'" value-field="lineChartDataField" argument-field="date" type="line">
-    </DxSeries>
-  </DxChart>
+    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData" title="CNN Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'CNN Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
   </div>
   <div class="newChart">
-  <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="lineChartDataSource" title="Transformer Chart">
+   <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="this.transformerData" title="Transformer Chart">
     <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'Transformer Line'" value-field="lineChartDataField" argument-field="date" type="line">
+    <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line">
     </DxSeries>
-  </DxChart>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+   </DxChart>
   </div>
   <div class="newChart">
-  <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="lineChartDataSource" title="LSTM Chart">
-    <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'LSTM Line'" value-field="lineChartDataField" argument-field="date" type="line">
-    </DxSeries>
-  </DxChart>
+    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData" title="LSTM Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'LSTM Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
   </div>
   <div class="newChart">
-  <DxChart v-if="showArimaLine && showChart" id="Arima-chart" :data-source="lineChartDataSource" title="Arima Chart">
-    <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'Arima Line'" value-field="lineChartDataField" argument-field="date" type="line">
-    </DxSeries>
-  </DxChart>
+    <DxChart v-if="showArimaLine && showChart" id="Arima-chart" :data-source="this.arimaData" title="Arima Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'Arima Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
   </div>
   <div class="newChart">
-  <DxChart v-if="showStatistischeMethodenLine && showChart" id="Statistische Methoden-chart" :data-source="lineChartDataSource" title="Statistische Methoden Chart">
-    <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'StatistischeMethoden Line'" value-field="lineChartDataField" argument-field="date" type="line">
-    </DxSeries>
-  </DxChart>
+    <DxChart v-if="showhistoricAverageLine && showChart" id="Historic Average-chart"
+      :data-source="this.historicAverageData" title="Historic Average Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'historicAverage Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
   </div>
   <div class="newChart">
-  <DxChart v-if="showRandomLine && showChart" id="Random-chart" :data-source="lineChartDataSource" title="Random Chart">
-    <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'Line Chart'" value-field="lineChartDataField" argument-field="date" type="line">
-    </DxSeries>
-  </DxChart>
+    <DxChart v-if="showwindowAverageLine && showChart" id="Window Average-chart"
+      :data-source="this.windowAverageData" title="Window Average Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'windowAverage Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="shownaiveLine && showChart" id="Naive-chart"
+      :data-source="this.naiveData" title="Naive Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'naive Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="showthetaLine && showChart" id="Theta-chart"
+      :data-source="this.thetaData" title="Theta Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'theta Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="showETSLine && showChart" id="ETS-chart"
+      :data-source="this.ETSData" title="ETS Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'ETS Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="showlinearRegressionLine && showChart" id="Lineare Regression-chart"
+      :data-source="this.linearRegressionData" title="Lineare Regression Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'linearRegression Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart"
+      :data-source="this.randomForestData" title="Random Forest Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart"
+      :data-source="this.gradientBoostData" title="Gradient Boost Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="showsvmLine && showChart" id="SVM-chart"
+      :data-source="this.svmData" title="SVM Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'svm Line'" value-field="value" argument-field="date" type="line">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
   </div>
 </template>
 <script>
@@ -127,7 +378,7 @@ import DxChart, {
   DxTooltip,
 } from 'devextreme-vue/chart';
 
-import { dataSource } from './data.js';
+//import { dataSource } from './data.js';
 import Header from './Header.vue'
 import axios from "axios";
 import Swal from "sweetalert2/dist/sweetalert2.js";
@@ -149,12 +400,38 @@ export default {
     DxTooltip,
   },
   async created() {
-    this.dataSource = null;
+    this.dataSource = [];
     this.selectedDays = null;
+    this.transformerData =[];
+    this.historicAverageData = [];
+    this.linearRegressionData = [];
+    this.svmData = [];
+    this.windowAverageData = [];
+    this.naiveData = [];
+    this.thetaData = [];
+    this.ETSData = [];
+    this.arimaData = [];
+    this.LSTMData =[];
+    this.CNNData =[];
+    this.randomForestData = [];
+    this.gradientBoostData = [];
   },
   data() {
     return {
-      dataSource,
+      dataSource: [],
+      transformerData: [],
+      LSTMData: [],
+      CNNData: [],
+      historicAverageData: [],
+      linearRegressionData: [],
+      randomForestData: [],
+      gradientBoostData: [],
+      svmData: [],
+      windowAverageData: [],
+      naiveData: [],
+      thetaData: [],
+      ETSData: [],
+      arimaData: [],
       selectedStock: "",
       selectedDays: null,
       showChart: false,
@@ -167,127 +444,279 @@ export default {
       LSTMpredictionData: [],
       showArimaLine: false,
       ArimapredictionData: [],
-      showStatistischeMethodenLine: false,
-      StatistischeMethodenpredictionData: [],
-      showRandomLine: false,
-      randomLineData: [],
+      showhistoricAverageLine: false,
+      historicAveragepredictionData: [],
+      showlinearRegressionLine: false,
+      linearRegressionpredictionData: [],
+      showrandomForestLine: false,
+      randomForestpredictionData: [],
+      showgradientBoostLine: false,
+      gradientBoostpredictionData: [],
+      showsvmLine: false,
+      svmpredictionData: [],
+      showwindowAverageLine: false,
+      windowAveragepredictionData: [],
+      shownaiveLine: false,
+      naivepredictionData: [],
+      showthetaLine: false,
+      thetapredictionData: [],
+      showETSLine: false,
+      ETSpredictionData: [],
+      combinedData: [],
+      store: useMyPiniaStore(),
     };
   },
   computed: {
-    combinedData() {
-      const combinedData = this.dataSource.map(data => {
-        const randomValue = this.showRandomLine ? Math.random() * 80 + 70: 0;
-        return {
-          date: data.date,
-          open: data.open,
-          high: data.high,
-          low: data.low,
-          close: data.close,
-          volume: data.volume,
-          randomValue: randomValue,
-        };
-      });
-      return combinedData;
-    },
+    tooltip: {
+          enabled: true,
+          // Customize tooltip appearance or behavior if needed
+        },
   },
   methods: {
-    async hideAll(){
+    async updateCombinedData() {
+    // Map dataSource points with TransformerValue set to null
+    const combinedDataWithNull = this.dataSource.map(data => ({
+      ...data,
+      TransformerValue: null,
+      CNNValue: null,
+      LSTMValue: null,
+      arimaValue: null,
+      historicAverageValue: null,
+      linearRegressionValue: null,
+      randomForestValue: null,
+      gradientBoostValue: null,
+      svmValue: null,
+      windowAverageValue: null,
+      naiveValue: null,
+      thetaValue: null,
+      ETSValue: null,
+    }));
+
+    // Merge transformerData points into combinedData
+    this.transformerData.forEach(transformerDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === transformerDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].TransformerValue = transformerDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: transformerDataPoint.date,
+          TransformerValue: transformerDataPoint.value,
+        });
+      }
+    });
+
+    this.LSTMData.forEach(LSTMDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === LSTMDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].LSTMValue = LSTMDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: LSTMDataPoint.date,
+          LSTMValue: LSTMDataPoint.value,
+        });
+      }
+    });
+
+    this.CNNData.forEach(CNNDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === CNNDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].CNNValue = CNNDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: CNNDataPoint.date,
+          CNNValue: CNNDataPoint.value,
+        });
+      }
+    });
+
+        this.historicAverageData.forEach(historicAverageDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === historicAverageDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].historicAverageValue = historicAverageDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: historicAverageDataPoint.date,
+          historicAverageValue: historicAverageDataPoint.value,
+        });
+      }
+    });
+
+    this.windowAverageData.forEach(windowAverageDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === windowAverageDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].windowAverageValue = windowAverageDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: windowAverageDataPoint.date,
+          windowAverageValue: windowAverageDataPoint.value,
+        });
+      }
+    });
+
+    this.svmData.forEach(svmDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === svmDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].svmValue = svmDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: svmDataPoint.date,
+          svmValue: svmDataPoint.value,
+        });
+      }
+    });
+
+    this.naiveData.forEach(naiveDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === naiveDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].naiveValue = naiveDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: naiveDataPoint.date,
+          naiveValue: naiveDataPoint.value,
+        });
+      }
+    });
+
+    this.thetaData.forEach(thetaDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === thetaDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].thetaValue = thetaDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: thetaDataPoint.date,
+          thetaValue: thetaDataPoint.value,
+        });
+      }
+    });
+
+    this.ETSData.forEach(ETSDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === ETSDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].ETSValue = ETSDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: ETSDataPoint.date,
+          ETSValue: ETSDataPoint.value,
+        });
+      }
+    });
+
+    this.linearRegressionData.forEach(linearRegressionDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === linearRegressionDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].linearRegressionValue = linearRegressionDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: linearRegressionDataPoint.date,
+          linearRegressionValue: linearRegressionDataPoint.value,
+        });
+      }
+    });
+
+    this.randomForestData.forEach(randomForestDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === randomForestDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].randomForestValue = randomForestDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: randomForestDataPoint.date,
+          randomForestValue: randomForestDataPoint.value,
+        });
+      }
+    });
+
+    this.gradientBoostData.forEach(gradientBoostDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === gradientBoostDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].gradientBoostValue = gradientBoostDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: gradientBoostDataPoint.date,
+          gradientBoostValue: gradientBoostDataPoint.value,
+        });
+      }
+    });
+
+        this.arimaData.forEach(arimaDataPoint => {
+      const index = combinedDataWithNull.findIndex(data => data.date === arimaDataPoint.date);
+      if (index !== -1) {
+        // If date exists in combinedData, update TransformerValue
+        combinedDataWithNull[index].arimaValue = arimaDataPoint.value;
+      } else {
+        // If date doesn't exist in combinedData, add a new point
+        combinedDataWithNull.push({
+          date: arimaDataPoint.date,
+          arimaValue: arimaDataPoint.value,
+        });
+      }
+    });
+
+    // Set the result to combinedData
+    this.combinedData = combinedDataWithNull;
+
+    console.log("combinedData");
+    console.log(this.combinedData);
+  },
+
+    async hideAll() {
       this.showCNNLine = false;
       this.showTransformerLine = false;
       this.showLSTMLine = false;
       this.showArimaLine = false;
-      this.showStatistischeMethodenLine = false;
-      this.showRandomLine = false;
+      this.showhistoricAverageLine = false;
+      this.showwindowAverageLine = false;
+      this.shownaiveLine = false;
+      this.showthetaLine = false;
+      this.showETSLine = false;
+      this.showlinearRegressionLine = false;
+      this.showrandomForestLine = false;
+      this.showgradientBoostLine = false;
+      this.showsvmLine = false;
     },
 
-    async showAll(){
-      this.showCNNLine = true;
+    async showAll() {
       this.showTransformerLine = true;
-      this.showLSTMLine = true;
       this.showArimaLine = true;
-      this.showStatistischeMethodenLine = true;
-      this.showRandomLine = true;
+      this.showhistoricAverageLine = true;
+      this.showwindowAverageLine = true;
+      this.shownaiveLine = true;
+      this.showthetaLine = true;
+      this.showETSLine = true;
+      this.showlinearRegressionLine = true;
+      this.showsvmLine = true;
+      this.showrandomForestLine = true;
+      this.showgradientBoostLine = true;
+      //this.showLSTMLine = true;
+      //this.showCNNLine = true;
     },
 
-    async useTestData() {
-    // Replace this with your actual test data for stock prices
-const testData = [
-  { date: '2022-01-01', open: 100, close: 110, high: 120, low: 90, volume: 1000000 },
-  { date: '2022-01-02', open: 110, close: 105, high: 115, low: 100, volume: 1200000 },
-  { date: '2022-01-03', open: 105, close: 112, high: 115, low: 100, volume: 900000 },
-  { date: '2022-01-04', open: 112, close: 115, high: 120, low: 105, volume: 1100000 },
-  // Add more test data as needed
-];
-
-// Set the data source with the test data
-this.dataSource = testData;
-
-// Dummy data for CNN prediction
-const CNNpredictionTestData = [
-  { date: '2022-01-01', predictedValue: 105 },
-  { date: '2022-01-02', predictedValue: 108 },
-  { date: '2022-01-03', predictedValue: 110 },
-  { date: '2022-01-04', predictedValue: 113 },
-  // Add more dummy data as needed
-];
-this.CNNpredictionData = CNNpredictionTestData;
-
-// Dummy data for Transformer prediction
-const TransformerpredictionTestData = [
-  { date: '2022-01-01', predictedValue: 102 },
-  { date: '2022-01-02', predictedValue: 107 },
-  { date: '2022-01-03', predictedValue: 105 },
-  { date: '2022-01-04', predictedValue: 110 },
-  // Add more dummy data as needed
-];
-this.TransformerpredictionData = TransformerpredictionTestData;
-
-// Customize other properties as needed
-this.showChart = true;
-const maxVolume = Math.max(...this.dataSource.map(data => data.volume));
-
-const prices = this.dataSource.flatMap(data => [data.open, data.close]);
-this.priceRange = {
-  min: Math.min(...prices) * 0.5,
-  max: Math.max(...prices) * 2
-};
-this.priceRangeKey = Math.random()
-  },
-
-    customizeTooltip(pointInfo) {
-      if (!pointInfo.valueText.includes('h:')) {
-        return {
-          text: `Volume: ${(pointInfo.valueText / 1000000).toFixed(2)}M`
-        };
-      } else {
-        return {
-          text:
-            `
-            Date: $${(pointInfo.argument)}<br/>
-            Open: $${Number(pointInfo.openValue).toFixed(2)}<br/>
-            Close: $${Number(pointInfo.closeValue).toFixed(2)}<br/>
-            High: $${Number(pointInfo.highValue).toFixed(2)}<br/>
-            Low: $${Number(pointInfo.lowValue).toFixed(2)}<br/>
-            `,
-        };
-      }
-    },
-    customizeStockPoint(point) {
-      const stockData = this.dataSource.find(data => data.date === point.argument);
-      if (stockData) {
-        const color = stockData.close >= stockData.open ? 'green' : 'red';
-        return {
-          color: color,
-          hoverStyle: {
-            color: color
-          }
-        };
-      }
-    },
     async get_stock_data(stock_symbol, days_back) {
-      const store = useMyPiniaStore();
       try {
-        const response = await axios.get(store.API + "/getStock", {
+        const response = await axios.get(this.store.API + "/getStock", {
           params: {
             stock_symbol: stock_symbol,
             days_back: days_back,
@@ -315,10 +744,349 @@ this.priceRangeKey = Math.random()
         }
       }
     },
+    
+    async load_arima_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/arima`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        console.log("Prediction loaded");
+        console.log(response.data);
+
+        // Assuming the response.data is an object with date and close properties
+        this.arimaData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_CNN_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/cnn`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        console.log("Prediction loaded");
+        console.log(response.data);
+
+        // Assuming the response.data is an object with date and close properties
+        this.CNNData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_LSTM_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/lstm`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        // Assuming the response.data is an object with date and close properties
+        this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_transformer_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/transformer`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        console.log("Prediction loaded");
+        console.log(response.data);
+
+        // Assuming the response.data is an object with date and close properties
+        this.transformerData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        console.log("mapped");
+        console.log(this.transformerData);
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_historicAverage_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/historicAverage`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        // Assuming the response.data is an object with date and close properties
+        this.historicAverageData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_windowAverage_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/windowAverage`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        // Assuming the response.data is an object with date and close properties
+        this.windowAverageData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_naive_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/naive`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        // Assuming the response.data is an object with date and close properties
+        this.naiveData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_theta_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/theta`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        // Assuming the response.data is an object with date and close properties
+        this.thetaData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_ETS_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/ETS`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        // Assuming the response.data is an object with date and close properties
+        this.ETSData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_linearRegression_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/linearRegression`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        // Assuming the response.data is an object with date and close properties
+        this.linearRegressionData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_randomForest_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/randomForest`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        // Assuming the response.data is an object with date and close properties
+        this.randomForestData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_gradientBoost_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/gradientBoost`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        // Assuming the response.data is an object with date and close properties
+        this.gradientBoostData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_svm_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/svm`, {
+          params: {
+            stock_symbol: "AAPL"
+          }
+        });
+
+        // Assuming the response.data is an object with date and close properties
+        this.svmData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
     async load_data() {
       try {
-        const response = await axios.get(store.API + "/load/data", {
+        const response = await axios.get(this.store.API + "/load/data", {
         });
+        console.log("normal loaded")
         console.log([response.data])
         return response.data
       } catch (error) {
@@ -341,34 +1109,40 @@ this.priceRangeKey = Math.random()
         }
       }
     },
+
     async updateChart() {
-      if (this.selectedStock == "" || !this.selectedDays) {
-        Swal.fire({
-          title: "Error",
-          text: "Please fill out all fields",
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-      } else {
-        console.log(this.selectedStock, this.selectedDays)
-        //this.dataSource = await this.get_stock_data(this.selectedStock, this.selectedDays);
-        this.dataSource = await this.load_data();
+      this.dataSource = await this.load_data();
+      this.transformerData = await this.load_transformer_data();
+      this.arimaData = await this.load_arima_data();
+      this.historicAverageData = await this.load_historicAverage_data();
+      this.windowAverageData = await this.load_windowAverage_data();
+      this.naiveData = await this.load_naive_data();
+      this.thetaData = await this.load_theta_data();
+      this.ETSData = await this.load_ETS_data();
+      this.linearRegressionData = await this.load_linearRegression_data();
+      this.svmData = await this.load_svm_data();
+      this.randomForestData = await this.load_randomForest_data();
+      this.gradientBoostData = await this.load_gradientBoost_data();
+      //this.LSTMData = await this.load_LSTM_data();
+      //this.CNNData = await this.load_CNN_data();
+      
 
-        if (this.dataSource) {
+      console.log(this.dataSource)
+      
+      if (this.dataSource) {
 
-          const prices = this.dataSource.flatMap(data => [data.open, data.close]);
-          this.priceRange = {
-            min: Math.min(...prices) * 0.5,
-            max: Math.max(...prices) * 2
-          };
-          this.priceRangeKey = Math.random();
-          console.log(this.priceRange)
-        }
-
-        this.showChart = true;
+        const prices = this.dataSource.flatMap(data => [data.open, data.close]);
+        this.priceRange = {
+          min: Math.min(...prices) * 0.5,
+          max: Math.max(...prices) * 2
+        };
+        this.priceRangeKey = Math.random();
+        console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
       }
+      
+      await this.updateCombinedData();
+      this.showChart = true;
+      //}
     },
   },
 };
@@ -378,11 +1152,11 @@ this.priceRangeKey = Math.random()
   height: 30%;
 }
 
-.newChart{
+.newChart {
   margin-top: 2%;
 }
 
-.checkboxes{
+.checkboxes {
   margin-left: 1%;
   margin-right: 1%;
   padding: 0.5%;
@@ -391,12 +1165,13 @@ this.priceRangeKey = Math.random()
 }
 
 .checkboxes label {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .checkboxes input {
-    margin-right: 5px; /* Adjust the margin as needed */
+  margin-right: 5px;
+  /* Adjust the margin as needed */
 }
 
 .center {

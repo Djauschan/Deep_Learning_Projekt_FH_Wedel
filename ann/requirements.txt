@@ -1,7 +1,0 @@
-matplotlib
-seaborn
-scikit-learn
-statsforecast
-neuralforecast
-torch
-tensorflow
