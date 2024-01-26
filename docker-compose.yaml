@@ -10,7 +10,7 @@ services:
       context: ./WebApp/services/backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - 8000:8000
     volumes:
       - ./WebApp/services/backend:/app
     entrypoint:
@@ -29,9 +29,8 @@ services:
     volumes:
       - ./transformer:/app
     
-    # Map port 5000 on the host to port 5000 in the container
+    # Map port 8001 on the host to port 8000 in the container
     ports:
-      - 5000:5000
       - 8001:8000
 
     # Set the entrypoint of the container to start a Uvicorn server running the app defined in 'api' of 'src_transformers' directory
@@ -52,10 +51,29 @@ services:
       - ./CNN:/app
       - ./data:/data
     
-    # Map port 5001 on the host to port 5000 in the container
+    # Map port 8002 on the host to port 8000 in the container
     ports:
-      - 5001:5000
       - 8002:8000
+
+    # Set the entrypoint of the container to start a Uvicorn server running the app defined in 'api' of 'src_transformers' directory
+    entrypoint:
+      ["bash", "-c", "uvicorn api:app --host 0.0.0.0 --port 8000"]
+    networks:
+      - backend_network
+
+  predict_ann:
+    # Specify the build context for this service (current directory)
+    build:
+      context: ./ann
+      dockerfile: Dockerfile
+    
+    # Bind mount the current directory to /app in the container
+    volumes:
+      - ./ann:/app
+    
+    # Map port 8003 on the host to port 8000 in the container
+    ports:
+      - 8003:8000
 
     # Set the entrypoint of the container to start a Uvicorn server running the app defined in 'api' of 'src_transformers' directory
     entrypoint:

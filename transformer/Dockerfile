@@ -25,6 +25,3 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements_torch.txt,target=requirements_torch.txt \
     python -m pip install -r requirements_torch.txt
-
-# Expose the port that the application listens on.
-EXPOSE 5000
