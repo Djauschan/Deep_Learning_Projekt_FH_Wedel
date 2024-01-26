@@ -13,7 +13,7 @@ class ArimaInterface(AbstractModel):
         business_days = pd.bdate_range(
             start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
-        path = "./ann/statisticmodels/models/savedModelsARIMA/"
+        path = "./statisticmodels/models/savedModelsARIMA/"
 
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(
@@ -56,7 +56,7 @@ class ETSInterface(AbstractModel):
         business_days = pd.bdate_range(
             start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
-        path = "./ann/statisticmodels/models/savedModelsETS/"
+        path = "./statisticmodels/models/savedModelsETS/"
 
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(
@@ -98,7 +98,7 @@ class historicAverageInterface(AbstractModel):
         business_days = pd.bdate_range(
             start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
-        path = "./ann/statisticmodels/models/savedModelshistoricAverage/"
+        path = "./statisticmodels/models/savedModelshistoricAverage/"
 
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(
@@ -142,7 +142,7 @@ class ThetaInterface(AbstractModel):
         business_days = pd.bdate_range(
             start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
-        path = "./ann/statisticmodels/models/savedModelsTheta/"
+        path = "./statisticmodels/models/savedModelsTheta/"
 
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(
@@ -184,7 +184,7 @@ class NaiveInterface(AbstractModel):
         business_days = pd.bdate_range(
             start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
-        path = "./ann/statisticmodels/models/savedModelsNaive/"
+        path = "./statisticmodels/models/savedModelsNaive/"
 
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(
@@ -227,7 +227,7 @@ class WindowAverageInterface(AbstractModel):
         business_days = pd.bdate_range(
             start=timestamp_start, end=timestamp_end)
         days_difference = len(business_days)
-        path = "./ann/statisticmodels/models/savedModelsWindowAverage/"
+        path = "./statisticmodels/models/savedModelsWindowAverage/"
 
         # Erzeugen eines Datumsbereichs für Geschäftstage
         business_days = pd.bdate_range(

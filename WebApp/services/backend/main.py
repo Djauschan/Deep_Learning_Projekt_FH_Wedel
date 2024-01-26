@@ -201,118 +201,106 @@ def predict_cnn():
 #     return lstm.predict('2021-01-04', '2021-01-06', 120)
 
 
-# @app.get("/predict/arima")
-# def predict_arima(stock_symbol: str):
-#     arima_interface = ArimaInterface()
+@app.get("/predict/arima")
+def predict_arima(stock_symbol: str):
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_ann:8000/predict/arima"
+    response = requests.get(api_url, params=data_to_send)
 
-#     start_date = pd.to_datetime("2021-01-04")
-#     end_date = pd.to_datetime("2021-01-05")
-#     prediction = arima_interface.predict(start_date, end_date, 120)
-#     prediction.set_index('ds', inplace=True)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
 
-#     prediction = prediction.astype("Float64")
-
-#     # Convert the prediction to a list of dictionaries
-#     prediction_data = prediction[f"{stock_symbol.upper()}"]
-#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-#             for date, value in prediction_data.items()]
-
-#     return data
+    return response.json()
 
 
-# @app.get("/predict/ETS")
-# def predict_ets(stock_symbol: str):
-#     ets_interface = ETSInterface()
+@app.get("/predict/ETS")
+def predict_ets(stock_symbol: str):
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_ann:8000/predict/ETS"
+    response = requests.get(api_url, params=data_to_send)
 
-#     start_date = pd.to_datetime("2021-01-04")
-#     end_date = pd.to_datetime("2021-01-05")
-#     prediction = ets_interface.predict(start_date, end_date, 120)
-#     prediction.set_index('ds', inplace=True)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
 
-#     prediction = prediction.astype("Float64")
-
-#     # Convert the prediction to a list of dictionaries
-#     prediction_data = prediction[f"{stock_symbol.upper()}"]
-#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-#             for date, value in prediction_data.items()]
-
-#     return data
+    return response.json()
 
 
-# @app.get("/predict/historicAverage")
-# def predict_historicAverage(stock_symbol: str):
-#     historicAverage_interface = historicAverageInterface()
+@app.get("/predict/historicAverage")
+def predict_historicAverage(stock_symbol: str):
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_ann:8000/predict/historicAverage"
+    response = requests.get(api_url, params=data_to_send)
 
-#     start_date = pd.to_datetime("2021-01-04")
-#     end_date = pd.to_datetime("2021-01-05")
-#     prediction = historicAverage_interface.predict(start_date, end_date, 120)
-#     prediction.set_index('ds', inplace=True)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
 
-#     prediction = prediction.astype("Float64")
-
-#     # Convert the prediction to a list of dictionaries
-#     prediction_data = prediction[f"{stock_symbol.upper()}"]
-#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-#             for date, value in prediction_data.items()]
-
-#     return data
+    return response.json()
 
 
-# @app.get("/predict/theta")
-# def predict_theta(stock_symbol: str):
-#     theta_interface = ThetaInterface()
+@app.get("/predict/theta")
+def predict_theta(stock_symbol: str):
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_ann:8000/predict/theta"
+    response = requests.get(api_url, params=data_to_send)
 
-#     start_date = pd.to_datetime("2021-01-04")
-#     end_date = pd.to_datetime("2021-01-05")
-#     prediction = theta_interface.predict(start_date, end_date, 120)
-#     prediction.set_index('ds', inplace=True)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
 
-#     prediction = prediction.astype("Float64")
-
-#     # Convert the prediction to a list of dictionaries
-#     prediction_data = prediction[f"{stock_symbol.upper()}"]
-#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-#             for date, value in prediction_data.items()]
-
-#     return data
+    return response.json()
 
 
-# @app.get("/predict/naive")
-# def predict_naive(stock_symbol: str):
-#     naive_interface = NaiveInterface()
+@app.get("/predict/naive")
+def predict_naive(stock_symbol: str):
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_ann:8000/predict/naive"
+    response = requests.get(api_url, params=data_to_send)
 
-#     start_date = pd.to_datetime("2021-01-04")
-#     end_date = pd.to_datetime("2021-01-05")
-#     prediction = naive_interface.predict(start_date, end_date, 120)
-#     prediction.set_index('ds', inplace=True)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
 
-#     prediction = prediction.astype("Float64")
-
-#     # Convert the prediction to a list of dictionaries
-#     prediction_data = prediction[f"{stock_symbol.upper()}"]
-#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-#             for date, value in prediction_data.items()]
-
-#     return data
+    return response.json()
 
 
-# @app.get("/predict/windowAverage")
-# def predict_windowAverage(stock_symbol: str):
-#     windowAverage_interface = WindowAverageInterface()
+@app.get("/predict/windowAverage")
+def predict_windowAverage(stock_symbol: str):
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_ann:8000/predict/windowAverage"
+    response = requests.get(api_url, params=data_to_send)
 
-#     start_date = pd.to_datetime("2021-01-04")
-#     end_date = pd.to_datetime("2021-01-05")
-#     prediction = windowAverage_interface.predict(start_date, end_date, 120)
-#     prediction.set_index('ds', inplace=True)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
 
-#     prediction = prediction.astype("Float64")
-
-#     # Convert the prediction to a list of dictionaries
-#     prediction_data = prediction[f"{stock_symbol.upper()}"]
-#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-#             for date, value in prediction_data.items()]
-
-#     return data
+    return response.json()
 
 
 @app.get("/predict/linearRegression")
@@ -332,54 +320,55 @@ def predict_linearRegression(stock_symbol: str):
     return response.json()
 
 
-# @app.get("/predict/randomForest")
-# def predict_randomForest(stock_symbol: str):
-#     random_forest_interface = ABC_RandomForestModel()
+@app.get("/predict/randomForest")
+def predict_randomForest(stock_symbol: str):
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_ann:8000/predict/randomForest"
+    response = requests.get(api_url, params=data_to_send)
 
-#     start_date = pd.to_datetime("2021-01-04")
-#     end_date = pd.to_datetime("2021-01-05")
-#     prediction = random_forest_interface.predict(start_date, end_date, 120)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
 
-#     # Convert the prediction to a list of dictionaries
-#     prediction_data = prediction[f"Predicted_Close"]
-#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-#             for date, value in prediction_data.items()]
-
-#     return data
-
-
-# @app.get("/predict/gradientBoost")
-# def predict_gradientBoost(stock_symbol: str):
-#     gradient_boost_interface = ABC_GradientBoostingModel()
-
-#     start_date = pd.to_datetime("2021-01-04")
-#     end_date = pd.to_datetime("2021-01-05")
-#     prediction = gradient_boost_interface.predict(start_date, end_date, 120)
-
-#     print(prediction)
-
-#     # Convert the prediction to a list of dictionaries
-#     prediction_data = prediction[f"Predicted_Close"]
-#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-#             for date, value in prediction_data.items()]
-
-#     return data
+    return response.json()
 
 
-# @app.get("/predict/svm")
-# def predict_svm(stock_symbol: str):
-#     svm_interface = ABC_SVMModel()
+@app.get("/predict/gradientBoost")
+def predict_gradientBoost(stock_symbol: str):
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_ann:8000/predict/gradientBoost"
+    response = requests.get(api_url, params=data_to_send)
 
-#     start_date = pd.to_datetime("2021-01-04")
-#     end_date = pd.to_datetime("2021-01-05")
-#     prediction = svm_interface.predict(start_date, end_date, 120)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
 
-#     # Convert the prediction to a list of dictionaries
-#     prediction_data = prediction["Predicted_Close"]
-#     data = [{"date": pd.to_datetime(date).replace(hour=19, minute=30, second=00), "value": value}
-#             for date, value in prediction_data.items()]
+    return response.json()
 
-#     return data
+
+@app.get("/predict/svm")
+def predict_svm(stock_symbol: str):
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": "2021-01-04",
+                    "end_date": "2021-01-05"}
+    api_url = "http://predict_ann:8000/predict/svm"
+    response = requests.get(api_url, params=data_to_send)
+
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
+
+    return response.json()
 
 
 @app.get("/load/data")
