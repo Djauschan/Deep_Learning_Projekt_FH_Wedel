@@ -293,6 +293,11 @@ class Trainer:
                         name="validation_set"
                     )
 
+                if epoch > 0:
+                    ep = (epoch-1)//10
+                    self.optimizer.param_groups[0]['lr'] = self.optimizer.param_groups[0]['lr'] + self.learning_rate * pow(10, ep)
+                    self.logger.log_lr(self.optimizer.param_groups[0]['lr'], epoch)
+
                 # Early stopping
                 if min_loss > validation_loss:
                     min_loss = validation_loss

@@ -9,9 +9,9 @@ model_parameters:
     dropout: 0
     norm: layer_norm
 training_parameters:
-  batch_size: 1000
+  batch_size: 5000
   epochs: 10000
-  learning_rate: 0.001
+  learning_rate: 0.0000001
   loss: "mse" # Options: "mse", "rmse", "rmsle"
   optimizer: "adam" # Options: "adam", "sgd"
   weight_decay: 0.0
@@ -22,12 +22,12 @@ training_parameters:
   log_image_frequency: 25
 dataset_parameters:
   read_all_files: false
-  first_date: '2017-01-01'
+  first_date: '2000-01-01'
   last_date: '2020-12-31' # YYYY-MM-DD Last date of the data to be read in
-  data_usage_ratio: 0.1 # Only the last 50% of the read data are used in the dataset
+  data_usage_ratio: 0.05 # Only the last 50% of the read data are used in the dataset
   subseries_amount: 1 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
-  validation_split: 0.2 # The last 10% of timestamps in a subseries are used for validation
-  create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
+  validation_split: 0.4 # The last 10% of timestamps in a subseries are used for validation
+  create_new_file: false # This parameter must be set to true if the symbols to be read in are changed.
   scaler: "MinMaxScaler" # Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol.csv"
   time_resolution: 120 # Time resolution of the data in minutes
