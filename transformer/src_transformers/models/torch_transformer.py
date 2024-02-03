@@ -40,7 +40,7 @@ class TransformerModel(nn.Module):
         self.pos_encoder = PositionalEncoding(
             dim_encoder, dropout, max(seq_len_encoder, seq_len_decoder))
         encoder_layers = TransformerEncoderLayer(
-            dim_encoder, num_heads, d_ff, dropout)
+            dim_encoder, num_heads, d_ff, dropout, norm_first=True)
         encoder_layers.self_attn.batch_first = True
         self.transformer_encoder = TransformerEncoder(
             encoder_layers, num_layers)
@@ -85,17 +85,16 @@ class TransformerModel(nn.Module):
         Returns:
             torch.Tensor: Output tensor of shape (seq_len, batch_size, dim_decoder).
         """
-        src_mask = None  # TODO find proper solution
+        src_mask = nn.Transformer.generate_square_subsequent_mask(
+            src.size(1)).to(self.device)
 
         src = self.embedding(src) * math.sqrt(self.d_model)
         src = self.pos_encoder(src)
-        if src_mask is None:
-            src_mask = nn.Transformer.generate_square_subsequent_mask(
-                src.size(1)).to(self.device)
         output = self.transformer_encoder(src, src_mask)
         output = self.linear(output)
 
-        # The output sequence is artificially shortened so that it is possible to have a shorter output sequence than the input sequence.
+        # The output sequence is artificially shortened so that it is possible
+        # to have a shorter output sequence than the input sequence.
         output_sequence = output[:, :self.seq_len_decoder, :]
 
         return output_sequence
