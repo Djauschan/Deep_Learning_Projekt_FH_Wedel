@@ -40,7 +40,7 @@ class TransformerModel(nn.Module):
         self.pos_encoder = PositionalEncoding(
             dim_encoder, dropout, max(seq_len_encoder, seq_len_decoder))
         encoder_layers = TransformerEncoderLayer(
-            dim_encoder, num_heads, d_ff, dropout, norm_first=True)
+            dim_encoder, num_heads, d_ff, dropout)
         encoder_layers.self_attn.batch_first = True
         self.transformer_encoder = TransformerEncoder(
             encoder_layers, num_layers)

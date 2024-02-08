@@ -1,11 +1,11 @@
 use_gpu: true
 model_parameters:
   torch_transformer:
-    num_heads: 2
+    num_heads: 4
     num_layers: 2
     d_ff: 80
-    seq_len_encoder: 96
-    seq_len_decoder: 24
+    seq_len_encoder: 96 #96
+    seq_len_decoder: 16 #24
     dropout: 0
 training_parameters:
   batch_size: 10000
@@ -14,18 +14,18 @@ training_parameters:
   loss: "mse" #Options: "mse", "rmse", "rmsle", "expmse"
   seed: 42
   patience: 10000
-  log_image_frequency: 5
+  log_image_frequency: 10
 dataset_parameters:
   read_all_files: false
   first_date: 2000-01-01 # YYYY-MM-DD First date of the data to be read in
   last_date: 2021-01-03 # YYYY-MM-DD Last date of the data to be read in
-  data_usage_ratio: 0.25 # Only the last 30% of the read data are used in the dataset
-  subseries_amount: 2 # The time series will be cut into 2 subseries (which each consist of a train and validation set)
+  data_usage_ratio: 0.35 # Only the last 35% of the read data are used in the dataset
+  subseries_amount: 4 # The time series will be cut into 4 subseries (which each consist of a train and validation set)
   validation_split: 0.15 # The last 15% of timestamps in a subseries are used for validation
   create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol_Train.csv"
-  time_resolution: 60 # Time resolution of the data in minutes 
+  time_resolution: 120 # Time resolution of the data in minutes 
   data_selection_config:
     ignore_nights: true # If true, only the data between start_day_time and end_day_time is used
     ignore_weekends: false # If true, Saturday and Sunday are ignored
@@ -44,16 +44,16 @@ dataset_parameters:
     - "SQ" # Block
     - "TSLA" # Tesla
   # ETFs
-    - "ACWI" # iShares MSCI ACWI ETF
+    # - "ACWI" # iShares MSCI ACWI ETF
   # indices
     # - "DXY" # US Dollar Index
     - "SPX" # S&P 500
-    # - "DJCIGC" # Dow Jones Commodity Index Gold
-    # - "DJCISI" # Dow Jones Commodity Index Silver
-    # - "DJCIEN" # Dow Jones Commodity Index Energy
-    # - "DJCIIK" # Dow Jones Commodity Index Nickel
+    - "DJCIGC" # Dow Jones Commodity Index Gold
+    - "DJCISI" # Dow Jones Commodity Index Silver
+    - "DJCIEN" # Dow Jones Commodity Index Energy
+    - "DJCIIK" # Dow Jones Commodity Index Nickel
     - "DJI" # Dow Jones Industrial Average
-    # - "DJINET" # Dow Jones Internet Composite Index
+    - "DJINET" # Dow Jones Internet Composite Index
     - "COMP" # NASDAQ Composite
     - "W5000" # FT Wilshire 5000 Full Cap
     # - art1
