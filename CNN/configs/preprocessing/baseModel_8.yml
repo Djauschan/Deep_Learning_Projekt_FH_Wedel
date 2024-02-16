@@ -1,0 +1,42 @@
+AMOUNT_OF_DATA : 1
+TO_FIND_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\rsc\\data\\training\\Aktien\\"
+TO_SAVE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\rsc\\MAIN_DATA\\"
+TO_SAVE_IMAGE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\MAIN_DATA\\imageData\\"
+TO_SAVE_TS_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\MAIN_DATA\\timeSeriesData\\"
+
+##AAPL,AAL,AMD,C,MRNA,NIO,NVDA,SNAP,SQ,TSLA
+RSC_DATA_FILES: [
+  #key: [fileName, [columns in file], [relevant feature columns], y-variable]
+  AAPL: ["AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"]
+]
+
+TO_FIND_OTHER_FEATURE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\rsc\\data\\training\\ETF\\"
+TO_SAVE_OTHER_FEATURE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\rsc\\timeSeriesData\\FEATURE_DATA\\"
+TO_SAVE_OTHER_FEATURE_IMG_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\rsc\\imageData\\FEATURE_DATA"
+OTHER_FEATURES_TO_LOAD : [
+  #key: [fileName, [columns in file], [relevant columns to keep]
+  #EWA: ["EWA_1min.txt", ["DateTime", "Open_EWA", "a", "b", "c", "Volume"], ["DateTime", "Open_EWA"]], #Australia
+  #EWC: ["EWC_1min.txt", ["DateTime", "Open_EWC", "a", "b", "c", "Volume"], ["DateTime", "Open_EWC"]], #Canda
+  #EWG: ["EWG_1min.txt", ["DateTime", "Open_EWG", "a", "b", "c", "Volume"], ["DateTime", "Open_EWG"]], #Germany
+  #EWJ: ["EWJ_1min.txt", ["DateTime", "Open_EWJ", "a", "b", "c", "Volume"], ["DateTime", "Open_EWJ"]], #Japan
+  #EWU: ["EWU_1min.txt", ["DateTime", "Open_EWU", "a", "b", "c", "Volume"], ["DateTime", "Open_EWU"]], #England
+  #INDA: ["INDA_1min.txt", ["DateTime", "Open_INDA", "a", "b", "c", "Volume"], ["DateTime", "Open_INDA"]], #Inda
+  #MCHI: ["MCHI_1min.txt", ["DateTime", "Open_MCHI", "a", "b", "c", "Volume"], ["DateTime", "Open_MCHI"]] #China
+  MCHI: ["MCHI_1min.txt", ["DateTime", "Open_MCHI", "a", "b", "c", "Volume"], ["DateTime", "Open_MCHI"]], #China
+  IVV: ["IVV_1min.txt", ["DateTime", "Open_IVV", "a", "b", "c", "Volume"], ["DateTime", "Open_IVV"]] #USA
+]
+
+TIME_SPAN_BEGIN: "2015-01-01"
+TIME_SPAN_END: "2021-01-30"
+TIMESERIES_SEQUENCE_LEN: 20  # length  of the TimeSeries; 1 : no series at all
+TIMESTEPS_AHEAD: 8  # predict 60min
+TIME_STEP_INTERVAL: 120  #
+TOLERANCE: 180
+
+FEATURES: [
+  "Open", "Volume", "Open_MCHI", "Open_IVV"
+]
+
+DATA_FEATURE_NAME: "DATA_Open_Volume_MCHI_IVV"
+ALLOW_SERIES_INTERVAL_TOLERANCE: true
+ENHANCE_DIFFERENCE: true

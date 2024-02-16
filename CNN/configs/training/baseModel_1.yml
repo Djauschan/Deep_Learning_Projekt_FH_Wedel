@@ -1,0 +1,21 @@
+# Model Config
+#### HYPER PARAMETER ####
+NUM_EPOCH: 5
+LR: 0.01
+BATCH_SIZE: 1
+TRAIN_TEST_SPLIT_RATIO: 0.9 #To test smaller the training size
+L2RegularisationFactor: 0.00 #First Overfit
+DROPOUT: 0.0 #First Overfit
+LOGGING_INTERVAL: 10 #every x value will be logged
+LOSS_PLOT_INTERVAL: 1000
+RESULT_FOLDER: "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\result\\"
+RSC_DATA_ROOT: "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\rsc\\MAIN_DATA\\"
+TRAINING_FOLDER: "20_120_1_DATA_Open_Volume_MCHI_IVV_2015-01-01_2021-01-30\\"
+MODEL_NAME: "20_120_1_MODEL" # must be equal to training_folder
+TRAINING_DATA_LIST: [
+  #Training_Data, "Label_Data
+  AAPL: ["AAPL\\ImageGafData\\DATA_Open_Volume_MCHI_IVV.npy", "AAPL\\ImageGafData\\LABELS.npy"],
+]
+FEATURE_LIST: [
+  "Open", "Volume", "Open_MCHI", "Open_IVV"
+]

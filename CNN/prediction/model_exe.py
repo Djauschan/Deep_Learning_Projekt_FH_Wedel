@@ -3,8 +3,8 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
-from abstract_model import AbstractModel
-from preprocessingServices import ConfigService, ModelImportService, Preprocessor
+from CNN.abstract_model import AbstractModel
+from CNN.preprocessingServices import ConfigService, ModelImportService, Preprocessor
 
 
 class ModelExe(AbstractModel):

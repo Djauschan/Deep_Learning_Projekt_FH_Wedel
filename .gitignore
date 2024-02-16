@@ -1,5 +1,6 @@
 #CNN
-WebApp/services/backend/CNN/__pycache__/
+CNN/__pycache__/
+CNN/data/*
 
 # Custom
 runs/
