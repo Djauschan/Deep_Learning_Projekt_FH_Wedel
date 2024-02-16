@@ -34,7 +34,7 @@ services:
       - ./WebApp/services/frontend:/app
     # Set the entrypoint of the container to build and start the frontend
     # This could take a few seconds
-    entrypoint: [ "bash", "-c", "npm run build && npm run serve" ]
+    entrypoint: [ "bash", "-c", "npm install -g @vue/cli && npm install && npm run build && npm run serve" ]
     depends_on:
       - backend
     networks:
