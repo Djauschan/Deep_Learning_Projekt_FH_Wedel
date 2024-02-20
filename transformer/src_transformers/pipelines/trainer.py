@@ -167,8 +167,6 @@ class Trainer:
                     f"Learning rate scheduler {lr_scheduler_params['scheduler']} is not valid, no scheduler is used.")
                 lr_scheduler = None
         else:
-            Logger.log_text(
-                f"Learning rate scheduler {lr_scheduler_params['scheduler']} is not valid, no scheduler is used.")
             lr_scheduler = None
 
         # Setting random seed for torch
