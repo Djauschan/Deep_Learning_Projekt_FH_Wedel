@@ -12,10 +12,10 @@ training_parameters:
   batch_size: 5000
   epochs: 100
   learning_rate: 0.001
-  lr_scheduler_params:
-    scheduler: "ReduceLROnPlateau" # Options: "ReduceLROnPlateau", "CyclicLR", "OneCycleLR"
-    params: # Give the parameters for the specific class you chose. Here you can find the documentation: https://pytorch.org/docs/stable/optim.html
-      mode: "min"
+  #lr_scheduler_params:
+  #  scheduler: "ReduceLROnPlateau" # Options: "ReduceLROnPlateau", "CyclicLR", "OneCycleLR"
+  #  params: # Give the parameters for the specific class you chose. Here you can find the documentation: https://pytorch.org/docs/stable/optim.html
+  #    mode: "min"
   loss: "mse" # Options: "mse", "rmse", "rmsle"
   optimizer: "sgd" # Options: "adam", "sgd"
   weight_decay: 0.0
@@ -28,16 +28,17 @@ dataset_parameters:
   read_all_files: false
   first_date: '2000-01-01'
   last_date: '2020-12-31' # YYYY-MM-DD Last date of the data to be read in
-  data_usage_ratio: 0.05 # Only the last 50% of the read data are used in the dataset
+  data_usage_ratio: 0.5 # Only the last 50% of the read data are used in the dataset
   subseries_amount: 1 # The time series will be cut into 10 subseries (which each consist of a train and validation set)
-  validation_split: 0.5 # The last 10% of timestamps in a subseries are used for validation
+  validation_split: 0.1 # The last 10% of timestamps in a subseries are used for validation
   create_new_file: false # This parameter must be set to true if the symbols to be read in are changed.
-  scaler: "MinMaxScaler" # Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
-  data_file: "data/output/Multi_Symbol.csv"
-  time_resolution: 120 # Time resolution of the data in minutes
+  #scaler:  #"MinMaxScaler" # Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
+  data_file: "data/output/Multi_Symbol_dataset.csv"
+  time_resolution: 1 # Time resolution of the data in minutes
+  outlier_quantile: 0.99995 # Set to 1 to disable outlier removal
   data_selection_config:
-    ignore_nights: true # If true, only the data between start_day_time and end_day_time is used
-    ignore_weekends: true # If true, Saturday and Sunday are ignored
+    ignore_nights: false # If true, only the data between start_day_time and end_day_time is used
+    ignore_weekends: false # If true, Saturday and Sunday are ignored
     start_day_time: '04:00' # Start time of the day if ignore_nights is true
     end_day_time: '20:00' # End time of the day if ignore_nights is true
   time_feature:
@@ -61,12 +62,12 @@ dataset_parameters:
   # indices
     - "DXY" # US Dollar Index
     - "SPX" # S&P 500
-    # - "DJCIGC" # Dow Jones Commodity Index Gold
-    # - "DJCISI" # Dow Jones Commodity Index Silver
-    # - "DJCIEN" # Dow Jones Commodity Index Energy
-    # - "DJCIIK" # Dow Jones Commodity Index Nickel
+    - "DJCIGC" # Dow Jones Commodity Index Gold
+    - "DJCISI" # Dow Jones Commodity Index Silver
+    - "DJCIEN" # Dow Jones Commodity Index Energy
+    - "DJCIIK" # Dow Jones Commodity Index Nickel
     - "DJI" # Dow Jones Industrial Average
-    # - "DJINET" # Dow Jones Internet Composite Index
+    - "DJINET" # Dow Jones Internet Composite Index
     - "COMP" # NASDAQ Composite
     - "W5000" # FT Wilshire 5000 Full Cap
     # - art1
