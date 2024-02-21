@@ -23,6 +23,7 @@ class DataCleaner:
     
     def hourly(self):
         hourly = self.raw_data.resample('H').mean()
+        hourly = hourly.between_time('09:00', '16:00')
         return hourly.ffill()
     
     def minute(self):

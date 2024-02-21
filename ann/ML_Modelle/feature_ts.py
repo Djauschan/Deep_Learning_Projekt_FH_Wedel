@@ -91,7 +91,7 @@ def create_window_feature(data): #durchschnittlicher stündlicher wert
 window_feature_transformer = FunctionTransformer(create_window_feature) #kw_args={'data_columns': data_columns}
 
 ####################################################################
-######################## df business daily #########################
+######################## df business daily ######################### model daily
 
 #lag feature backward mit 20 days aus den vergangenheit -> 1 Monat (20 Business Days)
 def create_lag_features_20d_backward(data, max_lags=20):
@@ -126,9 +126,10 @@ monthly_average_feature = FunctionTransformer(create_monthly_average_feature)
 
 
 ####################################################################
-############################ df hourly #############################
+############################ df hourly ############################# model hourly
 
 #lag feature backward mit 1h - 7h 
+    #7h, Zeitraum von 9.30 -16 Uhr sind 7h
 def create_lag_features_7h_backward(data, max_lag_hours=7):
     df = data.copy()
     for col in data_columns:
