@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from CNN.preprocessing.services.ConfigService import ConfigService
 from CNN.preprocessing.services.ImportService import importService
 
-PROJECT_ROOT = "/Users/aykanguney/Projects/DeepLearningProject/"
+
 # RESCOURCE DIRS
 RSC_ROOT = "rsc/"
 DATA_FOLDER_NAME = "timeSeriesData/"
@@ -57,6 +57,7 @@ class Importer:
     def __init__(self, ymlModelConfig):
         confService = ConfigService()
         self.modelParameters = confService.loadModelConfig(ymlModelConfig)
+        self.PROJECT_ROOT = self.modelParameters['PROJECT_ROOT']
         self.RSC_DATA_ROOT = self.modelParameters['RSC_DATA_ROOT']
         self.TRAINING_FOLDER = self.modelParameters['TRAINING_FOLDER']
         self.TRAINING_DATA_LIST = self.modelParameters['TRAINING_DATA_LIST']
@@ -93,8 +94,8 @@ class Importer:
 
         # creating timeStamp dir for new dataImports & results
         self.currTime_folder = self.getCurrentTimeName()
-        self.result_completePath = os.path.join(PROJECT_ROOT, RESULT_PATH, self.currTime_folder)
-        self.rsc_completePath = os.path.join(PROJECT_ROOT, RSC_ROOT, DATA_FOLDER_NAME)
+        self.result_completePath = os.path.join(self.PROJECT_ROOT, RESULT_PATH, self.currTime_folder)
+        self.rsc_completePath = os.path.join(self.PROJECT_ROOT, RSC_ROOT, DATA_FOLDER_NAME)
 
     def getData(self):
         return self.data

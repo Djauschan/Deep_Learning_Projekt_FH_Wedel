@@ -29,12 +29,12 @@ class TimeSeriesBuilder:
     '''
 
     def buildTimeSeries(self, data: pd.DataFrame, length: int, interval: int, time_ahead: int, tolerance: int,
-                        featureArray: list, label_name: str, INT_TOL: bool):
+                        nextDay_retry_threshold: int, featureArray: list, label_name: str, INT_TOL: bool):
         df = data
         CLOEST_CANDIDATE_TRESHOLD = 10000000
         # A List with multiple DF
         COUNT_OF_FEATURES = len(featureArray)
-        RETRY_TRESHOLD = 5
+        RETRY_TRESHOLD = nextDay_retry_threshold
         df_length = len(df)
         # result array = länge datengrundlage - interval * length, weil letzte serie nicht aufgeht
         resultNp = np.zeros((df_length - (length - 1), length, COUNT_OF_FEATURES))
@@ -87,7 +87,7 @@ class TimeSeriesBuilder:
                 # sonst wert vom start des nächsten tages
                 if candidateIdx == -1:
                     # and abw > tolerance => go the next day, because trading day ended / or holidays..
-                    if abs(minimalAbw) < 30:
+                    if abs(minimalAbw) < tolerance:
                         candidateIdx = closestCandidateIdx
                     else:
                         # ersten Wert des folge Tages nehmen (oder nächster Handelstag...)
@@ -103,9 +103,8 @@ class TimeSeriesBuilder:
                             reTryCounter += 1
                             if candidateIdx != -1:
                                 noValidAlternativeFound = False
-
-                            if not noValidAlternativeFound and abs(
-                                    minimalAbw) <= 180:  # in seconds = 180second = 3min is allowed on next day
+                            # in seconds = 180second = 3min is allowed on next day
+                            if not noValidAlternativeFound and abs(minimalAbw) <= 180:
                                 candidateIdx = closestCandidateIdx
                                 noValidAlternativeFound = False
 

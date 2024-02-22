@@ -13,13 +13,13 @@ class executer:
         pass
 
     def buildTimeSeriesData_w(self):
-        CONFIG_PATH1 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\baseModel_1.yml"
+        CONFIG_PATH1 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_dayTrayding_1.yml"
         preProcessingService = Preprocessor(CONFIG_PATH1)
         print('BUILD ALL DATA with CONFIG_PATH1')
 
 
     def startTraining_w(self):
-        CONFIG_PATH_1 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\training\\baseModel_1.yml"
+        CONFIG_PATH_1 = "/CNN/configs/training/baseModel_dayTraiding.yml"
         #start 12:50
         importer = Importer(CONFIG_PATH_1)
         trainExe = CNN_TimeSeriesModel(importer)

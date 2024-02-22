@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import numpy as np
 
+from CNN.preprocessing.services.AverageService import AverageService
 from CNN.preprocessing.services.DataMergerService import DataMergerService
 from CNN.preprocessing.services.ExportService import ExportService
 from CNN.preprocessing.services.GafService import gafService
@@ -39,6 +40,7 @@ class Preprocessor:
         self.TO_FIND_RSC_FOLDER = self.modelParameters['TO_FIND_RSC_FOLDER']
         self.RSC_DATA_FILES = self.modelParameters['RSC_DATA_FILES']
         self.TS_TOLERANCE = self.modelParameters['TOLERANCE']
+        self.NEXT_DAY_RETRY_THRESHOLD = self.modelParameters['NEXT_DAY_RETRY_THRESHOLD']
         self.TS_INTERVAL = self.modelParameters['TIME_STEP_INTERVAL']
         self.TS_LENGTH = self.modelParameters['TIMESERIES_SEQUENCE_LEN']
         self.TS_AHEAD = self.modelParameters['TIMESTEPS_AHEAD']
@@ -55,44 +57,21 @@ class Preprocessor:
         self.INT_TOL = self.modelParameters['ALLOW_SERIES_INTERVAL_TOLERANCE']
         self.ENHANCE_DIFFERENCE = self.modelParameters['ENHANCE_DIFFERENCE']
 
+        # All Services Used during Preprocessing
         self.featureDataMergeService = DataMergerService()
         self.timeSeriesBuilderService = TimeSeriesBuilder()
         self.timeModificationService = TimeModificationService()
         self.normalisationService = NormalisationService()
+        self.avaragingService = AverageService()
         self.differenceService = differencingService(self.ENHANCE_DIFFERENCE)
         self.GAFservice = gafService()
-
-        ''' todo neu pfad Struktur..
-        self.BASE_RESOURCE_PATH = os.path.join(self.TO_SAVE_RSC_FOLDER, key) #to change folder here..!
-        tsDataPath = os.path.join(self.BASE_RESOURCE_PATH, tsSubPathFolder)
-        tsImgPath = os.path.join(self.TO_SAVE_IMAGE_RSC_FOLDER, key, tsSubPathFolder)
-        #check if data with same "kürzel" und "timeSeries" not exist
-        tsSubPathFolder = "tsLen" + str(self.TS_LENGTH) + '_' + "tsInt" + str(self.TS_INTERVAL) + '_' \
-                  + "tsAhead" + str(self.TS_AHEAD)
-        os.makedirs(tsDataPath)
-        '''
 
         # MAIN DATA & LABEL PREPROCESSING
         self.data = {}  # each data entry has key of item and value is the numpy TimeSeriesData
         # check and create a rsc folder struc with:
 
-        '''
-        -> tsLen + '_' + tsInterval + '_' + tsAhead + '_' + featureList + '_' + TIME_SPAN_BEGIN + '_' + TIME_SPAN_END
-        --> Kürzel + '_' + anz_length_series:
-        --> 'LABEL.npy' #with Dimension = (999, 1) = (999)
-        --->TS_DATA
-        -----> FEATURE_NAME_1 + '_' + 'DATA.npy' #with Dimension = (999, tsLen)
-        -----> FEATURE_NAME_2 + '_' + 'DATA.npy' #with Dimension = (999, tsLen)
-        -----> FEATURE_NAME_3 + '_' + 'DATA.npy' #with Dimension = (999, tsLen)
-        -----> FEATURE_NAME_3 + '_' + 'DATA.npy' #with Dimension = (999, tsLen)
-        --->GAF_DATA
-        -----> FEATURE_NAME_1 + '_' + 'DATA.npy' #with Dimension = (999, tsLen)
-        -----> FEATURE_NAME_2 + '_' + 'DATA.npy' #with Dimension = (999, tsLen, tsLen)
-        -----> FEATURE_NAME_3 + '_' + 'DATA.npy' #with Dimension = (999, tsLen, tsLen)
-        -----> FEATURE_NAME_3 + '_' + 'DATA.npy' #with Dimension = (999, tsLen, tsLen)
-        '''
         trainingDataPath = str(self.TS_LENGTH) + '_' + str(self.TS_INTERVAL) + '_' + str(self.TS_AHEAD) + '_' + \
-                           self.DATA_FEATURE_NAME + '_' + self.TIME_SPAN_BEGIN + '_' + self.TIME_SPAN_END
+            self.DATA_FEATURE_NAME + '_' + self.TIME_SPAN_BEGIN + '_' + self.TIME_SPAN_END
         sub_path = os.path.join(self.TO_SAVE_RSC_FOLDER, trainingDataPath)
         if not os.path.exists(self.TO_SAVE_RSC_FOLDER):
             os.makedirs(self.TO_SAVE_RSC_FOLDER)
@@ -108,23 +87,24 @@ class Preprocessor:
                 allDataColumns = v[1]
                 column_featureName = v[2]
                 label_name = v[3]
-                tsDataPath = os.path.join(kuerzel_folder_path, 'TimeSeriesData')
                 imgDataPath = os.path.join(kuerzel_folder_path, 'ImageGafData')
                 df = self.loadMainData(fileName, allDataColumns, column_featureName)
                 # merges the main data (the data with the label values)
                 # with all the feature data (the etf, gold index...)
                 df = self.getAndMergeFeatureDataWithMainData(df)
                 data, labels = self.createSeries(df, self.FEATURES, label_name, self.INT_TOL)
+                # create a feature Row with avg vals for open
+                data = self.avaragingService.calcAvg(data)
                 # All feature Data will be differenced
                 data, labels = self.differenceService.transformSeriesAndLabel(data, labels)
                 # Only the Data will be normalised
                 data = self.normalisationService.normMinusPlusOne(data)
                 #########################
                 #### EXPORT THE DATA ####
-                #self.exportLabelsToNpy(kuerzel_folder_path, labels) #no need to save TS
+                # self.exportLabelsToNpy(kuerzel_folder_path, labels) #no need to save TS
                 # data in format (count_of_feature, anz vo ts, length single ts)
                 featureShapedData = self.reshapeDataToFeatureList(data, self.FEATURES)
-                #list(features) to -> np.array(len_of_feature, anz_aller_ts, länge_einzelner_ts, länge_einzelner_ts)
+                # list(features) to -> np.array(len_of_feature, anz_aller_ts, länge_einzelner_ts, länge_einzelner_ts)
                 gafData = self.GAFservice.createGAFfromMultivariateTimeSeries(featureShapedData)
                 gafData = np.transpose(gafData, (1, 0, 2, 3))
                 if not os.path.exists(imgDataPath):
@@ -133,11 +113,12 @@ class Preprocessor:
                 np.save(os.path.join(imgDataPath, self.DATA_FEATURE_NAME + '.npy'), gafData)
                 np.save(os.path.join(imgDataPath, 'LABELS' + '.npy'), labels)
 
+                #Test Images for Visualisation
                 # create imgaes for first 3 feautre to Visualize
                 self.createSingleGafImg(gafData[0][0], imgDataPath + '0_gaf.png')
                 self.createSingleGafImg(gafData[1][0], imgDataPath + '1_gaf.png')
                 self.createSingleGafImg(gafData[2][0], imgDataPath + '2_gaf.png')
-                #self.exportGafData(imgDataPath, gafData, self.FEATURES) deprecated
+                # self.exportGafData(imgDataPath, gafData, self.FEATURES) deprecated
 
     def loadMainData(self, fileName, allDataColumns, column_featureName) -> pd.DataFrame:
         loadService = importService("")
@@ -171,12 +152,12 @@ class Preprocessor:
                                                                      self.TS_INTERVAL,
                                                                      self.TS_AHEAD,
                                                                      self.TS_TOLERANCE,
+                                                                     self.NEXT_DAY_RETRY_THRESHOLD,
                                                                      FEATURES,
                                                                      LABEL,
                                                                      INT_TOL)
-        #data, labels = self.timeSeriesBuilderService.timeSeriesBuilderSimple(data, 9, 16, self.TS_LENGTH, FEATURES,
+        # data, labels = self.timeSeriesBuilderService.timeSeriesBuilderSimple(data, 9, 16, self.TS_LENGTH, FEATURES,
         #                                                                     self.TS_AHEAD)
-
 
         print('LEN OF TS:')
         print(len(labels))
@@ -185,7 +166,6 @@ class Preprocessor:
     def exportLabelsToNpy(self, path, labels):
         exporter = ExportService(path)
         exporter.storeNumpyTimeSeries(labels, str(len(labels)) + '_TS_LABELS')
-
 
     def exportGafData(self, path, data, features):
         exporter = ExportService(path)

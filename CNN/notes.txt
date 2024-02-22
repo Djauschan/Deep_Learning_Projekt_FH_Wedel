@@ -1,0 +1,39 @@
+Für jede Trading Variante Daten erstellen.
+
+1.) DayTrading:
+    interval: 20min
+    length: 20
+    ahead: 80min
+    #20*20min = 400 + 80 = 480 = 1 tag von 8-16uhr
+    #alternativ interval kleiner machen
+2.) Swing:
+    interval: 2h
+    length: 20x
+    ahead 2tage
+3.) Langfristig:
+    interval: 8h (1x pro Tag)
+    length: 60x
+    ahead: 1Monat
+
+Todo:
+1.)
+wie bekomm ich die verschiedenen Aktien implementiert.. ein großes Datenset oder für jede Aktie ein Modell?
+=> jede Aktie ein eigenes Modell
+=> PredictionWrapper class that includes all seperate Modells and handels calls and request to correct Modell
+
+2.)
+zeiten Testen welche modelle sind gut (day, swing, long)
+=> jede Aktie, jede trading methode eigenes Modell..
+
+3.)
+wie weit wird predicted
+=> daytrading 1 wert = endwert des Tages
+=> swing trading = 4 werte (mittags, abends, mittags, abends)
+=> long = 8 (ab tag 10 jeder tag 1 wert... = 8tage lang)
+=> gesamt anzahl der Modelle =
+3 * anzahl der Aktien
+
+
+Note:
+Implement Moving Avarage as Feature, moving avarage depending on
+Use the on-balance volume to measure the positive and negative flow of volume in a security over time.
