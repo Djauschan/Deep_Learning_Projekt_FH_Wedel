@@ -16,7 +16,7 @@ q_models: # Path to q-models
 
 
 train_parameters:
-  epochs: 20  # 150 # Number of epochs to train
+  epochs: 120  # 150 # Number of epochs to train
   state_size: 20  # Number of different states that an agent can distinguish 
   action_size: 3   # Possible actions: sell (+1), hold (0), buy (+2)
 
