@@ -34,20 +34,33 @@ class QLearningAgent:
             return random.randrange(self.action_size)
         return np.argmax(self.q_table[state])
 
-    def learn(self, state, action, reward, next_state, done):
+    def learn(self, state, action, reward, next_state, individual, done):
         """
         Updates the Q-table based on the action, reward, and the next state.
         :param state: Current state.
         :param action: Performed action.
         :param reward: Received reward.
         :param next_state: State after the action.
+        :param individual: individual agent or aggregation agent
         :param done: Whether the episode is finished.
         """
+
         q_update = reward
         if not done:
             q_update += self.discount_factor * np.amax(self.q_table[next_state])
-        
-        self.q_table[state, action] += self.learning_rate * (q_update - self.q_table[state, action])
+
+        if individual == True:    
+            self.q_table[state, action] += self.learning_rate * (q_update - self.q_table[state, action])
+
+        if individual == False:
+            for i, state_value in enumerate(state):
+                q_update = reward if state_value == action else -reward # Belohnung oder Bestrafung
+                if not done:
+                    q_update += self.discount_factor * np.amax(self.q_table[i])
+                self.q_table[i, action] += self.learning_rate * (q_update - self.q_table[i, action])
+
+
+        #print(self.q_table)
 
         # Update the exploration rate
         if done:

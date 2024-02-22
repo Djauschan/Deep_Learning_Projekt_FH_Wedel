@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import pickle
 import matplotlib.pyplot as plt
 from environments.TraidingEnvironment_q_learning import TradingEnvironment
 from utils.read_config import Config_reader
@@ -58,7 +57,7 @@ def train_individual_agent(agent, agent_type, num_episodes, env, config, cumulat
             next_states, reward, done = env.step(action, agent_type)
             if not done:
                 next_state = next_states[agent_type]
-                agent.learn(state, action, reward, next_state, done)
+                agent.learn([state], action, reward, next_state, True, done)
             episode_rewards += reward
             states = next_states
         cumulative_rewards[agent_type][episode] = episode_rewards
@@ -83,11 +82,10 @@ def train_aggregation_agent(price_train_data, aggregation_agent, ql_agents, agen
 
             # Hinzufügen der RSI-Aktion zu den Agentenaktionen
             all_actions = individual_actions + [rsi_action]
-
             aggregated_action = aggregate_actions(aggregation_agent, all_actions)
             _, aggregation_reward, done = env.step(aggregated_action, 'aggregation', calculate_value=True)
             new_aggregation_state = update_aggregation_state(aggregation_state, individual_actions, rsi_action)
-            aggregation_agent.learn(aggregation_state, aggregated_action, aggregation_reward, new_aggregation_state, done)
+            aggregation_agent.learn(aggregation_state, aggregated_action, aggregation_reward, new_aggregation_state, False, done)
             episode_rewards += aggregation_reward
             aggregation_state = new_aggregation_state
 
@@ -95,7 +93,7 @@ def train_aggregation_agent(price_train_data, aggregation_agent, ql_agents, agen
         cumulative_rewards['aggregation'][episode] = episode_rewards
         portfolio_values['aggregation'][episode].append(env.calculate_portfolio_value('aggregation'))
 
-
+"""
 def save_models(ql_agents, agent_types, aggregation_agent):
     for agent, agent_type in zip(ql_agents, agent_types):
         model_file_path = f'models/{agent_type}_agent_model.pkl'
@@ -103,6 +101,14 @@ def save_models(ql_agents, agent_types, aggregation_agent):
             pickle.dump(agent, file)
     with open('models/aggregation_agent_model.pkl', 'wb') as file:
         pickle.dump(aggregation_agent, file)
+"""
+
+def save_models(ql_agents, agent_types, aggregation_agent):
+    for agent, agent_type in zip(ql_agents, agent_types):
+        model_file_path = f'models/{agent_type}_agent_q_table.npy'
+        np.save(model_file_path, agent.q_table)
+    
+    np.save('models/aggregation_agent_q_table.npy', aggregation_agent.q_table)
 
 def visualize_performance(agent_types, cumulative_rewards, portfolio_values, config):
     NUM_EPISODES = config.get_parameter('epochs', 'train_parameters')

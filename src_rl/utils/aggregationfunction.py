@@ -2,20 +2,25 @@ import numpy as np
 
 
 def aggregate_actions(aggregation_agent, actions):
-    weighted_actions = np.zeros(3)  # Angenommen, es gibt 3 mögliche Aktionen
+    weighted_actions = np.zeros(3)  # Angenommen, es gibt 3 mögliche Aktionen (kaufen, nichts tun, und verkaufen)
+    
     
     for i, action in enumerate(actions):
+        #print("")
+        #print("i= ",  i ,"action= ", action,"value at i" ,aggregation_agent.q_table[i, action])
         weighted_actions += aggregation_agent.q_table[i, action]
-        print(aggregation_agent.q_table[i, action], i, action, aggregation_agent.q_table)
+        #print(aggregation_agent.q_table[i, action], i, action, aggregation_agent.q_table)
+        #print(aggregation_agent.q_table)
+
+    
 
 
-    # Wenn alle gewichteten Aktionen gleich sind, wählen Sie zufällig
+    # Wenn alle gewichteten Aktionen gleich sind, wähle zufällig
     if np.all(weighted_actions == weighted_actions[0]):
         return np.random.choice(len(weighted_actions))
     else:
         return np.argmax(weighted_actions)
   
-
 
 """
 #Aggregationfunction

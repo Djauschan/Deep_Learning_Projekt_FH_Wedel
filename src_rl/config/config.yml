@@ -8,11 +8,11 @@ aggregation:
   aggregation_state_size: 5 #Inputsize from each agent
   
 q_models: # Path to q-models
-  ma5: models/ma5_agent_model.pkl
-  ma30: models/ma5_agent_model.pkl
-  ma200: models/ma5_agent_model.pkl
-  rsi: models/rsi_agent_model.pkl
-  aggregation: models/aggregation_agent_model.pkl
+  ma5: models/ma5_agent_q_table.npy
+  ma30: models/ma5_agent_q_table.npy
+  ma200: models/ma5_agent_q_table.npy
+  rsi: models/rsi_agent_q_table.npy
+  aggregation: models/aggregation_agent_q_table.npy
 
 
 train_parameters:
@@ -27,8 +27,8 @@ train_parameters:
   # parameters for Q-Learning Agents
   learning_rate: 0.2 # Learning rate
   discount_factor: 0.9 # Discount factor for future rewards
-  exploration_rate: 0.2 # Initial exploration rate
-  exploration_decay: 0.1 # Decay rate for the exploration rate
+  exploration_rate: 0.2 # Initial exploration rate #0,2
+  exploration_decay: 0.1 # Decay rate for the exploration rate #0,1
   exploration_min: 0.01 # Minimum exploration rate
 
   # parameters for rewards
@@ -43,7 +43,7 @@ train_parameters:
 
 #Use manual Stopp loss orders:
 stopp_loss:
-  use_stopp_loss: TRUE #TRUE #FALSE
+  use_stopp_loss: FALSE #TRUE #FALSE
   buy_stop_loss_under_buy_price: 0.1 #0.1 Percent
   stopp_under_sell_price: 0.01 #0.01 Percent
 
