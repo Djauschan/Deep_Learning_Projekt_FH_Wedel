@@ -9,7 +9,7 @@ from ml_model_daily import LinearRegressionModel, RandomForestModel, GradientBoo
 
 #Implementieren der ML-Modelle von: LR, RF, GBM, SVM
 
-class ABC_LinearRegressionModel(AbstractModel):
+class ABC_LinearRegressionModel_daily(AbstractModel):
 
     def predict(self, symbol, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
         
@@ -75,7 +75,7 @@ class ABC_LinearRegressionModel(AbstractModel):
             print(f"Modell-Datei für {symbol} nicht gefunden.")
             self.model = None
 
-class ABC_RandomForestModel(AbstractModel):
+class ABC_RandomForestModel_daily(AbstractModel):
 
     def predict(self, symbol, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
 
@@ -141,7 +141,7 @@ class ABC_RandomForestModel(AbstractModel):
             print(f"Modell-Datei für {symbol} nicht gefunden.")
             self.model = None
 
-class ABC_GradientBoostingModel(AbstractModel):
+class ABC_GradientBoostingModel_daily(AbstractModel):
 
     def predict(self, symbol, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
 
@@ -208,7 +208,7 @@ class ABC_GradientBoostingModel(AbstractModel):
             self.model = None
 
 
-class ABC_SVMModel(AbstractModel):
+class ABC_SVMModel_daily(AbstractModel):
 
     def predict(self, symbol, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
         

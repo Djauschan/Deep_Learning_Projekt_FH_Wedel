@@ -119,31 +119,34 @@ for idx, symbol in enumerate(symbols):
 
 
 """ 
-################## prediction test
+################## prediction test daily
+
+import pandas as pd
+from ML_PredictionInterface_daily import ABC_LinearRegressionModel_daily, ABC_RandomForestModel_daily, ABC_GradientBoostingModel_daily, ABC_SVMModel_daily
 
 ############### LR ##################### 
-lr_model = ABC_LinearRegressionModel()
+lr_model = ABC_LinearRegressionModel_daily()
 
 lr_predictions = lr_model.predict("AAPL", pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)
 print("lr_predictions")
 print(lr_predictions)
 
 ############### RF ##################### 
-rf_model = ABC_RandomForestModel()
+rf_model = ABC_RandomForestModel_daily()
 
 rf_predictions = rf_model.predict("AAPL", pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)
 print("rf_predictions")
 print(rf_predictions)
 
 ############### GBM ##################### 
-gbm_model = ABC_GradientBoostingModel()
+gbm_model = ABC_GradientBoostingModel_daily()
 
 gbm_predictions = gbm_model.predict("AAPL", pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)
 print("gbm_predictions")
 print(gbm_predictions)
 
 ############### SVM ##################### 
-svm_model = ABC_SVMModel()
+svm_model = ABC_SVMModel_daily()
 
 svm_predictions = svm_model.predict("AAPL", pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)
 print("svm_predictions")
