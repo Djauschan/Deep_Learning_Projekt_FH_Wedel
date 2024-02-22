@@ -66,8 +66,8 @@ for idx, symbol in enumerate(symbols):
     test_data = splitter.get_test_data()    #2020-12-07 -> beim splitt - 20 Business Days wegen den LagFeatures
 
     #splitt train und test data durch pipeline
-    train_data = pipeline.fit_transform(train_data, 'busdaily')
-    test_data = pipeline.fit_transform(test_data, 'busdaily')
+    train_data = pipeline.fit_transform(train_data, 'busdaily') #2021-01-01
+    test_data = pipeline.fit_transform(test_data, 'busdaily')   #2021-01-04 -> passt, da ab dem 4.1 die prediciton ist
 
     ###############################################################
     # data_columns = ['open', 'high', 'low', 'close', 'volume']
@@ -97,7 +97,7 @@ for idx, symbol in enumerate(symbols):
 
     ####### Initialisierung und Training der Modelle , sowie speichern #######
 
-    # Modelle trainiert bis Timestamp('2021-01-03') -> ab nächsten Werktag 2021-01-05 möglich
+    # Modelle trainiert bis Timestamp('2021-01-03') -> ab nächsten Werktag 2021-01-04 möglich
 
     ############### LR ##################### 
     lr_model = LinearRegressionModel()

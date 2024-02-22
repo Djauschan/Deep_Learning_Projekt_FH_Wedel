@@ -55,14 +55,14 @@ for idx, symbol in enumerate(symbols):
 
     # Verwendung der Klasse zum splitten der Daten
     splitter = DataSplitter(data)
-    splitter.split_by_hour_7h(pd.Timestamp('2021-01-03')) #Split zu diesen Datum mit beachtung der 7h  #Final 03.01.2021 
+    splitter.split_by_hour_7h(pd.Timestamp('2021-01-03 16:00:01')) #Split zu diesen Datum mit beachtung der 7h  #Final 03.01.2021 
 
-    train_data = splitter.get_train_data()  #2021-01-02 16:00:00
-    test_data = splitter.get_test_data()    #2021-01-03 09:00:00 -> beim splitt - 7 h wegen den LagFeatures
+    train_data = splitter.get_train_data()  #2021-01-03 16:00:00
+    test_data = splitter.get_test_data()    #2021-01-03 10:00:00  -> beim splitt - 7 h wegen den LagFeatures
 
     #splitt train und test data durch pipeline
-    train_data = pipeline.fit_transform(train_data, 'hour') #2021-01-01 16:00:00 ende
-    test_data = pipeline.fit_transform(test_data, 'hour')   #2021-01-03 16:00:00 beginn
+    train_data = pipeline.fit_transform(train_data, 'hour') #2021-01-03 16:00:00 ende
+    test_data = pipeline.fit_transform(test_data, 'hour')   #2021-01-04 09:00:00 beginn -> passt, ab 4.1 9uhr ist erste prediction
 
     ###############################################################
     # data_columns = ['open', 'high', 'low', 'close', 'volume']
@@ -90,7 +90,7 @@ for idx, symbol in enumerate(symbols):
 
     ####### Initialisierung und Training der Modelle , sowie speichern #######
 
-    # Modelle trainiert bis Timestamp('2021-01-03') -> ab nächsten Werktag 2021-01-05 möglich
+    # Modelle trainiert bis Timestamp('2021-01-03') -> ab nächsten Werktag 2021-01-04 möglich
 
     ############### LR ##################### 
     lr_model = LinearRegressionModel()
