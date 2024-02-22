@@ -49,7 +49,7 @@ class MultiSymbolDataset(Dataset):
     data_file: str
     scaler: str
     time_resolution: int
-    ignore_nights: bool
+    data_selection_config: dict
 
     @classmethod
     def create_from_config(cls,
@@ -65,9 +65,9 @@ class MultiSymbolDataset(Dataset):
                            decoder_symbols: list[str],
                            encoder_input_length: int,
                            decoder_target_length: int,
+                           data_selection_config: dict,
                            scaler: str = "MinMaxScaler",
                            time_resolution: int = 1,
-                           ignore_nights: bool = False,
                            time_feature: dict = None
                            ):
         """
@@ -87,9 +87,9 @@ class MultiSymbolDataset(Dataset):
             decoder_symbols (list[str]): The symbols to use for the decoder input.
             encoder_input_length (int): The length of the encoder input sequence.
             decoder_target_length (int): The length of the decoder target sequence.
+            data_selection_config (dict): The configuration for selecting the data.
             scaler (str, optional): The scaler to use for the data. Defaults to "MinMaxScaler".
             time_resolution (int, optional): The time resolution of the data in minutes.
-            ignore_nights (bool, optional): Whether to ignore the night hours in the data.
             time_feature (dict, optional): The time feature to use for the data. Defaults to None.
 
         Returns:
@@ -115,7 +115,7 @@ class MultiSymbolDataset(Dataset):
                                                 data_file=data_file,
                                                 scaler=scaler,
                                                 time_resolution=time_resolution,
-                                                ignore_nights=ignore_nights)
+                                                data_selection_config=data_selection_config)
 
         else:
             Logger.log_text(
@@ -129,7 +129,7 @@ class MultiSymbolDataset(Dataset):
                 f"Created a dataframe from the selected {len(data_df)} timestamps, "
                 + f"since the user specified a data usage ratio of {data_usage_ratio}.")
             cls.stocks, cls.prices, data_df = fill_dataframe(
-                data_df, data_reader, time_resolution, ignore_nights)
+                data_df, data_reader, time_resolution, data_selection_config)
 
             # Select Data for Prediction Interface
             # Only Select timestamp index is greater or equal to 2020-12-22 04:00:00
@@ -172,7 +172,7 @@ class MultiSymbolDataset(Dataset):
                                                 data_file=data_file,
                                                 scaler=scaler,
                                                 time_resolution=time_resolution,
-                                                ignore_nights=ignore_nights)
+                                                data_selection_config=data_selection_config)
 
             # Normalization
             scaler = SCALER_OPTIONS[scaler]()

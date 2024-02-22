@@ -35,10 +35,8 @@ class TransformerModel(nn.Module):
                 'seq_len_decoder must be smaller or equal to seq_len_encoder')
 
         self.model_type = 'Transformer'
-        self.seq_len_encoder = seq_len_encoder # Required to save the model
-        self.seq_len_decoder = seq_len_decoder # Required to save the model
-        self.dim_encoder = dim_encoder  # Required to save the model
-        self.dim_decoder = dim_decoder  # Required to save the model
+        self.seq_len_encoder = seq_len_encoder
+        self.seq_len_decoder = seq_len_decoder
         self.pos_encoder = PositionalEncoding(
             dim_encoder, dropout, max(seq_len_encoder, seq_len_decoder))
         encoder_layers = TransformerEncoderLayer(
@@ -52,6 +50,19 @@ class TransformerModel(nn.Module):
         self.device = device
 
         self.init_weights()
+
+        # save constructor arguments to enable model saving/loading
+        self.params = {
+            'dim_encoder': dim_encoder,
+            'dim_decoder': dim_decoder,
+            'num_heads': num_heads,
+            'num_layers': num_layers,
+            'd_ff': d_ff,
+            'seq_len_encoder': seq_len_encoder,
+            'seq_len_decoder': seq_len_decoder,
+            'dropout': dropout,
+            'device': device
+        }
 
     def init_weights(self) -> None:
         """
@@ -74,17 +85,16 @@ class TransformerModel(nn.Module):
         Returns:
             torch.Tensor: Output tensor of shape (seq_len, batch_size, dim_decoder).
         """
-        src_mask = None  # TODO find proper solution
+        src_mask = nn.Transformer.generate_square_subsequent_mask(
+            src.size(1)).to(self.device)
 
         src = self.embedding(src) * math.sqrt(self.d_model)
         src = self.pos_encoder(src)
-        if src_mask is None:
-            src_mask = nn.Transformer.generate_square_subsequent_mask(
-                src.size(1)).to(self.device)
         output = self.transformer_encoder(src, src_mask)
         output = self.linear(output)
 
-        # The output sequence is artificially shortened so that it is possible to have a shorter output sequence than the input sequence.
+        # The output sequence is artificially shortened so that it is possible
+        # to have a shorter output sequence than the input sequence.
         output_sequence = output[:, :self.seq_len_decoder, :]
 
         return output_sequence
