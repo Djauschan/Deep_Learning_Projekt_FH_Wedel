@@ -1,10 +1,6 @@
 # base image
 FROM node:18.12
 
-# USER node
-
-ENV NODE_ENV=development
-
 # set working directory
 WORKDIR /app
 
