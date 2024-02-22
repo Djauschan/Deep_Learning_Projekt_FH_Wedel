@@ -30,10 +30,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8080:8080
-    # volumes:
-    #   - ./WebApp/services/frontend:/app
-    # Set the entrypoint of the container to build and start the frontend
-    # This could take a few seconds
+    # Set the entrypoint of the container to start the frontend
     entrypoint:
       ["bash", "-c", "npm run serve"]
     depends_on:
