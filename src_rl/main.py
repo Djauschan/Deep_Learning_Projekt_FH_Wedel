@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import pickle
+from agents.q_learning import QLearningAgent
 from utils.aggregationfunction import aggregate_actions
 from environments.TraidingEnvironment_q_learning import TradingEnvironment
 from utils.read_config import Config_reader
@@ -83,10 +83,18 @@ def main():
   
 
     # Laden der trainierten Modelle
-    ma5_agent = pickle.load(open(config.get_parameter('ma5', 'q_models'), 'rb'))
-    ma30_agent = pickle.load(open(config.get_parameter('ma30', 'q_models'), 'rb'))
-    ma200_agent = pickle.load(open(config.get_parameter('ma200', 'q_models'), 'rb'))
-    aggregation_agent = pickle.load(open(config.get_parameter('aggregation', 'q_models'), 'rb'))
+    # Erstellen von Agenteninstanzen
+    ma5_agent = QLearningAgent('ma5', len(np.load(config.get_parameter('ma5', 'q_models'))[0]), 'config/config.yml')
+    ma30_agent = QLearningAgent('ma30', len(np.load(config.get_parameter('ma30', 'q_models'))[0]), 'config/config.yml')
+    ma200_agent = QLearningAgent('ma200', len(np.load(config.get_parameter('ma200', 'q_models'))[0]), 'config/config.yml')
+    aggregation_agent = QLearningAgent('aggregation', len(np.load(config.get_parameter('aggregation', 'q_models'))[0]), 'config/config.yml')
+
+    # Laden der Q-Tabellen in die Agenteninstanzen
+    ma5_agent.q_table = np.load(config.get_parameter('ma5', 'q_models'))
+    ma30_agent.q_table = np.load(config.get_parameter('ma30', 'q_models'))
+    ma200_agent.q_table = np.load(config.get_parameter('ma200', 'q_models'))
+    aggregation_agent.q_table = np.load(config.get_parameter('aggregation', 'q_models'))
+
 
     # Testparameter
     test_data_path = config.get_parameter('test_data', 'directories')
