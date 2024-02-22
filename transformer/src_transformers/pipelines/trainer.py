@@ -1,6 +1,7 @@
 """
 This module contains the Trainer class which is used to train a PyTorch model.
 """
+import math
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -10,6 +11,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
 
@@ -51,8 +53,10 @@ class Trainer:
     epochs: int
     learning_rate: float
     loss: Union[nn.MSELoss, nn.CrossEntropyLoss,
-                RMSELoss, RMSLELoss, ExpMSELoss]
+    RMSELoss, RMSLELoss, ExpMSELoss]
     optimizer: Union[optim.SGD, optim.Adam]
+    lr_scheduler: Union[
+        optim.lr_scheduler.ReduceLROnPlateau, optim.lr_scheduler.CyclicLR, optim.lr_scheduler.OneCycleLR, None]
     weight_decay: float
     device: torch.device
     model: nn.Module
@@ -74,6 +78,7 @@ class Trainer:
             device: torch.device,
             loss: str = "mse",
             optimizer: str = "adam",
+            lr_scheduler_params: dict = None,
             weight_decay: float = 0,
             momentum: float = 0,
             eval_mode: bool = False,
@@ -98,6 +103,7 @@ class Trainer:
             device (torch.device): Whether to use the CPU or the GPU for training.
             loss (str, optional): Loss function to use. Defaults to "mse".
             optimizer (str, optional): Optimizer to use. Defaults to "adam".
+            lr_scheduler_params (dict, optional): Parameters for the learning rate scheduler. Defaults to None.
             weight_decay (float, optional): Weight decay for the optimizer. Defaults to 0.
             momentum (float, optional): Momentum for the optimizer. Defaults to 0.
             eval_mode (bool, optional): If the model is evaluated, the validation split is set to 1.
@@ -143,6 +149,28 @@ class Trainer:
             optimizer_instance = optim.Adam(
                 model.parameters(), lr=learning_rate)
 
+        # Setting up the learning rate scheduler
+        if lr_scheduler_params is not None:
+            if lr_scheduler_params["scheduler"] == "ReduceLROnPlateau":
+                lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer_instance,
+                                                                    **lr_scheduler_params["params"])
+            elif lr_scheduler_params["scheduler"] == "CyclicLR":
+                lr_scheduler = optim.lr_scheduler.CyclicLR(optimizer_instance,
+                                                           **lr_scheduler_params["params"])
+            elif lr_scheduler_params["scheduler"] == "OneCycleLR":
+                total_steps = (int(math.ceil(len(dataset)/batch_size))) * epochs
+                lr_scheduler = optim.lr_scheduler.OneCycleLR(optimizer_instance,
+                                                             total_steps=total_steps,
+                                                             **lr_scheduler_params["params"])
+            else:
+                Logger.log_text(
+                    f"Learning rate scheduler {lr_scheduler_params['scheduler']} is not valid, no scheduler is used.")
+                lr_scheduler = None
+        else:
+            Logger.log_text(
+                f"Learning rate scheduler {lr_scheduler_params['scheduler']} is not valid, no scheduler is used.")
+            lr_scheduler = None
+
         # Setting random seed for torch
         if seed is not None:
             torch.manual_seed(seed)
@@ -155,6 +183,7 @@ class Trainer:
             learning_rate=learning_rate,
             loss=loss_instance,
             optimizer=optimizer_instance,
+            lr_scheduler=lr_scheduler,
             weight_decay=weight_decay,
             device=device,
             model=model,
@@ -196,8 +225,10 @@ class Trainer:
         dataset_str = str(dataset_dict).replace("'", "")
 
         # Logg object variables
-        self.logger.write_text("config_settings/Trainer_variables", trainer_str)
-        self.logger.write_text("config_settings/dataset_variables", dataset_str)
+        self.logger.write_text(
+            "config_settings/Trainer_variables", trainer_str)
+        self.logger.write_text(
+            "config_settings/dataset_variables", dataset_str)
         self.logger.write_model(self.model)
 
         # Creating training and validation data loaders from the given data
@@ -291,6 +322,13 @@ class Trainer:
                         name="validation_set"
                     )
 
+                # Logging learning rate (getter-function only works with torch2.2 or higher)
+                if self.lr_scheduler is not None:
+                    try:
+                        self.logger.log_lr(lr=self.lr_scheduler.get_last_lr()[0], epoch=epoch)
+                    except AttributeError:
+                        self.logger.log_lr(lr=self.lr_scheduler.optimizer.param_groups[0]['lr'], epoch=epoch)
+
                 # Early stopping
                 if min_loss > validation_loss:
                     min_loss = validation_loss
@@ -365,6 +403,10 @@ class Trainer:
 
             self.optimizer.step()
 
+            # Step for ReduceLROnPlateau schedule is done with validation loss
+            if self.lr_scheduler is not None and not isinstance(self.lr_scheduler, optim.lr_scheduler.ReduceLROnPlateau):
+                self.lr_scheduler.step()
+
             train_loss += loss.item()
             step_count += 1
 
@@ -419,6 +461,10 @@ class Trainer:
                 results[0, start_idx:end_idx, :, :] = prediction.cpu()
                 results[1, start_idx:end_idx, :, :] = target.cpu()
 
+                if self.lr_scheduler is not None and isinstance(self.lr_scheduler,
+                                                                    optim.lr_scheduler.ReduceLROnPlateau):
+                    self.lr_scheduler.step(loss)
+
                 validation_loss += loss.sum().item()
                 step_count += 1
 
@@ -436,7 +482,7 @@ class Trainer:
         After the model is saved, the method logs a message to the console with the path
         to the file.
         """
-        path = ModelService.save_model(self.model, self.device)
+        path = ModelService.save_model(self.model)
         self.logger.log_model_path(model_path=path)
         Logger.log_text(f"Model saved to '{path}'.")
 

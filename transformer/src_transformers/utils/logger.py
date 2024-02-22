@@ -145,6 +145,19 @@ class Logger():
         tqdm.write(f"[LOGGER]: Epoch {epoch}: Validation Loss = {value}")
         self._summary_writer.add_scalar("loss/val", value, epoch)
 
+    def log_lr(self, lr: float, epoch: int) -> None:
+        """
+        Logs the learning rate for an epoch.
+
+        This method writes a message to the console and writes the validation loss to the
+        TensorBoard log file.
+
+        Args:
+            value (float): The validation loss.
+            epoch (int): The epoch number.
+        """
+        self._summary_writer.add_scalar("lr", lr, epoch)
+
     def save_prediction_chart(self, targets: np.array,
                               predictions: np.array, epoch: int, name: str = "validation_set"):
         """
