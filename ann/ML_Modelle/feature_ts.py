@@ -77,18 +77,6 @@ remove_infinite = FunctionTransformer(remove_infinite_values)
 drop_ts = DropFeatures(features_to_drop=['open', 'high', 'low', 'close', 'volume'])
 
 
-####################################################################
-########### df normal / minütlich && if dtf is made ################
-def create_window_feature(data): #durchschnittlicher stündlicher wert
-    df = data.copy()
-    for col in data_columns:
-        if col in data_columns:
-            # Berechnen des durchschnittlichen Wertes der Spalte pro Stunde
-            average_value_per_hour = df.groupby('hour')[col].transform('mean')
-            df[col + '_average_per_hour'] = average_value_per_hour
-
-    return df
-window_feature_transformer = FunctionTransformer(create_window_feature) #kw_args={'data_columns': data_columns}
 
 ####################################################################
 ######################## df business daily ######################### model daily
@@ -124,7 +112,6 @@ monthly_average_feature = FunctionTransformer(create_monthly_average_feature)
 
 
 
-
 ####################################################################
 ############################ df hourly ############################# model hourly
 
@@ -132,28 +119,39 @@ monthly_average_feature = FunctionTransformer(create_monthly_average_feature)
     #7h, Zeitraum von 9.30 -16 Uhr sind 7h
 def create_lag_features_7h_backward(data, max_lag_hours=7):
     df = data.copy()
-    for col in data_columns:
+    selected_columns = ["close"]
+    for col in selected_columns:
         for lag_hour in range(1, max_lag_hours + 1):
             df[f'{col}_lag_{lag_hour}H_back'] = data[col].shift(lag_hour)
     return df
 lag_backward_7h_features= FunctionTransformer(create_lag_features_7h_backward) # Erstellen einer  FunctionTransformer-Instanz um es in die Pipeline aufnehmen zu können
 
-#lag feature foreward mit 1h - 7h 
-def create_lag_features_7h_forward(data, max_lag_hours=7):
-    df = data.copy()
-    for col in data_columns:
-        for lag_hour in range(1, max_lag_hours + 1):
-            df[f'{col}_lag_{lag_hour}H_forward'] = data[col].shift(-lag_hour)
-    return df
-lag_forward_7h_features= FunctionTransformer(create_lag_features_7h_forward)
-
 def replace_weekend_volume_with_zero(data):
-    # Kopie des DataFrame erstellen, um das Original nicht zu ändern
     df = data.copy()
     # Ersetze das 'Volume'-Attribut auf 0 für Wochenenden (wenn 'weekend' gleich 1 ist)
     df.loc[df['weekend'] == 1, 'volume'] = 0
     return df
 replace_weekend_volume = FunctionTransformer(replace_weekend_volume_with_zero)
+
+def remove_weekend_data(data):
+    df = data.copy()
+    # Entferne alle Zeilen, die auf das Wochenende fallen (Samstag: 5, Sonntag: 6)
+    df = df[df.index.dayofweek < 5]
+    return df
+remove_weekend = FunctionTransformer(remove_weekend_data)
+
+####################################################################
+########### df normal / minütlich && if dtf is made ################    #model min
+def create_window_feature(data): #durchschnittlicher stündlicher wert
+    df = data.copy()
+    for col in data_columns:
+        if col in data_columns:
+            # Berechnen des durchschnittlichen Wertes der Spalte pro Stunde
+            average_value_per_hour = df.groupby('hour')[col].transform('mean')
+            df[col + '_average_per_hour'] = average_value_per_hour
+
+    return df
+window_feature_transformer = FunctionTransformer(create_window_feature) #kw_args={'data_columns': data_columns}
 
 
 ####################################################################

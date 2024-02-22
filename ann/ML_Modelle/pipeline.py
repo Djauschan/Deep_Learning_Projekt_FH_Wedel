@@ -6,10 +6,17 @@ from sklearn.preprocessing import FunctionTransformer
 
 from feature_ts import FeatureEngineering
 
+#all
 from feature_ts import day_name_transformer, dtf, replace_weekend_volume, imputer, drop_ts, remove_infinite
 from feature_ts import differenz_value, pct_change_transformer, differenz_pct_change_transformer
+
+#daily
 from feature_ts import lag_backward_20d_features, monthly_average_feature
-from feature_ts import lag_backward_7h_features, lag_forward_7h_features
+
+#hour
+from feature_ts import lag_backward_7h_features, remove_weekend
+
+#min
 from feature_ts import window_feature_transformer
 
 class ClassPipeline:
@@ -34,7 +41,7 @@ class ClassPipeline:
                 
                 # for hourly
                 ("lag_features_back", lag_backward_7h_features),
-                ("lag_features_for", lag_forward_7h_features),
+                ("remove_weekend", remove_weekend),
 
                 #bus daily
                 ("lag_backward_20d_features", lag_backward_20d_features),
@@ -56,9 +63,10 @@ class ClassPipeline:
             ]
         )
         self.pipe_hour = Pipeline( #hourly df 
-            #model 2h prediction
+            #model hour prediction
             [
                 ("datetime_features", dtf),
+                #("remove_weekend", remove_weekend),
                 ("pct_change", pct_change_transformer),
                 ("lag_features_back", lag_backward_7h_features),
                 ("dropna", imputer),
