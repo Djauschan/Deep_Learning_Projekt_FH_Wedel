@@ -153,6 +153,16 @@ def create_window_feature(data): #durchschnittlicher stündlicher wert
     return df
 window_feature_transformer = FunctionTransformer(create_window_feature) #kw_args={'data_columns': data_columns}
 
+#lag feature backward mit 60 min 
+def create_lag_features_60min(data, max_lag_min=60):
+    df = data.copy()
+    selected_columns = ["close"]
+    for col in selected_columns:
+        for lag_min in range(1, max_lag_min + 1):
+            df[f'{col}_lag_{lag_min}min_back'] = data[col].shift(lag_min)
+    return df
+lag_backward_60min= FunctionTransformer(create_lag_features_60min) 
+
 
 ####################################################################
 # Class FeatureEngineering

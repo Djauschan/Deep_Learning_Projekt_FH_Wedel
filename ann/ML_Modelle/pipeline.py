@@ -17,7 +17,7 @@ from feature_ts import lag_backward_20d_features, monthly_average_feature
 from feature_ts import lag_backward_7h_features, remove_weekend
 
 #min
-from feature_ts import window_feature_transformer
+from feature_ts import window_feature_transformer, lag_backward_60min
 
 class ClassPipeline:
     def __init__(self, data):
@@ -38,7 +38,8 @@ class ClassPipeline:
 
                 #for normal / minütlich, only with dtf
                 ("window_feature", window_feature_transformer), #mit dtf ! -> ("datetime_features", dtf),
-                
+                ("lag_backward_60min", lag_backward_60min),
+
                 # for hourly
                 ("lag_features_back", lag_backward_7h_features),
                 ("remove_weekend", remove_weekend),
@@ -59,6 +60,7 @@ class ClassPipeline:
             [
                 ("datetime_features", dtf),
                 ("pct_change", pct_change_transformer),
+                ("lag_backward_60min", lag_backward_60min),
                 ("dropna", imputer),
             ]
         )
