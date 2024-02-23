@@ -127,28 +127,28 @@ from ML_PredictionInterface_daily import ABC_LinearRegressionModel_daily, ABC_Ra
 ############### LR ##################### 
 lr_model = ABC_LinearRegressionModel_daily()
 
-lr_predictions = lr_model.predict("AAPL", pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)
+lr_predictions = lr_model.predict("AAPL", pd.Timestamp('2021-01-06'), pd.Timestamp('2021-01-15'), 1)
 print("lr_predictions")
 print(lr_predictions)
 
 ############### RF ##################### 
 rf_model = ABC_RandomForestModel_daily()
 
-rf_predictions = rf_model.predict("AAPL", pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)
+rf_predictions = rf_model.predict("AAPL", pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 1)
 print("rf_predictions")
 print(rf_predictions)
 
 ############### GBM ##################### 
 gbm_model = ABC_GradientBoostingModel_daily()
 
-gbm_predictions = gbm_model.predict("AAPL", pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)
+gbm_predictions = gbm_model.predict("AAPL", pd.Timestamp('2021-01-10'), pd.Timestamp('2021-01-13'), 1)
 print("gbm_predictions")
 print(gbm_predictions)
 
 ############### SVM ##################### 
 svm_model = ABC_SVMModel_daily()
 
-svm_predictions = svm_model.predict("AAPL", pd.Timestamp('2021-01-05'), pd.Timestamp('2021-01-07'), 2)
+svm_predictions = svm_model.predict("AAPL", pd.Timestamp('2021-01-20'), pd.Timestamp('2021-01-27'), 1)
 print("svm_predictions")
 print(svm_predictions)
 

@@ -17,7 +17,8 @@ class ABC_LinearRegressionModel_daily(AbstractModel):
         self.load_model(symbol)
         
         #Modelle sind bis zum 3.1.21 trainiert -> prediction ab 4.1 möglich
-        prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end)
+        prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end, freq='D')
+        #prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end, freq=f'{interval}D')
         predicted_values = []
         indices = []
 
@@ -25,27 +26,28 @@ class ABC_LinearRegressionModel_daily(AbstractModel):
         back_transform_test_data = loaded_data['back_transform_test_data']
         X_test = loaded_data['X_test']
 
-        #last_known_close_value = back_transform_test_data['close'].iloc[0]
-        #last_known_close_value = back_transform_test_data[back_transform_test_data.index < timestamp_start]['close'].iloc[-1]
-
-        if timestamp_start == pd.Timestamp('2021-01-04'):
-            last_known_close_value = back_transform_test_data['close'].iloc[0]
+        # Bestimmung des letzten bekannten Close-Wertes zum Startzeitpunkt
+        if timestamp_start in back_transform_test_data.index:
+            last_known_close_value = back_transform_test_data.loc[timestamp_start, 'close']
         else:
             last_known_close_value = back_transform_test_data[back_transform_test_data.index < timestamp_start]['close'].iloc[-1]
 
-        max_points = min(len(prediction_dates), len(X_test))
-        for i in range(max_points):
-            X_test_row_df = pd.DataFrame([X_test.iloc[i]], columns=X_test.columns)  # Umwandlung der Daten in DataFrame
-            predicted_pct_change = self.model.predict(X_test_row_df)[0]             # Vorhersage für den nächsten Tag (prozentuale Veränderung)
-            
-            # Umwandlung der prozentualen Veränderung in einen absoluten Close-Wert
-            predicted_close = last_known_close_value * (1 + predicted_pct_change / 100)
-            predicted_values.append(predicted_close)
+        # Iteration über die Vorhersagedaten
+        for timestamp in prediction_dates:
+            if timestamp in X_test.index:
+                X_test_row = X_test.loc[timestamp]
 
-            # Aktualisieren des letzten bekannten Close-Werts für die nächste Vorhersage
-            last_known_close_value = predicted_close
-            indices.append(X_test.index[i])
+                # Vorhersage machen
+                predicted_pct_change = self.model.predict([X_test_row])[0]
+                predicted_close = last_known_close_value * (1 + predicted_pct_change / 100)
 
+                # Aktualisierung des letzten bekannten Close-Werts
+                last_known_close_value = predicted_close
+
+                # Vorhersagewerte und Indizes speichern
+                predicted_values.append(predicted_close)
+                indices.append(timestamp)
+        
         # Erstellen eines DataFrames für die Vorhersageergebnisse
         prediction_df = pd.DataFrame({f'{symbol}_Predicted_Close': predicted_values}, index=indices)
         return prediction_df
@@ -78,12 +80,13 @@ class ABC_LinearRegressionModel_daily(AbstractModel):
 class ABC_RandomForestModel_daily(AbstractModel):
 
     def predict(self, symbol, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
-
+        
         #Model laden
         self.load_model(symbol)
-
+        
         #Modelle sind bis zum 3.1.21 trainiert -> prediction ab 4.1 möglich
-        prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end)
+        prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end, freq='D')
+        #prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end, freq=f'{interval}D')
         predicted_values = []
         indices = []
 
@@ -91,27 +94,28 @@ class ABC_RandomForestModel_daily(AbstractModel):
         back_transform_test_data = loaded_data['back_transform_test_data']
         X_test = loaded_data['X_test']
 
-        #last_known_close_value = back_transform_test_data['close'].iloc[0]
-        #last_known_close_value = back_transform_test_data[back_transform_test_data.index < timestamp_start]['close'].iloc[-1]
-
-        if timestamp_start == pd.Timestamp('2021-01-04'):
-            last_known_close_value = back_transform_test_data['close'].iloc[0]
+        # Bestimmung des letzten bekannten Close-Wertes zum Startzeitpunkt
+        if timestamp_start in back_transform_test_data.index:
+            last_known_close_value = back_transform_test_data.loc[timestamp_start, 'close']
         else:
             last_known_close_value = back_transform_test_data[back_transform_test_data.index < timestamp_start]['close'].iloc[-1]
 
-        max_points = min(len(prediction_dates), len(X_test))
-        for i in range(max_points):
-            X_test_row_df = pd.DataFrame([X_test.iloc[i]], columns=X_test.columns)  # Umwandlung der Daten in DataFrame
-            predicted_pct_change = self.model.predict(X_test_row_df)[0]             # Vorhersage für den nächsten Tag (prozentuale Veränderung)
-            
-            # Umwandlung der prozentualen Veränderung in einen absoluten Close-Wert
-            predicted_close = last_known_close_value * (1 + predicted_pct_change / 100)
-            predicted_values.append(predicted_close)
+        # Iteration über die Vorhersagedaten
+        for timestamp in prediction_dates:
+            if timestamp in X_test.index:
+                X_test_row = X_test.loc[timestamp]
 
-            # Aktualisieren des letzten bekannten Close-Werts für die nächste Vorhersage
-            last_known_close_value = predicted_close
-            indices.append(X_test.index[i])
+                # Vorhersage machen
+                predicted_pct_change = self.model.predict([X_test_row])[0]
+                predicted_close = last_known_close_value * (1 + predicted_pct_change / 100)
 
+                # Aktualisierung des letzten bekannten Close-Werts
+                last_known_close_value = predicted_close
+
+                # Vorhersagewerte und Indizes speichern
+                predicted_values.append(predicted_close)
+                indices.append(timestamp)
+        
         # Erstellen eines DataFrames für die Vorhersageergebnisse
         prediction_df = pd.DataFrame({f'{symbol}_Predicted_Close': predicted_values}, index=indices)
         return prediction_df
@@ -144,12 +148,13 @@ class ABC_RandomForestModel_daily(AbstractModel):
 class ABC_GradientBoostingModel_daily(AbstractModel):
 
     def predict(self, symbol, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
-
+        
         #Model laden
         self.load_model(symbol)
-
-        #Modelle sind bis zum 3.1.21trainiert -> prediction ab 4.1 möglich
-        prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end)
+        
+        #Modelle sind bis zum 3.1.21 trainiert -> prediction ab 4.1 möglich
+        prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end, freq='D')
+        #prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end, freq=f'{interval}D')
         predicted_values = []
         indices = []
 
@@ -157,27 +162,28 @@ class ABC_GradientBoostingModel_daily(AbstractModel):
         back_transform_test_data = loaded_data['back_transform_test_data']
         X_test = loaded_data['X_test']
 
-        #last_known_close_value = back_transform_test_data['close'].iloc[0]
-        #last_known_close_value = back_transform_test_data[back_transform_test_data.index < timestamp_start]['close'].iloc[-1]
-
-        if timestamp_start == pd.Timestamp('2021-01-04'):
-            last_known_close_value = back_transform_test_data['close'].iloc[0]
+        # Bestimmung des letzten bekannten Close-Wertes zum Startzeitpunkt
+        if timestamp_start in back_transform_test_data.index:
+            last_known_close_value = back_transform_test_data.loc[timestamp_start, 'close']
         else:
             last_known_close_value = back_transform_test_data[back_transform_test_data.index < timestamp_start]['close'].iloc[-1]
 
-        max_points = min(len(prediction_dates), len(X_test))
-        for i in range(max_points):
-            X_test_row_df = pd.DataFrame([X_test.iloc[i]], columns=X_test.columns)  # Umwandlung der Daten in DataFrame
-            predicted_pct_change = self.model.predict(X_test_row_df)[0]             # Vorhersage für den nächsten Tag (prozentuale Veränderung)
-            
-            # Umwandlung der prozentualen Veränderung in einen absoluten Close-Wert
-            predicted_close = last_known_close_value * (1 + predicted_pct_change / 100)
-            predicted_values.append(predicted_close)
+        # Iteration über die Vorhersagedaten
+        for timestamp in prediction_dates:
+            if timestamp in X_test.index:
+                X_test_row = X_test.loc[timestamp]
 
-            # Aktualisieren des letzten bekannten Close-Werts für die nächste Vorhersage
-            last_known_close_value = predicted_close
-            indices.append(X_test.index[i])
+                # Vorhersage machen
+                predicted_pct_change = self.model.predict([X_test_row])[0]
+                predicted_close = last_known_close_value * (1 + predicted_pct_change / 100)
 
+                # Aktualisierung des letzten bekannten Close-Werts
+                last_known_close_value = predicted_close
+
+                # Vorhersagewerte und Indizes speichern
+                predicted_values.append(predicted_close)
+                indices.append(timestamp)
+        
         # Erstellen eines DataFrames für die Vorhersageergebnisse
         prediction_df = pd.DataFrame({f'{symbol}_Predicted_Close': predicted_values}, index=indices)
         return prediction_df
@@ -214,9 +220,10 @@ class ABC_SVMModel_daily(AbstractModel):
         
         #Model laden
         self.load_model(symbol)
-
+        
         #Modelle sind bis zum 3.1.21 trainiert -> prediction ab 4.1 möglich
-        prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end)
+        prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end, freq='D')
+        #prediction_dates = pd.date_range(start=timestamp_start, end=timestamp_end, freq=f'{interval}D')
         predicted_values = []
         indices = []
 
@@ -224,27 +231,28 @@ class ABC_SVMModel_daily(AbstractModel):
         back_transform_test_data = loaded_data['back_transform_test_data']
         X_test = loaded_data['X_test']
 
-        #last_known_close_value = back_transform_test_data['close'].iloc[0]
-        #last_known_close_value = back_transform_test_data[back_transform_test_data.index < timestamp_start]['close'].iloc[-1]
-
-        if timestamp_start == pd.Timestamp('2021-01-04'):
-            last_known_close_value = back_transform_test_data['close'].iloc[0]
+        # Bestimmung des letzten bekannten Close-Wertes zum Startzeitpunkt
+        if timestamp_start in back_transform_test_data.index:
+            last_known_close_value = back_transform_test_data.loc[timestamp_start, 'close']
         else:
             last_known_close_value = back_transform_test_data[back_transform_test_data.index < timestamp_start]['close'].iloc[-1]
 
-        max_points = min(len(prediction_dates), len(X_test))
-        for i in range(max_points):
-            X_test_row_df = pd.DataFrame([X_test.iloc[i]], columns=X_test.columns)  # Umwandlung der Daten in DataFrame
-            predicted_pct_change = self.model.predict(X_test_row_df)[0]             # Vorhersage für den nächsten Tag (prozentuale Veränderung)
-            
-            # Umwandlung der prozentualen Veränderung in einen absoluten Close-Wert
-            predicted_close = last_known_close_value * (1 + predicted_pct_change / 100)
-            predicted_values.append(predicted_close)
+        # Iteration über die Vorhersagedaten
+        for timestamp in prediction_dates:
+            if timestamp in X_test.index:
+                X_test_row = X_test.loc[timestamp]
 
-            # Aktualisieren des letzten bekannten Close-Werts für die nächste Vorhersage
-            last_known_close_value = predicted_close
-            indices.append(X_test.index[i])
+                # Vorhersage machen
+                predicted_pct_change = self.model.predict([X_test_row])[0]
+                predicted_close = last_known_close_value * (1 + predicted_pct_change / 100)
 
+                # Aktualisierung des letzten bekannten Close-Werts
+                last_known_close_value = predicted_close
+
+                # Vorhersagewerte und Indizes speichern
+                predicted_values.append(predicted_close)
+                indices.append(timestamp)
+        
         # Erstellen eines DataFrames für die Vorhersageergebnisse
         prediction_df = pd.DataFrame({f'{symbol}_Predicted_Close': predicted_values}, index=indices)
         return prediction_df
