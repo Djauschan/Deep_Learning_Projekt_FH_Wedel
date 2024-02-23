@@ -2,5 +2,6 @@ matplotlib
 numpy
 pandas
 PyYAML
-torch
 tqdm
+fastapi
+uvicorn
