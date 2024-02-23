@@ -385,16 +385,15 @@ def predict_rl(stock_symbol: str):
     posible_actions = ['buy', 'sell', 'hold']
     model_names = ["q_learning_ma5", "q_learning_ma30", "q_learning_ma200", "q_learning_transformer", "q_learning_cnn", "q_learning_arima"]
     
-    random_return = {'2021-01-04' : {model: choice(posible_actions) for model in model_names},
-                      "2021-01-05" : {model: choice(posible_actions) for model in model_names},}
-    
     ensemble = choice(["election", "ensemble"]) == 'ensemble'
-    for key in random_return:
+    random_return = {}
+    for current_date in pd.date_range("2021-01-04", "2021-01-05", freq='h'):
+        random_return[current_date] = {model: choice(posible_actions) for model in model_names}
         if ensemble:
-            random_return[key]['ensemble'] = choice(list(random_return[key].values()))
+            random_return[current_date]['ensemble'] = choice(list(random_return[current_date].values()))
         else:
-            lst = list(random_return[key].values())
-            random_return[key]['election'] =  max(set(lst), key=lst.count)
+            lst = list(random_return[current_date].values())
+            random_return[current_date]['election'] =  max(set(lst), key=lst.count)
   
     return [random_return]
 
