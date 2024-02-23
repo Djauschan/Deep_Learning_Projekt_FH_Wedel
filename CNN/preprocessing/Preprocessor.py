@@ -45,6 +45,7 @@ class Preprocessor:
         self.TS_LENGTH = self.modelParameters['TIMESERIES_SEQUENCE_LEN']
         self.TS_AHEAD = self.modelParameters['TIMESTEPS_AHEAD']
         self.FEATURES = self.modelParameters['FEATURES']
+        self.MVG_AVG = self.modelParameters['MVG_AVG']
         self.AMOUNT_OF_DATA = self.modelParameters['AMOUNT_OF_DATA']
         self.TIME_SPAN_BEGIN = self.modelParameters['TIME_SPAN_BEGIN']
         self.TIME_SPAN_END = self.modelParameters['TIME_SPAN_END']
@@ -71,7 +72,7 @@ class Preprocessor:
         # check and create a rsc folder struc with:
 
         trainingDataPath = str(self.TS_LENGTH) + '_' + str(self.TS_INTERVAL) + '_' + str(self.TS_AHEAD) + '_' + \
-            self.DATA_FEATURE_NAME + '_' + self.TIME_SPAN_BEGIN + '_' + self.TIME_SPAN_END
+                           self.DATA_FEATURE_NAME + '_' + self.TIME_SPAN_BEGIN + '_' + self.TIME_SPAN_END
         sub_path = os.path.join(self.TO_SAVE_RSC_FOLDER, trainingDataPath)
         if not os.path.exists(self.TO_SAVE_RSC_FOLDER):
             os.makedirs(self.TO_SAVE_RSC_FOLDER)
@@ -89,6 +90,11 @@ class Preprocessor:
                 label_name = v[3]
                 imgDataPath = os.path.join(kuerzel_folder_path, 'ImageGafData')
                 df = self.loadMainData(fileName, allDataColumns, column_featureName)
+                """ 
+                    In the meaning of Performance this architecture is horrible because
+                    multiple steps of preprocessing could be done in 1 loop but are here
+                    split in x loops for each service..
+                """
                 # merges the main data (the data with the label values)
                 # with all the feature data (the etf, gold index...)
                 df = self.getAndMergeFeatureDataWithMainData(df)
@@ -103,9 +109,16 @@ class Preprocessor:
                 #### EXPORT THE DATA ####
                 # self.exportLabelsToNpy(kuerzel_folder_path, labels) #no need to save TS
                 # data in format (count_of_feature, anz vo ts, length single ts)
-                featureShapedData = self.reshapeDataToFeatureList(data, self.FEATURES)
+                countOfFeatures = len(self.FEATURES)
+                if self.MVG_AVG:
+                    countOfFeatures += 1
+
+                featureShapedData = self.reshapeDataToFeatureList(data, countOfFeatures)
                 # list(features) to -> np.array(len_of_feature, anz_aller_ts, länge_einzelner_ts, länge_einzelner_ts)
                 gafData = self.GAFservice.createGAFfromMultivariateTimeSeries(featureShapedData)
+                #swap shape of gafData
+                #(features, datapoints, len_ts, len_ts) -> (datapoints, features, len_ts, len_Ts)
+                #from (5, 5000, 10, 10) ->  (5000, 5, 10, 10)
                 gafData = np.transpose(gafData, (1, 0, 2, 3))
                 if not os.path.exists(imgDataPath):
                     os.makedirs(imgDataPath)
@@ -113,7 +126,7 @@ class Preprocessor:
                 np.save(os.path.join(imgDataPath, self.DATA_FEATURE_NAME + '.npy'), gafData)
                 np.save(os.path.join(imgDataPath, 'LABELS' + '.npy'), labels)
 
-                #Test Images for Visualisation
+                # Test Images for Visualisation
                 # create imgaes for first 3 feautre to Visualize
                 self.createSingleGafImg(gafData[0][0], imgDataPath + '0_gaf.png')
                 self.createSingleGafImg(gafData[1][0], imgDataPath + '1_gaf.png')
@@ -175,7 +188,7 @@ class Preprocessor:
         GAFservice = gafService()
         GAFservice.saveGAFimg(data, path)
 
-    def reshapeDataToFeatureList(self, arr, FEATURE_LIST) -> list:
+    def reshapeDataToFeatureList(self, arr, COUNT_OF_FEATURES: int) -> list:
         """
             param:
                 arr = dimension (länge_aller_ts, länge_einzelner_ts, features)
@@ -194,7 +207,7 @@ class Preprocessor:
         """
         # Splitting the array along the last dimension into three separate arrays
         # split from: (3740, 5, 3)     to: list(3), each = (3740, 5, 1)
-        split_arrays = np.split(arr, len(FEATURE_LIST), axis=2)
+        split_arrays = np.split(arr, COUNT_OF_FEATURES, axis=2)
         toReturnList = []  # new list with the correct Shaped Data
         i = 0
         for sArr in split_arrays:

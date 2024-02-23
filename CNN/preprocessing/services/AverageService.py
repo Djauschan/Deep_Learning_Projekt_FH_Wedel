@@ -6,13 +6,18 @@ class AverageService:
         calc the current avarage of the timeseries and add it as a feature
     """
 
-    # 50200, 11, 4 => 50200, 11, 5 =(5 <- 1 feature dazu...)
+    # 50200, 11, 4 => 50200, 11, 5 =( 5 <- 1 feature dazu...)
     def calcAvg(self, arr: np.ndarray):
+        """
+            extends the numpy array of all timeseries to add 1 more feature
+        """
+        newArr = np.zeros((len(arr), len(arr[0]), len(arr[0][0])+1))
         len_df = len(arr)
         i: int = 0
         while i < len_df:
-            arr[i] = self._calcAvgOnSingleTs(arr[i])
-        return arr
+            newArr[i] = self._calcAvgOnSingleTs(arr[i])
+            i += 1
+        return newArr
 
     def _calcAvgOnSingleTs(self, timeSeries: np.ndarray):
         """

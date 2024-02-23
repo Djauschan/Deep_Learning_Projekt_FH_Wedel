@@ -15,7 +15,27 @@ class executer:
     def buildTimeSeriesData_w(self):
         CONFIG_PATH1 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_dayTrayding_1.yml"
         preProcessingService = Preprocessor(CONFIG_PATH1)
-        print('BUILD ALL DATA with CONFIG_PATH1')
+        print('BUILD ALL DATA with CONFIG_PATH 1')
+
+        CONFIG_PATH2 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_dayTrayding_1.yml"
+        preProcessingService = Preprocessor(CONFIG_PATH2)
+        print('BUILD ALL DATA with CONFIG_PATH 2')
+
+        CONFIG_PATH3 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_dayTrayding_1.yml"
+        preProcessingService = Preprocessor(CONFIG_PATH3)
+        print('BUILD ALL DATA with CONFIG_PATH 3')
+
+        CONFIG_PATH4 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_dayTrayding_1.yml"
+        preProcessingService = Preprocessor(CONFIG_PATH4)
+        print('BUILD ALL DATA with CONFIG_PATH 4')
+
+        CONFIG_PATH5 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_dayTrayding_1.yml"
+        preProcessingService = Preprocessor(CONFIG_PATH5)
+        print('BUILD ALL DATA with CONFIG_PATH 5')
+
+        CONFIG_PATH6 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_dayTrayding_1.yml"
+        preProcessingService = Preprocessor(CONFIG_PATH6)
+        print('BUILD ALL DATA with CONFIG_PATH 6')
 
 
     def startTraining_w(self):

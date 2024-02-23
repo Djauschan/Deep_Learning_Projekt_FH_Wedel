@@ -28,19 +28,19 @@ OTHER_FEATURES_TO_LOAD : [
   IVV: ["IVV_1min.txt", ["DateTime", "Open_IVV", "a", "b", "c", "Volume"], ["DateTime", "Open_IVV"]] #USA
 ]
 
-TIME_SPAN_BEGIN: "2010-01-01"
+TIME_SPAN_BEGIN: "2005-01-01"
 TIME_SPAN_END: "2021-01-30"
 TIMESERIES_SEQUENCE_LEN: 20  # length  of the TimeSeries; 1 : no series at all
-TIMESTEPS_AHEAD: 1  # predict 60min
-TIME_STEP_INTERVAL: 15  #
-TOLERANCE: 10
-NEXT_DAY_RETRY_THRESHOLD: 2
+TIMESTEPS_AHEAD: 10  # predict 60min
+TIME_STEP_INTERVAL: 120  #
+TOLERANCE: 60
+NEXT_DAY_RETRY_THRESHOLD: 0
 
 FEATURES: [
   "Open", "Volume", "Open_MCHI", "Open_IVV"
 ]
 MVG_AVG: True #if moving Avg should be a feature
 
-DATA_FEATURE_NAME: "DATA_Open_Volume_MCHI_IVV_MVG_ahead1"
+DATA_FEATURE_NAME: "DATA_Open_Volume_MCHI_IVV_MVG_ahead10"
 ALLOW_SERIES_INTERVAL_TOLERANCE: true
 ENHANCE_DIFFERENCE: true
