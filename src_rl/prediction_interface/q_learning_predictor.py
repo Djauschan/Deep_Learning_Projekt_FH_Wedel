@@ -54,7 +54,7 @@ class MAPredictor():
 class RSIPredictor():
     def __init__(self, model_path) -> float:
         self.q_table = np.load(model_path)
-        self.name = 'Q_learning_RSI'
+        self.name = 'RSI_decision'
         self.low_threshold = 30
         self.high_threshold = 70
     
