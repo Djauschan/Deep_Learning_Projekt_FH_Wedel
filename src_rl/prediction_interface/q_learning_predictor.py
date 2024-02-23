@@ -8,6 +8,8 @@ class QLearningPredictor():
             self.model = MAPredictor(model_path)
         elif 'rsi' in model_path.lower():
             self.model = RSIPredictor(model_path)
+        elif 'aggregation' in model_path.lower():
+            self.model = ensemblePredictor(model_path)
         try:
             self.name = self.model.name
         except AttributeError:
@@ -18,10 +20,9 @@ class QLearningPredictor():
 
 class MAPredictor():
     def __init__(self, model_path):
-        self.ma_variant = int(model_path.split('/')[-1].split('_')[0].replace('ma', ''))
+        self.ma_variant = int(model_path.split('/')[-1].split('_')[1].replace('ma', ''))
         self.q_table = np.load(model_path)
         self.name = f'Q_learning_MA{self.ma_variant}'
-    
     
     def calculate_MA(self, data) -> float: #Mit period = 5, 30 oder 200
         if len(data) < self.ma_variant:
@@ -41,15 +42,7 @@ class MAPredictor():
     def predict(self, data) -> str:
         current_price = data.iloc[-1].Close
         state_index = self.calculate_state(current_price, self.calculate_MA(data.Close))
-        action = np.argmax(self.q_table[state_index])
-        if action == 0:
-            return 'hold'
-        elif action == 1:
-            return 'buy'
-        elif action == 2:
-            return 'sell'
-        else:
-            raise ValueError(f'Invalid action: {action}')
+        return np.argmax(self.q_table[state_index])
 
 class RSIPredictor():
     def __init__(self, model_path) -> float:
@@ -81,8 +74,26 @@ class RSIPredictor():
     def predict(self, data) -> str:
         rsi_value = self.calculate_RSI(data)
         if rsi_value < self.low_threshold:
-            return 'buy'  # Kaufen
+            return 1  # Kaufen
         elif rsi_value > self.high_threshold:
-            return 'sell'  # Verkaufen
+            return 2  # Verkaufen
         else:
-            return 'hold'  # Halten
+            return 0  # Halten
+
+class ensemblePredictor():
+    def __init__(self, model_path) -> None:
+        self.q_table = np.load(model_path)
+        self.name = 'ensemble'
+        
+    def predict(self, actions) -> str:
+        weighted_actions = np.zeros(3)  # Angenommen, es gibt 3 mögliche Aktionen (kaufen, nichts tun, und verkaufen)
+    
+        for i, action in enumerate(actions):
+            weighted_actions += self.q_table[i, action]
+
+        # Wenn alle gewichteten Aktionen gleich sind, wähle zufällig
+        if np.all(weighted_actions == weighted_actions[0]):
+            return np.random.choice(len(weighted_actions))
+        else:
+            return np.argmax(weighted_actions)
+        
