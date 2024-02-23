@@ -4,12 +4,14 @@ import sys
 
 class QLearningPredictor():
     def __init__(self, model_path):
-        if 'ma' in model_path:
+        if 'ma' in model_path.lower():
             self.model = MAPredictor(model_path)
+        elif 'rsi' in model_path.lower():
+            self.model = RSIPredictor(model_path)
+        try:
             self.name = self.model.name
-        else:
-            print(f'Model type not supported: {model_path}')
-            
+        except AttributeError:
+            self.name = 'unsupported'
     def predict(self, data) -> str:
         return self.model.predict(data)
             
@@ -48,3 +50,39 @@ class MAPredictor():
             return 'sell'
         else:
             raise ValueError(f'Invalid action: {action}')
+
+class RSIPredictor():
+    def __init__(self, model_path) -> float:
+        self.q_table = np.load(model_path)
+        self.name = 'Q_learning_RSI'
+        self.low_threshold = 30
+        self.high_threshold = 70
+    
+    def calculate_RSI(self, data, period=14):
+        if len(data) < period:
+            return 50  # Neutraler RSI-Wert bei unzureichenden Daten
+
+        # Berechnung der Differenzen
+        delta = data.Close.diff()
+        
+        # Ermittlung von Gewinnen und Verlusten über die letzten 'period' Tage
+        gain = delta.clip(lower=0).iloc[-period:].mean()
+        loss = -delta.clip(upper=0).iloc[-period:].mean()
+
+        # Vermeidung der Division durch Null
+        if loss == 0:
+            return 100 if gain > 0 else 50
+
+        # Berechnung des RSI
+        RS = gain / loss
+        RSI = 100 - (100 / (1 + RS))
+        return RSI
+    
+    def predict(self, data) -> str:
+        rsi_value = self.calculate_RSI(data)
+        if rsi_value < self.low_threshold:
+            return 'buy'  # Kaufen
+        elif rsi_value > self.high_threshold:
+            return 'sell'  # Verkaufen
+        else:
+            return 'hold'  # Halten
