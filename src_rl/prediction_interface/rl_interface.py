@@ -12,8 +12,6 @@ class RLInterface:
         models = [QLearningPredictor(model) for model in glob('prediction_interface/api_models/*.npy')]
         self.models = {model.name : model for model in models if model.name != 'unsupported'}
         
-        print(self.models)
-        
         if 'ensemble' in self.models.keys():
             self.ensemble_mode = True
         else:
