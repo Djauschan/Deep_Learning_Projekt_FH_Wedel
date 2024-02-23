@@ -4,7 +4,11 @@ from glob import glob
 import pandas as pd
 
 class RLInterface:
+    """RL Interface for the prediction API. This class is used to predict trading actions.
+    """
     def __init__(self) -> None:
+        """Initializes the RLInterface by loading all available models.
+        """
         models = [QLearningPredictor(model) for model in glob('prediction_interface/api_models/*.npy')]
         self.models = {model.name : model for model in models if model.name != 'unsupported'}
         
@@ -19,7 +23,17 @@ class RLInterface:
         self.data = self.read_data()
         
         
-    def predict(self, stock_symbol, start_date, end_date) -> dict:
+    def predict(self, stock_symbol : str, start_date : str , end_date : str) -> dict[str, dict[str, str]]:        
+        """Predicts trading actions for a given stock symbol and time frame with every avialible model.
+
+        Args:
+            stock_symbol (str): The stock symbol to predict trading actions for.
+            start_date (str): The start date of the time frame to predict trading actions for.
+            end_date (str): The end date of the time frame to predict trading actions for.
+
+        Returns:
+            dict[pd.Timestamp, dict[str, str]]: A dictionary containing the predictions for every model for every hour in the given time frame.
+        """
         predictions = {}
         relevant_data = self.data[stock_symbol.upper()]
         for current_date in pd.date_range(start_date, end_date, freq='h'):
@@ -41,7 +55,12 @@ class RLInterface:
         
         return predictions
     
-    def read_data(self) -> dict:
+    def read_data(self) -> dict[str, pd.DataFrame]:
+        """Reads the stock data from the data folder.
+
+        Returns:
+            dict[str, pd.DataFrame]: A dictionary containing the stock data for every stock symbol.
+        """
         dataDict = {}
         for filepath in glob('../data/aktien/*.txt'):
             df = pd.read_csv(filepath, sep=',', index_col=0, parse_dates=True, names=["DateTime", "Open", "Close", "High", "Low", "_"]).drop("_", axis=1)
