@@ -52,9 +52,9 @@ class RandomForestModel(BaseModel):
         Das Bagging hilft dabei die Varianz zu verringern, da die Modelle jeweils unabhänging voneinander erstellt werden.
 
         #
-        Feature Importances: ist die Wichtigkeit der einzelnen Variablen
+        Beste Hyperparameter: {'max_depth': 5, 'max_features': 'auto', 'min_samples_leaf': 50, 'min_samples_split': 2, 'n_estimators': 20}
     '''
-    hyperparameters = {"n_estimators": 1, "max_depth": 2, "min_samples_split": 2, "min_samples_leaf": 1, "max_features": "auto", "random_state": 11}
+    hyperparameters = {"n_estimators": 20, "max_depth": 5, "min_samples_split": 2, "min_samples_leaf": 50, "max_features": "auto", "random_state": 11}
 
     def __init__(self):
         super().__init__(RandomForestRegressor(**RandomForestModel.hyperparameters))
@@ -73,9 +73,9 @@ class GradientBoostingModel(BaseModel):
            (Im Vergleich zum RF, der hier zufällige Bäume erstellt (Bagging /Bootsstap); -> GBM nicht)
 
         #
-        Feature Importances: ist die Wichtigkeit der einzelnen Variablen
+        Beste Hyperparameter: {'max_depth': 5, 'max_features': 'auto', 'min_samples_leaf': 75, 'min_samples_split': 2, 'n_estimators': 10}
     '''
-    hyperparameters = {"n_estimators": 1, "max_depth": 1, "min_samples_split": 2, "min_samples_leaf": 1, "max_features": "auto", "random_state": 11}
+    hyperparameters = {"n_estimators": 10, "max_depth": 5, "min_samples_split": 2, "min_samples_leaf": 75, "max_features": "auto", "random_state": 11}
 
     def __init__(self):
         super().__init__(GradientBoostingRegressor(**GradientBoostingModel.hyperparameters))
