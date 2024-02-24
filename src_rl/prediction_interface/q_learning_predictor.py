@@ -62,19 +62,19 @@ class MAPredictor():
             # Berechnen des Durchschnitts der letzten 'period' Werte
             return data.iloc[-self.ma_variant:].mean()
     
-    def _calculate_state(self, current_price : float, ma_value : float) -> int:
+    def _calculate_state(self, current_price : np.array, ma_value : float) -> int:
         """Calculates the state for the given current price and moving average value.
 
         Args:
-            current_price (float): The current price to calculate the state for.
+            current_price (np.array): The last 200 closing prices to calculate the state for.
             ma_value (float): The moving average value to calculate the state for.
 
         Returns:
             int: The calculated state.
         """
         deviation = (current_price - ma_value) / ma_value * 100
-        max_deviation = 2 * deviation.std() 
-        scaled_deviation = (deviation + max_deviation) / (2 * max_deviation)
+        max_deviation = 2 * deviation.std()
+        scaled_deviation = ((deviation + max_deviation) / (2 * max_deviation))[-1]
         state = max(0, min(int(scaled_deviation * 20), 20 - 1)) # n_bins = 20
         return state
     
@@ -87,8 +87,8 @@ class MAPredictor():
         Returns:
             int: The predicted trading action.
         """
-        current_price = data.iloc[-1].Close
-        state_index = self._calculate_state(current_price, self._calculate_MA(data.Close))
+        current_price = data.iloc[-221:-1].Close
+        state_index = self._calculate_state(np.array(current_price), self._calculate_MA(data.Close))
         return np.argmax(self.q_table[state_index])
 
 class RSIPredictor():
@@ -100,7 +100,6 @@ class RSIPredictor():
         Args:
             model_path (str): The path to the model to load.
         """
-        self.q_table = np.load(model_path)
         self.name = 'RSI_decision'
         self.low_threshold = 30
         self.high_threshold = 70

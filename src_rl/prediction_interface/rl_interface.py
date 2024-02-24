@@ -18,7 +18,7 @@ class RLInterface:
             self.ensemble_mode = False
         
         self.action_map = {0: 'hold', 1: 'buy', 2: 'sell'}
-        self.data = self.read_data()
+        self.data = self._read_data()
         
         
     def predict(self, stock_symbol : str, start_date : str , end_date : str) -> dict[str, dict[str, str]]:        
@@ -53,7 +53,7 @@ class RLInterface:
         
         return predictions
     
-    def read_data(self) -> dict[str, pd.DataFrame]:
+    def _read_data(self) -> dict[str, pd.DataFrame]:
         """Reads the stock data from the data folder.
 
         Returns:
