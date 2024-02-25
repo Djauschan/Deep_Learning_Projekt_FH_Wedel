@@ -180,7 +180,7 @@ class MultiSymbolDataset(Dataset):
             volume_cols = [item for item in data_df.columns if "volume" in item]
 
             if outlier_quantile < 1:
-                outlier_quantiles = data_df[volume_cols].quantile(q=0.99995, axis=0)
+                outlier_quantiles = data_df[volume_cols].quantile(q=outlier_quantile, axis=0)
                 data_df[volume_cols] = data_df[volume_cols].clip(upper=outlier_quantiles * 2, axis=1)
 
             if scaler is not None:
