@@ -23,3 +23,15 @@ def predict_transformer(stock_symbol: str, start_date: str, end_date: str):
             for date, value in prediction_data.items()]
 
     return data
+
+if __name__ == "__main__":
+    symbols = ["AAPL", "AAL", "AMD", "C", "NVDA", "SNAP", "SQ", "TSLA"]
+    start_date = "2019-01-01"
+    end_date = "2021-01-03"
+    predictions = pd.DataFrame([])
+
+    for symbol in symbols:
+        prediction = predict_transformer(symbol, start_date, end_date)
+        predictions[symbol] = prediction
+
+

@@ -14,6 +14,7 @@ import torch.optim as optim
 from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
+import pickle as pkl
 
 from src_transformers.models.loss import RMSELoss, RMSLELoss, ExpMSELoss
 from src_transformers.pipelines.model_service import ModelService
