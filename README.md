@@ -39,3 +39,17 @@ Open your web browser and navigate to `http://localhost:8080` to start using the
 - `README.md`: This file.
 
 ## Contributing
+
+Please note: Even though the subgroups were in constant communication with each other to align on the project's vision, they still worked independently on their group projects. Therefore, if you want to run or work on the existing codebase, you might want to navigate to the relevant group's project directory and read any documentation or README files, if existing. Furthermore, each group has put their `requirements.txt` in the corresponding directory for you to be able to recreate their development environments.
+
+If you want to expand the web application by adding more models, you can easily do so by adhering to the following process:
+
+1. Create your own group project directory in the repository's root folder.
+2. Develop your group's codebase to be able to train and predict with your chosen model.
+    - For this step, you might be able to reuse a large proportion of the current code, e.g. the data loader source code.
+3. Add a prediction API (`api.py`) to your group's directory which returns your model predictions when called.
+    - Refer to other groups' prediction APIs when implementing yours.
+4. Extend `WebApp/backend/main.py` by adding a prediction route which sends an HTTP request to your group's prediction API.
+    - Follow the same pattern of the other predictions routes.
+5. Add a `DOCKERFILE`, which details how your container should be built, to your group directory.
+6. Extend `docker-compose.yaml` in the repository's root to create your container along the others when using `docker compose up`.
