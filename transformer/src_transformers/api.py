@@ -1,6 +1,6 @@
 import pandas as pd
 from fastapi import FastAPI
-from transformer_interface import TransformerInterface
+from prediction_interface import TransformerInterface
 
 app = FastAPI()
 
@@ -26,12 +26,24 @@ def predict_transformer(stock_symbol: str, start_date: str, end_date: str):
 
 if __name__ == "__main__":
     symbols = ["AAPL", "AAL", "AMD", "C", "NVDA", "SNAP", "SQ", "TSLA"]
-    start_date = "2019-01-01"
+    start_date = "2019-02-01"
     end_date = "2021-01-03"
-    predictions = pd.DataFrame([])
+    predictions = [{}]
 
-    for symbol in symbols:
-        prediction = predict_transformer(symbol, start_date, end_date)
-        predictions[symbol] = prediction
+    # Generate time range for every 2 hours between start_date and end_date
+    date_range = pd.date_range(start_date, end_date, freq="2H")
+
+    for timestamp in date_range:
+        step_predictions = {}
+        for symbol in symbols:
+            prediction = predict_transformer(symbol, start_date, end_date)
+            step_predictions[symbol] = prediction[0]["value"]
+        predictions.append(step_predictions)
+
+    prediction = pd.DataFrame(predictions, index=date_range)
+
+    print(predictions)
+
+
 
 
