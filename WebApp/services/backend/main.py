@@ -371,19 +371,19 @@ def predict_svm(stock_symbol: str):
 
 
 @app.get("/predict/rl")
-def predict_rl(stock_symbol: str  # , start_date: str, end_date: str
+def predict_rl(stock_symbols: str  # , start_date: str, end_date: str
                ):
     """Predicts trading actions for a given stock symbol and time frame with every avialible model.
 
     Args:
-        stock_symbol (str): The stock symbol to predict trading actions for.
+        stock_symbols (str): The stock symbol to predict trading actions for.
         start_date (str): The start date of the time frame to predict trading actions for.
         end_date (str): The end date of the time frame to predict trading actions for.
 
     Returns:
         list[dict[str, dict[object, dict[str, str]]]]: A list containing the predictions for every every stock symbol, every model for every 2hours in the given time frame.
     """
-    data_to_send = {"stock_symbol": stock_symbol,
+    data_to_send = {"stock_symbols": stock_symbols,
                     "start_date": "2021-01-04",
                     "end_date": "2021-01-05"}
     api_url = "http://predict_rl:8000/predict"
