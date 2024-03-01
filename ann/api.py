@@ -232,8 +232,7 @@ def predict_gradientBoost_daily(stock_symbol: str, start_date: str, end_date: st
 def predict_randomForest_hour(stock_symbol: str, start_date: str, end_date: str):
     random_forest_interface = ABC_RandomForestModel_hour()
 
-    prediction = random_forest_interface.predict(
-        pd.to_datetime(start_date), pd.to_datetime(end_date), 120)
+    prediction = random_forest_interface.predict(stock_symbol, pd.to_datetime(start_date), pd.to_datetime(end_date), 120)
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction["Predicted_Close"]

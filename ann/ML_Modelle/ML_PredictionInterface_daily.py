@@ -3,9 +3,9 @@ import os
 import pickle
 
 from abc import ABC, abstractmethod
-from abstract_model import AbstractModel
+from ML_Modelle.abstract_model import AbstractModel
 
-from ml_model_daily import LinearRegressionModel, RandomForestModel, GradientBoostingModel, SVMModel
+from ML_Modelle.ml_model_daily import LinearRegressionModel, RandomForestModel, GradientBoostingModel, SVMModel
 
 #Implementieren der ML-Modelle von: LR, RF, GBM, SVM
 
