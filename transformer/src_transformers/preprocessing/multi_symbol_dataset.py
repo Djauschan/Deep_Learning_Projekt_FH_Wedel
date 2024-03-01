@@ -66,9 +66,10 @@ class MultiSymbolDataset(Dataset):
                            encoder_input_length: int,
                            decoder_target_length: int,
                            data_selection_config: dict,
-                           scaler: str = "MinMaxScaler",
+                           scaler: str = None,
                            time_resolution: int = 1,
-                           time_feature: dict = None
+                           time_feature: dict = None,
+                           outlier_quantile: float = 1,
                            ):
         """
         This method either creates a new MultiSymbolDataset by preprocessing financial data for
@@ -91,6 +92,7 @@ class MultiSymbolDataset(Dataset):
             scaler (str, optional): The scaler to use for the data. Defaults to "MinMaxScaler".
             time_resolution (int, optional): The time resolution of the data in minutes.
             time_feature (dict, optional): The time feature to use for the data. Defaults to None.
+            outlier_quantile (float, optional): The quantile to use for outlier detection. Set to 1 to disable outlier detection. Defaults to 1.
 
         Returns:
             MultiSymbolDataset: The created or loaded dataset.
@@ -174,35 +176,46 @@ class MultiSymbolDataset(Dataset):
                                                 time_resolution=time_resolution,
                                                 data_selection_config=data_selection_config)
 
-            # Normalization
-            scaler = SCALER_OPTIONS[scaler]()
-
-            # Get all columns that contain volume and indeces in train set
+            # Get all columns that contain volume in train set for scaling and outlier detection
             volume_cols = [
                 item for item in data_df.columns if "volume" in item]
-            train_indeces, validation_indecies = instance_multi_symbol_dataset.get_subset_indices()
 
-            # NOTE: This is only to create the dataset for the prediction interface
-            # scaler = pickle.load(open("data/output/Multi_Symbol_Train_scaler.pkl", "rb"))
-            # with open("data/output/prices.pkl", 'wb') as file:
-            #     pickle.dump(instance_multi_symbol_dataset.prices, file)
+            if outlier_quantile < 1:
+                outlier_quantiles = data_df[volume_cols].quantile(
+                    q=outlier_quantile, axis=0)
+                data_df[volume_cols] = data_df[volume_cols].clip(
+                    upper=outlier_quantiles * 2, axis=1)
 
-            # Fit scaler to each volume column only with train data
-            scaler.fit(data_df[volume_cols].iloc[train_indeces])
+            if scaler is not None:
+                # Normalization
+                scaler = SCALER_OPTIONS[scaler]()
 
-            # Transform train and test data
-            data_df[volume_cols] = scaler.transform(data_df[volume_cols])
+                train_indeces, validation_indecies = instance_multi_symbol_dataset.get_subset_indices()
 
-            # Store scaler in pickle file
-            scaler_path = instance_multi_symbol_dataset.data_file.replace(
-                '.csv', f'_scaler.pkl')
-            with open(scaler_path, 'wb') as file:
-                pickle.dump(scaler, file)
+                # NOTE: This is only to create the dataset for the prediction interface
+                scaler = pickle.load(
+                    open("data/output/Multi_Symbol_Train_scaler.pkl", "rb"))
+                with open("data/output/tt_prices_for_rl.pkl", 'wb') as file:
+                    pickle.dump(instance_multi_symbol_dataset.prices, file)
+
+                # Fit scaler to each volume column only with train data
+                # scaler.fit(data_df[volume_cols].iloc[train_indeces])
+
+                # Transform train and test data
+                data_df[volume_cols] = scaler.transform(data_df[volume_cols])
+
+                # Store scaler in pickle file
+                scaler_path = instance_multi_symbol_dataset.data_file.replace(
+                    '.csv', f'_scaler.pkl')
+                with open(scaler_path, 'wb') as file:
+                    pickle.dump(scaler, file)
 
             # Store data in csv file
             data_df.to_csv(data_file, mode='w', header=True)
             Logger.log_text(
                 f"Dataframe holding the preprocessed data was stored to the file '{data_file}'.")
+
+            exit()
 
         return instance_multi_symbol_dataset
 
