@@ -209,7 +209,7 @@ class TransformerInterface(AbstractModel):
                 prediction[f"close {symbol}"] = np.round(
                     absolute_prices, decimals=2)
 
-        # Only select columns wich are included in the symbol_list
+        # Only select the stock symbols [close {symbol}] that are in the symbol list [symbol, symbol]
         prediction = prediction[[f"close {symbol}" for symbol in symbol_list]]
 
         return prediction
@@ -328,6 +328,6 @@ class TransformerInterface(AbstractModel):
 
 if __name__ == "__main__":
     interface = TransformerInterface()
-    result = interface.predict(["aapl", "nvda"], pd.to_datetime('2021-01-04'),
+    result = interface.predict(["AAPL", "NVDA"], pd.to_datetime('2021-01-04'),
                                pd.to_datetime('2021-01-06'), resolution.TWO_HOURLY)
     result.to_csv("data/output/predictions.csv")
