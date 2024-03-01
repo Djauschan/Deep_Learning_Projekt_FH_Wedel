@@ -53,7 +53,7 @@ class ABC_LinearRegressionModel_daily(AbstractModel):
         return prediction_df
 
     def load_data(self, symbol):
-        file_path = 'ML_Modelle/saved_pkl_model_daily/Data'
+        file_path = 'ann/ML_Modelle/saved_pkl_model_daily/Data'
         data = {}
 
         if os.path.exists(file_path):
@@ -69,7 +69,7 @@ class ABC_LinearRegressionModel_daily(AbstractModel):
         pass
 
     def load_model(self, symbol) -> None:
-        model_path = f'ML_Modelle/saved_pkl_model_daily/LR-Model/{symbol}_lr_model.pkl'
+        model_path = f'ann/ML_Modelle/saved_pkl_model_daily/LR-Model/{symbol}_lr_model.pkl'
         if os.path.exists(model_path):
             with open(model_path, 'rb') as file:
                 self.model = pickle.load(file)
@@ -121,7 +121,7 @@ class ABC_RandomForestModel_daily(AbstractModel):
         return prediction_df
 
     def load_data(self, symbol):
-        file_path = 'ML_Modelle/saved_pkl_model_daily/Data'
+        file_path = 'ann/ML_Modelle/saved_pkl_model_daily/Data'
         data = {}
 
         if os.path.exists(file_path):
@@ -137,7 +137,7 @@ class ABC_RandomForestModel_daily(AbstractModel):
         pass
 
     def load_model(self, symbol) -> None:
-        model_path = f'ML_Modelle/saved_pkl_model_daily/RF-Model/{symbol}_rf_model.pkl'
+        model_path = f'ann/ML_Modelle/saved_pkl_model_daily/RF-Model/{symbol}_rf_model.pkl'
         if os.path.exists(model_path):
             with open(model_path, 'rb') as file:
                 self.model = pickle.load(file)
@@ -189,7 +189,7 @@ class ABC_GradientBoostingModel_daily(AbstractModel):
         return prediction_df
 
     def load_data(self, symbol):
-        file_path = 'ML_Modelle/saved_pkl_model_daily/Data'
+        file_path = 'ann/ML_Modelle/saved_pkl_model_daily/Data'
         data = {}
 
         if os.path.exists(file_path):
@@ -205,7 +205,7 @@ class ABC_GradientBoostingModel_daily(AbstractModel):
         pass
 
     def load_model(self, symbol) -> None:
-        model_path = f'ML_Modelle/saved_pkl_model_daily/GBM-Model/{symbol}_gbm_model.pkl'
+        model_path = f'ann/ML_Modelle/saved_pkl_model_daily/GBM-Model/{symbol}_gbm_model.pkl'
         if os.path.exists(model_path):
             with open(model_path, 'rb') as file:
                 self.model = pickle.load(file)
@@ -258,7 +258,7 @@ class ABC_SVMModel_daily(AbstractModel):
         return prediction_df
 
     def load_data(self, symbol):
-        file_path = 'ML_Modelle/saved_pkl_model_daily/Data'
+        file_path = 'ann/ML_Modelle/saved_pkl_model_daily/Data'
         data = {}
 
         if os.path.exists(file_path):
@@ -274,7 +274,7 @@ class ABC_SVMModel_daily(AbstractModel):
         pass
 
     def load_model(self, symbol) -> None:
-        model_path = f'ML_Modelle/saved_pkl_model_daily/SVM-Model/{symbol}_svm_model.pkl'
+        model_path = f'ann/ML_Modelle/saved_pkl_model_daily/SVM-Model/{symbol}_svm_model.pkl'
         if os.path.exists(model_path):
             with open(model_path, 'rb') as file:
                 self.model = pickle.load(file)
