@@ -34,7 +34,7 @@ class RLInterface:
         """
         predictions = {}
         relevant_data = self.data[stock_symbol.upper()]
-        for current_date in pd.date_range(start_date, end_date, freq='h'):
+        for current_date in pd.date_range(start_date, end_date, freq='2h'):
             data = relevant_data.loc[:current_date]
             if current_date in data.index:
                 ensemble_input = []
