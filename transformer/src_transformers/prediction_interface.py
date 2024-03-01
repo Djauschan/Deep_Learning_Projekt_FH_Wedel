@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+import yaml
 from torch.utils.data import DataLoader, Dataset
 
 from src_transformers.abstract_model import AbstractModel
@@ -149,13 +150,28 @@ class TransformerInterface(AbstractModel):
                                               self.interval_minutes,
                                               self.num_intervals)
 
+        # Get config
+        with open("../data/test_configs/config_rl_predictions.yaml", "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+
+        start_day = config['dataset_parameters']['data_selection_config']['start_day_time']
+        start_day = dt.datetime.strptime(start_day, '%H:%M').time().hour
+        end_day = config['dataset_parameters']['data_selection_config']['end_day_time']
+        end_day = dt.datetime.strptime(end_day, '%H:%M').time().hour
+
         # TODO: Timestamps aus Dataloader holen?
+        empty_df = pd.DataFrame([], index=pd.Index(timestamps), columns=prediction.columns)
 
-        idx_0 = timestamps[0].hour
+        i = 0
+        for timestamp in timestamps:
+            if timestamp.hour >= start_day and timestamp.hour < end_day:
+                # Insert prediction where timestamp matches index
+                # Insert data from prediction at row i
+                empty_df.loc[timestamp] = prediction.iloc[i]
+                i += 1
 
-        prediction = self.insert_valid_entries(pd.Series(timestamps), prediction)
+        prediction = empty_df.fillna(0)
 
-        prediction.index = pd.Index(timestamps)
 
         # Convert the relative prices to absolute prices
         for symbol, price in prices_before_prediction.items():
@@ -164,11 +180,11 @@ class TransformerInterface(AbstractModel):
                 absolute_prices = self.calculate_absolute_prices(prices=relative_prices,
                                                                  start_price=price)
                 prediction[f"close {symbol}"] = np.round(
-                    absolute_prices, decimals=2)
+                    absolute_prices, decimals=6)
 
         return prediction
 
-    def insert_valid_entries(self, timeseries, valid_entries):
+    def insert_valid_entries(self, timeseries: pd.Series, valid_entries: pd.DataFrame):
         # Get the index of the first valid entry
         first_valid_index = timeseries.index[(timeseries.apply(lambda d: d.hour) >= 4) & (timeseries.apply(lambda d: d.hour) < 20)][0]
         print(timeseries.apply(lambda d: d.hour))

@@ -26,9 +26,9 @@ def predict_transformer(stock_symbol: str, start_date: str, end_date: str):
 
 if __name__ == "__main__":
     symbols = ["AAPL", "AAL", "AMD", "C", "NVDA", "SNAP", "SQ", "TSLA"]
-    start_date = "2019-02-01"
-    end_date = "2021-01-03"
-    predictions = [{}]
+    start_date = "2019-02-04"
+    end_date = "2019-02-06"
+    predictions = []
 
     # Generate time range for every 2 hours between start_date and end_date
     date_range = pd.date_range(start_date, end_date, freq="2H")
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     for timestamp in date_range:
         step_predictions = {}
         for symbol in symbols:
-            prediction = predict_transformer(symbol, start_date, end_date)
+            prediction = predict_transformer(symbol, timestamp, None)
             step_predictions[symbol] = prediction[0]["value"]
         predictions.append(step_predictions)
 
