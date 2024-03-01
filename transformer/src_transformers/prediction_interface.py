@@ -18,6 +18,7 @@ import torch
 import torch.nn as nn
 import yaml
 from torch.utils.data import DataLoader, Dataset
+from src_transformers.abstract_model import resolution
 
 from src_transformers.abstract_model import AbstractModel
 
@@ -126,7 +127,32 @@ class TransformerInterface(AbstractModel):
         Returns:
             pd.DataFrame: A DataFrame with the predicted prices for each stock.
         """
+        pass
 
+    def predict(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, resolution: resolution) -> pd.DataFrame:
+        """predicts the stock prices for the given symbols and time range.
+
+        Args:
+            symbol_list (list): The list of symbols for which the stock prices should be predicted.
+            timestamp_start (pd.Timestamp): The start of the time range for which the stock prices should be predicted.
+            timestamp_end (pd.Timestamp): The end of the time range for which the stock prices should be predicted.
+            resolution (resolution): The resolution of the stock data.
+
+        Returns:
+            pd.DataFrame: The predicted stock prices.
+        """
+        if resolution == resolution.MINUTE:
+            # Not implemented for minute resolution
+            raise NotImplementedError()
+        elif resolution == resolution.TWO_HOURLY:
+            return self.perdict_two_hourly(symbol_list, timestamp_start, timestamp_end)
+        elif resolution == resolution.DAILY:
+            raise NotImplementedError()
+        else:
+            # Invalid resolution
+            raise ValueError("Invalid resolution")
+
+    def perdict_two_hourly(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp) -> pd.DataFrame:
         # Load the data for making predictions
         prices_before_prediction, dataset = self.load_data(timestamp_start)
         data_loader = DataLoader(dataset, shuffle=False)
@@ -182,6 +208,9 @@ class TransformerInterface(AbstractModel):
                                                                  start_price=price)
                 prediction[f"close {symbol}"] = np.round(
                     absolute_prices, decimals=2)
+
+        # Only select columns wich are included in the symbol_list
+        prediction = prediction[[f"close {symbol}" for symbol in symbol_list]]
 
         return prediction
 
@@ -299,6 +328,6 @@ class TransformerInterface(AbstractModel):
 
 if __name__ == "__main__":
     interface = TransformerInterface()
-    result = interface.predict(pd.to_datetime('2021-01-04'),
-                               pd.to_datetime('2021-01-06'))
+    result = interface.predict(["aapl", "nvda"], pd.to_datetime('2021-01-04'),
+                               pd.to_datetime('2021-01-06'), resolution.TWO_HOURLY)
     result.to_csv("data/output/predictions.csv")

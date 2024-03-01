@@ -1,6 +1,7 @@
 import pandas as pd
 from fastapi import FastAPI
 from src_transformers.prediction_interface import TransformerInterface
+from src_transformers.abstract_model import resolution
 
 app = FastAPI()
 
@@ -14,8 +15,8 @@ async def root():
 def predict_transformer(stock_symbol: str, start_date: str, end_date: str):
     transformer_interface = TransformerInterface()
 
-    prediction = transformer_interface.predict(
-        pd.to_datetime(start_date), pd.to_datetime(end_date))
+    prediction = transformer_interface.predict(["AAPL", "NVDA"], pd.to_datetime(
+        start_date), pd.to_datetime(end_date), resolution.TWO_HOURLY)
 
     # Convert the prediction to a list of dictionaries
     prediction_data = prediction[f"close {stock_symbol.upper()}"]
