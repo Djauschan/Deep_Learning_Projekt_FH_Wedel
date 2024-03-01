@@ -11,10 +11,12 @@ import pickle
 from datetime import timedelta
 from pathlib import Path
 
+import datetime as dt
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+import yaml
 from torch.utils.data import DataLoader, Dataset
 
 from src_transformers.abstract_model import AbstractModel
@@ -99,10 +101,11 @@ class TransformerInterface(AbstractModel):
         self.interval_minutes = 120
         self.num_intervals = 24
         self.model_path = Path("data", "output", "models",
-                               "TransformerModel_v1.pt")
-        self.data_path = Path(
-            "data", "output", "preprocessed_data_prediction.csv")
-        self.prices_path = Path("data", "output", "prices_prediction.pkl")
+                               "TransformerModel_v3.pt")
+        self.data_path = Path("data", "output", "tt_dataset_for_rl.csv")
+        self.prices_path = Path("data", "output", "tt_prices_for_rl.pkl")
+        self.config_path = Path("data", "test_configs",
+                                "config_rl_predictions.yaml")
 
     def predict(self,
                 timestamp_start: pd.Timestamp,
@@ -123,9 +126,11 @@ class TransformerInterface(AbstractModel):
         Returns:
             pd.DataFrame: A DataFrame with the predicted prices for each stock.
         """
+
         # Load the data for making predictions
         prices_before_prediction, dataset = self.load_data(timestamp_start)
         data_loader = DataLoader(dataset, shuffle=False)
+
         # Get the input for the model
         model_input = next(iter(data_loader))
         model = self.load_model()
@@ -137,15 +142,37 @@ class TransformerInterface(AbstractModel):
         # Squeeze the batch dimension and convert the output to a 2 dimensional numpy array
         output = torch.squeeze(output, 0).cpu().numpy()
         # Create a DataFrame with the predictions (and mapping to the correct column names)
-        columns = ["close AAPL", "close AAL", "close AMD", "close C", "close MRNA",
-                   "close NIO", "close NVDA", "close SNAP", "close SQ", "close TSLA"]
+        columns = ["close AAPL", "close AAL", "close AMD", "close C", "close NVDA", "close SNAP", "close SQ",
+                   "close TSLA"]
         prediction = pd.DataFrame(output, columns=columns)
 
         # Generate the timestamps for the predictions
         timestamps = self.generate_timestamps(timestamp_start,
                                               self.interval_minutes,
                                               self.num_intervals)
-        prediction.index = pd.Index(timestamps)
+
+        # Get config
+        with open(self.config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+
+        start_day = config['dataset_parameters']['data_selection_config']['start_day_time']
+        start_day = dt.datetime.strptime(start_day, '%H:%M').time().hour
+        end_day = config['dataset_parameters']['data_selection_config']['end_day_time']
+        end_day = dt.datetime.strptime(end_day, '%H:%M').time().hour
+
+        # TODO: Timestamps aus Dataloader holen?
+        empty_df = pd.DataFrame([], index=pd.Index(
+            timestamps), columns=prediction.columns)
+
+        i = 0
+        for timestamp in timestamps:
+            if timestamp.hour >= start_day and timestamp.hour < end_day:
+                # Insert prediction where timestamp matches index
+                # Insert data from prediction at row i
+                empty_df.loc[timestamp] = prediction.iloc[i]
+                i += 1
+
+        prediction = empty_df.fillna(0)
 
         # Convert the relative prices to absolute prices
         for symbol, price in prices_before_prediction.items():
@@ -157,6 +184,29 @@ class TransformerInterface(AbstractModel):
                     absolute_prices, decimals=2)
 
         return prediction
+
+    def insert_valid_entries(self, timeseries: pd.Series, valid_entries: pd.DataFrame):
+        # Get the index of the first valid entry
+        first_valid_index = timeseries.index[(timeseries.apply(
+            lambda d: d.hour) >= 4) & (timeseries.apply(lambda d: d.hour) < 20)][0]
+        print(timeseries.apply(lambda d: d.hour))
+        # Create a DataFrame with valid entries and their corresponding timestamps
+        valid_df = pd.DataFrame(valid_entries, columns=['Values'],
+                                index=pd.date_range(start=first_valid_index, periods=len(valid_entries), freq='2H'))
+
+        # Concatenate the original DataFrame and the DataFrame with valid entries
+        result_df = pd.concat([valid_df, timeseries])
+
+        return result_df
+
+    def insert_rows_with_zeros(self, df, row_number, count):
+        for _ in range(count):
+            df = pd.concat(
+                [df.iloc[:row_number], pd.DataFrame(
+                    [[0] * len(df.columns)], columns=df.columns), df.iloc[row_number:]],
+                ignore_index=True)
+            row_number += 1
+        return df
 
     def load_data(self, timestamp_start: pd.Timestamp) -> tuple[dict[str, float], PredictionDataset]:
         """
@@ -214,7 +264,8 @@ class TransformerInterface(AbstractModel):
             nn.Module: The loaded PyTorch model.
         """
 
-        state_dict, params = torch.load(self.model_path)
+        state_dict, params = torch.load(
+            self.model_path, map_location=torch.device('cpu'))
         model = MODEL_NAME_MAPPING[model_name](**params)
         model.load_state_dict(state_dict)
         model.to(torch.device("cpu"))

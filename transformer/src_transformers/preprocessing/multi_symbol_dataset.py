@@ -177,11 +177,14 @@ class MultiSymbolDataset(Dataset):
                                                 data_selection_config=data_selection_config)
 
             # Get all columns that contain volume in train set for scaling and outlier detection
-            volume_cols = [item for item in data_df.columns if "volume" in item]
+            volume_cols = [
+                item for item in data_df.columns if "volume" in item]
 
             if outlier_quantile < 1:
-                outlier_quantiles = data_df[volume_cols].quantile(q=outlier_quantile, axis=0)
-                data_df[volume_cols] = data_df[volume_cols].clip(upper=outlier_quantiles * 2, axis=1)
+                outlier_quantiles = data_df[volume_cols].quantile(
+                    q=outlier_quantile, axis=0)
+                data_df[volume_cols] = data_df[volume_cols].clip(
+                    upper=outlier_quantiles * 2, axis=1)
 
             if scaler is not None:
                 # Normalization
@@ -190,12 +193,13 @@ class MultiSymbolDataset(Dataset):
                 train_indeces, validation_indecies = instance_multi_symbol_dataset.get_subset_indices()
 
                 # NOTE: This is only to create the dataset for the prediction interface
-                # scaler = pickle.load(open("data/output/Multi_Symbol_Train_scaler.pkl", "rb"))
-                # with open("data/output/prices.pkl", 'wb') as file:
-                #     pickle.dump(instance_multi_symbol_dataset.prices, file)
+                scaler = pickle.load(
+                    open("data/output/Multi_Symbol_Train_scaler.pkl", "rb"))
+                with open("data/output/tt_prices_for_rl.pkl", 'wb') as file:
+                    pickle.dump(instance_multi_symbol_dataset.prices, file)
 
                 # Fit scaler to each volume column only with train data
-                scaler.fit(data_df[volume_cols].iloc[train_indeces])
+                # scaler.fit(data_df[volume_cols].iloc[train_indeces])
 
                 # Transform train and test data
                 data_df[volume_cols] = scaler.transform(data_df[volume_cols])
@@ -210,6 +214,8 @@ class MultiSymbolDataset(Dataset):
             data_df.to_csv(data_file, mode='w', header=True)
             Logger.log_text(
                 f"Dataframe holding the preprocessed data was stored to the file '{data_file}'.")
+
+            exit()
 
         return instance_multi_symbol_dataset
 
