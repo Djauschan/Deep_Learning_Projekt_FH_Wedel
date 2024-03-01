@@ -9,4 +9,3 @@ plotly
 scikit-learn
 fastapi
 uvicorn
-python-multipart

@@ -160,10 +160,11 @@ def check_login(email: str, password: str, db: Session = Depends(get_db)):
 
 
 @app.get("/predict/transformer")
-def predict_transformer(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
+def predict_transformer(stock_symbols: str):
+    data_to_send = {"stock_symbols": stock_symbols,
+                    "start_date": "2020-01-01",
+                    "end_date": "2021-01-05",
+                    "resolution": 'H'}
     api_url = "http://predict_transformer:8000/predict"
     response = requests.get(api_url, params=data_to_send)
 
@@ -368,8 +369,9 @@ def predict_svm(stock_symbol: str):
 
     return response.json()
 
+
 @app.get("/predict/rl")
-def predict_rl(stock_symbol: str #, start_date: str, end_date: str
+def predict_rl(stock_symbol: str  # , start_date: str, end_date: str
                ):
     """Predicts trading actions for a given stock symbol and time frame with every avialible model.
 
@@ -394,18 +396,22 @@ def predict_rl(stock_symbol: str #, start_date: str, end_date: str
     # return response.json()
     from random import choice
     posible_actions = ['buy', 'sell', 'hold']
-    model_names = ["q_learning_ma5", "q_learning_ma30", "q_learning_ma200", "q_learning_transformer", "q_learning_cnn", "q_learning_arima"]
-    
+    model_names = ["q_learning_ma5", "q_learning_ma30", "q_learning_ma200",
+                   "q_learning_transformer", "q_learning_cnn", "q_learning_arima"]
+
     ensemble = choice(["election", "ensemble"]) == 'ensemble'
     random_return = {}
     for current_date in pd.date_range("2021-01-04", "2021-01-05", freq='h'):
-        random_return[current_date] = {model: choice(posible_actions) for model in model_names}
+        random_return[current_date] = {model: choice(
+            posible_actions) for model in model_names}
         if ensemble:
-            random_return[current_date]['ensemble'] = choice(list(random_return[current_date].values()))
+            random_return[current_date]['ensemble'] = choice(
+                list(random_return[current_date].values()))
         else:
             lst = list(random_return[current_date].values())
-            random_return[current_date]['election'] =  max(set(lst), key=lst.count)
-  
+            random_return[current_date]['election'] = max(
+                set(lst), key=lst.count)
+
     return [random_return]
 
 
