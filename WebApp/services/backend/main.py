@@ -368,6 +368,36 @@ def predict_svm(stock_symbol: str):
 
     return response.json()
 
+@app.get("/predict/rl")
+def predict_rl(stock_symbol: str):
+    # data_to_send = {"stock_symbol": stock_symbol,
+    #                 "start_date": "2021-01-04",
+    #                 "end_date": "2021-01-05"}
+    # api_url = "http://predict_rl:8000/predict"
+    # response = requests.get(api_url, params=data_to_send)
+    # if response.status_code != 200:
+    #     return {
+    #         "status_code": response.status_code,
+    #         "response_text": response.text
+    #     }
+    # return response.json()
+    from random import choice
+    posible_actions = ['buy', 'sell', 'hold']
+    model_names = ["q_learning_ma5", "q_learning_ma30", "q_learning_ma200", "q_learning_transformer", "q_learning_cnn", "q_learning_arima"]
+    
+    random_return = {'2021-01-04' : {model: choice(posible_actions) for model in model_names},
+                      "2021-01-05" : {model: choice(posible_actions) for model in model_names},}
+    
+    ensemble = choice(["election", "ensemble"]) == 'ensemble'
+    for key in random_return:
+        if ensemble:
+            random_return[key]['ensemble'] = choice(list(random_return[key].values()))
+        else:
+            lst = list(random_return[key].values())
+            random_return[key]['election'] =  max(set(lst), key=lst.count)
+  
+    return [random_return]
+
 
 @app.get("/load/data")
 def load_data():
