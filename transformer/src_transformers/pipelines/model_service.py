@@ -134,8 +134,9 @@ class ModelService():
             path = Path(MODEL_OUTPUT_PATH,
                         f'{model_class_name}_v{version + 1}.pt')
             first_save = False
-        torch.save(model, path)
 
+        # Save the model state dict to the specified path
+        torch.save([model.state_dict(), model.params], path)
         return str(path.absolute())
 
     @classmethod
@@ -157,15 +158,16 @@ class ModelService():
         Returns:
             nn.Module: The loaded model.
         """
-        model = MODEL_NAME_MAPPING[model_name]
-
         version = cls.get_latest_version(model.__name__)
         if version == 0:
             raise ValueError(
                 f'No model of class {model.__name__} found in {MODEL_OUTPUT_PATH}')
 
-        model = torch.load(
-            Path(MODEL_OUTPUT_PATH, f"{model.__name__}_v{version}.pt"))
+        # Load model from torch state dict
+        state_dict, params = torch.load(
+            Path(MODEL_OUTPUT_PATH, f'{model_name}_v{version}.pt'))
+        model = MODEL_NAME_MAPPING[model_name](**params)
+        model.load_state_dict(state_dict)
         model.eval()
 
         return model

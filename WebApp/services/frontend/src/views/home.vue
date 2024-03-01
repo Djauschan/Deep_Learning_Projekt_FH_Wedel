@@ -303,12 +303,14 @@ export default {
 
 <style scoped>
 .home-container { 
-  width: 100%; /* Use viewport width to take the whole screen width */
-  height: 89vh;
+  width: 100%;
   display: flex;
   overflow: auto;
   align-items: center;
+  display: flex;
   flex-direction: column;
+  height: 100vh; /* Set initial height to 100% of viewport height */
+  flex:1;
 }
 
 .dark-mode {
@@ -370,7 +372,7 @@ export default {
 
 .home-container01 {
   flex: 0 0 auto;
-  height: 100px;
+  height: 80px;
   display: flex;
   align-items: flex-end;
   flex-direction: column;
@@ -526,7 +528,7 @@ export default {
 
 .home-container19 {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: flex;
   align-items: flex-start;
   flex-direction: column;
@@ -748,7 +750,7 @@ export default {
 
 .home-container36 {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -776,7 +778,7 @@ export default {
 
 .home-container38 {
   width: 100%;
-  height: 100%;
+  height: 90%;
   border-color:  #E0E0E0;
   border-style: groove;
   border-width: 1px;

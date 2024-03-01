@@ -44,7 +44,8 @@ class DataReader():
         self.decoder_symbols = decoder_symbols
         # Get last minute of the day
         self.first_date = pd.to_datetime(first_date)
-        self.last_date = pd.to_datetime(last_date) + pd.Timedelta(days=1) - pd.Timedelta(minutes=1)
+        self.last_date = pd.to_datetime(
+            last_date) + pd.Timedelta(days=1) - pd.Timedelta(minutes=1)
 
         self.root_folder = data_dir_name
         # A list containing all file names and a list containing all symbols
@@ -138,11 +139,13 @@ class DataReader():
                 data["timestamp"], format="%Y-%m-%d %H:%M:%S")
 
             # Only read in data that is within the specified time period.
-            data = data[(data["timestamp"] >= self.first_date) & (data["timestamp"] <= self.last_date)]
+            data = data[(data["timestamp"] >= self.first_date) &
+                        (data["timestamp"] <= self.last_date)]
 
             # Raise error if the dataframe is empty.
             if data.empty:
-                raise ValueError("No data for the selected date range available.")
+                raise ValueError(
+                    "No data for the selected date range available.")
 
             self.current_file_idx += 1
             return data

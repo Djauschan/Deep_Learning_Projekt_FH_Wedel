@@ -110,6 +110,7 @@ class StockModel:
 
         for _ in range(x_days):
             last_sequence = scaled_data[-30:].reshape(1, 30, 1)
+            print(self.model.summary())
             predicted_scaled = self.model.predict(last_sequence)
             predicted_price_change = self.scaler.inverse_transform(predicted_scaled)[0, 0]
 
@@ -158,8 +159,8 @@ class StockModel:
 
 # Instanz der StockModel Klasse erstellen
 # Wenn die TF Nachrichten zu viel werden: tf.keras.utils.disable_interactive_logging()
-file_path = "/Users/umutkurucay/Documents/Developer/LSTM_testing/Data/AAPL_1min.txt"  # Pfad zur Datei
-cut_off_date = '2021-01-03'  # Cut-off-Datum
+file_path = "..\..\..\data\Aktien\AAPL_1min.txt"  # Pfad zur Datei
+cut_off_date = '2021-03-03'  # Cut-off-Datum
 stock_name = file_path.split('/')[-1].split('_')[0] # Hier wird der Name der Aktie aus dem Dateipfad extrahiert
 #bei laden wird das Modell geladen, bei generieren wird ein neues Modell erstellt
 laden_statt_generieren = True #oder "False" für generieren 

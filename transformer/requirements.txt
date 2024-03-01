@@ -7,3 +7,5 @@ PyYAML
 tqdm
 plotly
 scikit-learn
+fastapi
+uvicorn

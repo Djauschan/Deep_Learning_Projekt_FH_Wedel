@@ -19,6 +19,8 @@ from torch.utils.data import DataLoader, Dataset
 
 from src_transformers.abstract_model import AbstractModel
 
+from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
+
 
 class PredictionDataset(Dataset):
     """
@@ -41,7 +43,7 @@ class PredictionDataset(Dataset):
             data (pd.DataFrame): The DataFrame containing the data for making predictions.
             first_index (int): The index of the first row of data not included in the sample.
         """
-        self.data = data.iloc[first_index - 96 : first_index, :]
+        self.data = data.iloc[first_index - 96: first_index, :]
         self.data.set_index("posix_time", inplace=True)
 
     def __len__(self) -> int:
@@ -96,8 +98,10 @@ class TransformerInterface(AbstractModel):
         """
         self.interval_minutes = 120
         self.num_intervals = 24
-        self.model_path = Path("data", "output", "models", "TransformerModel_v1.pt")
-        self.data_path = Path("data", "output", "preprocessed_data_prediction.csv")
+        self.model_path = Path("data", "output", "models",
+                               "TransformerModel_v1.pt")
+        self.data_path = Path(
+            "data", "output", "preprocessed_data_prediction.csv")
         self.prices_path = Path("data", "output", "prices_prediction.pkl")
 
     def predict(self,
@@ -149,7 +153,8 @@ class TransformerInterface(AbstractModel):
                 relative_prices = list(prediction[f"close {symbol}"])
                 absolute_prices = self.calculate_absolute_prices(prices=relative_prices,
                                                                  start_price=price)
-                prediction[f"close {symbol}"] = np.round(absolute_prices, decimals=2)
+                prediction[f"close {symbol}"] = np.round(
+                    absolute_prices, decimals=2)
 
         return prediction
 
@@ -172,7 +177,8 @@ class TransformerInterface(AbstractModel):
         data = pd.read_csv(self.data_path)
 
         # Find the index of the first timestamp on the given start date
-        data_after_start = data[data["posix_time"] >= timestamp_start.value / 1e9]
+        data_after_start = data[data["posix_time"]
+                                >= timestamp_start.value / 1e9]
         first_index = data_after_start.index[0]
         dataset = PredictionDataset(data, first_index)
 
@@ -194,17 +200,23 @@ class TransformerInterface(AbstractModel):
     def preprocess(self) -> None:
         """Not implemented in this interface as stored data is already preprocessed."""
 
-    def load_model(self) -> nn.Module:
+    def load_model(self, model_name: str = "torch_transformer") -> nn.Module:
         """
         Loads a PyTorch model from a file.
 
         This method loads a PyTorch model from the file specified by the `model_path` attribute.
         It then sets the model's device to CPU and switches the model to evaluation mode.
 
+        Args:
+            model_name (str, optional): The name of the model to be loaded. Defaults to "torch_transformer".
+
         Returns:
             nn.Module: The loaded PyTorch model.
         """
-        model = torch.load(self.model_path)
+
+        state_dict, params = torch.load(self.model_path)
+        model = MODEL_NAME_MAPPING[model_name](**params)
+        model.load_state_dict(state_dict)
         model.to(torch.device("cpu"))
         # Set model device attribute to CPU so that masks are on CPU as well
         model.device = torch.device("cpu")
@@ -236,5 +248,6 @@ class TransformerInterface(AbstractModel):
 
 if __name__ == "__main__":
     interface = TransformerInterface()
-    print(interface.predict(pd.to_datetime('2021-01-04'),
-                            pd.to_datetime('2021-01-06')))
+    result = interface.predict(pd.to_datetime('2021-01-04'),
+                               pd.to_datetime('2021-01-06'))
+    result.to_csv("data/output/predictions.csv")
