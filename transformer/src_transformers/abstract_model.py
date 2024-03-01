@@ -7,9 +7,9 @@ from enum import Enum
 class resolution(Enum):
     """Enum for the resolution of the stock data.
     """
-    DAILY = 1
-    TWO_HOURLY = 2
-    MINUTE = 3
+    DAILY = "D"
+    TWO_HOURLY = "H"
+    MINUTE = "M"
 
 
 class AbstractModel(ABC):

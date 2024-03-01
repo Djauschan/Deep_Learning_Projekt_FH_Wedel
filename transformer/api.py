@@ -12,7 +12,9 @@ async def root():
 
 
 @app.get("/predict")
-def predict_transformer(stock_symbols: list, start_date: str, end_date: str):
+def predict_transformer(stock_symbols: str, start_date: str, end_date: str, resolution: resolution) -> dict:
+    # convert stock_symbols to list "[AAPL, AAL, AMD]" -> ["AAPL", "AAL", "AMD"]
+    stock_symbols = stock_symbols[1:-1].split(", ")
     transformer_interface = TransformerInterface()
 
     prediction = transformer_interface.predict(stock_symbols, pd.to_datetime(
@@ -38,7 +40,8 @@ if __name__ == "__main__":
 
     for timestamp in date_range:
         step_predictions = {}
-        prediction = predict_transformer(symbols, timestamp, None)
+        prediction = predict_transformer(
+            symbols, timestamp, None, resolution.TWO_HOURLY)
         for symbol in symbols:
             step_predictions[symbol] = prediction[symbol][0]["value"]
         predictions.append(step_predictions)
