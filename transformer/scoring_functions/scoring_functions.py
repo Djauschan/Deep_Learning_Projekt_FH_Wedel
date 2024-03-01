@@ -165,25 +165,16 @@ def calc_profit(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 
 if __name__ == "__main__":
-    with open("target_data.pkl", "rb") as f:
-        y_true = pickle.load(f)
-    with open("prediction.pkl", "rb") as f:
+    with open("rl_pred.pkl", "rb") as f:
         y_pred = pickle.load(f)
 
-    with open("rl_pred.pkl", "rb") as f:
-        y_rl = pickle.load(f)
-
     # Generate artificial target date from y_rl
-    y_true_rl = np.zeros((y_rl.shape[0], y_rl.shape[1], y_rl.shape[2]))
-    for t in range(y_rl.shape[0]):
-        for s in range(y_rl.shape[1]):
-            y_true_rl[t, s, :] = y_rl[t, s, :]*np.random.uniform(0.9, 1.1, y_rl.shape[2])
+    y_true = np.zeros((y_pred.shape[0], y_pred.shape[1], y_pred.shape[2]))
+    for t in range(y_pred.shape[0]):
+        for s in range(y_pred.shape[1]):
+            y_true[t, s, :] = y_pred[t, s, :] * np.random.uniform(0.9, 1.1, y_pred.shape[2])
 
-    # Convert tensor to numpy
-    #y_true = y_true.numpy()
-    #y_pred = y_pred.numpy()
-
-    calc_profit(y_true_rl, y_rl)
+    print(calc_profit(y_true, y_pred))
 
     print(total_mae(y_true, y_pred))
 

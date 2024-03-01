@@ -178,3 +178,8 @@ cython_debug/
 # VS Code Configurations
 .vscode/
 /src_transformers/__init__.py
+/transformer/notebooks/minmax.png
+/transformer/notebooks/outlier.png
+/transformer/notebooks/power_transformation_snv.png
+/transformer/notebooks/qunatile_transformation_snv.png
+/transformer/notebooks/standard_scaling.png
