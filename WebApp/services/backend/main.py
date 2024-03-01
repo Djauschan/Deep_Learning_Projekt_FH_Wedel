@@ -381,7 +381,7 @@ def predict_rl(stock_symbol: str  # , start_date: str, end_date: str
         end_date (str): The end date of the time frame to predict trading actions for.
 
     Returns:
-        list[dict[Timestamp, dict[str, str]]]: A list containing the predictions for every model for every hour in the given time frame.
+        list[dict[str, dict[object, dict[str, str]]]]: A list containing the predictions for every every stock symbol, every model for every 2hours in the given time frame.
     """
     data_to_send = {"stock_symbol": stock_symbol,
                     "start_date": "2021-01-04",
