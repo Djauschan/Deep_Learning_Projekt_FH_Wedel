@@ -100,11 +100,12 @@ class TransformerInterface(AbstractModel):
         """
         self.interval_minutes = 120
         self.num_intervals = 24
-        self.model_path = Path("..", "data", "output", "models",
-                               "TransformerModel_v2.pt")
-        self.data_path = Path(
-            "..", "data", "output", "tt_dataset_for_rl.csv")
-        self.prices_path = Path("..", "data", "output", "tt_prices_for_rl.pkl")
+        self.model_path = Path("data", "output", "models",
+                               "TransformerModel_v3.pt")
+        self.data_path = Path("data", "output", "tt_dataset_for_rl.csv")
+        self.prices_path = Path("data", "output", "tt_prices_for_rl.pkl")
+        self.config_path = Path("data", "test_configs",
+                                "config_rl_predictions.yaml")
 
     def predict(self,
                 timestamp_start: pd.Timestamp,
@@ -151,7 +152,7 @@ class TransformerInterface(AbstractModel):
                                               self.num_intervals)
 
         # Get config
-        with open("../data/test_configs/config_rl_predictions.yaml", "r", encoding="utf-8") as f:
+        with open(self.config_path, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
 
         start_day = config['dataset_parameters']['data_selection_config']['start_day_time']
@@ -160,7 +161,8 @@ class TransformerInterface(AbstractModel):
         end_day = dt.datetime.strptime(end_day, '%H:%M').time().hour
 
         # TODO: Timestamps aus Dataloader holen?
-        empty_df = pd.DataFrame([], index=pd.Index(timestamps), columns=prediction.columns)
+        empty_df = pd.DataFrame([], index=pd.Index(
+            timestamps), columns=prediction.columns)
 
         i = 0
         for timestamp in timestamps:
@@ -172,7 +174,6 @@ class TransformerInterface(AbstractModel):
 
         prediction = empty_df.fillna(0)
 
-
         # Convert the relative prices to absolute prices
         for symbol, price in prices_before_prediction.items():
             if f"close {symbol}" in columns:
@@ -180,13 +181,14 @@ class TransformerInterface(AbstractModel):
                 absolute_prices = self.calculate_absolute_prices(prices=relative_prices,
                                                                  start_price=price)
                 prediction[f"close {symbol}"] = np.round(
-                    absolute_prices, decimals=6)
+                    absolute_prices, decimals=2)
 
         return prediction
 
     def insert_valid_entries(self, timeseries: pd.Series, valid_entries: pd.DataFrame):
         # Get the index of the first valid entry
-        first_valid_index = timeseries.index[(timeseries.apply(lambda d: d.hour) >= 4) & (timeseries.apply(lambda d: d.hour) < 20)][0]
+        first_valid_index = timeseries.index[(timeseries.apply(
+            lambda d: d.hour) >= 4) & (timeseries.apply(lambda d: d.hour) < 20)][0]
         print(timeseries.apply(lambda d: d.hour))
         # Create a DataFrame with valid entries and their corresponding timestamps
         valid_df = pd.DataFrame(valid_entries, columns=['Values'],
@@ -200,7 +202,8 @@ class TransformerInterface(AbstractModel):
     def insert_rows_with_zeros(self, df, row_number, count):
         for _ in range(count):
             df = pd.concat(
-                [df.iloc[:row_number], pd.DataFrame([[0] * len(df.columns)], columns=df.columns), df.iloc[row_number:]],
+                [df.iloc[:row_number], pd.DataFrame(
+                    [[0] * len(df.columns)], columns=df.columns), df.iloc[row_number:]],
                 ignore_index=True)
             row_number += 1
         return df
@@ -261,7 +264,8 @@ class TransformerInterface(AbstractModel):
             nn.Module: The loaded PyTorch model.
         """
 
-        state_dict, params = torch.load(self.model_path, map_location=torch.device('cpu'))
+        state_dict, params = torch.load(
+            self.model_path, map_location=torch.device('cpu'))
         model = MODEL_NAME_MAPPING[model_name](**params)
         model.load_state_dict(state_dict)
         model.to(torch.device("cpu"))
