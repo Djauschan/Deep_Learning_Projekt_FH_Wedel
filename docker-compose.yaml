@@ -31,8 +31,7 @@ services:
     ports:
       - 8080:8080
     # Set the entrypoint of the container to start the frontend
-    entrypoint:
-      ["bash", "-c", "npm run serve"]
+    entrypoint: [ "bash", "-c", "npm run serve" ]
     depends_on:
       - backend
     networks:
@@ -58,7 +57,7 @@ services:
       [
         "bash",
         "-c",
-        "cd src_transformers && uvicorn api:app --host 0.0.0.0 --port 8000"
+        "uvicorn api:app --host 0.0.0.0 --port 8000"
       ]
     networks:
       - backend_network
