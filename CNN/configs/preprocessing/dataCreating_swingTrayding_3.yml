@@ -9,10 +9,10 @@ RSC_DATA_FILES: [
   AAL: ["AAL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   AAPL: ["AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   AMD: ["AMD_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
-  C: ["C_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
-  NIO: ["NIO_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
-  TSLA: ["TSLA_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
-  NVDA: ["NVDA_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"]
+  C: ["C_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"]
+  #NIO: ["NIO_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
+  #TSLA: ["TSLA_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
+  #NVDA: ["NVDA_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"]
 ]
 
 OTHER_FEATURES_TO_LOAD : [
@@ -34,7 +34,7 @@ TIMESERIES_SEQUENCE_LEN: 20  # length  of the TimeSeries; 1 : no series at all
 TIMESTEPS_AHEAD: 8  # predict 60min
 TIME_STEP_INTERVAL: 120  #
 TOLERANCE: 60
-NEXT_DAY_RETRY_THRESHOLD: 0
+NEXT_DAY_RETRY_THRESHOLD: 5
 
 FEATURES: [
   "Open", "Volume", "Open_MCHI", "Open_IVV"

@@ -1,0 +1,24 @@
+# Model Config
+#### HYPER PARAMETER ####
+NUM_EPOCH: 5
+LR: 0.0001
+BATCH_SIZE: 1
+TRAIN_TEST_SPLIT_RATIO: 0.8 #To test smaller the training size
+L2RegularisationFactor: 0.00 #First Overfit
+DROPOUT: 0.0 #First Overfit
+LOGGING_INTERVAL: 10 #every x value will be logged
+LOSS_PLOT_INTERVAL: 100
+RESULT_FOLDER: "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\result\\"
+RSC_DATA_ROOT: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\data\\train_data\\"
+TRAINING_FOLDER: "swingTrayding_20_120_4_DATA_Open_Volume_MCHI_IVV_MVG_ahead4\\"
+MODEL_NAME: "20_120_4_swingTrayding_1"
+TRAINING_DATA_LIST: [
+  #Training_Data, "Label_Data
+  AAL: ["AAL\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead4.npy", "AAL\\ImageGafData\\LABELS.npy"],
+  AAPL: ["AAPL\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead4.npy", "AAPL\\ImageGafData\\LABELS.npy"],
+  AMD: ["AMD\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead4.npy", "AMD\\ImageGafData\\LABELS.npy"],
+  C: ["C\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead4.npy", "C\\ImageGafData\\LABELS.npy"]
+]
+FEATURE_LIST: [
+  "Open", "Volume", "Open_MCHI", "Open_IVV", "mvgAvg"
+]

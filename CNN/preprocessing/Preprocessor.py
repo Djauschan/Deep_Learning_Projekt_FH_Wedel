@@ -176,10 +176,6 @@ class Preprocessor:
         print(len(labels))
         return data, labels
 
-    def exportLabelsToNpy(self, path, labels):
-        exporter = ExportService(path)
-        exporter.storeNumpyTimeSeries(labels, str(len(labels)) + '_TS_LABELS')
-
     def exportGafData(self, path, data, features):
         exporter = ExportService(path)
         exporter.storeGAFNumpyFeatureDataSeperatly(data, features, '_GAF_DATA')

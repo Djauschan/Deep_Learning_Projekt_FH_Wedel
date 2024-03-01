@@ -42,7 +42,8 @@ class gafService:
 
             # logging prgress
             perc_done = int((i * 100) / len_series)
-            print('% done: ' + str(perc_done))
+            if perc_done % 10 == 0:
+                print('% done: ' + str(perc_done))
 
             gafData[i] = self._createSingleGAF(x_arr)
             i = i + 1

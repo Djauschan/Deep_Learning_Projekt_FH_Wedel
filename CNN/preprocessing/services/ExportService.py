@@ -18,33 +18,99 @@ class ExportService:
         if not os.path.exists(self.folderPath):
             os.makedirs(self.folderPath)
 
-    def logEpochResult(self, arr, subFolder, pathToSave):
-        folderPath = os.path.join(self.folderPath, subFolder)
+    def saveAllResults(self, arr: np.ndarray, columns: list, subFolderPath: str, pathToSave: str):
+        df = pd.DataFrame(arr, columns=columns)
+        folderPath = os.path.join(self.folderPath, subFolderPath)
         if not os.path.exists(folderPath):
             os.makedirs(folderPath)
-        filePath = os.path.join(folderPath, pathToSave)
-        df = pd.DataFrame(arr, columns=['epoch', 'modelOut', 'label', 'loss', 'running_avg'])
+        filePath = os.path.join(folderPath, pathToSave + '.csv')
         df.to_csv(filePath, sep=';', index=False)
-        return df
 
-    def createLossPlot(self, df, LOSS_PLOT_INTERVAL, subFolder, pathToSave):
+    def createLossPlot(self, arr, LOSS_PLOT_INTERVAL, logColumns_train, subFolder, pathToSave):
         folderPath = os.path.join(self.folderPath, subFolder)
         if not os.path.exists(folderPath):
             os.makedirs(folderPath)
         filePath = os.path.join(folderPath, pathToSave)
-        df.plot(y='running_avg', kind="line", figsize=(20, 5), lw=1)
-        plt.title("running_avg", color='red')
+        # ["EPOCH", "idx", "rIDX", "prediction", "label", "LOSS", "epochAvgLOSS", "rAvgLOSS"]
+        df = pd.DataFrame(arr, columns=logColumns_train)
+        # RUNNING AVG, exlude extrema
+        running_avg_arr = df['rAvgLOSS'].to_numpy()
+        running_avg_arr = running_avg_arr[running_avg_arr < np.percentile(running_avg_arr, 99)]
+        y_min = np.min(running_avg_arr)
+        y_max = np.max(running_avg_arr) * 1.3
+        x_min = 0
+        x_max = len(running_avg_arr)
+        # Set the limits for the plot
+        plt.figure(figsize=(20, 5))
+        plt.plot(range(x_max), running_avg_arr, linewidth=1)
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
+        plt.title("running_avg loss", color='red')
         plt.savefig(filePath + 'running_avg' + '.png')
-        #
-        df.plot(y='loss', kind="line", figsize=(20, 5), lw=1)
-        plt.title("loss absolute", color='red')
+        plt.clf()
+        ##########################
+        ######LOSS Absolute#######
+        abs_loss_arr = df['LOSS'].to_numpy()
+        abs_loss_arr = abs_loss_arr[abs_loss_arr < np.percentile(abs_loss_arr, 99)]
+        y_min = np.min(abs_loss_arr)
+        y_max = np.max(abs_loss_arr) * 1.3
+        x_min = 0
+        x_max = len(abs_loss_arr)
+        # Set the limits for the plot
+        plt.figure(figsize=(20, 5))
+        plt.plot(range(x_max), abs_loss_arr, linewidth=1)
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
+        plt.title("Loss Absolute", color='red')
         plt.savefig(filePath + 'absolute_loss' + '.png')
-        #
+        plt.clf()
+        ##########################
+        ######LOSS LOSS_PLOT_INTERVAL#######
         df = df.iloc[::LOSS_PLOT_INTERVAL, :]
-        df.plot(y=['modelOut', 'label'], kind="line", figsize=(20, 5), lw=1, alpha=0.4)
-        plt.title("soll_ist vergleich", color='red')
+        df.plot(y=['prediction', 'label'], kind="line", figsize=(20, 5), lw=1, alpha=0.4)
+        plt.title("soll_ist Vergleich", color='red')
         plt.savefig(filePath + 'soll_ist' + '.png')
+        plt.clf()
         #
+
+    def createLogAndPlot_test(self, arr, e, columns, subFolder, pathToSave):
+        folderPath = os.path.join(self.folderPath, subFolder, '_' + str(e))
+        if not os.path.exists(folderPath):
+            os.makedirs(folderPath)
+        filePath = os.path.join(folderPath, pathToSave)
+        # ["EPOCH", "idx", "prediction", "label", "LOSS", "epochAvgLOSS"]
+        df = pd.DataFrame(arr, columns=columns)
+        df.to_csv(filePath + '_' + str(e) + '_' + '.csv', sep=';', index=False)
+        # RUNNING AVG, exlude extrema
+        loss_arr = df['LOSS'].to_numpy()
+        avg_loss_arr = df['epochAvgLOSS'].to_numpy()
+        loss_arr = loss_arr[loss_arr < np.percentile(loss_arr, 99)]
+        y_min = np.min(loss_arr)
+        y_max = np.max(loss_arr) * 1.3
+        x_min = 0
+        x_max = len(loss_arr)
+        # Set the limits for the plot
+        plt.figure(figsize=(20, 5))
+        plt.plot(range(x_max), loss_arr, linewidth=1)
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
+        plt.title("test epoch loss", color='red')
+        plt.savefig(filePath + 'epoch_test_loss' + '_' + str(e) + '.png')
+        plt.clf()
+        ######Plot AVG LOSSS
+        avg_loss_arr = avg_loss_arr[avg_loss_arr < np.percentile(avg_loss_arr, 99)]
+        y_min = np.min(avg_loss_arr)
+        y_max = np.max(avg_loss_arr) * 1.3
+        x_min = 0
+        x_max = len(avg_loss_arr)
+        # Set the limits for the plot
+        plt.figure(figsize=(20, 5))
+        plt.plot(range(x_max), avg_loss_arr, linewidth=1)
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
+        plt.title("test epoch avg_loss", color='red')
+        plt.savefig(filePath + 'epoch_test_avgLoss' + '_' + str(e) + '.png')
+        plt.clf()
 
     def storeGAFNumpyFeatureDataSeperatly(self, arr, FEATURE_LIST, pathToSave):
         """

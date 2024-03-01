@@ -34,7 +34,7 @@ TIMESERIES_SEQUENCE_LEN: 20  # length  of the TimeSeries; 1 : no series at all
 TIMESTEPS_AHEAD: 6  # predict 60min
 TIME_STEP_INTERVAL: 120  #
 TOLERANCE: 60
-NEXT_DAY_RETRY_THRESHOLD: 0
+NEXT_DAY_RETRY_THRESHOLD: 5
 
 FEATURES: [
   "Open", "Volume", "Open_MCHI", "Open_IVV"

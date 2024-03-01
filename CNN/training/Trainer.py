@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from datetime import datetime
@@ -15,6 +16,7 @@ else:
 device = torch.device(dev)
 
 INTERVAL_LOGGING = 1000
+
 
 class ModelTrainer:
 
@@ -38,11 +40,12 @@ class ModelTrainer:
         self.loss = loss_func
         self.optimizer = optimizer
         self.printer = 100000
+        self.logIdx_train = 0
+        self.logIdx_test = 0
 
         print("GPU OUTPUT: ")
         name = torch.cuda.get_device_name(0)
         print(name)
-
 
     '''
         Ausführung:
@@ -70,17 +73,25 @@ class ModelTrainer:
     def run(self, exporter: ExportService):
         # np array mit dim = (x,y) alle x-te trainingschritte werden gelogged, dabei werden y messwerte gespeichert
         # y1 = 'epoch', y2='modelOut', y3='label', y4='loss', y5='running_avg'
+        train_logging_arr_interval = np.zeros(
+            (int((len(self.train_dataloader) * self.NUM_EPOCH / self.LOGGING_INTERVAL)) + self.NUM_EPOCH, 5))
+        logColumns_train = ["EPOCH", "idx", "rIDX", "prediction", "label", "LOSS", "epochAvgLOSS", "rAvgLOSS"]
+        logColumns_test = ["EPOCH", "idx", "prediction", "label", "LOSS", "epochAvgLOSS"]
         train_logging_arr = np.zeros(
-            (int((len(self.train_dataloader) * self.NUM_EPOCH / self.LOGGING_INTERVAL)) + 5, 5))
+            (int((len(self.train_dataloader) * self.NUM_EPOCH)) + self.NUM_EPOCH, len(logColumns_train)))
+        test_logging_arr = np.zeros(
+            (int((len(self.test_dataloader) * self.NUM_EPOCH)) + self.NUM_EPOCH, len(logColumns_test)))
+
         rRunningAvgLoss = 0.0
         # running var for each model exec step
         c = 0
         # logging running var
-        logIdx = 0
+        logIdx_train = 0
         print('LENGTH OF DATALOADER')
         print(len(self.train_dataloader))
         for e in range(self.NUM_EPOCH):
             self.model.train()
+            eAvgLoss = 0.0
             ############## FOR EPOCH #############
             ######## EPOCH Train #######
             ### ______________ TRAIN ______________ ###
@@ -92,14 +103,18 @@ class ModelTrainer:
                 rLabel = round(y.item(), 4)
                 rModel_out = round(model_out.item(), 4)
                 rLoss = round(loss_val.item(), 4)
-                rRunningAvgLoss = round(((rRunningAvgLoss + rLoss) / c), 3)
+                rRunningAvgLoss = round(((rRunningAvgLoss + rLoss) / c), 4)
+                eAvgLoss = round(((eAvgLoss + rLoss) / (i + 1)), 4)
+                train_logging_arr = self.createLogEntry_train(train_logging_arr, e, i, c, rModel_out, rLabel, rLoss,
+                                                              eAvgLoss,
+                                                              rRunningAvgLoss)
                 if i % self.LOGGING_INTERVAL == 0:
                     # Logging Single EPOCH TRAIN
-                    train_logging_arr[logIdx] = [int(e), rModel_out, rLabel, rLoss, rRunningAvgLoss]
-                    logIdx = logIdx + 1
+                    train_logging_arr_interval[logIdx_train] = [int(e), rModel_out, rLabel, rLoss, rRunningAvgLoss]
+                    logIdx_train = logIdx_train + 1
                     if i % 10000 == 0:
                         print("Epoch: {}, Batch: {}".format(e + 1, i))
-                        #'''
+                        # '''
                         print('IN INTERVAL LOGGING')
                         print('model_INPUT:')
                         print(x)
@@ -109,58 +124,82 @@ class ModelTrainer:
                         print(y)
                         print("Training Loss: {}".format(loss_val))
                         print('________________')
-                        #'''
+                        # '''
 
             ##### TEST FOR EACH EPOCH
-            # with torch.no_grad():
-            #    test_epoch_y_arr = self.test_model(self.test_dataloader, self.model)
-            # add logging
+            with torch.no_grad():
+                tmp_test_logging_arr = np.zeros(
+                    (int(len(self.test_dataloader) + 1), len(logColumns_test)))
+                epochTestArr = self.test_model(self.test_dataloader, self.model, self.loss,
+                                               tmp_test_logging_arr, e)
+                np.concatenate((test_logging_arr, epochTestArr))
+                exporter.createLogAndPlot_test(epochTestArr, e, logColumns_test, 'TEST', 'test')
 
-            # FÜR GESAMT RESULT
-
+        # FÜR GESAMT RESULT
         LOSS_PLOT_INTERVAL = self.parameters['LOSS_PLOT_INTERVAL']
-        df = exporter.logEpochResult(train_logging_arr, 'TRAINING', 'TRAINING_LOGGING.csv')
-        exporter.createLossPlot(df, LOSS_PLOT_INTERVAL, 'TRAINING', 'TRAINING_LOGGING')
+        exporter.saveAllResults(train_logging_arr, logColumns_train, 'TRAINING', 'ALL_TR_RESULTS')
+        exporter.createLossPlot(train_logging_arr, LOSS_PLOT_INTERVAL, logColumns_train,
+                                'TRAINING', 'TRAINING_LOGGING_INTERVAL')
+        exporter.createLogAndPlot_test(test_logging_arr, self.NUM_EPOCH+1, logColumns_test, 'GESAMT_TEST',
+                                       'ALL_TEST_RESULTS')
+
         now = datetime.now()
         end_time = now.strftime("%Y-%m-%d_%H_%M_%S")
         print("End Time =", end_time)
         return self.model
 
-    def test_model(self, test_data, model):
+    def test_model(self, test_data, model, loss_func, logArr, epoch):
         ### ______________ TEST ______________ ###
         with torch.no_grad():
             # Model should not improve
             model.eval()
+            self.logIdx_test = 0
             index = 0
             sum_losses = 0.0
             for i, z in enumerate(test_data):
                 inputs = z['x']
                 y = z['y']
+                inputs = inputs.to(device)
+                y = y.to(device)
                 # check each item in batch
                 # eigtl nunnötig da Batch_size = 1
                 for j in range(len(y)):
                     model_out = model(inputs.float())
-                    # todo anpassen loss.item() anstatt selber zu berechnen.
-                    y_val = y[j].item()
-                    model_out_val = model_out[j].item()
+                    model_out = torch.squeeze(model_out, 1)
+                    y_val = y[j].float()
                     # bei anderer Fehlerfunktion zu ändern, bzw. über loss.item() definieren
-                    current_loss = (y_val - model_out_val) ** 2
+                    loss_val = loss_func(model_out, y_val)
+                    model_out_val = model_out[j].item()
+                    rModel_out = round(model_out_val, 4)
+                    rLabel = round(y.item(), 4)
+                    rLoss_val = round(loss_val.item(), 4)
                     index = index + 1
-                    sum_losses = sum_losses + current_loss
+                    sum_losses = sum_losses + rLoss_val
+                    avg_loss = round(sum_losses / (i + 1), 4)
+                test_logging_arr = self.createLogEntry_test(logArr, epoch, i, rModel_out, rLabel, rLoss_val, avg_loss)
 
-            mse = round((sum_losses / index), 4)
-            return mse
+        return test_logging_arr
 
     def training_step(self, model, x, y, loss, optimizer):
         x = x.to(device)
         y = y.to(device)
         model_out = model(x.float())
         model_out = torch.squeeze(model_out, 1)
-        #to put model out in same shape as y
+        # to put model out in same shape as y
 
+        optimizer.zero_grad()
         # MSE
         loss_val = loss(model_out, y.float())
-        optimizer.zero_grad()
         loss_val.backward()
         optimizer.step()
         return loss_val, model_out
+
+    def createLogEntry_train(self, arr, e, i, c, rModel_out, rLabel, rLoss, epochRunningAvgLoss, rRunningAvgLoss):
+        arr[self.logIdx_train] = [e, i, c, rModel_out, rLabel, rLoss, epochRunningAvgLoss, rRunningAvgLoss]
+        self.logIdx_train += 1
+        return arr
+
+    def createLogEntry_test(self, arr, e, i, rModel_out, rLabel, rLoss, epochRunningAvgLoss):
+        arr[self.logIdx_test] = [e, i, rModel_out, rLabel, rLoss, epochRunningAvgLoss]
+        self.logIdx_test += 1
+        return arr

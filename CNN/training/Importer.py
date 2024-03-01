@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 from CNN.preprocessing.services.ConfigService import ConfigService
 from CNN.preprocessing.services.ImportService import importService
 
-
 # RESCOURCE DIRS
 RSC_ROOT = "rsc/"
 DATA_FOLDER_NAME = "timeSeriesData/"
@@ -74,9 +73,10 @@ class Importer:
         # (length_all_ts, feature_count, tsl, tsl)
         self.data = None
         self.labels = None
-        #list of pair entires (each pair = k=Kürzel, v=list with ele=0 data, ele=1 label
+        self.modelResourcePaths = []
+        # list of pair entires (each pair = k=Kürzel, v=list with ele=0 data, ele=1 label
         for i in self.TRAINING_DATA_LIST:
-            #getting data for 1 stock
+            # getting data for 1 stock
             for k, v in i.items():
                 data_fileName = v[0]
                 label_fileName = v[1]
@@ -86,11 +86,10 @@ class Importer:
                 if not os.path.exists(label_folder_path) or not os.path.exists(data_folder_path):
                     print('NO FILE FOUND !!')
                     sys.exit()
-
-                importer = importService(training_data_root)
-                self.data = importer.loadFromNpy(data_fileName)
-                self.labels = importer.loadFromNpy(label_fileName)
-
+                self.modelResourcePaths.append([k, training_data_root, data_fileName, label_fileName])
+                #importer = importService(training_data_root)
+                #self.data = importer.loadFromNpy(data_fileName)
+                #self.labels = importer.loadFromNpy(label_fileName)
 
         # creating timeStamp dir for new dataImports & results
         self.currTime_folder = self.getCurrentTimeName()
@@ -132,3 +131,26 @@ class Importer:
         maxCount = valList[0][0]
         return sortedVal, maxCount
 
+    def getModelResources(self):
+        return self.modelResourcePaths
+
+    @staticmethod
+    def loadModelData(root_folder, data_fileName, label_fileName):
+        importer = importService(root_folder)
+        data = importer.loadFromNpy(data_fileName)
+        labels = importer.loadFromNpy(label_fileName)
+        modelData = ModelData(data, labels)
+        return modelData
+
+
+class ModelData:
+
+    def __init__(self, trainingData, trainingLabels):
+        self.trainingData = trainingData
+        self.trainingLabels = trainingLabels
+
+    def getTrainingData(self):
+        return self.trainingData
+
+    def getTrainingLabels(self):
+        return self.trainingLabels

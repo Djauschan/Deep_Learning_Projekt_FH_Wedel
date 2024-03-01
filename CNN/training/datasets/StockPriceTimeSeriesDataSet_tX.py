@@ -17,11 +17,10 @@ class StockPriceTimeSeriesDataSet(Dataset):
         needs data array like
             (a,b,c,d) = (1500, 9, 20, 20) = (länge_aller_ts, features, länge_single_ts, länge_single_Ts)
     """
-    def __init__(self, importer, transform):
+    def __init__(self, data, labels, transform):
         self.transform = transform
-        self.Importer = importer
-        self.tsData = importer.getData()
-        self.tsLabels = importer.getLabels()
+        self.tsData = data
+        self.tsLabels = labels
 
     def __len__(self):
         return len(self.tsLabels)
@@ -34,7 +33,7 @@ class StockPriceTimeSeriesDataSet(Dataset):
             'data': self.tsData[idx - 1],
             'label': self.tsLabels[idx - 1]
         }
-        if self.transform != None:
+        if self.transform is not None:
             sample = self.transform(item)
         else:
             sample = item
