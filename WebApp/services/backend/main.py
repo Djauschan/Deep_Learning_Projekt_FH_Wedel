@@ -99,6 +99,11 @@ async def update_user(username: str, user_update: schemas.UserUpdate, db: Sessio
     updated_user = crud.update_user_by_username(db, username, user_update)
     return {"message": "User updated successfully"}
 
+@app.put("/update_budget/{username}")
+async def update_budget_by_user(username: str, budgetInput: int, db: Session = Depends(get_db)):
+    updated_budget = crud.update_budget_by_user(db, username, budgetInput)
+    return {"message": "Budget updated successfully"}
+
 
 @app.get("/getUsers/", response_model=list[schemas.User])
 def read_users(query: str = '', limit: int = 100, db: Session = Depends(get_db)):
@@ -160,7 +165,7 @@ def check_login(email: str, password: str, db: Session = Depends(get_db)):
 
 
 @app.get("/predict/transformer")
-def predict_transformer(stock_symbols: str, start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
+def predict_transformer(stock_symbols: str = ['aapl', 'nvda'], start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
     data_to_send = {"stock_symbols": stock_symbols,
                     "start_date": start_date,
                     "end_date": end_date,
@@ -178,7 +183,7 @@ def predict_transformer(stock_symbols: str, start_date: str = '2021-01-04', end_
 
 
 @app.get("/predict/cnn")
-def predict_cnn(stock_symbol: str, start_date: str, end_date: str, resolution: str):
+def predict_cnn(stock_symbol: str = ['aapl', 'nvda'], start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
     data_to_send = {"stock_symbol": stock_symbol,
                     "start_date": start_date,
                     "end_date": end_date,

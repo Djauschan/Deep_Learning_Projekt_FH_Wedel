@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 // Initial state function
 const initialState = () => ({
     logged_user: null,
+    logged_budget: null,
     logged_user_id: null,
     API: 'http://localhost:8000'
 });
@@ -13,6 +14,9 @@ export const useMyPiniaStore = defineStore({
     mutations: {
         setUser(state, user) {
             state.logged_user = user;
+        },
+        setBudget(state, budget) {
+            state.logged_budget = budget;
         },
         setUserId(state, user_id) {
             state.logged_user_id = user_id;
@@ -26,6 +30,7 @@ export const useMyPiniaStore = defineStore({
     },
     getters: {
         currentUser: (state) => state.logged_user,
+        currentBudget: (state) => state.logged_budget,
         isLoggedIn: (state) => state.logged_user !== null,
     },
     actions: {

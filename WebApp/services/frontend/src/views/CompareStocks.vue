@@ -4,9 +4,6 @@
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
     <button class="button-stock" @click="updateChart">Show Stock</button>!-->
-    <button class="button-stock" @click="updateChart">Show Predictions</button>
-    <button class="button-stock" @click="showAll">Check All</button>
-    <button class="button-stock" @click="hideAll">Uncheck All</button>
     <!-- Add checkboxes for additional data points -->
     <span class="selection">Time Interval</span>
     <div class="selector">
@@ -19,6 +16,24 @@
         </option>
         <option value="Option 3">
           Minutely
+        </option>
+      </select>
+    </div>
+    <br>
+    <span class="selection">Model</span>
+    <div class="selector">
+      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+        <option value="Option 1" selected>
+          Transformer
+        </option>
+        <option value="Option 2">
+          CNN
+        </option>
+        <option value="Option 3">
+          Random Forest
+        </option>
+        <option value="Option 4">
+          Gradient Boost
         </option>
       </select>
     </div>
@@ -53,6 +68,11 @@
           <input type="checkbox" v-model="showTSLALine"> Tesla
         </label>
       </div>
+      <button class="button-stock" @click="showAll">Check All</button>
+      <br>
+      <button class="button-stock" @click="hideAll">Uncheck All</button>
+      <br>
+      <button class="button-stock" @click="updateChart">Show Predictions</button>
     </div>
   </div>
   <!-- Combined Chart -->

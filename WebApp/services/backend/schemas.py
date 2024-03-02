@@ -4,6 +4,7 @@ class UserBase(BaseModel):
     email: str
     username: str
     password: str
+    budget: float
     class Config:
         from_attributes = True
 
@@ -20,6 +21,7 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     username: str
     email: str
+    budget: float
     
 class PasswordUpdate(BaseModel):
     current_password: str
