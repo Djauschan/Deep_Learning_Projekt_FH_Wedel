@@ -5,6 +5,7 @@ import ModelInformation from "./views/ModelInformation.vue";
 import StockList from "./views/StockList.vue";
 import NotFound from "./views/not-found.vue";
 import Login from "./views/Login.vue";
+import rl_results from "./views/rl_results.vue";
 import "./style.css";
 
 const router = createRouter({
@@ -34,6 +35,10 @@ const router = createRouter({
     {
       path: "/login",
       component: Login,
+    },
+    {
+      path: "/rl_results",
+      component: rl_results,
     },
     {
       path: "/**",

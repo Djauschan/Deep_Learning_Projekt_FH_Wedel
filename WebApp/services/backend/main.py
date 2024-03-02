@@ -373,8 +373,7 @@ def predict_gradientBoost(stock_symbols: str, start_date: str, end_date: str, re
 #     return response.json()
 
 @app.get("/predict/rl")
-def predict_rl(stock_symbols: str  # , start_date: str, end_date: str
-               ):
+def predict_rl(stock_symbols: str, start_date: str, end_date: str, resolution: str):
     """Predicts trading actions for a given stock symbol and time frame with every avialible model.
 
     Args:
@@ -406,7 +405,7 @@ def predict_rl(stock_symbols: str  # , start_date: str, end_date: str
     stock_symbols = stock_symbols[1:-1].split(", ")
     for stock_symbol in stock_symbols:
         random_return[stock_symbol] = {}
-        for current_date in pd.date_range("2021-01-04", "2021-01-05", freq='2h'):
+        for current_date in pd.date_range(start_date, end_date, freq='2h'):
             random_return[stock_symbol][current_date] = {model: choice(
                 posible_actions) for model in model_names}
             if ensemble:
