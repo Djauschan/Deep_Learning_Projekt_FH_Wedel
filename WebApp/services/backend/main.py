@@ -8,7 +8,6 @@ from database import SessionLocal, engine
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from abstract_model import resolution
 
 # Create tables in the database based on the model definitions
 models.Base.metadata.create_all(bind=engine)
@@ -161,8 +160,8 @@ def check_login(email: str, password: str, db: Session = Depends(get_db)):
 
 
 @app.get("/predict/transformer")
-def predict_transformer(stock_symbol: str, start_date: str, end_date: str, resolution: resolution):
-    data_to_send = {"stock_symbol": stock_symbol,
+def predict_transformer(stock_symbols: str, start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
+    data_to_send = {"stock_symbols": stock_symbols,
                     "start_date": start_date,
                     "end_date": end_date,
                     "resolution": resolution}
@@ -179,7 +178,7 @@ def predict_transformer(stock_symbol: str, start_date: str, end_date: str, resol
 
 
 @app.get("/predict/cnn")
-def predict_cnn(stock_symbol: str, start_date: str, end_date: str, resolution: resolution):
+def predict_cnn(stock_symbol: str, start_date: str, end_date: str, resolution: str):
     data_to_send = {"stock_symbol": stock_symbol,
                     "start_date": start_date,
                     "end_date": end_date,
@@ -322,7 +321,7 @@ def predict_cnn(stock_symbol: str, start_date: str, end_date: str, resolution: r
 
 
 @app.get("/predict/randomForest")
-def predict_randomForest(stock_symbol: str, start_date: str, end_date: str, resolution: resolution):
+def predict_randomForest(stock_symbol: str, start_date: str, end_date: str, resolution: str):
     data_to_send = {"stock_symbol": stock_symbol,
                     "start_date": start_date,
                     "end_date": end_date,
@@ -340,8 +339,8 @@ def predict_randomForest(stock_symbol: str, start_date: str, end_date: str, reso
 
 
 @app.get("/predict/gradientBoost")
-def predict_gradientBoost(stock_symbol: str, start_date: str, end_date: str, resolution: resolution):
-    data_to_send = {"stock_symbol": stock_symbol,
+def predict_gradientBoost(stock_symbols: str, start_date: str, end_date: str, resolution: str):
+    data_to_send = {"stock_symbols": stock_symbols,
                     "start_date": start_date,
                     "end_date": end_date,
                     "resolution": resolution}
