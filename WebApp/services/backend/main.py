@@ -371,12 +371,12 @@ def predict_svm(stock_symbol: str):
 
 
 @app.get("/predict/rl")
-def predict_rl(stock_symbol: str  # , start_date: str, end_date: str
+def predict_rl(stock_symbols: str  # , start_date: str, end_date: str
                ):
     """Predicts trading actions for a given stock symbol and time frame with every avialible model.
 
     Args:
-        stock_symbol (str): The stock symbol to predict trading actions for.
+        stock_symbols (str): The stock symbols to predict trading actions for.
         start_date (str): The start date of the time frame to predict trading actions for.
         end_date (str): The end date of the time frame to predict trading actions for.
 
@@ -401,18 +401,21 @@ def predict_rl(stock_symbol: str  # , start_date: str, end_date: str
 
     ensemble = choice(["election", "ensemble"]) == 'ensemble'
     random_return = {}
-    for current_date in pd.date_range("2021-01-04", "2021-01-05", freq='h'):
-        random_return[current_date] = {model: choice(
-            posible_actions) for model in model_names}
-        if ensemble:
-            random_return[current_date]['ensemble'] = choice(
-                list(random_return[current_date].values()))
-        else:
-            lst = list(random_return[current_date].values())
-            random_return[current_date]['election'] = max(
-                set(lst), key=lst.count)
+    stock_symbols = stock_symbols[1:-1].split(", ")
+    for stock_symbol in stock_symbols:
+        random_return[stock_symbol] = {}
+        for current_date in pd.date_range("2021-01-04", "2021-01-05", freq='2h'):
+            random_return[stock_symbol][current_date] = {model: choice(
+                posible_actions) for model in model_names}
+            if ensemble:
+                random_return[stock_symbol][current_date]['ensemble'] = choice(
+                    list(random_return[stock_symbol][current_date].values()))
+            else:
+                lst = list(random_return[stock_symbol][current_date].values())
+                random_return[stock_symbol][current_date]['election'] = max(
+                    set(lst), key=lst.count)
 
-    return [random_return]
+    return random_return
 
 
 @app.get("/load/data")
