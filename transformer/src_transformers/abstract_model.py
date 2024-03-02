@@ -1,7 +1,15 @@
-import typing
 from abc import ABC, abstractmethod
-
 import pandas as pd
+import typing
+from enum import Enum
+
+
+class resolution(Enum):
+    """Enum for the resolution of the stock data.
+    """
+    DAILY = "D"
+    TWO_HOURLY = "H"
+    MINUTE = "M"
 
 
 class AbstractModel(ABC):
@@ -13,16 +21,17 @@ class AbstractModel(ABC):
 
     """
     @abstractmethod
-    def predict(self, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, interval: int) -> pd.DataFrame:
-        """predict stock price for a given time interval
+    def predict(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, resolution: resolution) -> pd.DataFrame:
+        """predicts the stock prices for the given symbols and time range.
 
         Args:
-            timestamp_start (pd.Timestamp): start time of the time period
-            timestamp_end (pd.Timestamp): end time of the time period
-            interval (int): interval in minutes
+            symbol_list (list): The list of symbols for which the stock prices should be predicted.
+            timestamp_start (pd.Timestamp): The start of the time range for which the stock prices should be predicted.
+            timestamp_end (pd.Timestamp): The end of the time range for which the stock prices should be predicted.
+            resolution (resolution): The resolution of the stock data.
 
         Returns:
-            pd.DataFrame: dataframe with columns: timestamp, 1-n prices of stock_symbols
+            pd.DataFrame: The predicted stock prices.
         """
         pass
 
@@ -64,6 +73,5 @@ class AbstractModel(ABC):
             if i == 0:
                 prices[i] = start_price * (1 + price_change)
             else:
-                prices_before = prices[i - 1]
-                prices[i] = prices_before * (1 + price_change)
+                prices[i] = prices[i - 1] * (1 + price_change)
         return prices

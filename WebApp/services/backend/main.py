@@ -370,7 +370,7 @@ def predict_gradientBoost(stock_symbol: str, start_date: str, end_date: str):
 #     return response.json()
 
 @app.get("/predict/rl")
-def predict_rl(stock_symbol: str #, start_date: str, end_date: str
+def predict_rl(stock_symbol: str  # , start_date: str, end_date: str
                ):
     """Predicts trading actions for a given stock symbol and time frame with every avialible model.
 
@@ -395,18 +395,22 @@ def predict_rl(stock_symbol: str #, start_date: str, end_date: str
     # return response.json()
     from random import choice
     posible_actions = ['buy', 'sell', 'hold']
-    model_names = ["q_learning_ma5", "q_learning_ma30", "q_learning_ma200", "q_learning_transformer", "q_learning_cnn", "q_learning_arima"]
-    
+    model_names = ["q_learning_ma5", "q_learning_ma30", "q_learning_ma200",
+                   "q_learning_transformer", "q_learning_cnn", "q_learning_arima"]
+
     ensemble = choice(["election", "ensemble"]) == 'ensemble'
     random_return = {}
     for current_date in pd.date_range("2021-01-04", "2021-01-05", freq='h'):
-        random_return[current_date] = {model: choice(posible_actions) for model in model_names}
+        random_return[current_date] = {model: choice(
+            posible_actions) for model in model_names}
         if ensemble:
-            random_return[current_date]['ensemble'] = choice(list(random_return[current_date].values()))
+            random_return[current_date]['ensemble'] = choice(
+                list(random_return[current_date].values()))
         else:
             lst = list(random_return[current_date].values())
-            random_return[current_date]['election'] =  max(set(lst), key=lst.count)
-  
+            random_return[current_date]['election'] = max(
+                set(lst), key=lst.count)
+
     return [random_return]
 
 
