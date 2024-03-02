@@ -3,9 +3,10 @@ import Home from "./views/home.vue";
 import Statistik from "./views/statistik.vue";
 import ModelInformation from "./views/ModelInformation.vue";
 import StockList from "./views/StockList.vue";
+import CompareModels from "./views/CompareModels.vue";
+import CompareStocks from "./views/CompareStocks.vue";
 import NotFound from "./views/not-found.vue";
 import Login from "./views/Login.vue";
-import rl_results from "./views/rl_results.vue";
 import "./style.css";
 
 const router = createRouter({
@@ -33,12 +34,18 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: "/login",
-      component: Login,
+      path: "/CompareModels",
+      component: CompareModels,
+      meta: { requiresAuth: true },
     },
     {
-      path: "/rl_results",
-      component: rl_results,
+      path: "/CompareStocks",
+      component: CompareStocks,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/login",
+      component: Login,
     },
     {
       path: "/**",

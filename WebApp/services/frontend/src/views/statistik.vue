@@ -4,9 +4,52 @@
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
     <button class="button-stock" @click="updateChart">Show Stock</button>!-->
-    <button class="button-stock" @click="updateChart">One Click Solution</button>
-    <button class="button-stock" @click="showAll">Show All</button>
-    <button class="button-stock" @click="hideAll">Hide All</button>
+    <span class="selection">Stock</span>
+    <div class="selector">
+      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+        <option value="Option 1" selected>
+          Apple
+        </option>
+        <option value="Option 2">
+          American Airlines
+        </option>
+        <option value="Option 3">
+          Advanced Micro Devices
+        </option>
+        <option value="Option 3">
+          Citigroup
+        </option>
+        <option value="Option 3">
+          NVIDIA
+        </option>
+        <option value="Option 3">
+          Snap
+        </option>
+        <option value="Option 3">
+          Block
+        </option>
+        <option value="Option 3">
+          Tesla
+        </option>
+      </select>
+    </div>
+    <span class="selection">Time Interval</span>
+    <div class="selector">
+      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+        <option value="Option 1" selected>
+          Daily
+        </option>
+        <option value="Option 2">
+          Hourly
+        </option>
+        <option value="Option 3">
+          Minutely
+        </option>
+      </select>
+    </div>
+    <button class="button-stock" @click="updateChart">Load Charts</button>
+    <button class="button-stock" @click="showAll">Check All</button>
+    <button class="button-stock" @click="hideAll">Uncheck All</button>
     <!-- Add checkboxes for additional data points -->
     <div class="checkboxes">
       <div class="checkboxes1">
@@ -20,42 +63,12 @@
           <input type="checkbox" v-model="showLSTMLine"> LSTM
         </label>
       </div>
-      <div class="checkboxes2">
-        <label>
-          <input type="checkbox" v-model="showArimaLine"> Arima
-        </label>
-        <label>
-          <input type="checkbox" v-model="showhistoricAverageLine"> historic Average
-        </label>
-        <label>
-          <input type="checkbox" v-model="showwindowAverageLine"> windowAverage
-        </label>
-      </div>
-      <div class="checkboxes3">
-        <label>
-          <input type="checkbox" v-model="shownaiveLine"> Naive
-        </label>
-        <label>
-          <input type="checkbox" v-model="showthetaLine"> Theta
-        </label>
-        <label>
-          <input type="checkbox" v-model="showETSLine"> ETS
-        </label>
-      </div>
       <div class="checkboxes4">
-        <label>
-          <input type="checkbox" v-model="showlinearRegressionLine"> Linear Regression
-        </label>
         <label>
           <input type="checkbox" v-model="showrandomForestLine"> Random Forest
         </label>
         <label>
           <input type="checkbox" v-model="showgradientBoostLine"> gradient Boost
-        </label>
-      </div>
-      <div class="checkboxes5">
-        <label>
-          <input type="checkbox" v-model="showsvmLine"> SVM
         </label>
       </div>
     </div>
@@ -67,44 +80,20 @@
       <DxSeries :name="'aapl'" open-value-field="Open" high-value-field="High" low-value-field="Low"
         close-value-field="Close" argument-field="DateTime">
       </DxSeries>
-      <DxSeries v-if="showCNNLine" :name="'CNN Line - ' + selectedStock" :data-source="combinedData" type="line"
+      <DxSeries v-if="showCNNLine" :name="'CNN' + selectedStock" :data-source="combinedData" type="line"
         value-field="CNNValue" argument-field="date">
       </DxSeries>
-      <DxSeries v-if="showTransformerLine" :name="'Transformer Line - ' + selectedStock" :data-source="combinedData"
+      <DxSeries v-if="showTransformerLine" :name="'Transformer' + selectedStock" :data-source="combinedData"
         type="line" value-field="TransformerValue" argument-field="date">
       </DxSeries>
-      <DxSeries v-if="showLSTMLine" :name="'LSTM Line - ' + selectedStock" :data-source="combinedData" type="line"
+      <DxSeries v-if="showLSTMLine" :name="'LSTM' + selectedStock" :data-source="combinedData" type="line"
         value-field="LSTMValue" argument-field="date">
       </DxSeries>
-      <DxSeries v-if="showArimaLine" :name="'Arima Line - ' + selectedStock" :data-source="combinedData" type="line"
-        value-field="arimaValue" argument-field="date">
-      </DxSeries>
-      <DxSeries v-if="showhistoricAverageLine" :name="'historicAverage Line - ' + selectedStock"
-        :data-source="combinedData" type="line" value-field="historicAverageValue" argument-field="date">
-      </DxSeries>
-      <DxSeries v-if="showlinearRegressionLine" :name="'linearRegression Line - ' + selectedStock"
-        :data-source="combinedData" type="line" value-field="linearRegressionValue" argument-field="date">
-      </DxSeries>
-      <DxSeries v-if="showrandomForestLine" :name="'randomForest Line - ' + selectedStock"
+      <DxSeries v-if="showrandomForestLine" :name="'randomForest' + selectedStock"
         :data-source="combinedData" type="line" value-field="randomForestValue" argument-field="date">
       </DxSeries>
-      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost Line - ' + selectedStock"
+      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost' + selectedStock"
         :data-source="combinedData" type="line" value-field="gradientBoostValue" argument-field="date">
-      </DxSeries>
-      <DxSeries v-if="showsvmLine" :name="'svm Line - ' + selectedStock"
-        :data-source="combinedData" type="line" value-field="svmValue" argument-field="date">
-      </DxSeries>
-      <DxSeries v-if="showwindowAverageLine" :name="'Window Average Line - ' + selectedStock"
-        :data-source="combinedData" type="line" value-field="windowAverageValue" argument-field="date">
-      </DxSeries>
-      <DxSeries v-if="shownaiveLine" :name="'Naive Line - ' + selectedStock"
-        :data-source="combinedData" type="line" value-field="naiveValue" argument-field="date">
-      </DxSeries>
-      <DxSeries v-if="showthetaLine" :name="'Theta Line - ' + selectedStock"
-        :data-source="combinedData" type="line" value-field="thetaValue" argument-field="date">
-      </DxSeries>
-      <DxSeries v-if="showETSLine" :name="'ETS Line - ' + selectedStock"
-        :data-source="combinedData" type="line" value-field="ETSValue" argument-field="date">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -174,138 +163,6 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showArimaLine && showChart" id="Arima-chart" :data-source="this.arimaData" title="Arima Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Arima Line'" value-field="value" argument-field="date" type="line">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showhistoricAverageLine && showChart" id="Historic Average-chart"
-      :data-source="this.historicAverageData" title="Historic Average Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'historicAverage Line'" value-field="value" argument-field="date" type="line">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showwindowAverageLine && showChart" id="Window Average-chart"
-      :data-source="this.windowAverageData" title="Window Average Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'windowAverage Line'" value-field="value" argument-field="date" type="line">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="shownaiveLine && showChart" id="Naive-chart"
-      :data-source="this.naiveData" title="Naive Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'naive Line'" value-field="value" argument-field="date" type="line">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showthetaLine && showChart" id="Theta-chart"
-      :data-source="this.thetaData" title="Theta Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'theta Line'" value-field="value" argument-field="date" type="line">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showETSLine && showChart" id="ETS-chart"
-      :data-source="this.ETSData" title="ETS Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'ETS Line'" value-field="value" argument-field="date" type="line">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showlinearRegressionLine && showChart" id="Lineare Regression-chart"
-      :data-source="this.linearRegressionData" title="Lineare Regression Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'linearRegression Line'" value-field="value" argument-field="date" type="line">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
     <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart"
       :data-source="this.randomForestData" title="Random Forest Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
@@ -329,25 +186,6 @@
       :data-source="this.gradientBoostData" title="Gradient Boost Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showsvmLine && showChart" id="SVM-chart"
-      :data-source="this.svmData" title="SVM Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'svm Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -403,14 +241,6 @@ export default {
     this.dataSource = [];
     this.selectedDays = null;
     this.transformerData =[];
-    this.historicAverageData = [];
-    this.linearRegressionData = [];
-    this.svmData = [];
-    this.windowAverageData = [];
-    this.naiveData = [];
-    this.thetaData = [];
-    this.ETSData = [];
-    this.arimaData = [];
     this.LSTMData =[];
     this.CNNData =[];
     this.randomForestData = [];
@@ -422,16 +252,8 @@ export default {
       transformerData: [],
       LSTMData: [],
       CNNData: [],
-      historicAverageData: [],
-      linearRegressionData: [],
       randomForestData: [],
       gradientBoostData: [],
-      svmData: [],
-      windowAverageData: [],
-      naiveData: [],
-      thetaData: [],
-      ETSData: [],
-      arimaData: [],
       selectedStock: "",
       selectedDays: null,
       showChart: false,
@@ -442,26 +264,10 @@ export default {
       TransformerpredictionData: [],
       showLSTMLine: false,
       LSTMpredictionData: [],
-      showArimaLine: false,
-      ArimapredictionData: [],
-      showhistoricAverageLine: false,
-      historicAveragepredictionData: [],
-      showlinearRegressionLine: false,
-      linearRegressionpredictionData: [],
       showrandomForestLine: false,
       randomForestpredictionData: [],
       showgradientBoostLine: false,
       gradientBoostpredictionData: [],
-      showsvmLine: false,
-      svmpredictionData: [],
-      showwindowAverageLine: false,
-      windowAveragepredictionData: [],
-      shownaiveLine: false,
-      naivepredictionData: [],
-      showthetaLine: false,
-      thetapredictionData: [],
-      showETSLine: false,
-      ETSpredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
     };
@@ -480,16 +286,8 @@ export default {
       TransformerValue: null,
       CNNValue: null,
       LSTMValue: null,
-      arimaValue: null,
-      historicAverageValue: null,
-      linearRegressionValue: null,
       randomForestValue: null,
       gradientBoostValue: null,
-      svmValue: null,
-      windowAverageValue: null,
-      naiveValue: null,
-      thetaValue: null,
-      ETSValue: null,
     }));
 
     // Merge transformerData points into combinedData
@@ -535,104 +333,6 @@ export default {
       }
     });
 
-        this.historicAverageData.forEach(historicAverageDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === historicAverageDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].historicAverageValue = historicAverageDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: historicAverageDataPoint.date,
-          historicAverageValue: historicAverageDataPoint.value,
-        });
-      }
-    });
-
-    this.windowAverageData.forEach(windowAverageDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === windowAverageDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].windowAverageValue = windowAverageDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: windowAverageDataPoint.date,
-          windowAverageValue: windowAverageDataPoint.value,
-        });
-      }
-    });
-
-    this.svmData.forEach(svmDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === svmDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].svmValue = svmDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: svmDataPoint.date,
-          svmValue: svmDataPoint.value,
-        });
-      }
-    });
-
-    this.naiveData.forEach(naiveDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === naiveDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].naiveValue = naiveDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: naiveDataPoint.date,
-          naiveValue: naiveDataPoint.value,
-        });
-      }
-    });
-
-    this.thetaData.forEach(thetaDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === thetaDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].thetaValue = thetaDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: thetaDataPoint.date,
-          thetaValue: thetaDataPoint.value,
-        });
-      }
-    });
-
-    this.ETSData.forEach(ETSDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === ETSDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].ETSValue = ETSDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: ETSDataPoint.date,
-          ETSValue: ETSDataPoint.value,
-        });
-      }
-    });
-
-    this.linearRegressionData.forEach(linearRegressionDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === linearRegressionDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].linearRegressionValue = linearRegressionDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: linearRegressionDataPoint.date,
-          linearRegressionValue: linearRegressionDataPoint.value,
-        });
-      }
-    });
-
     this.randomForestData.forEach(randomForestDataPoint => {
       const index = combinedDataWithNull.findIndex(data => data.date === randomForestDataPoint.date);
       if (index !== -1) {
@@ -661,20 +361,6 @@ export default {
       }
     });
 
-        this.arimaData.forEach(arimaDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === arimaDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].arimaValue = arimaDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: arimaDataPoint.date,
-          arimaValue: arimaDataPoint.value,
-        });
-      }
-    });
-
     // Set the result to combinedData
     this.combinedData = combinedDataWithNull;
 
@@ -686,32 +372,16 @@ export default {
       this.showCNNLine = false;
       this.showTransformerLine = false;
       this.showLSTMLine = false;
-      this.showArimaLine = false;
-      this.showhistoricAverageLine = false;
-      this.showwindowAverageLine = false;
-      this.shownaiveLine = false;
-      this.showthetaLine = false;
-      this.showETSLine = false;
-      this.showlinearRegressionLine = false;
       this.showrandomForestLine = false;
       this.showgradientBoostLine = false;
-      this.showsvmLine = false;
     },
 
     async showAll() {
       this.showTransformerLine = true;
-      this.showArimaLine = true;
-      this.showhistoricAverageLine = true;
-      this.showwindowAverageLine = true;
-      this.shownaiveLine = true;
-      this.showthetaLine = true;
-      this.showETSLine = true;
-      this.showlinearRegressionLine = true;
-      this.showsvmLine = true;
       this.showrandomForestLine = true;
       this.showgradientBoostLine = true;
-      //this.showLSTMLine = true;
-      //this.showCNNLine = true;
+      this.showLSTMLine = true;
+      this.showCNNLine = true;
     },
 
     async get_stock_data(stock_symbol, days_back) {
@@ -742,34 +412,6 @@ export default {
         } else {
           console.log(error);
         }
-      }
-    },
-    
-    async load_arima_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/arima`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        console.log("Prediction loaded");
-        console.log(response.data);
-
-        // Assuming the response.data is an object with date and close properties
-        this.arimaData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
       }
     },
 
@@ -857,156 +499,6 @@ export default {
       }
     },
 
-    async load_historicAverage_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/historicAverage`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.historicAverageData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
-    async load_windowAverage_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/windowAverage`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.windowAverageData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
-    async load_naive_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/naive`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.naiveData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
-    async load_theta_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/theta`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.thetaData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
-    async load_ETS_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/ETS`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.ETSData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
-    async load_linearRegression_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/linearRegression`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.linearRegressionData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
     async load_randomForest_data() {
       try {
         const response = await axios.get(`${this.store.API}/predict/randomForest`, {
@@ -1057,31 +549,6 @@ export default {
       }
     },
 
-    async load_svm_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/svm`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.svmData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
     async load_data() {
       try {
         const response = await axios.get(this.store.API + "/load/data", {
@@ -1113,18 +580,10 @@ export default {
     async updateChart() {
       this.dataSource = await this.load_data();
       this.transformerData = await this.load_transformer_data();
-      this.arimaData = await this.load_arima_data();
-      this.historicAverageData = await this.load_historicAverage_data();
-      this.windowAverageData = await this.load_windowAverage_data();
-      this.naiveData = await this.load_naive_data();
-      this.thetaData = await this.load_theta_data();
-      this.ETSData = await this.load_ETS_data();
-      this.linearRegressionData = await this.load_linearRegression_data();
-      this.svmData = await this.load_svm_data();
       this.randomForestData = await this.load_randomForest_data();
       this.gradientBoostData = await this.load_gradientBoost_data();
-      //this.LSTMData = await this.load_LSTM_data();
-      //this.CNNData = await this.load_CNN_data();
+      this.LSTMData = await this.load_LSTM_data();
+      this.CNNData = await this.load_CNN_data();
       
 
       console.log(this.dataSource)
