@@ -8,6 +8,7 @@ from database import SessionLocal, engine
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from abstract_model import resolution
 
 # Create tables in the database based on the model definitions
 models.Base.metadata.create_all(bind=engine)
@@ -160,10 +161,11 @@ def check_login(email: str, password: str, db: Session = Depends(get_db)):
 
 
 @app.get("/predict/transformer")
-def predict_transformer(stock_symbol: str, start_date: str, end_date: str):
+def predict_transformer(stock_symbol: str, start_date: str, end_date: str, resolution: resolution):
     data_to_send = {"stock_symbol": stock_symbol,
                     "start_date": start_date,
-                    "end_date": end_date}
+                    "end_date": end_date,
+                    "resolution": resolution}
     api_url = "http://predict_transformer:8000/predict"
     response = requests.get(api_url, params=data_to_send)
 
@@ -177,11 +179,11 @@ def predict_transformer(stock_symbol: str, start_date: str, end_date: str):
 
 
 @app.get("/predict/cnn")
-def predict_cnn(stock_symbol: str, start_date: str, end_date: str, interval: int):
+def predict_cnn(stock_symbol: str, start_date: str, end_date: str, resolution: resolution):
     data_to_send = {"stock_symbol": stock_symbol,
                     "start_date": start_date,
                     "end_date": end_date,
-                    "interval": interval}
+                    "resolution": resolution}
     api_url = "http://predict_cnn:8000/predict"
     response = requests.get(api_url, params=data_to_send)
 
@@ -320,10 +322,11 @@ def predict_cnn(stock_symbol: str, start_date: str, end_date: str, interval: int
 
 
 @app.get("/predict/randomForest")
-def predict_randomForest(stock_symbol: str, start_date: str, end_date: str):
+def predict_randomForest(stock_symbol: str, start_date: str, end_date: str, resolution: resolution):
     data_to_send = {"stock_symbol": stock_symbol,
                     "start_date": start_date,
-                    "end_date": end_date}
+                    "end_date": end_date,
+                    "resolution": resolution}
     api_url = "http://predict_ann:8000/predict/randomForest"
     response = requests.get(api_url, params=data_to_send)
 
@@ -337,10 +340,11 @@ def predict_randomForest(stock_symbol: str, start_date: str, end_date: str):
 
 
 @app.get("/predict/gradientBoost")
-def predict_gradientBoost(stock_symbol: str, start_date: str, end_date: str):
+def predict_gradientBoost(stock_symbol: str, start_date: str, end_date: str, resolution: resolution):
     data_to_send = {"stock_symbol": stock_symbol,
                     "start_date": start_date,
-                    "end_date": end_date}
+                    "end_date": end_date,
+                    "resolution": resolution}
     api_url = "http://predict_ann:8000/predict/gradientBoost"
     response = requests.get(api_url, params=data_to_send)
 
