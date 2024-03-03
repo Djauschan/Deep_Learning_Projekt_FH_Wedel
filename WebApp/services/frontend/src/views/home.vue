@@ -38,29 +38,25 @@
                 </div>
                 <div class="home-container25">
                   <div class="seperator"></div>
-                  <div class="home-container26">
-                    <span>Budget aufladen:</span>
-                  </div>
-                  <div class="home-container27">
-                    <div class="home-container28">
-                      <svg viewBox="0 0 1024 1024" class="home-icon26">
-                        <path
-                          d="M512 0c-282.77 0-512 229.23-512 512s229.23 512 512 512 512-229.23 512-512-229.23-512-512-512zM512 960c-247.424 0-448-200.576-448-448s200.576-448 448-448 448 200.576 448 448-200.576 448-448 448z">
-                        </path>
-                        <path
-                          d="M512 256c-17.664 0-32 14.336-32 32v192h-192c-17.664 0-32 14.336-32 32s14.336 32 32 32h192v192c0 17.664 14.336 32 32 32s32-14.336 32-32v-192h192c17.664 0 32-14.336 32-32s-14.336-32-32-32h-192v-192c0-17.664-14.336-32-32-32z">
-                        </path>
-                      </svg>
-                      <input type="text" placeholder="Wert in Euro" class="home-textinput input" v-model="budgetInput" />
-                      <button ref="myButton4" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
-                        class="button" @click="updateBudget">Aufladen</button>
+                  <div class="home-container29">
+                  <div class="hover-effect">
+                   <div class="home-container26">
+                     <span>Budget aufladen:</span>
+                     <div class="middleInput">
+                        <input type="text" placeholder="Wert in Euro" class="home-textinput" v-model="budgetInput" />
+                      </div>
+                      <div class="home-container27">
+                         <button ref="myButton4" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
+                          class="button" @click="updateBudget">Aufladen</button>
+                      </div>
+                   </div>
                     </div>
                   </div>
                 </div>
                 <div class="seperator"></div>
                 <div class="home-container29">
                   <div class="hover-effect">
-                    <div class="home-container26">
+                    <div class="home-container262">
                       <div class="home-container23">
                         <span>Modell Guthaben</span>
                       </div>
@@ -70,7 +66,7 @@
                             d="M928 128h-832c-52.8 0-96 43.2-96 96v576c0 52.8 43.2 96 96 96h832c52.8 0 96-43.2 96-96v-576c0-52.8-43.2-96-96-96zM96 192h832c17.346 0 32 14.654 32 32v96h-896v-96c0-17.346 14.654-32 32-32zM928 832h-832c-17.346 0-32-14.654-32-32v-288h896v288c0 17.346-14.654 32-32 32zM128 640h64v128h-64zM256 640h64v128h-64zM384 640h64v128h-64z">
                           </path>
                         </svg>
-                        <input type="text" placeholder="Wert in Euro" class="home-textinput input" />
+                        <input type="text" placeholder="Wert in Euro" class="home-textinput" />
                       </div>
                     </div>
                   </div>
@@ -654,7 +650,17 @@ export default {
   justify-content: center;
 }
 
+.home-container262 {
+  width: 100%;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .home-container27 {
+  margin-top: 5px;
   width: 200px;
   height: 27px;
   display: flex;
@@ -682,6 +688,11 @@ export default {
   margin-right: var(--dl-space-space-halfunit);
   border-radius: 10px;
   /* Adjust the value to control the roundness of the corners */
+}
+
+.middleInput{
+  justify-content: center;
+
 }
 
 .home-textinput {
