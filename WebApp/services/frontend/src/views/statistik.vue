@@ -6,7 +6,7 @@
     <button class="button-stock" @click="updateChart">Show Stock</button>!-->
     <span class="selection">Stock</span>
     <div class="selector">
-      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+      <select v-model="selectedStock" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
         <option value="Option 1" selected>
           Apple
         </option>
@@ -16,26 +16,26 @@
         <option value="Option 3">
           Advanced Micro Devices
         </option>
-        <option value="Option 3">
+        <option value="Option 4">
           Citigroup
         </option>
-        <option value="Option 3">
+        <option value="Option 5">
           NVIDIA
         </option>
-        <option value="Option 3">
+        <option value="Option 6">
           Snap
         </option>
-        <option value="Option 3">
+        <option value="Option 7">
           Block
         </option>
-        <option value="Option 3">
+        <option value="Option 8">
           Tesla
         </option>
       </select>
     </div>
     <span class="selection">Time Interval</span>
     <div class="selector">
-      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+      <select v-model="selectedTime" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
         <option value="Option 1" selected>
           Daily
         </option>
@@ -81,19 +81,19 @@
         close-value-field="Close" argument-field="DateTime">
       </DxSeries>
       <DxSeries v-if="showCNNLine" :name="'CNN' + selectedStock" :data-source="combinedData" type="line"
-        value-field="CNNValue" argument-field="date">
+        value-field="CNNValue" argument-field="date" :color="seriesColors[0]">
       </DxSeries>
       <DxSeries v-if="showTransformerLine" :name="'Transformer' + selectedStock" :data-source="combinedData"
-        type="line" value-field="TransformerValue" argument-field="date">
+        type="line" value-field="TransformerValue" argument-field="date" :color="seriesColors[1]">
       </DxSeries>
       <DxSeries v-if="showLSTMLine" :name="'LSTM' + selectedStock" :data-source="combinedData" type="line"
-        value-field="LSTMValue" argument-field="date">
+        value-field="LSTMValue" argument-field="date" :color="seriesColors[2]">
       </DxSeries>
       <DxSeries v-if="showrandomForestLine" :name="'randomForest' + selectedStock"
-        :data-source="combinedData" type="line" value-field="randomForestValue" argument-field="date">
+        :data-source="combinedData" type="line" value-field="randomForestValue" argument-field="date" :color="seriesColors[3]">
       </DxSeries>
       <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost' + selectedStock"
-        :data-source="combinedData" type="line" value-field="gradientBoostValue" argument-field="date">
+        :data-source="combinedData" type="line" value-field="gradientBoostValue" argument-field="date" :color="seriesColors[4]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -111,7 +111,7 @@
   <div class="newChart">
     <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData" title="CNN Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'CNN Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'CNN Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[0]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -129,7 +129,7 @@
   <div class="newChart">
    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="this.transformerData" title="Transformer Chart">
     <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line">
+    <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[1]">
     </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -147,7 +147,7 @@
   <div class="newChart">
     <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData" title="LSTM Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'LSTM Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'LSTM Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -166,7 +166,7 @@
     <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart"
       :data-source="this.randomForestData" title="Random Forest Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -185,7 +185,7 @@
     <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart"
       :data-source="this.gradientBoostData" title="Gradient Boost Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[4]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -270,6 +270,9 @@ export default {
       gradientBoostpredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
+      selectedTime: 'Option 1',
+      selectedStock: 'Option 1',
+      seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'] // Array of colors for each series
     };
   },
   computed: {
@@ -277,8 +280,19 @@ export default {
           enabled: true,
           // Customize tooltip appearance or behavior if needed
         },
+  },  
+  
+  mounted(){
+    this.handleSelection();
   },
+
   methods: {
+
+    handleSelection(){
+      console.log("SelectedTime:", this.selectedTime);
+      console.log("SelectedStock:", this.SelectedStock);
+    },
+
     async updateCombinedData() {
     // Map dataSource points with TransformerValue set to null
     const combinedDataWithNull = this.dataSource.map(data => ({

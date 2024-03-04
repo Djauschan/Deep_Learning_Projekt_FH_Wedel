@@ -7,7 +7,7 @@
     <!-- Add checkboxes for additional data points -->
     <span class="selection">Time Interval</span>
     <div class="selector">
-      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+      <select v-model="selectedTime" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
         <option value="Option 1" selected>
           Daily
         </option>
@@ -22,7 +22,7 @@
     <br>
     <span class="selection">Model</span>
     <div class="selector">
-      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+      <select v-model="selectedModel" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
         <option value="Option 1" selected>
           Transformer
         </option>
@@ -85,28 +85,28 @@
       </DxSeries> -->
 
       <DxSeries v-if="showAAPLLine" :name="'AAPL Line' + selectedStock" :data-source="combinedData" type="line"
-        value-field="AAPLValue" argument-field="date">
+        value-field="AAPLValue" argument-field="date" :color="seriesColors[0]">
       </DxSeries>
       <DxSeries v-if="showAALLine" :name="'AAL Line' + selectedStock" :data-source="combinedData"
-        type="line" value-field="AALValue" argument-field="date">
+        type="line" value-field="AALValue" argument-field="date" :color="seriesColors[1]">
       </DxSeries>
       <DxSeries v-if="showAMDLine" :name="'AMD Line' + selectedStock" :data-source="combinedData" type="line"
-        value-field="AMDValue" argument-field="date">
+        value-field="AMDValue" argument-field="date" :color="seriesColors[2]">
       </DxSeries>
       <DxSeries v-if="showCLine" :name="'C Line' + selectedStock" :data-source="combinedData" type="line"
-        value-field="CValue" argument-field="date">
+        value-field="CValue" argument-field="date" :color="seriesColors[3]">
       </DxSeries>
       <DxSeries v-if="showNVDALine" :name="'NVDA Line' + selectedStock"
-        :data-source="combinedData" type="line" value-field="NVDAValue" argument-field="date">
+        :data-source="combinedData" type="line" value-field="NVDAValue" argument-field="date" :color="seriesColors[4]">
       </DxSeries>
       <DxSeries v-if="showSnapLine" :name="'Snap Line' + selectedStock"
-        :data-source="combinedData" type="line" value-field="SnapValue" argument-field="date">
+        :data-source="combinedData" type="line" value-field="SnapValue" argument-field="date" :color="seriesColors[5]">
       </DxSeries>
       <DxSeries v-if="showSQLine" :name="'SQ Line' + selectedStock"
-        :data-source="combinedData" type="line" value-field="SQValue" argument-field="date">
+        :data-source="combinedData" type="line" value-field="SQValue" argument-field="date" :color="seriesColors[6]">
       </DxSeries>
       <DxSeries v-if="showTSLALine" :name="'TSLA Line' + selectedStock"
-        :data-source="combinedData" type="line" value-field="TSLAValue" argument-field="date">
+        :data-source="combinedData" type="line" value-field="TSLAValue" argument-field="date" :color="seriesColors[7]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -124,7 +124,7 @@
   <div class="newChart">
     <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" :data-source="this.AAPLData" title="AAPL Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AAPL Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'AAPL Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[1]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -142,7 +142,7 @@
   <div class="newChart">
    <DxChart v-if="showAALLine && showChart" id="AAL-chart" :data-source="this.AALData" title="AAL Chart">
     <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'AAL Line'" value-field="value" argument-field="date" type="line">
+    <DxSeries :name="'AAL Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
     </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -160,7 +160,7 @@
   <div class="newChart">
     <DxChart v-if="showAMDLine && showChart" id="AMD-chart" :data-source="this.AMDData" title="AMD Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AMD Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'AMD Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -178,7 +178,7 @@
   <div class="newChart">
     <DxChart v-if="showCLine && showChart" id="C-chart" :data-source="this.CData" title="C Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'C Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'C Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[4]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -197,7 +197,7 @@
     <DxChart v-if="showNVDALine && showChart" id="Historic Average-chart"
       :data-source="this.NVDAData" title="Historic Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'NVDA Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'NVDA Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[5]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -216,7 +216,7 @@
     <DxChart v-if="showSnapLine && showChart" id="Window Average-chart"
       :data-source="this.SnapData" title="Window Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Snap Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'Snap Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[6]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -235,7 +235,7 @@
     <DxChart v-if="showSQLine && showChart" id="SQ-chart"
       :data-source="this.SQData" title="SQ Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'SQ Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'SQ Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[7]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -352,6 +352,9 @@ export default {
       TSLApredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
+      selectedTime: 'Option 1',
+      selectedModel: 'Option 1',
+      seriesColors:  ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC', '#FFB733', '#FF3385', '#33B5FF'] // Array of colors for each series
     };
   },
   computed: {
@@ -360,7 +363,17 @@ export default {
           // Customize tooltip appearance or behavior if needed
         },
   },
+
+  mounted(){
+    this.handleSelection();
+  },
+
   methods: {
+    handleSelection(){
+      console.log("SelectedTime:", this.selectedTime);
+      console.log("SelectedModel:", this.selectedModel);
+    },
+
     async updateCombinedData() {
     // Map dataSource points with AALValue set to null
     const combinedDataWithNull = this.dataSource.map(data => ({
@@ -899,6 +912,8 @@ input::placeholder {
   transition: background-color 0.3s ease;
   border-radius: 12px;
   box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  height: 30px;
+  margin-left: 5px;
 }
 
 .button-stock:hover {

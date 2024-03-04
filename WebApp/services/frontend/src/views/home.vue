@@ -71,6 +71,46 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="seperator"></div>
+                <div class="hover-effect">
+                  <div class="home-container71">
+                    <div class="home-container33">
+                      <div class="home-container34">
+                        <span>Aktienwahl</span>
+                      </div>
+                      <div class="home-container35">
+                        <select v-model="selectedStock" ref="myButton3" @mouseover="changeCursor" @mouseleave="resetCursor">
+                          <option value="Option 1" selected>
+                            Apple
+                          </option>
+                          <option value="Option 2">
+                            American Airlines
+                          </option>
+                          <option value="Option 3">
+                            Advanced Micro Devices
+                          </option>
+                          <option value="Option 4">
+                            Citigroup
+                          </option>
+                          <option value="Option 5">
+                            NVIDIA
+                          </option>
+                          <option value="Option 6">
+                            Snap
+                          </option>
+                          <option value="Option 7">
+                            Block
+                          </option>
+                          <option value="Option 8">
+                            Tesla
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="seperator"></div>
                 <div class="hover-effect">
                   <div class="home-container33">
@@ -92,37 +132,18 @@
                   </div>
                 </div>
                 <div class="seperator"></div>
-                <div class="hover-effect">
+                <!--<div class="hover-effect">>-->
                   <div class="home-container70">
                     <div class="home-container33">
                       <div class="home-container34">
                         <span>Der Agent empfiehlt:</span>
                       </div>
-                      <button ref="myButton" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
-                        class="button">Aktie Kaufen!</button>
+                      <span>Kaufen!</span>
+                        <!--<button ref="myButton" @click="extractLastEnsembleValue" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
+                        class="button"><pre>{{ this.lastEnsembleValue }}</pre></button>-->
                     </div>
                   </div>
-                </div>
-                <div class="seperator"></div>
-                <div class="hover-effect">
-                  <div class="home-container71">
-                    <div class="home-container33">
-                      <div class="home-container34">
-                        <span>Zuletzt angesehen</span>
-                      </div>
-                      <div class="home-container35">
-                        <select ref="myButton3" @mouseover="changeCursor" @mouseleave="resetCursor">
-                          <option value="Option 1" selected>
-                            E-Mart
-                          </option>
-                          <option value="Option 2">
-                            Amazon
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <!--</div>>-->
               </div>
             </div>
             <div class="home-container36">
@@ -153,12 +174,30 @@
               <div class="home-container40">
                 <div class="home-container43">
                   <div class="home-container42">
-                    <span>Additional Information</span>
+                    <span>Detailed Agent Info</span>
                   </div>
-                  <span>Model Calculating...</span>
-                  <div class="home-container12">
+                  <div class="table-container" v-if="rlData">
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th v-for="stock in Object.keys(rlData[Object.keys(rlData)[0]])">{{ stock }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(dateData, date) in rlData" :key="date">
+        <td>{{ date }}</td>
+        <td v-for="stockData in Object.values(dateData)">
+          <pre>{{ formatStockData(stockData) }}</pre>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+                  <!--<div class="home-container12">
                     <ProgressBar ref="progressBar" />
-                  </div>
+                  </div>-->
                 </div>
               </div>
             </div>
@@ -192,6 +231,8 @@ import { useMyPiniaStore } from "../store.js";
 import { defineComponent, computed, ref } from "vue";
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import axios from "axios";
+import Swal from "sweetalert2/dist/sweetalert2.js";
 
 export default {
   name: "Home",
@@ -229,9 +270,64 @@ export default {
       isDarkMode: false,
       budgetInput: null,
       store: useMyPiniaStore(),
+      rlData: null,
+      lastEnsembleValue: null // Property to store the last ensemble value
     };
   },
+  mounted() {
+    // Scroll to a specific position on the page after it's loaded
+    this.scrollToPosition(0, 500); // Example: scroll to the top of the page with animation duration of 500ms
+
+    
+    // Extract the last "ensemble" value
+    this.extractLastEnsembleValue();
+  },
+
   methods: {
+    extractLastEnsembleValue() {
+      // Assuming rlData is available in your component's data
+      if (this.rlData) {
+        const lastDate = Object.keys(this.rlData).pop(); // Get the last date entry
+        this.lastEnsembleValue = this.rlData[lastDate].ensemble; // Extract the last "ensemble" value
+      }
+    },
+
+    scrollToPosition(x, y, duration = 0) {
+      const scrollOptions = {
+        left: x,
+        top: y,
+        behavior: 'smooth' // Smooth scrolling behavior
+      };
+      setTimeout(() => {
+        window.scrollTo(scrollOptions);
+      }, duration);
+    },
+
+  formatStockData(data) {
+    let formattedData = "";
+    for (const [key, value] of Object.entries(data)) {
+      formattedData += `${key}: ${value}\n`;
+    }
+    return formattedData;
+  },
+
+  
+    async load_rl_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/rl`, { // Use store.state.API
+          params: {
+            stock_symbols: '[AAPL, AAL, SNAP, TSLA]',
+            start_date: '2021-01-04',
+            end_date: '2021-01-08',
+            resolution: 'H'
+          }
+        });
+        this.rlData = response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
     async update_budget() {
       const username = this.username;
       console.log(this.budget);
@@ -267,7 +363,7 @@ export default {
       }
     },
     changeCursor() {
-      this.$refs.myButton.style.cursor = 'pointer'; // or any other cursor value
+      //this.$refs.myButton.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton1.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton2.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton3.style.cursor = 'pointer'; // or any other cursor value
@@ -275,7 +371,7 @@ export default {
       //this.$refs.myButton5.style.cursor = 'pointer'; // or any other cursor value
     },
     resetCursor() {
-      this.$refs.myButton.style.cursor = 'auto'; // reset to the default cursor
+      //this.$refs.myButton.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton1.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton2.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton3.style.cursor = 'auto'; // reset to the default cursor
@@ -314,6 +410,7 @@ export default {
       }, 500);
     },
   },
+  
   metaInfo: {
     title: "frontend",
     meta: [
@@ -322,6 +419,10 @@ export default {
         content: "frontend",
       },
     ],
+  },
+
+  created() {
+    this.load_rl_data();
   },
 };
 </script>
@@ -416,7 +517,7 @@ export default {
 }
 
 .home-logo {
-  font-size: 75px;
+  font-size: 65px;
   align-self: flex-start;
   font-family: "Lato";
   font-weight: bold;
@@ -440,6 +541,9 @@ export default {
   flex-direction: column;
 }
 
+.home-header{
+  height: 90px;
+}
 
 .home-desktop-menu {
   flex: 1;
@@ -597,7 +701,7 @@ export default {
 
 .home-container22 {
   flex: 0 0 auto;
-  width: 320px;
+  width: 140px;
   height: 100px;
   display: flex;
   align-items: center;
@@ -627,6 +731,27 @@ export default {
   border-radius: 10px;
   /* Adjust the value to control the roundness of the corners */
 }
+
+.table-container {
+  overflow-x: auto; /* Add horizontal scrollbar if content exceeds container width */
+  max-width: 100%; /* Limit the maximum width of the container */
+}
+
+table {
+  width: 100%; /* Ensure table takes up full width of its container */
+  border-collapse: collapse; /* Collapse borders between cells */
+}
+
+th, td {
+  padding: 8px; /* Add padding to cells */
+  text-align: left; /* Align text to the left within cells */
+  border: 1px solid #ddd; /* Add border to cells */
+}
+
+th {
+  background-color: #f2f2f2; /* Add background color to header cells */
+}
+
 
 .home-icon26 {
   width: 24px;
@@ -776,7 +901,7 @@ export default {
 
 .home-container33 {
   flex: 0 0 auto;
-  width: 200px;
+  width: 180px;
   height: 100px;
   display: flex;
   align-items: center;
@@ -786,7 +911,7 @@ export default {
 }
 
 .home-container34 {
-  width: 200px;
+  width: 180px;
   height: 27px;
   display: flex;
   align-items: center;
@@ -823,7 +948,7 @@ export default {
 
 .home-container37 {
   flex: 0 0 auto;
-  width: 70%;
+  width: 50%;
   height: auto;
   display: flex;
   align-self: top;
@@ -857,8 +982,8 @@ export default {
 
 .home-container40 {
   flex: 0 0 auto;
-  width: 25%;
-  height: 60%;
+  width: 45%;
+  height: 80%;
   display: flex;
   align-self: center;
   align-items: space-between;
@@ -912,7 +1037,7 @@ export default {
 
 .home-container42 {
   width: 100%;
-  Height: 100%;
+  Height: 10%;
   font-size: 26px;
   align-self: left;
 }
