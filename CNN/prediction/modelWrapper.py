@@ -59,10 +59,14 @@ class ModelWrapper:
                 # (1, 5, 20, 20) size
                 # predict single model
                 modelResult = modelEntry.get('model').predict(modelInputData)
+                modelResultValue = modelResult.get('prediction')
                 horizon = modelEntry.get('horizon')
-                predictedEndPrice = differencingService.calcThePriceFromChange(True, modelResult, rawEndPrice)
+                #todo fix hässlich
+                hItem = list(horizon.keys())[0]
+                predictedEndPrice = differencingService.calcThePriceFromChange(True, modelResultValue.item(),
+                                                                               rawEndPrice)
                 dateTimeOfPrediction = TimeModificationService.calcDateTimeFromStartDateAndInterval(endDate, interval,
-                                                                                                    horizon)
+                                                                                                    hItem)
                 stockResult.append({'DateTime': dateTimeOfPrediction, 'result': predictedEndPrice})
 
         return stockResult
@@ -79,7 +83,6 @@ class ModelWrapper:
         """
         pass
 
-
     def loadModels(self):
         for items in self.modelsToLoad:
             for tradingType in items.values():
@@ -92,4 +95,4 @@ class ModelWrapper:
                                 folder_path = os.path.join(self.MODEL_FOLDER, list(folder.values())[0])
                                 model = Model(stock_symbol, horizon, os.path.join(folder_path, model_path))
                                 self.modelCollection.append({'stock_Symbol': stock_symbol, 'horizon': horizon,
-                                                         'model': model})
+                                                             'model': model})

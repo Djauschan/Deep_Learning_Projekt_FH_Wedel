@@ -17,5 +17,5 @@ class Model:
 
     def predict(self, modelInput: Iterable):
         prediction = self.model.forward(modelInput)
-        toReturn = {'stock_symbol': self.stock_symbol, 'timestamp': self.model_horizon, 'prediction': prediction}
+        toReturn = {'stock_symbol': self.stock_symbol, 'horizon': self.model_horizon, 'prediction': prediction}
         return toReturn
