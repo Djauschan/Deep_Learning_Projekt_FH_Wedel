@@ -1,6 +1,6 @@
 import pandas as pd
 from fastapi import FastAPI
-from model_exe import ModelExe
+from CNN.prediction.model_exe import ModelExe
 
 app = FastAPI()
 

@@ -1,10 +1,7 @@
-from abc import ABC
-from datetime import timedelta
-
 import numpy as np
 import pandas as pd
-from abstract_model import AbstractModel
-from preprocessingServices import ConfigService, ModelImportService, Preprocessor
+from CNN.prediction.abstract_model import AbstractModel
+from CNN.prediction.services.preprocessingServices import ConfigService, ModelImportService, Preprocessor
 
 
 class ModelExe(AbstractModel):
@@ -15,6 +12,7 @@ class ModelExe(AbstractModel):
         self.parameters = self.configService.loadModelConfig(configPath)
         self.preprocessor = Preprocessor(self.parameters)
         self.gafData = np.zeros((1, 1))
+        self.modelCollection = 0
         """
             a collection of multiple models. Each Model can only predict a single value,
             in order to get a series of multiple timeStamps, multiple Models will predict values 
