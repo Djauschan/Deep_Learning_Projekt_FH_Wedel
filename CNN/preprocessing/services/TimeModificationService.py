@@ -32,6 +32,8 @@ class TimeModificationService:
     def calcDateTimeFromStartDateAndInterval(startDate: pd.Timestamp, interval, horizon) -> pd.Timestamp:
         difference = interval * horizon
         nextDateTime: pd.Timestamp = startDate + timedelta(minutes=difference)
+        #add if time <9:30 and >16:00 dann nächster tag 9:30
+
         return nextDateTime
 
     @staticmethod

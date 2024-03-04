@@ -11,11 +11,11 @@ async def root():
 
 
 @app.get("/predict/")
-def predict_cnn(stock_symbol: str, start_date: str, end_date: str):
+def predict_cnn(stock_symbol: str, start_date: str, end_date: str, resolution: str):
     cnn_interface = ModelExe()
 
-    prediction = cnn_interface.predict(pd.to_datetime(
-        start_date), pd.to_datetime(end_date), 120)
+    prediction = cnn_interface.predict(stock_symbol, pd.to_datetime(start_date),
+                                       pd.to_datetime(end_date), resolution)
 
     prediction.set_index('Timestamp', inplace=True)
     prediction = prediction.astype("Float64")

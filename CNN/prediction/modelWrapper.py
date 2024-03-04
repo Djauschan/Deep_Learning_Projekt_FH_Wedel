@@ -40,59 +40,89 @@ class ModelWrapper:
         """
             redirect predict request from api/backend to correct model
         """
-        predictions = pd.DataFrame([], columns=symbol_list)
+        modelsToExecute = []
+        if trading_type == resolution.MINUTE:
+            modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'dayTrading']
+        elif trading_type == resolution.TWO_HOURLY:
+            modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'swingTrading']
+        elif trading_type == resolution.DAILY:
+            modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'longTrading']
+        else:
+            print("error")
+
         interval = TRADING_PARAMS.get(trading_type.value).get('interval')
         preprocessor = Preprocessor(self.config)
         for stock_symbol in symbol_list:
             modelInputData, endRawPrice = preprocessor.pipeline(stock_symbol, startDate, endDate,
                                                                 length=20, interval=interval)
-            stockResultArr = self.getAllPredictionsForSingleStock(stock_symbol, modelInputData, endDate, endRawPrice,
+            stockResultArr = self.getAllPredictionsForSingleStock(modelsToExecute, stock_symbol, modelInputData, endDate, endRawPrice,
                                                                   interval)
-            self.modelResults.append({stock_symbol: stockResultArr})
+            self.modelResults.append({'stockSymbol': stock_symbol, 'result': stockResultArr})
 
         return self.createPredictionDataframe(self.modelResults)
 
-    def getAllPredictionsForSingleStock(self, stock_symbol, modelInputData, endDate, rawEndPrice, interval):
+    @staticmethod
+    def getAllPredictionsForSingleStock(modelsToExecute, stock_symbol, modelInputData, endDate, rawEndPrice, interval):
         stockResult = []
-        for modelEntry in self.modelCollection:
-            if modelEntry.get('stock_Symbol') == stock_symbol:
+        for modelEntry in modelsToExecute:
+            if modelEntry.get('stockSymbol') == stock_symbol:
                 # (1, 5, 20, 20) size
                 # predict single model
-                modelResult = modelEntry.get('model').predict(modelInputData)
-                modelResultValue = modelResult.get('prediction')
+                model = modelEntry.get('model').predict(modelInputData)
+                modelResult = model.get('prediction')
                 horizon = modelEntry.get('horizon')
-                #todo fix hässlich
-                hItem = list(horizon.keys())[0]
-                predictedEndPrice = differencingService.calcThePriceFromChange(True, modelResultValue.item(),
+                predictedEndPrice = differencingService.calcThePriceFromChange(True, modelResult.item(),
                                                                                rawEndPrice)
                 dateTimeOfPrediction = TimeModificationService.calcDateTimeFromStartDateAndInterval(endDate, interval,
-                                                                                                    hItem)
+                                                                                                    horizon)
                 stockResult.append({'DateTime': dateTimeOfPrediction, 'result': predictedEndPrice})
 
         return stockResult
 
     def createPredictionDataframe(self, resultMap) -> pd.DataFrame:
         """
-            (look up, Gruppenleiter-Meeting protokol
-            creates dataframe to return to Interface Impl.
-            in form of (return values in €)
-                                AAL, APL...
-            01.01.2022:15:00    12  22
-            01.01.2022:16:00    14  24
-            01.01.2022:17:00    16  25
+            IN: resultMap:
+                    AAL:
+                        DateTime: 01.01.2023:15:00, result: 16,02
+                        DateTime: 01.01.2023:16:00, result: 17,08
+                        DateTime: 01.01.2023:17:00, result: 18,01
+                    AAPL:
+                        DateTime: 01.01.2023:15:00, result: 16,02
+                        DateTime: 01.01.2023:16:00, result: 17,08
+                        DateTime: 01.01.2023:17:00, result: 18,21
+
+            OUT:                    AAL,    APL...
+                01.01.2022:15:00    12      22
+                01.01.2022:16:00    14      24
+                01.01.2022:17:00    16      25
         """
-        pass
+        stockList = ['Timestamp']
+        timestamps = []
+        predicts = []
+        for item in resultMap:
+            stockList.append(item.get('stock_symbol'))
+            for result in item.get('result'):
+                timestamps.append(result.get('DateTime'))
+                predicts.append(result.get('result'))
+
+
+        # prediction.set_index('Timestamp', inplace=True)
+        # prediction = prediction.astype("Float64")
+        return pd.DataFrame()
 
     def loadModels(self):
-        for items in self.modelsToLoad:
-            for tradingType in items.values():
-                for horizon in tradingType:
-                    for (folder, models) in horizon.values():
-                        for model_entry in models.values():
-                            for item in model_entry:
-                                stock_symbol = list(item.keys())[0]
-                                model_path = list(item.values())[0]
-                                folder_path = os.path.join(self.MODEL_FOLDER, list(folder.values())[0])
-                                model = Model(stock_symbol, horizon, os.path.join(folder_path, model_path))
-                                self.modelCollection.append({'stock_Symbol': stock_symbol, 'horizon': horizon,
-                                                             'model': model})
+        for tradingTypes in self.modelsToLoad.items():
+            tradingType = tradingTypes[0]
+            horizons = tradingTypes[1]
+            for horizonData in horizons:
+                for horizon in horizonData:
+                    item = horizonData[horizon]
+                    folderPath = item.get('folder')
+                    models = item.get('models')
+                    for model in models:
+                        for stock_symbol in model:
+                            modelPath = model[stock_symbol]
+                            path = os.path.join(self.MODEL_FOLDER, folderPath, modelPath)
+                            modelObj = Model(stock_symbol, horizon, path)
+                            self.modelCollection.append({'tradingType': tradingType, 'stockSymbol': stock_symbol,
+                                                         'horizon': horizon, 'model': modelObj})
