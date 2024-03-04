@@ -47,7 +47,7 @@
                       </div>
                       <div class="home-container27">
                          <button ref="myButton4" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
-                          class="button" @click="updateBudget">Aufladen</button>
+                          class="button" @click="update_budget">Aufladen</button>
                       </div>
                    </div>
                     </div>
@@ -190,6 +190,8 @@ import ProgressBar from "@/components/ProgressBar.vue";
 import SearchBar from '@/components/SearchBar.vue';
 import { useMyPiniaStore } from "../store.js";
 import { defineComponent, computed, ref } from "vue";
+import Swal from 'sweetalert2';
+import axios from 'axios';
 
 export default {
   name: "Home",
@@ -217,7 +219,7 @@ export default {
 
     return {
       isUserLoggedIn,
-      budget: localStorage.logged_budget,
+      budget: localStorage.getItem("budget"),
       username: localStorage.logged_user,
     };
   },
@@ -232,7 +234,9 @@ export default {
   methods: {
     async update_budget() {
       const username = this.username;
-      localStorage.logged_budget += this.budgetInput;
+      console.log(this.budget);
+      //console.log(this.store.state.budget);
+      localStorage.setItem("budget", this.budget += this.budgetInput);
       try {
         const response = await axios.put(this.store.API + "/update_budget/" + username, {
           params: {

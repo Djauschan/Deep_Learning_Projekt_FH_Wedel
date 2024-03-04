@@ -101,7 +101,7 @@ async def update_user(username: str, user_update: schemas.UserUpdate, db: Sessio
 
 @app.put("/update_budget/{username}")
 async def update_budget_by_user(username: str, budgetInput: int, db: Session = Depends(get_db)):
-    updated_budget = crud.update_budget_by_user(db, username, budgetInput)
+    updated_budget = crud.update_budget_by_user(db=db, username=username, new_budget=budgetInput)
     return {"message": "Budget updated successfully"}
 
 
