@@ -153,6 +153,17 @@ class TransformerInterface(AbstractModel):
             raise ValueError("Invalid resolution")
 
     def perdict_two_hourly(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp) -> pd.DataFrame:
+        """
+        Makes predictions for the given time period for the given symbols with a resolution of two hours.
+
+        Args:
+            symbol_list (list): The list of symbols for which the stock prices should be predicted.
+            timestamp_start (pd.Timestamp): The start of the time range for which the stock prices should be predicted.
+            timestamp_end (pd.Timestamp): The end of the time range for which the stock prices should be predicted.
+
+        Returns:
+            pd.DataFrame: A DataFrame with the predicted prices for each stock.
+        """
         # Load the data for making predictions
         prices_before_prediction, dataset = self.load_data(timestamp_start)
         data_loader = DataLoader(dataset, shuffle=False)
@@ -214,7 +225,17 @@ class TransformerInterface(AbstractModel):
 
         return prediction
 
-    def insert_valid_entries(self, timeseries: pd.Series, valid_entries: pd.DataFrame):
+    def insert_valid_daytime_entries(self, timeseries: pd.Series, valid_entries: pd.DataFrame) -> pd.DataFrame:
+        """
+        Insert entries in a dataframe at the timestamps where stocks are traded.
+
+        Args:
+            timeseries (pd.Series): The original timeseries containing valid and invalid entries.
+            valid_entries (pd.DataFrame): Predictions made by the model. These are inserted at the timestamps where stocks are traded.
+
+        Returns:
+            pd.DataFrame: A DataFrame with the valid entries inserted at the correct timestamps. The entries at the invalid timestamps are nan.
+        """
         # Get the index of the first valid entry
         first_valid_index = timeseries.index[(timeseries.apply(
             lambda d: d.hour) >= 4) & (timeseries.apply(lambda d: d.hour) < 20)][0]
@@ -228,7 +249,18 @@ class TransformerInterface(AbstractModel):
 
         return result_df
 
-    def insert_rows_with_zeros(self, df, row_number, count):
+    def insert_rows_with_zeros(self, df: pd.DataFrame, row_number: int, count: int) -> pd.DataFrame:
+        """
+        Inserts count rows with zeros at the given row number in the given dataframe.
+
+        Args:
+            df (pd.DataFrame): DataFrame to insert the rows into.
+            row_number (int): The row number to insert the rows at.
+            count (int): The number of rows to insert.
+
+        Returns:
+            pd.DataFrame: The DataFrame with the inserted rows.
+        """
         for _ in range(count):
             df = pd.concat(
                 [df.iloc[:row_number], pd.DataFrame(
