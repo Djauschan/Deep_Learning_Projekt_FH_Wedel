@@ -1,7 +1,4 @@
-import time
 from datetime import datetime, timedelta
-from typing import Union, Tuple, Any
-
 import numpy as np
 import pandas as pd
 from numpy import ndarray
@@ -12,24 +9,108 @@ class TimeSeriesBuilder:
     def __init__(self):
         pass
 
-    '''
-        Creates timeseriesArray, with constant time intervals
-        This function is supposed to be modular, each feature will be return in a seperate numpy arr,
-        so that it can be serialized individually. This enables that different combinations of features can
-        be explored without redoing the building process
+    # todo fix singel source of trutuh similar process, in buildTimeSeries but not reuseable bc label identification and
+    # todo mutliple iteration, no time to dix
+    def buildSingleTimeSeries(
+            self,
+            df: pd.DataFrame,
+            features,
+            length: int,
+            interval: int,
+            tolerance: int
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """
+            build a single TimeSeries of a dataframe,
+            the timeseries has as the last element of the series the last element of the dataframe
+            as the dataframe is already filtered to only contain the elements within the desired range
+            :param:
 
-        @:param
-            _df = represents the dataframe, with spaces and emptyRows..
-            length = the desired length of a single timeSeries
-            interval = the space <=> interval between single timeSeries
-            tolerance = the allowed difference between the intervals
-            time_ahead = the amount of time <=> timestamp, the model trys to predict <=> timeStamp of Label
-                time_ahead is provided as amount of intervals ahead <=> 3 => 3 * interval at the last entry of series
-            featureArray = a List of Strings with Column names that represent the features
-    '''
+            :return:
+                tupel np.array with (length_series, features), np.array(dateTime entries of series)
+        """
+        len_df = len(df) - 1
+        x = length
+        RETRY_TRESHOLD = 10
+        previousCandidateIdx = 0
+        previousCandidate = df.iloc[len_df]
+        dateTimeArr = np.zeros(length).astype(datetime)
+        singleTimeSeriesArr = np.zeros((length+1, len(features)))
+        posixTestArr = np.zeros(length)
+        i = 0
+        while x == 0:
+            df_row = df.iloc[len_df]
+            singleTimeSeriesArr[length] = df_row[[*features]].values
+            # from current element the posix minute
+            currentMinute = df_row['posixMinute']
+            # the next element in the series should be the item with the posixTime of last ele - the interval
+            nextOptimalMinute = currentMinute - interval
+            # get closest element to optimal element, with binary search, start looking at previous ele bc list is sorted
+            candidateIdx, minimalAbw, closestCandidateIdx = \
+                self._binary_search(df, 0, len_df, nextOptimalMinute, tolerance, -1, False)
+            # no exact candidate found
+            if candidateIdx == -1:
+                # is the next candidate in tolerance range
+                if abs(minimalAbw) < tolerance:
+                    candidateIdx = closestCandidateIdx
+                # go to previous day
+                else:
+                    # ersten Wert des folge Tages nehmen (oder nächster Handelstag...)
+                    reTryCounter: int = 1
+                    noValidAlternativeFound = True
+                    while reTryCounter < RETRY_TRESHOLD and noValidAlternativeFound:
+                        optimalDateTimeFromPosix = pd.Timestamp.fromtimestamp(nextOptimalMinute * 60) - \
+                                                   pd.Timedelta(hours=1)
+                        prevDay = self._getPriviousDayVal(optimalDateTimeFromPosix, reTryCounter)
+                        candidateIdx, minimalAbw, closestCandidateIdx = \
+                            self._binary_search_dateTime(df, previousCandidateIdx, len_df - 1,
+                                                         prevDay, 100000, -1, True)
+                        reTryCounter += 1
+                        if candidateIdx != -1:
+                            noValidAlternativeFound = False
+                        # in seconds = 180second = 3min is allowed on next day
+                        if not noValidAlternativeFound and abs(minimalAbw) <= 600:
+                            candidateIdx = closestCandidateIdx
+                            noValidAlternativeFound = False
+                            # wenn bis 8:20 gefunden -> zeitreihe verwerfen
+                            if candidateIdx == -1:
+                                isValid = False
+                                previousCandidateIdx = x - 1
+                                # print(' NO VALID CANDIDATE ')
+                            else:
+                                'Bei pd.TimeStamp = 16.01.2024 = 2024-01-16 bei data 2. day'
+                                candidate = df.iloc[candidateIdx]
+                                previousCandidate = candidate
+                                previousCandidateIdx = candidateIdx
+                                candidate_minuteOfDay = int(candidate['posixMinute'])
+                                ### END FIND CANDIDATE
+                                # Second check if the day fits as well
+                                singleTimeSeriesArr[x] = candidate[[*features]].values
+                                dateTimeArr[x] = candidate['DateTime']
+                                posixTestArr[x] = candidate_minuteOfDay
+                        else:
+                            #not possible to get valid series
+                            return np.zeros(1), np.zeros(1)
+            x = x - 1
+            i = i + 1
+        return singleTimeSeriesArr, dateTimeArr
 
     def buildTimeSeries(self, data: pd.DataFrame, length: int, interval: int, time_ahead: int, tolerance: int,
-                        nextDay_retry_threshold: int, featureArray: list, label_name: str, INT_TOL: bool):
+                        nextDay_retry_threshold: int, featureArray: list, label_name: str):
+        """
+            Creates timeseriesArray, with constant time intervals
+            This function is supposed to be modular, each feature will be return in a seperate numpy arr,
+            so that it can be serialized individually. This enables that different combinations of features can
+            be explored without redoing the building process
+
+            @:param
+                _df = represents the dataframe, with spaces and emptyRows..
+                length = the desired length of a single timeSeries
+                interval = the space <=> interval between single timeSeries
+                tolerance = the allowed difference between the intervals
+                time_ahead = the amount of time <=> timestamp, the model trys to predict <=> timeStamp of Label
+                    time_ahead is provided as amount of intervals ahead <=> 3 => 3 * interval at the last entry of series
+                featureArray = a List of Strings with Column names that represent the features
+        """
         df = data
         CLOEST_CANDIDATE_TRESHOLD = 10000000
         # A List with multiple DF
@@ -112,7 +193,7 @@ class TimeSeriesBuilder:
                 if candidateIdx == -1:
                     isValid = False
                     previousCandidateIdx = i + 1
-                    #print(' NO VALID CANDIDATE ')
+                    # print(' NO VALID CANDIDATE ')
                 else:
                     'Bei pd.TimeStamp = 16.01.2024 = 2024-01-16 bei data 2. day'
                     candidate = df.iloc[candidateIdx]
@@ -144,7 +225,7 @@ class TimeSeriesBuilder:
 
                         notFound = False
                         label_candidate = df.iloc[0]
-                        #if no perfect Label Candidate Found. look for alternative
+                        # if no perfect Label Candidate Found. look for alternative
                         if labelIdx == -1:
                             # Optimal Label not found -> get value next day 8pm
                             # previousCandidateDateTime = previousCandidate['DateTime']  # letzter eintrag in timeSeries
@@ -155,7 +236,7 @@ class TimeSeriesBuilder:
                                 self._binary_search_dateTime(df, candidateIdx, df_length - 1, nextDayStartDay,
                                                              CLOEST_CANDIDATE_TRESHOLD, -1, True)
                             if labelIdx == -1:
-                                if abs(minimalAbw) < 60*10:  # 10min
+                                if abs(minimalAbw) < 60 * 10:  # 10min
                                     labelIdx = closestCandidateIdx
                                     notFound = False
                                 else:
@@ -171,16 +252,16 @@ class TimeSeriesBuilder:
                             resultNp[r] = singleTimeSeriesArr
                             # assign cadidate to final label array
                             label_arr[r] = label_candidate[label_name]
-                            #dateTimeLabel = label_candidate['DateTime']
-                            #print('dateTimeArr: ')
-                            #print(f'for index: {i}: ')
-                            #print(dateTimeArr)
-                            #print(f'labelTime: {dateTimeLabel}')
-                            #time.sleep(10)
+                            # dateTimeLabel = label_candidate['DateTime']
+                            # print('dateTimeArr: ')
+                            # print(f'for index: {i}: ')
+                            # print(dateTimeArr)
+                            # print(f'labelTime: {dateTimeLabel}')
+                            # time.sleep(10)
                             r = r + 1
                         else:
                             pass
-                            #print('NO LABEL')
+                            # print('NO LABEL')
 
             i = i + 1
 
@@ -274,6 +355,12 @@ class TimeSeriesBuilder:
                                                      hour=9, minute=30, second=0)
         return nextDayStartDay
 
+    def _getPriviousDayVal(self, previousDayDateTime: pd.Timestamp, countOfDay: int) -> pd.Timestamp:
+        prevDay: pd.Timestamp = previousDayDateTime - timedelta(days=countOfDay)
+        prevDayStartOfDay: pd.Timestamp = pd.Timestamp(year=prevDay.year, month=prevDay.month, day=prevDay.day,
+                                                       hour=9, minute=30, second=0)
+        return prevDayStartOfDay
+
     def timeSeriesBuilderSimple(self, df: pd.DataFrame, startTimeToKeep: int, endTimeToKeep: int, lengthTs: int,
                                 features: list, ahead: int) -> tuple[ndarray, ndarray]:
         """
@@ -289,7 +376,7 @@ class TimeSeriesBuilder:
 
         LEN_DF = len(data)
         i = 0
-        LEN_RETURN_ARR = LEN_DF-lengthTs
+        LEN_RETURN_ARR = LEN_DF - lengthTs
         toReturn_data = np.zeros((LEN_RETURN_ARR, lengthTs, len(features)))
         toReturn_label = np.zeros(LEN_RETURN_ARR)
         singleTs = np.zeros((lengthTs, len(features)))
@@ -298,7 +385,7 @@ class TimeSeriesBuilder:
             x = 0
             singleTs = np.zeros((lengthTs, len(features)))
             while x < lengthTs:
-                currentRow = data.iloc[i+x]
+                currentRow = data.iloc[i + x]
                 singleTs = currentRow[[*features]]
                 dateTimeArr = currentRow['DateTime']
                 print(dateTimeArr)

@@ -2,8 +2,9 @@ from pyts.image import GramianAngularField
 import numpy as np
 import matplotlib
 
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+
+matplotlib.use('TkAgg')
 
 
 class gafService:
@@ -22,12 +23,12 @@ class gafService:
         gafDataFeatureSeparated = np.zeros((len(data), len(data[0]), len(data[0][0]), len(data[0][0])))
         i = 0
         while i < len(data):
-            gafDataFeatureSeparated[i] = self.createGAFfromUnivariateTimeSeries(data[i])
+            gafDataFeatureSeparated[i] = self._createGAFfromUnivariateTimeSeries(data[i])
             i = i + 1
 
         return gafDataFeatureSeparated
 
-    def createGAFfromUnivariateTimeSeries(self, data: np.ndarray) -> np.ndarray:
+    def _createGAFfromUnivariateTimeSeries(self, data: np.ndarray) -> np.ndarray:
         '''
             @data: Dimension (anz einzelner ts, len einer ts, anz feature je ts): bspw = (3740, 5)
         '''
@@ -48,6 +49,23 @@ class gafService:
             gafData[i] = self._createSingleGAF(x_arr)
             i = i + 1
         return gafData
+
+    def createSingleGAFfromMultivariateTimeSeries(self, data: np.ndarray) -> np.ndarray:
+        """
+        param:
+        @data: numpy arr with dimensions of (length, features) => (30, 10)
+        @return = np.array (len_of_feature, länge_ts, länge_ts)
+        """
+        data = data.transpose()  # (10, 30)
+        gafDataFeatureSeparated = np.zeros(
+            (len(data), len(data[0]), len(data[0]))
+        )  # 10x30x30
+        i = 0
+        while i < len(data):
+            gafDataFeatureSeparated[i] = self._createSingleGAF(data[i])
+            i = i + 1
+
+        return gafDataFeatureSeparated
 
     def _createSingleGAF(self, x_arr: np.ndarray):
         # Compute Gramian angular fields

@@ -17,7 +17,10 @@ class CNN_TimeSeriesModel:
         self.parameters = self.importer.getModelParameter()
 
     def exe(self):
-        for modelDataPath in self.importer.getModelResources():
+        listOfModelsToTrain = self.importer.getModelResources()
+        x = 0
+        while x < len(listOfModelsToTrain):
+            modelDataPath = listOfModelsToTrain[x]
             stockName = modelDataPath[0]
             folderRoot = modelDataPath[1]
             dataFilePath = modelDataPath[2]
@@ -49,3 +52,4 @@ class CNN_TimeSeriesModel:
             trainer = ModelTrainer(self.parameters, dataset_train, model, loss_func, optimizer)
             model = trainer.run(exporter)
             exporter.storeModel(model, self.parameters['MODEL_NAME'] + '_' + stockName)
+            x += 1

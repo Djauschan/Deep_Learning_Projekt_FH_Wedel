@@ -1,6 +1,6 @@
 # Model Config
 #### HYPER PARAMETER ####
-NUM_EPOCH: 5
+NUM_EPOCH: 4
 LR: 0.0001
 BATCH_SIZE: 1
 TRAIN_TEST_SPLIT_RATIO: 0.8 #To test smaller the training size
@@ -8,7 +8,8 @@ L2RegularisationFactor: 0.00 #First Overfit
 DROPOUT: 0.0 #First Overfit
 LOGGING_INTERVAL: 10 #every x value will be logged
 LOSS_PLOT_INTERVAL: 100
-RESULT_FOLDER: "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\result\\"
+PROJECT_ROOT : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\"
+RESULT_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\training\\result\\"
 RSC_DATA_ROOT: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\data\\train_data\\"
 TRAINING_FOLDER: "swingTrayding_20_120_4_DATA_Open_Volume_MCHI_IVV_MVG_ahead4\\"
 MODEL_NAME: "20_120_4_swingTrayding_1"

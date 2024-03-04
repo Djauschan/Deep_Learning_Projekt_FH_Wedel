@@ -7,12 +7,12 @@ TRAIN_TEST_SPLIT_RATIO: 0.8 #To test smaller the training size
 L2RegularisationFactor: 0.00 #First Overfit
 DROPOUT: 0.0 #First Overfit
 LOGGING_INTERVAL: 10 #every x value will be logged
-LOSS_PLOT_INTERVAL: 1000
+LOSS_PLOT_INTERVAL: 100
 PROJECT_ROOT : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\"
 RESULT_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\training\\result\\"
 RSC_DATA_ROOT: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\data\\train_data\\"
-TRAINING_FOLDER: "swingTrayding_20_120_8_DATA_Open_Volume_MCHI_IVV_MVG_ahead8\\"
-MODEL_NAME: "20_120_8_swingTrayding_3"
+TRAINING_FOLDER: "longTrayding_20_300_8_DATA_Open_Volume_MCHI_IVV_MVG_ahead8\\"
+MODEL_NAME: "20_300_8_longTrayding_1" # must be equal to training_folder
 TRAINING_DATA_LIST: [
   #Training_Data, "Label_Data
   AAL: ["AAL\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead8.npy", "AAL\\ImageGafData\\LABELS.npy"],

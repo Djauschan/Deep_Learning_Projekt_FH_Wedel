@@ -10,49 +10,114 @@ from numpy import float32
 from pyts.image import GramianAngularField
 from yaml import SafeLoader
 
+from CNN.prediction.services.DataLoaderService import DataLoaderService
+from CNN.prediction.services.DataMergerService import DataMergerService
+from CNN.preprocessing.services.GafService import gafService
+from CNN.preprocessing.services.NormalisationService import NormalisationService
+from CNN.preprocessing.services.TimeBuildService import TimeSeriesBuilder
+from CNN.preprocessing.services.TimeModificationService import TimeModificationService
+from CNN.preprocessing.services.DifferencingService import differencingService
+
 """
 @auther ayk.gue
 """
-
-
-class ConfigService:
+class Preprocessor:
     """
-    class to load model config
+    class to preprocess a given timeSeries
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, config):
+        self.config = config
+        self.dataLoaderService = DataLoaderService()
+        self.featureDataMergeService = DataMergerService()
+        self.timeSeriesBuilderService = TimeSeriesBuilder()
+        self.timeModificationService = TimeModificationService()
+        self.differenceService = differencingService(True)
+        self.normalisationService = NormalisationService()
+        self.GAFservice = gafService()
 
-    def loadModelConfig(self, path: str):
-        # opening a file
-        parameter = {}
-        with open(path, "r") as stream:
-            try:
-                # Converts yaml document to python object
-                parameter = yaml.load(stream, Loader=SafeLoader)
-            except yaml.YAMLError as e:
-                print(e)
-                # todo feherlbehandung einbauen
+    def pipeline(self, stock_symbol, startDate: pd.Timestamp, endDate: pd.Timestamp, length: int, interval: int):
+        RSC_ROOT = self.config["RSC_ROOT"]
+        RSC_DATA_FILES = self.config["RSC_DATA_FILES"]
+        STOCK_DATA = RSC_DATA_FILES.get(stock_symbol)
+        FEATURES_DATA_TO_LOAD = self.config["FEATURES_DATA_TO_LOAD"]
+        FEATURES = self.config["FEATURES"]
+        modelInputList = []
+        endPriceList = []
+        for k, v in STOCK_DATA.items():
+            filePath = os.path.join(RSC_ROOT, v[0])
+            allDataColumns = v[1]
+            column_featureName = v[2]
+            stock_path: filePath
+            stock_data = self.dataLoaderService.loadDataFromFile(
+                startDate,
+                endDate,
+                filePath,
+                allDataColumns,
+                column_featureName,
+            )
+            stock_data = self.timeModificationService.transformTimestap(
+                stock_data, False
+            )
+            endPriceList.append(stock_data.iloc[len(stock_data) - 1]["Open"])
+            # load ETF-feature data & join data & features
+            data = self.__getAndMergeFeatureDataWithMainData(
+                startDate, endDate, RSC_ROOT, FEATURES_DATA_TO_LOAD, stock_data
+            )
+            data, dateTimeArr = self.timeSeriesBuilderService.buildSingleTimeSeries(
+                data, FEATURES, length, interval, tolerance=30
+            )
 
-        return parameter
+            # if not (length + 1) -> data not correct
+            if len(data) != 21:
+                return -1, -1
 
+            data = self.differenceService.transformSingleSeries(data)
+            # remove first item difference of 0
+            data = data[1:]
+            # Only the Data will be normalised
+            data = self.normalisationService.normMinusPlusOne(data)
+            # the final model inputData
+            gafData = self.GAFservice.createGAFfromMultivariateTimeSeries(data)
+            # toTensor
+            arr = np.array(gafData).astype(float32)
+            modelInputList.append(
+                torch.unsqueeze(torch.from_numpy(arr), 0).to(torch.device("cpu"))
+            )
 
-class DataMergerService:
-    def __init__(self):
-        pass
+        return modelInputList, endPriceList
 
-    def mergeFeatureData(
-        self, main_df: pd.DataFrame, df_toMerge: pd.DataFrame
+    def __getAndMergeFeatureDataWithMainData(
+        self,
+        startate: pd.Timestamp,
+        endDate,
+        rsc_folder: str,
+        FEATURES_TO_LOAD: list,
+        main_df: pd.DataFrame,
     ) -> pd.DataFrame:
-        """
-        merge the dataframe in the list
-        """
-        return main_df.merge(
-            df_toMerge, how="inner", left_on=["posixMinute"], right_on=["posixMinute"]
-        )
+        mergedDf = main_df
+        for oData in FEATURES_TO_LOAD:
+            for k, v in oData.items():
+                fileName = v[0]
+                allColumns = v[1]
+                column_featureName = v[2]
+                feature_df = self.dataLoaderService.loadDataFromFile(
+                    startate,
+                    endDate,
+                    rsc_folder + fileName,
+                    allColumns,
+                    column_featureName,
+                )
+                feature_df = self.timeModificationService.transformTimestap(
+                    feature_df, True
+                )
+                mergedDf = self.featureDataMergeService.mergeFeatureData(
+                    mergedDf, feature_df
+                )
+        return mergedDf
 
 
-class DifferencingService:
+class _DifferencingService:
     """
     class to calc the difference between items in a given array and return array of differences
     """
@@ -110,7 +175,7 @@ class DifferencingService:
         ) * 1000  # to increase distance !was trained that way
 
 
-class GafService:
+class _GafService:
     """
     service that create based Grammian Angular Fields
     """
@@ -168,7 +233,7 @@ class GafService:
         plt.savefig(savePath)
 
 
-class NormalisationService:
+class _NormalisationService:
     """
     class to normalize a dataframe
     """
@@ -199,7 +264,7 @@ class NormalisationService:
         return data
 
 
-class TimeModificationService:
+class _TimeModificationService:
     """
     class to parse all given timeStamps to posixTime/60
     """
@@ -221,13 +286,7 @@ class TimeModificationService:
         return df_DateTimeColumn.apply(lambda x: (x.timestamp()) / 60)
 
 
-class TimeSeriesBuilder:
-    """
-    class to build a timeseries based from given Data.
-    the data is already filtered start & end date are fixed and
-    !!! WARNING, the used Modells require a length for = 10 ITEMS !!!
-    !!! Interval should be 480min !!!
-    """
+class _TimeSeriesBuilder:
 
     def __init__(self):
         pass
@@ -236,9 +295,9 @@ class TimeSeriesBuilder:
         self,
         df: pd.DataFrame,
         features,
-        length: int = 20,
-        interval: int = 120,
-        tolerance: int = 30,
+        length: int,
+        interval: int,
+        tolerance: int
     ) -> tuple[np.ndarray, np.ndarray]:
         """
         create 1 single valid series, out of given dataframe.
@@ -305,7 +364,6 @@ class TimeSeriesBuilder:
                             reTryCounter += 1
                             if candidateIdx != -1:
                                 noValidAlternativeFound = False
-
                             if (
                                 not noValidAlternativeFound and abs(minimalAbw) <= 180
                             ):  # in seconds = 180second = 3min is allowed on next day
@@ -453,7 +511,7 @@ class TimeSeriesBuilder:
         return nextDayStartDay
 
 
-class DataLoaderService:
+class _DataLoaderService:
     """
     class to load data from file and store it in dataframe
     """
@@ -505,107 +563,3 @@ class ModelImportService:
         model = torch.jit.load(full_path, map_location=device)
         model.eval()
         return model
-
-
-class Preprocessor:
-    """
-    class to preprocess a given timeSeries
-    """
-
-    def __init__(self, modelParameters):
-        self.configService = ConfigService()
-        self.modelParameters = modelParameters
-        self.dataLoaderService = DataLoaderService()
-        self.featureDataMergeService = DataMergerService()
-        self.timeSeriesBuilderService = TimeSeriesBuilder()
-        self.timeModificationService = TimeModificationService()
-        self.differenceService = DifferencingService()
-        self.normalisationService = NormalisationService()
-        self.GAFservice = GafService()
-
-    def pipeline(self, startDate: pd.Timestamp, endDate: pd.Timestamp):
-        RSC_ROOT = self.modelParameters["RSC_ROOT"]
-        STOCK_FOLDER = self.modelParameters["STOCK_FOLDER"]
-        ETF_FOLDER = self.modelParameters["ETF_FOLDER"]
-        RSC_DATA_FILES = self.modelParameters["RSC_DATA_FILES"]
-        FEATURES_DATA_TO_LOAD = self.modelParameters["FEATURES_DATA_TO_LOAD"]
-        FEATURES = self.modelParameters["FEATURES"]
-        modelInputList = []
-        endPriceList = []
-        # Todo timeseries builder start end of date not begin...
-        for i in RSC_DATA_FILES:
-            for k, v in i.items():
-                fileName = v[0]
-                allDataColumns = v[1]
-                column_featureName = v[2]
-                stock_path: str = os.path.join(RSC_ROOT, STOCK_FOLDER)
-                feature_path: str = os.path.join(RSC_ROOT, ETF_FOLDER)
-                stock_data = self.dataLoaderService.loadDataFromFile(
-                    startDate,
-                    endDate,
-                    stock_path + fileName,
-                    allDataColumns,
-                    column_featureName,
-                )
-                stock_data = self.timeModificationService.transformTimestap(
-                    stock_data, False
-                )
-                endPriceList.append(stock_data.iloc[len(stock_data) - 1]["Open"])
-                # load ETF-feature data & join data & features
-                data = self.__getAndMergeFeatureDataWithMainData(
-                    startDate, endDate, feature_path, FEATURES_DATA_TO_LOAD, stock_data
-                )
-
-                data, dateTimeArr = self.timeSeriesBuilderService.buildTimeSeries(
-                    data, FEATURES
-                )
-                # debug timeseries dateTime Array
-                # print(dateTimeArr)
-
-                # if not (length + 1) -> data not correct
-                if len(data) != 21:
-                    return -1, -1
-
-                data = self.differenceService.transformSeries(data)
-                # remove first item difference of 0
-                data = data[1:]
-                # Only the Data will be normalised
-                data = self.normalisationService.normMinusPlusOne(data)
-                # the final model inputData
-                gafData = self.GAFservice.createGAFfromMultivariateTimeSeries(data)
-                # toTensor
-                arr = np.array(gafData).astype(float32)
-                modelInputList.append(
-                    torch.unsqueeze(torch.from_numpy(arr), 0).to(torch.device("cpu"))
-                )
-
-        return modelInputList, endPriceList
-
-    def __getAndMergeFeatureDataWithMainData(
-        self,
-        startate: pd.Timestamp,
-        endDate,
-        rsc_folder: str,
-        FEATURES_TO_LOAD: list,
-        main_df: pd.DataFrame,
-    ) -> pd.DataFrame:
-        mergedDf = main_df
-        for oData in FEATURES_TO_LOAD:
-            for k, v in oData.items():
-                fileName = v[0]
-                allColumns = v[1]
-                column_featureName = v[2]
-                feature_df = self.dataLoaderService.loadDataFromFile(
-                    startate,
-                    endDate,
-                    rsc_folder + fileName,
-                    allColumns,
-                    column_featureName,
-                )
-                feature_df = self.timeModificationService.transformTimestap(
-                    feature_df, True
-                )
-                mergedDf = self.featureDataMergeService.mergeFeatureData(
-                    mergedDf, feature_df
-                )
-        return mergedDf

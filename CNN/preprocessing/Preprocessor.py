@@ -55,7 +55,6 @@ class Preprocessor:
         '''
         self.TO_FIND_OTHER_FEATURE_RSC_FOLDER = self.modelParameters['TO_FIND_OTHER_FEATURE_RSC_FOLDER']
         self.OTHER_FEATURES_TO_LOAD = self.modelParameters['OTHER_FEATURES_TO_LOAD']
-        self.INT_TOL = self.modelParameters['ALLOW_SERIES_INTERVAL_TOLERANCE']
         self.ENHANCE_DIFFERENCE = self.modelParameters['ENHANCE_DIFFERENCE']
 
         # All Services Used during Preprocessing
@@ -98,7 +97,7 @@ class Preprocessor:
                 # merges the main data (the data with the label values)
                 # with all the feature data (the etf, gold index...)
                 df = self.getAndMergeFeatureDataWithMainData(df)
-                data, labels = self.createSeries(df, self.FEATURES, label_name, self.INT_TOL)
+                data, labels = self.createSeries(df, self.FEATURES, label_name)
                 # create a feature Row with avg vals for open
                 data = self.avaragingService.calcAvg(data)
                 # All feature Data will be differenced
@@ -157,7 +156,7 @@ class Preprocessor:
 
         return mergedDf
 
-    def createSeries(self, data, FEATURES, LABEL, INT_TOL):
+    def createSeries(self, data, FEATURES, LABEL):
         # designered length + 1 => differecing removes first element
         # returs: (a=5000, l=11, f=8) array;
         # a=anz der einzelnen TS; l= die länge jeder TS; f=die enthaltenen Feature
@@ -167,8 +166,7 @@ class Preprocessor:
                                                                      self.TS_TOLERANCE,
                                                                      self.NEXT_DAY_RETRY_THRESHOLD,
                                                                      FEATURES,
-                                                                     LABEL,
-                                                                     INT_TOL)
+                                                                     LABEL)
         # data, labels = self.timeSeriesBuilderService.timeSeriesBuilderSimple(data, 9, 16, self.TS_LENGTH, FEATURES,
         #                                                                     self.TS_AHEAD)
 

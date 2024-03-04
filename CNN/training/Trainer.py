@@ -80,7 +80,7 @@ class ModelTrainer:
         train_logging_arr = np.zeros(
             (int((len(self.train_dataloader) * self.NUM_EPOCH)) + self.NUM_EPOCH, len(logColumns_train)))
         test_logging_arr = np.zeros(
-            (int((len(self.test_dataloader) * self.NUM_EPOCH)) + self.NUM_EPOCH, len(logColumns_test)))
+            (1, len(logColumns_test)))
 
         rRunningAvgLoss = 0.0
         # running var for each model exec step
@@ -132,15 +132,15 @@ class ModelTrainer:
                     (int(len(self.test_dataloader) + 1), len(logColumns_test)))
                 epochTestArr = self.test_model(self.test_dataloader, self.model, self.loss,
                                                tmp_test_logging_arr, e)
-                np.concatenate((test_logging_arr, epochTestArr))
-                exporter.createLogAndPlot_test(epochTestArr, e, logColumns_test, 'TEST', 'test')
+                test_logging_arr = np.concatenate((test_logging_arr, epochTestArr))
+                exporter.createLogAndPlot_epoch_test(epochTestArr, e, logColumns_test, 'TEST', 'test')
 
         # FÜR GESAMT RESULT
         LOSS_PLOT_INTERVAL = self.parameters['LOSS_PLOT_INTERVAL']
         exporter.saveAllResults(train_logging_arr, logColumns_train, 'TRAINING', 'ALL_TR_RESULTS')
         exporter.createLossPlot(train_logging_arr, LOSS_PLOT_INTERVAL, logColumns_train,
                                 'TRAINING', 'TRAINING_LOGGING_INTERVAL')
-        exporter.createLogAndPlot_test(test_logging_arr, self.NUM_EPOCH+1, logColumns_test, 'GESAMT_TEST',
+        exporter.createLogAndPlot_epoch_test(test_logging_arr, self.NUM_EPOCH + 1, logColumns_test, 'TEST',
                                        'ALL_TEST_RESULTS')
 
         now = datetime.now()

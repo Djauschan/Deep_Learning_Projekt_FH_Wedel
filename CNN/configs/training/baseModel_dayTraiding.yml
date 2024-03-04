@@ -1,6 +1,5 @@
 # Model Config
 #### HYPER PARAMETER ####
-PROJECT_ROOT : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\"
 NUM_EPOCH: 3
 LR: 0.0001
 BATCH_SIZE: 1
@@ -9,6 +8,7 @@ L2RegularisationFactor: 0.00 #First Overfit
 DROPOUT: 0.0 #First Overfit
 LOGGING_INTERVAL: 20 #every x value will be logged
 LOSS_PLOT_INTERVAL: 100
+PROJECT_ROOT : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\"
 RESULT_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\training\\result\\"
 RSC_DATA_ROOT: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\data\\train_data\\"
 TRAINING_FOLDER: "DayTrayding_20_15_1_DATA_Open_Volume_MCHI_IVV_MVG_ahead1\\"

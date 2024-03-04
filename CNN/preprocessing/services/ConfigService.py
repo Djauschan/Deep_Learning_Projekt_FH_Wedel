@@ -24,6 +24,7 @@ class ConfigService:
                 # Converts yaml document to python object
                 parameter = yaml.load(stream, Loader=SafeLoader)
             except yaml.YAMLError as e:
+                print('CONFOG NOT FOUND')
                 print(e)
                 # todo feherlbehandung einbauen
 
