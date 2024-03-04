@@ -132,17 +132,18 @@
                   </div>
                 </div>
                 <div class="seperator"></div>
-                <div class="hover-effect">
+                <!--<div class="hover-effect">>-->
                   <div class="home-container70">
                     <div class="home-container33">
                       <div class="home-container34">
                         <span>Der Agent empfiehlt:</span>
                       </div>
-                      <button ref="myButton" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
-                        class="button">Aktie Kaufen!</button>
+                      <span>Kaufen!</span>
+                        <!--<button ref="myButton" @click="extractLastEnsembleValue" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
+                        class="button"><pre>{{ this.lastEnsembleValue }}</pre></button>-->
                     </div>
                   </div>
-                </div>
+                <!--</div>>-->
               </div>
             </div>
             <div class="home-container36">
@@ -268,13 +269,27 @@ export default {
       budgetInput: null,
       store: useMyPiniaStore(),
       rlData: null,
+      lastEnsembleValue: null // Property to store the last ensemble value
     };
   },
   mounted() {
     // Scroll to a specific position on the page after it's loaded
     this.scrollToPosition(0, 500); // Example: scroll to the top of the page with animation duration of 500ms
+
+    
+    // Extract the last "ensemble" value
+    this.extractLastEnsembleValue();
   },
+
   methods: {
+    extractLastEnsembleValue() {
+      // Assuming rlData is available in your component's data
+      if (this.rlData) {
+        const lastDate = Object.keys(this.rlData).pop(); // Get the last date entry
+        this.lastEnsembleValue = this.rlData[lastDate].ensemble; // Extract the last "ensemble" value
+      }
+    },
+
     scrollToPosition(x, y, duration = 0) {
       const scrollOptions = {
         left: x,
@@ -344,7 +359,7 @@ export default {
       }
     },
     changeCursor() {
-      this.$refs.myButton.style.cursor = 'pointer'; // or any other cursor value
+      //this.$refs.myButton.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton1.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton2.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton3.style.cursor = 'pointer'; // or any other cursor value
@@ -352,7 +367,7 @@ export default {
       //this.$refs.myButton5.style.cursor = 'pointer'; // or any other cursor value
     },
     resetCursor() {
-      this.$refs.myButton.style.cursor = 'auto'; // reset to the default cursor
+      //this.$refs.myButton.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton1.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton2.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton3.style.cursor = 'auto'; // reset to the default cursor
@@ -882,7 +897,7 @@ th {
 
 .home-container33 {
   flex: 0 0 auto;
-  width: 200px;
+  width: 180px;
   height: 100px;
   display: flex;
   align-items: center;
@@ -892,7 +907,7 @@ th {
 }
 
 .home-container34 {
-  width: 200px;
+  width: 180px;
   height: 27px;
   display: flex;
   align-items: center;
