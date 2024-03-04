@@ -66,11 +66,12 @@ class differencingService:
         data = differencedData
         return data
 
-    def calcThePriceFromChange(self, y_change, endPrice):
+    @staticmethod
+    def calcThePriceFromChange(ENHANCE_DIFFERENCE: bool, y_change, endPrice):
         # because the differencing is in 1000, modelled trained that way
         # ((newVal - baseVal)/baseVal) * val=1000
         val = 100
-        if self.ENHANCE_DIFFERENCE:
+        if ENHANCE_DIFFERENCE:
             val = 1000
 
         return (1 + (y_change / val)) * endPrice

@@ -45,3 +45,21 @@ class NormalisationService:
             i = i + 1
 
         return toReturn
+
+    def normSingleSeriesMinusPlusOne(self, data: np.ndarray) -> np.ndarray:
+        """
+        muss jede featureColumn einzelnd normaliseren !todo check
+        """
+        i = 0
+        _tmpData = data.copy()
+        _tmpData = _tmpData.transpose()
+        len_data = len(_tmpData)
+        while i < len_data:
+            featureRow = _tmpData[i]
+            _min = np.min(featureRow)
+            _max = np.max(featureRow)
+            _tmpData[i] = ((_tmpData[i] - _max) + (_tmpData[i] - _min)) / (_max - _min)
+            i += 1
+
+        data = _tmpData.transpose()
+        return data

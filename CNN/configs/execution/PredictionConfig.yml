@@ -21,7 +21,7 @@ FEATURES: [
   "Open", "Volume", "Open_MCHI", "Open_IVV"
 ]
 
-MODEL_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\raining\\result\\"
+MODEL_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\training\\result\\"
 MODELS_TO_LOAD: [
   dayTrading: [
     1: [
@@ -78,12 +78,12 @@ MODELS_TO_LOAD: [
       folder: "swing_4",
       models: [
         AAL: "2024-03-02_16_25_59_AAL\\20_120_10_swingTrayding_4_AAL232024_1657.pt",
-        AAPL: "2024-03-02_01_26_18_AAPL\\20_120_10_swingTrayding_4_AAPL232024_1736.pt",
-        AMD: "2024-03-02_02_01_30_AMD\\20_120_10_swingTrayding_4_AMD232024_1814.pt",
-        C: "2024-03-02_02_36_34_C\\20_120_10_swingTrayding_4_C232024_1853.pt",
-        NIO: "2024-03-02_02_36_34_C\\20_120_10_swingTrayding_4_C232024_1853.pt",
-        NVDA: "2024-03-02_02_36_34_C\\20_120_10_swingTrayding_4_C232024_1853.pt",
-        TSLA: "2024-03-02_02_36_34_C\\20_120_10_swingTrayding_4_C232024_1853.pt"
+        AAPL: "2024-03-02_16_57_35_AAPL\\20_120_10_swingTrayding_4_AAPL232024_1736.pt",
+        AMD: "2024-03-02_17_36_37_AMD\\20_120_10_swingTrayding_4_AMD232024_1814.pt",
+        C: "2024-03-02_18_14_04_C\\20_120_10_swingTrayding_4_C232024_1853.pt",
+        NIO: "2024-03-02_18_14_04_C\\20_120_10_swingTrayding_4_C232024_1853.pt",
+        NVDA: "2024-03-02_18_14_04_C\\20_120_10_swingTrayding_4_C232024_1853.pt",
+        TSLA: "2024-03-02_18_14_04_C\\20_120_10_swingTrayding_4_C232024_1853.pt"
       ]
     ]
   ],

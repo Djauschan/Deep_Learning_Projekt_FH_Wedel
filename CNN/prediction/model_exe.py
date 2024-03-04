@@ -19,10 +19,6 @@ class ModelExe(AbstractModel):
                 res: resolution) -> pd.DataFrame:
         return self.modelWrapper.collective_predict(symbol_list, res, timestamp_start, timestamp_end)
 
-    def _calcThePriceFromChange(self, y_change, endPrice):
-        differenceService = differencingService(True)
-        return differenceService.calcThePriceFromChange(y_change, endPrice)
-
     def preprocess(self) -> None:
         """preprocess data and stores it in a class variable"""
         """ not used, bc start & endtime needed, directly in "predict executed" 
@@ -45,5 +41,5 @@ class ModelExe(AbstractModel):
 """
 model_Exe = ModelExe()
 startDate = pd.Timestamp("2021-02-01 04:00:00")
-endDate = pd.Timestamp("2021-02-18 04:00:00")
+endDate = pd.Timestamp("2021-02-18 16:00:00")
 t = model_Exe.predict(['AAL', 'APL'], startDate, endDate, resolution.MINUTE)

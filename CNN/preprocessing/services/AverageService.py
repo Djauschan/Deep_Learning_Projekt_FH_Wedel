@@ -15,11 +15,12 @@ class AverageService:
         len_df = len(arr)
         i: int = 0
         while i < len_df:
-            newArr[i] = self._calcAvgOnSingleTs(arr[i])
+            newArr[i] = self.calcAvgOnSingleTs(arr[i])
             i += 1
         return newArr
 
-    def _calcAvgOnSingleTs(self, timeSeries: np.ndarray):
+    @staticmethod
+    def calcAvgOnSingleTs(timeSeries: np.ndarray):
         """
             adds a row to the single timeseries numpy array
             containing the current avarage to each timestep

@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 from numpy import ndarray
 
+from CNN.preprocessing.services.TimeModificationService import TimeModificationService
+
 
 class TimeSeriesBuilder:
 
@@ -29,19 +31,20 @@ class TimeSeriesBuilder:
                 tupel np.array with (length_series, features), np.array(dateTime entries of series)
         """
         len_df = len(df) - 1
-        x = length
+        x = length - 1 #runner idx, items in series
         RETRY_TRESHOLD = 10
         previousCandidateIdx = 0
-        previousCandidate = df.iloc[len_df]
-        dateTimeArr = np.zeros(length).astype(datetime)
+        dateTimeArr = np.zeros(length+1).astype(datetime)
         singleTimeSeriesArr = np.zeros((length+1, len(features)))
         posixTestArr = np.zeros(length)
-        i = 0
-        while x == 0:
-            df_row = df.iloc[len_df]
-            singleTimeSeriesArr[length] = df_row[[*features]].values
+        isValid = True
+        df_row = df.iloc[len_df]  # put in last element of series
+        singleTimeSeriesArr[length] = df_row[[*features]].values
+        dateTimeArr[length] = df_row['DateTime']
+        previousCandidate = df_row
+        while x > -1 and isValid:
             # from current element the posix minute
-            currentMinute = df_row['posixMinute']
+            currentMinute = previousCandidate['posixMinute']
             # the next element in the series should be the item with the posixTime of last ele - the interval
             nextOptimalMinute = currentMinute - interval
             # get closest element to optimal element, with binary search, start looking at previous ele bc list is sorted
@@ -72,26 +75,22 @@ class TimeSeriesBuilder:
                             candidateIdx = closestCandidateIdx
                             noValidAlternativeFound = False
                             # wenn bis 8:20 gefunden -> zeitreihe verwerfen
-                            if candidateIdx == -1:
-                                isValid = False
-                                previousCandidateIdx = x - 1
-                                # print(' NO VALID CANDIDATE ')
-                            else:
-                                'Bei pd.TimeStamp = 16.01.2024 = 2024-01-16 bei data 2. day'
-                                candidate = df.iloc[candidateIdx]
-                                previousCandidate = candidate
-                                previousCandidateIdx = candidateIdx
-                                candidate_minuteOfDay = int(candidate['posixMinute'])
-                                ### END FIND CANDIDATE
-                                # Second check if the day fits as well
-                                singleTimeSeriesArr[x] = candidate[[*features]].values
-                                dateTimeArr[x] = candidate['DateTime']
-                                posixTestArr[x] = candidate_minuteOfDay
-                        else:
-                            #not possible to get valid series
-                            return np.zeros(1), np.zeros(1)
-            x = x - 1
-            i = i + 1
+            if candidateIdx == -1:
+                isValid = False
+                print(' NO VALID CANDIDATE ')
+            else:
+                'Bei pd.TimeStamp = 16.01.2024 = 2024-01-16 bei data 2. day'
+                candidate = df.iloc[candidateIdx]
+                previousCandidate = candidate
+                previousCandidateIdx = candidateIdx
+                candidate_minuteOfDay = int(candidate['posixMinute'])
+                ### END FIND CANDIDATE
+                # Second check if the day fits as well
+                singleTimeSeriesArr[x] = candidate[[*features]].values
+                dateTimeArr[x] = candidate['DateTime']
+                posixTestArr[x] = candidate_minuteOfDay
+                x = x - 1
+
         return singleTimeSeriesArr, dateTimeArr
 
     def buildTimeSeries(self, data: pd.DataFrame, length: int, interval: int, time_ahead: int, tolerance: int,
@@ -177,7 +176,7 @@ class TimeSeriesBuilder:
                         while reTryCounter < RETRY_TRESHOLD and noValidAlternativeFound:
                             optimalDateTimeFromPosix = pd.Timestamp.fromtimestamp(optimal_minute * 60) - \
                                                        pd.Timedelta(hours=1)
-                            nextDayStartDay = self._getNextDayVal(optimalDateTimeFromPosix, reTryCounter)
+                            nextDayStartDay = TimeModificationService.getNextDayVal(optimalDateTimeFromPosix, reTryCounter)
                             candidateIdx, minimalAbw, closestCandidateIdx = \
                                 self._binary_search_dateTime(df, previousCandidateIdx, df_length - 1,
                                                              nextDayStartDay, 1000000, -1, True)
@@ -231,7 +230,7 @@ class TimeSeriesBuilder:
                             # previousCandidateDateTime = previousCandidate['DateTime']  # letzter eintrag in timeSeries
                             optimalDateTimeFromPosix = pd.Timestamp.fromtimestamp(optimal_label_minuteOfDay * 60) - \
                                                        pd.Timedelta(hours=1)  # bc local Time != USA
-                            nextDayStartDay = self._getNextDayVal(optimalDateTimeFromPosix, 1)
+                            nextDayStartDay = TimeModificationService.getNextDayVal(optimalDateTimeFromPosix, 1)
                             labelIdx, minimalAbw, closestCandidateIdx = \
                                 self._binary_search_dateTime(df, candidateIdx, df_length - 1, nextDayStartDay,
                                                              CLOEST_CANDIDATE_TRESHOLD, -1, True)
@@ -348,18 +347,6 @@ class TimeSeriesBuilder:
                                                     closestVal_isBigger)
         else:
             return -1, minimal_abw, closestIdx
-
-    def _getNextDayVal(self, previousDayDateTime: pd.Timestamp, countOfDay: int) -> pd.Timestamp:
-        nextDay: pd.Timestamp = previousDayDateTime + timedelta(days=countOfDay)
-        nextDayStartDay: pd.Timestamp = pd.Timestamp(year=nextDay.year, month=nextDay.month, day=nextDay.day,
-                                                     hour=9, minute=30, second=0)
-        return nextDayStartDay
-
-    def _getPriviousDayVal(self, previousDayDateTime: pd.Timestamp, countOfDay: int) -> pd.Timestamp:
-        prevDay: pd.Timestamp = previousDayDateTime - timedelta(days=countOfDay)
-        prevDayStartOfDay: pd.Timestamp = pd.Timestamp(year=prevDay.year, month=prevDay.month, day=prevDay.day,
-                                                       hour=9, minute=30, second=0)
-        return prevDayStartOfDay
 
     def timeSeriesBuilderSimple(self, df: pd.DataFrame, startTimeToKeep: int, endTimeToKeep: int, lengthTs: int,
                                 features: list, ahead: int) -> tuple[ndarray, ndarray]:
