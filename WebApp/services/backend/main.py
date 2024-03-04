@@ -20,7 +20,8 @@ origins = [
     "http://localhost.tiangolo.com",
     "https://localhost.tiangolo.com",
     "http://localhost",
-    "http://localhost:8080",
+    "http://localhost:8080", # Frontend
+    "http://localhost:8000", # Backend
 ]
 
 app.add_middleware(
@@ -32,8 +33,6 @@ app.add_middleware(
 )
 
 # DB Dependency
-
-
 def get_db():
     db = SessionLocal()
 
@@ -43,15 +42,11 @@ def get_db():
         db.close()
 
 # test method to get Stock data for n days
-
-
 @app.get("/getStock/")
 def get_stock_days(stock_symbol: str, days_back: int, db: Session = Depends(get_db)):
     return crud.get_stock_days(stock_symbol=stock_symbol, n=days_back, db=db)
 
 # post method to delete table "users"
-
-
 @app.post("/deleteUsers/")
 def delete_users(db: Session = Depends(get_db)):
     db_delete_users = crud.delete_users(db)
@@ -60,8 +55,6 @@ def delete_users(db: Session = Depends(get_db)):
     # return crud.get_users(db=db, skip=0, limit=100)
 
 # post method to delete a single user from table "users" by id
-
-
 @app.post("/deleteUser/{username}")
 def delete_user(username: str, db: Session = Depends(get_db)):
     db_delete_user = crud.delete_user(db, username)
@@ -70,8 +63,6 @@ def delete_user(username: str, db: Session = Depends(get_db)):
     return {"message": "User deleted successfully", "status_code": 200}
 
 # post method to create a user into table "users"
-
-
 @app.post("/createUser/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user_email = crud.get_user_by_email(db, email=user.email)
@@ -88,6 +79,9 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 async def get_user(username: str, db: Session = Depends(get_db)):
     return crud.get_user_by_username(db, username)
 
+@app.get("/get_budget/{username}")
+async def get_budget(username: str, db: Session = Depends(get_db)):
+    return crud.get_budget_by_username(db, username)
 
 @app.get("/get_user/{email}")
 async def get_user(email: str, db: Session = Depends(get_db)):
@@ -165,7 +159,7 @@ def check_login(email: str, password: str, db: Session = Depends(get_db)):
 
 
 @app.get("/predict/transformer")
-def predict_transformer(stock_symbols: str = ['aapl', 'nvda'], start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
+def predict_transformer(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
     data_to_send = {"stock_symbols": stock_symbols,
                     "start_date": start_date,
                     "end_date": end_date,

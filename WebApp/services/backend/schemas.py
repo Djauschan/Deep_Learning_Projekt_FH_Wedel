@@ -24,6 +24,7 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     username: str
     email: str
+    budget: float
 
     class Config:
         from_attributes = True

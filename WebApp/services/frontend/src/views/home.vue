@@ -39,17 +39,17 @@
                 <div class="home-container25">
                   <div class="seperator"></div>
                   <div class="home-container29">
-                  <div class="hover-effect">
-                   <div class="home-container26">
-                     <span>Budget aufladen:</span>
-                     <div class="middleInput">
-                        <input type="text" placeholder="Wert in Euro" class="home-textinput" v-model="budgetInput" />
+                    <div class="hover-effect">
+                      <div class="home-container26">
+                        <span>Budget aufladen:</span>
+                        <div class="middleInput">
+                          <input type="text" placeholder="Wert in Euro" class="home-textinput" v-model="budgetInput" />
+                        </div>
+                        <div class="home-container27">
+                          <button ref="myButton4" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
+                            class="button" @click="update_budget">Aufladen</button>
+                        </div>
                       </div>
-                      <div class="home-container27">
-                         <button ref="myButton4" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
-                          class="button" @click="update_budget">Aufladen</button>
-                      </div>
-                   </div>
                     </div>
                   </div>
                 </div>
@@ -80,7 +80,8 @@
                         <span>Aktienwahl</span>
                       </div>
                       <div class="home-container35">
-                        <select v-model="selectedStock" ref="myButton3" @mouseover="changeCursor" @mouseleave="resetCursor">
+                        <select v-model="selectedStock" ref="myButton3" @mouseover="changeCursor"
+                          @mouseleave="resetCursor">
                           <option value="Option 1" selected>
                             Apple
                           </option>
@@ -133,16 +134,16 @@
                 </div>
                 <div class="seperator"></div>
                 <!--<div class="hover-effect">>-->
-                  <div class="home-container70">
-                    <div class="home-container33">
-                      <div class="home-container34">
-                        <span>Der Agent empfiehlt:</span>
-                      </div>
-                      <span>Kaufen!</span>
-                        <!--<button ref="myButton" @click="extractLastEnsembleValue" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
-                        class="button"><pre>{{ this.lastEnsembleValue }}</pre></button>-->
+                <div class="home-container70">
+                  <div class="home-container33">
+                    <div class="home-container34">
+                      <span>Der Agent empfiehlt:</span>
                     </div>
+                    <span>Kaufen!</span>
+                    <!--<button ref="myButton" @click="extractLastEnsembleValue" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
+                        class="button"><pre>{{ this.lastEnsembleValue }}</pre></button>-->
                   </div>
+                </div>
                 <!--</div>>-->
               </div>
             </div>
@@ -177,23 +178,23 @@
                     <span>Detailed Agent Info</span>
                   </div>
                   <div class="table-container" v-if="rlData">
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th v-for="stock in Object.keys(rlData[Object.keys(rlData)[0]])">{{ stock }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(dateData, date) in rlData" :key="date">
-        <td>{{ date }}</td>
-        <td v-for="stockData in Object.values(dateData)">
-          <pre>{{ formatStockData(stockData) }}</pre>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th v-for="stock in Object.keys(rlData[Object.keys(rlData)[0]])">{{ stock }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(dateData, date) in rlData" :key="date">
+                          <td>{{ date }}</td>
+                          <td v-for="stockData in Object.values(dateData)">
+                            <pre>{{ formatStockData(stockData) }}</pre>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
 
                   <!--<div class="home-container12">
                     <ProgressBar ref="progressBar" />
@@ -229,9 +230,7 @@ import ProgressBar from "@/components/ProgressBar.vue";
 import SearchBar from '@/components/SearchBar.vue';
 import { useMyPiniaStore } from "../store.js";
 import { defineComponent, computed, ref } from "vue";
-import Swal from 'sweetalert2';
 import axios from 'axios';
-import axios from "axios";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 
 export default {
@@ -260,9 +259,13 @@ export default {
 
     return {
       isUserLoggedIn,
-      budget: localStorage.getItem("budget"),
       username: localStorage.logged_user,
+      email: localStorage.logged_email,
     };
+  },
+  async created() {
+    this.load_rl_data();
+    this.budget = await this.get_budget();
   },
   data() {
     return {
@@ -271,14 +274,17 @@ export default {
       budgetInput: null,
       store: useMyPiniaStore(),
       rlData: null,
-      lastEnsembleValue: null // Property to store the last ensemble value
+      lastEnsembleValue: null, // Property to store the last ensemble value
+      budget: null,
+      username: localStorage.logged_user,
+      email: localStorage.logged_email,
     };
   },
   mounted() {
     // Scroll to a specific position on the page after it's loaded
     this.scrollToPosition(0, 500); // Example: scroll to the top of the page with animation duration of 500ms
 
-    
+
     // Extract the last "ensemble" value
     this.extractLastEnsembleValue();
   },
@@ -303,15 +309,15 @@ export default {
       }, duration);
     },
 
-  formatStockData(data) {
-    let formattedData = "";
-    for (const [key, value] of Object.entries(data)) {
-      formattedData += `${key}: ${value}\n`;
-    }
-    return formattedData;
-  },
+    formatStockData(data) {
+      let formattedData = "";
+      for (const [key, value] of Object.entries(data)) {
+        formattedData += `${key}: ${value}\n`;
+      }
+      return formattedData;
+    },
 
-  
+
     async load_rl_data() {
       try {
         const response = await axios.get(`${this.store.API}/predict/rl`, { // Use store.state.API
@@ -327,20 +333,48 @@ export default {
         console.error(error);
       }
     },
-
-    async update_budget() {
+    async get_budget() {
       const username = this.username;
-      console.log(this.budget);
-      //console.log(this.store.state.budget);
-      localStorage.setItem("budget", this.budget += this.budgetInput);
       try {
-        const response = await axios.put(this.store.API + "/update_budget/" + username, {
+        const response = await axios.get(this.store.API + "/get_budget/" + username, {
           params: {
             username: username,
-            budgetInput: this.budgetInput,
           }
         });
         console.log([response.data])
+        return response.data
+      } catch (error) {
+        Swal.fire({
+          title: "Error at getting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.detail
+        ) {
+          console.log(error.response.data.detail);
+        } else {
+          console.log(error);
+        }
+      }
+    },
+    async update_budget() {
+      console.log(this.budget);
+      try {
+        const response = await axios.put(this.store.API + "/update_user/" + this.username, {
+
+          username: this.username,
+          email: this.username,
+          budget: this.budgetInput,
+
+        });
+        console.log([response.data])
+        this.budget = await this.get_budget();
         return response.data
       } catch (error) {
         Swal.fire({
@@ -410,7 +444,7 @@ export default {
       }, 500);
     },
   },
-  
+
   metaInfo: {
     title: "frontend",
     meta: [
@@ -419,10 +453,6 @@ export default {
         content: "frontend",
       },
     ],
-  },
-
-  created() {
-    this.load_rl_data();
   },
 };
 </script>
@@ -541,7 +571,7 @@ export default {
   flex-direction: column;
 }
 
-.home-header{
+.home-header {
   height: 90px;
 }
 
@@ -733,23 +763,32 @@ export default {
 }
 
 .table-container {
-  overflow-x: auto; /* Add horizontal scrollbar if content exceeds container width */
-  max-width: 100%; /* Limit the maximum width of the container */
+  overflow-x: auto;
+  /* Add horizontal scrollbar if content exceeds container width */
+  max-width: 100%;
+  /* Limit the maximum width of the container */
 }
 
 table {
-  width: 100%; /* Ensure table takes up full width of its container */
-  border-collapse: collapse; /* Collapse borders between cells */
+  width: 100%;
+  /* Ensure table takes up full width of its container */
+  border-collapse: collapse;
+  /* Collapse borders between cells */
 }
 
-th, td {
-  padding: 8px; /* Add padding to cells */
-  text-align: left; /* Align text to the left within cells */
-  border: 1px solid #ddd; /* Add border to cells */
+th,
+td {
+  padding: 8px;
+  /* Add padding to cells */
+  text-align: left;
+  /* Align text to the left within cells */
+  border: 1px solid #ddd;
+  /* Add border to cells */
 }
 
 th {
-  background-color: #f2f2f2; /* Add background color to header cells */
+  background-color: #f2f2f2;
+  /* Add background color to header cells */
 }
 
 
@@ -819,7 +858,7 @@ th {
   /* Adjust the value to control the roundness of the corners */
 }
 
-.middleInput{
+.middleInput {
   justify-content: center;
 
 }

@@ -3,7 +3,6 @@ import Home from "./views/home.vue";
 import Statistik from "./views/statistik.vue";
 import ModelInformation from "./views/ModelInformation.vue";
 import StockList from "./views/StockList.vue";
-import CompareModels from "./views/CompareModels.vue";
 import CompareStocks from "./views/CompareStocks.vue";
 import NotFound from "./views/not-found.vue";
 import Login from "./views/Login.vue";
@@ -31,11 +30,6 @@ const router = createRouter({
     {
       path: "/StockList",
       component: StockList,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: "/CompareModels",
-      component: CompareModels,
       meta: { requiresAuth: true },
     },
     {

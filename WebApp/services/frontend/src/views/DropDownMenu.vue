@@ -63,6 +63,7 @@ export default defineComponent({
             localStorage.removeItem('logged_user');
             localStorage.removeItem('logged_user_id');
             localStorage.removeItem('logged_email');
+            localStorage.removeItem('logged_email');
             localStorage.setItem('isLoggedIn', false);
             router.push('/login');
         };
