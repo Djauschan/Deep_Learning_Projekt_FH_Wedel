@@ -6,7 +6,7 @@
     <button class="button-stock" @click="updateChart">Show Stock</button>!-->
     <span class="selection">Stock</span>
     <div class="selector">
-      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+      <select v-model="selectedStock" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
         <option value="Option 1" selected>
           Apple
         </option>
@@ -16,26 +16,26 @@
         <option value="Option 3">
           Advanced Micro Devices
         </option>
-        <option value="Option 3">
+        <option value="Option 4">
           Citigroup
         </option>
-        <option value="Option 3">
+        <option value="Option 5">
           NVIDIA
         </option>
-        <option value="Option 3">
+        <option value="Option 6">
           Snap
         </option>
-        <option value="Option 3">
+        <option value="Option 7">
           Block
         </option>
-        <option value="Option 3">
+        <option value="Option 8">
           Tesla
         </option>
       </select>
     </div>
     <span class="selection">Time Interval</span>
     <div class="selector">
-      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+      <select v-model="selectedTime" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
         <option value="Option 1" selected>
           Daily
         </option>
@@ -270,6 +270,8 @@ export default {
       gradientBoostpredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
+      selectedTime: 'Option 1',
+      selectedStock: 'Option 1',
     };
   },
   computed: {
@@ -277,8 +279,19 @@ export default {
           enabled: true,
           // Customize tooltip appearance or behavior if needed
         },
+  },  
+  
+  mounted(){
+    this.handleSelection();
   },
+
   methods: {
+
+    handleSelection(){
+      console.log("SelectedTime:", this.selectedTime);
+      console.log("SelectedStock:", this.SelectedStock);
+    },
+
     async updateCombinedData() {
     // Map dataSource points with TransformerValue set to null
     const combinedDataWithNull = this.dataSource.map(data => ({

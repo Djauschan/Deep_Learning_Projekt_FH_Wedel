@@ -7,7 +7,7 @@
     <!-- Add checkboxes for additional data points -->
     <span class="selection">Time Interval</span>
     <div class="selector">
-      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+      <select v-model="selectedTime" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
         <option value="Option 1" selected>
           Daily
         </option>
@@ -22,7 +22,7 @@
     <br>
     <span class="selection">Model</span>
     <div class="selector">
-      <select ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
+      <select v-model="selectedModel" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
         <option value="Option 1" selected>
           Transformer
         </option>
@@ -352,6 +352,8 @@ export default {
       TSLApredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
+      selectedTime: 'Option 1',
+      selectedModel: 'Option 1',
     };
   },
   computed: {
@@ -360,7 +362,17 @@ export default {
           // Customize tooltip appearance or behavior if needed
         },
   },
+
+  mounted(){
+    this.handleSelection();
+  },
+
   methods: {
+    handleSelection(){
+      console.log("SelectedTime:", this.selectedTime);
+      console.log("SelectedModel:", this.selectedModel);
+    },
+
     async updateCombinedData() {
     // Map dataSource points with AALValue set to null
     const combinedDataWithNull = this.dataSource.map(data => ({
@@ -899,6 +911,8 @@ input::placeholder {
   transition: background-color 0.3s ease;
   border-radius: 12px;
   box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  height: 30px;
+  margin-left: 5px;
 }
 
 .button-stock:hover {
