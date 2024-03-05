@@ -8,7 +8,13 @@ RSC_DATA_FILES: [
   AAL: ["Aktien\\AAL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
   AAPL: ["Aktien\\AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
   AMD: ["Aktien\\AMD_1min.txt.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
-  C: ["Aktien\\C_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]]
+  C: ["Aktien\\C_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
+  MRNS: ["Aktien\\MRNS_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
+  NIO: ["Aktien\\NIO_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
+  NVDA: ["Aktien\\NVDA_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
+  SNAP: ["Aktien\\SNAP_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
+  SQ: ["Aktien\\SQ_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
+  TSLA: ["Aktien\\TSLA_1min.txt", ["DateTime", "Open", "aw", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]]
 ]
 
 FEATURES_DATA_TO_LOAD : [

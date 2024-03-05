@@ -16,10 +16,6 @@ TRADING_PARAMS = {
     'D': {'interval': 300, 'length': 20}  # longTrading = day
 }
 
-STOCK_PARAMS = {
-
-}
-
 
 class ModelWrapper:
     """
@@ -38,7 +34,8 @@ class ModelWrapper:
     def collective_predict(self, symbol_list: list, trading_type: resolution, startDate: pd.Timestamp,
                            endDate: pd.Timestamp) -> pd.DataFrame:
         """
-            redirect predict request from api/backend to correct model
+            predicts the requested stock regarding trading type
+            redirects the single predict to each respective model and collects the result
         """
         modelsToExecute = []
         if trading_type == resolution.MINUTE:
@@ -52,18 +49,21 @@ class ModelWrapper:
 
         interval = TRADING_PARAMS.get(trading_type.value).get('interval')
         preprocessor = Preprocessor(self.config)
+        datesTimes = []
         for stock_symbol in symbol_list:
             modelInputData, endRawPrice = preprocessor.pipeline(stock_symbol, startDate, endDate,
                                                                 length=20, interval=interval)
-            stockResultArr = self.getAllPredictionsForSingleStock(modelsToExecute, stock_symbol, modelInputData, endDate, endRawPrice,
-                                                                  interval)
-            self.modelResults.append({'stockSymbol': stock_symbol, 'result': stockResultArr})
+            predictions, datesTimes = self.getAllPredictionsForSingleStock(modelsToExecute, stock_symbol,
+                                                                           modelInputData, endDate, endRawPrice,
+                                                                           interval)
+            self.modelResults.append({stock_symbol: predictions})
 
-        return self.createPredictionDataframe(self.modelResults)
+        return self.createPredictionDataframe(self.modelResults, datesTimes)
 
     @staticmethod
     def getAllPredictionsForSingleStock(modelsToExecute, stock_symbol, modelInputData, endDate, rawEndPrice, interval):
-        stockResult = []
+        predictionList = []
+        dateTimeList = []
         for modelEntry in modelsToExecute:
             if modelEntry.get('stockSymbol') == stock_symbol:
                 # (1, 5, 20, 20) size
@@ -71,15 +71,17 @@ class ModelWrapper:
                 model = modelEntry.get('model').predict(modelInputData)
                 modelResult = model.get('prediction')
                 horizon = modelEntry.get('horizon')
-                predictedEndPrice = differencingService.calcThePriceFromChange(True, modelResult.item(),
-                                                                               rawEndPrice)
-                dateTimeOfPrediction = TimeModificationService.calcDateTimeFromStartDateAndInterval(endDate, interval,
-                                                                                                    horizon)
-                stockResult.append({'DateTime': dateTimeOfPrediction, 'result': predictedEndPrice})
+                predictionEndPrice = differencingService.calcThePriceFromChange(True, modelResult.item(),
+                                                                                rawEndPrice)
+                predictionDateTime = TimeModificationService.calcDateTimeFromStartDateAndInterval(endDate, interval,
+                                                                                                  horizon)
+                predictionList.append(predictionEndPrice)
+                dateTimeList.append(predictionDateTime)
 
-        return stockResult
+        dateTimeList = TimeModificationService.reArrangeDateTimeList(dateTimeList)
+        return predictionList, dateTimeList
 
-    def createPredictionDataframe(self, resultMap) -> pd.DataFrame:
+    def createPredictionDataframe(self, resultMap, dateTimes) -> pd.DataFrame:
         """
             IN: resultMap:
                     AAL:
@@ -96,21 +98,19 @@ class ModelWrapper:
                 01.01.2022:16:00    14      24
                 01.01.2022:17:00    16      25
         """
-        stockList = ['Timestamp']
-        timestamps = []
-        predicts = []
-        for item in resultMap:
-            stockList.append(item.get('stock_symbol'))
-            for result in item.get('result'):
-                timestamps.append(result.get('DateTime'))
-                predicts.append(result.get('result'))
+        toReturn = pd.DataFrame(dateTimes, columns=['Timestamp'])
+        for stock in resultMap:
+            for key in stock:
+                toReturn[key] = stock[key]
 
-
-        # prediction.set_index('Timestamp', inplace=True)
-        # prediction = prediction.astype("Float64")
-        return pd.DataFrame()
+        toReturn.set_index('Timestamp', inplace=True)
+        toReturn = toReturn.astype("Float64")
+        return toReturn
 
     def loadModels(self):
+        """
+            load models out of prediction config and stores it in class variable
+        """
         for tradingTypes in self.modelsToLoad.items():
             tradingType = tradingTypes[0]
             horizons = tradingTypes[1]
