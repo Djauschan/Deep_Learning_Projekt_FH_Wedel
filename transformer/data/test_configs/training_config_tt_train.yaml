@@ -32,6 +32,11 @@ dataset_parameters:
     ignore_weekends: false # If true, Saturday and Sunday are ignored
     start_day_time: '04:00' # Start time of the day if ignore_nights is true
     end_day_time: '20:00' # End time of the day if ignore_nights is true
+  time_feature:
+    day_of_week: false
+    month: false
+    hour: false
+    first_and_last: true
   encoder_symbols:
   # stocks
     - "AAPL" # Apple

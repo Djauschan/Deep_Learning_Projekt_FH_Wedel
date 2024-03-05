@@ -53,11 +53,15 @@ def add_time_information(df: pd.DataFrame, time_feature: dict[str] = None) -> pd
     Returns:
         pd.DataFrame: Data frame with additional time information.
     """
+    first_and_last = False
     # It is checked whether a transaction is the first or the last of the day.
-    df['first of day'] = df.groupby(
-        df['timestamp'].dt.date).cumcount() == 0
-    df['last of day'] = df.groupby(
-        df['timestamp'].dt.date).cumcount(ascending=False) == 0
+    if time_feature is not None:
+        first_and_last = time_feature.pop("first_and_last")
+    if first_and_last:
+        df['first of day'] = df.groupby(
+            df['timestamp'].dt.date).cumcount() == 0
+        df['last of day'] = df.groupby(
+            df['timestamp'].dt.date).cumcount(ascending=False) == 0
 
     # Add additional time features.
     if time_feature is not None:
@@ -75,8 +79,9 @@ def add_time_information(df: pd.DataFrame, time_feature: dict[str] = None) -> pd
                 df = pd.get_dummies(df, columns=[feature], dtype=float)
 
     # Convert boolean to integer.
-    df['first of day'] = df['first of day'].astype(int)
-    df['last of day'] = df['last of day'].astype(int)
+    if first_and_last:
+        df['first of day'] = df['first of day'].astype(int)
+        df['last of day'] = df['last of day'].astype(int)
 
     # Convert python time to posix time.
     df['posix_time'] = df['timestamp'].apply(
