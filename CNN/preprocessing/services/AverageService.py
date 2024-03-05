@@ -7,7 +7,8 @@ class AverageService:
     """
 
     # 50200, 11, 4 => 50200, 11, 5 =( 5 <- 1 feature dazu...)
-    def calcAvg(self, arr: np.ndarray):
+    @staticmethod
+    def calcAvg(arr: np.ndarray):
         """
             extends the numpy array of all timeseries to add 1 more feature
         """
@@ -15,7 +16,7 @@ class AverageService:
         len_df = len(arr)
         i: int = 0
         while i < len_df:
-            newArr[i] = self.calcAvgOnSingleTs(arr[i])
+            newArr[i] = AverageService.calcAvgOnSingleTs(arr[i])
             i += 1
         return newArr
 
