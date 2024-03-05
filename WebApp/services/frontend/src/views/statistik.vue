@@ -77,7 +77,7 @@
   <div class="newChart">
     <DxChart v-if="showChart" :data-source="combinedData" title="Stock Price">
       <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
-      <DxSeries :name="'aapl'" open-value-field="Open" high-value-field="High" low-value-field="Low"
+      <DxSeries :name=selectedStock open-value-field="Open" high-value-field="High" low-value-field="Low"
         close-value-field="Close" argument-field="DateTime">
       </DxSeries>
       <DxSeries v-if="showCNNLine" :name="'CNN' + selectedStock" :data-source="combinedData" type="line"
@@ -109,7 +109,7 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData" title="CNN Chart">
+    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData" :title="CNNchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'CNN Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[0]">
       </DxSeries>
@@ -127,7 +127,7 @@
     </DxChart>
   </div>
   <div class="newChart">
-   <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="this.transformerData" title="Transformer Chart">
+   <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="this.transformerData" :title="TransformerchartTitle">
     <DxCommonSeriesSettings argument-field="date" type="line" />
     <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[1]">
     </DxSeries>
@@ -145,7 +145,7 @@
    </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData" title="LSTM Chart">
+    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData" :title="LSTMchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'LSTM Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
       </DxSeries>
@@ -163,8 +163,7 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart"
-      :data-source="this.randomForestData" title="Random Forest Chart">
+    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart" :data-source="this.randomForestData" :title="RandomForestchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
       </DxSeries>
@@ -182,8 +181,7 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart"
-      :data-source="this.gradientBoostData" title="Gradient Boost Chart">
+    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart" :data-source="this.gradientBoostData" :title="GradientBoostchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[4]">
       </DxSeries>
@@ -221,6 +219,25 @@ import Header from './Header.vue'
 import axios from "axios";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import { useMyPiniaStore } from "../store.js";
+
+// Add the calculateMeanErrorAndMeanAbsoluteError function here
+function calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues) {
+    if (actualValues.length !== predictedValues.length) {
+        throw new Error("The lengths of actualValues and predictedValues should be the same.");
+    }
+
+    // Calculate errors for each data point
+    const errors = actualValues.map((actual, index) => predictedValues[index] - actual);
+
+    // Calculate mean error
+    const meanError = errors.reduce((sum, error) => sum + error, 0) / errors.length;
+
+    // Calculate mean absolute error
+    const absoluteErrors = errors.map(error => Math.abs(error));
+    const meanAbsoluteError = absoluteErrors.reduce((sum, error) => sum + error, 0) / absoluteErrors.length;
+
+    return { meanError, meanAbsoluteError };
+};
 
 export default {
   components: {
@@ -272,10 +289,27 @@ export default {
       store: useMyPiniaStore(),
       selectedTime: 'Option 1',
       selectedStock: 'Option 1',
-      seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'] // Array of colors for each series
+      seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'], // Array of colors for each series
+      meanError: null,
+      meanAbsoluteError: null,
     };
   },
   computed: {
+    CNNchartTitle() {
+      return `CNN Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+    },
+    TransformerchartTitle() {
+      return `Transformer Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+    },
+    LSTMchartTitle() {
+      return `LSTM Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+    },
+    RandomForestchartTitle() {
+      return `Random Forest Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+    },
+    GradientBoostchartTitle() {
+      return `Gradient Boost Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+    },
     tooltip: {
           enabled: true,
           // Customize tooltip appearance or behavior if needed
@@ -287,6 +321,20 @@ export default {
   },
 
   methods: {
+    // Method to calculate mean error and mean absolute error
+    calculateErrorsAndDisplay(actualValues, predictedValues) {
+      const { meanError, meanAbsoluteError } = calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues);
+      this.meanError = meanError.toFixed(2); // Round to 2 decimal places
+      this.meanAbsoluteError = meanAbsoluteError.toFixed(2); // Round to 2 decimal places
+    },
+
+    // Example method to trigger calculation and display
+    displayErrors() {
+      // Example actual and predicted data
+      const actualValues = [10, 20, 30, 40, 50];
+      const predictedValues = [12, 18, 28, 38, 48];
+      this.calculateErrorsAndDisplay(actualValues, predictedValues);
+    },
 
     handleSelection(){
       console.log("SelectedTime:", this.selectedTime);
