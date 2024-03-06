@@ -195,8 +195,8 @@ class MultiSymbolDataset(Dataset):
                 # NOTE: This is only to create the dataset for the prediction interface
                 # scaler = pickle.load(
                 #     open("data/output/Multi_Symbol_Train_scaler.pkl", "rb"))
-                # with open("data/output/tt_prices_for_rl.pkl", 'wb') as file:
-                #     pickle.dump(instance_multi_symbol_dataset.prices, file)
+                with open("data/output/absolut_prices.pkl", 'wb') as file:
+                    pickle.dump(instance_multi_symbol_dataset.prices, file)
 
                 # Fit scaler to each volume column only with train data
                 scaler.fit(data_df[volume_cols].iloc[train_indeces])

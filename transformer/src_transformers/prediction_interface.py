@@ -103,10 +103,10 @@ class TransformerInterface(AbstractModel):
         self.num_intervals = 24
         self.model_path = Path("data", "output", "models",
                                "TransformerModel_v2.pt")
-        self.data_path = Path("data", "output", "tt_dataset_for_rl.csv")
-        self.prices_path = Path("data", "output", "tt_prices_for_rl.pkl")
+        self.data_path = Path("data", "output", "120_min_input_data.csv")
+        self.prices_path = Path("data", "output", "tt_prices_for_120_min.pkl")
         self.config_path = Path("data", "test_configs",
-                                "config_rl_predictions.yaml")
+                                "training_config_tt_train.yaml")
 
     def predict(self,
                 timestamp_start: pd.Timestamp,
