@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from numpy import ndarray
 
-from CNN.preprocessing.services.TimeModificationService import TimeModificationService
+from src.preprocessing.services.TimeModificationService import TimeModificationService
 
 
 class TimeSeriesBuilder:

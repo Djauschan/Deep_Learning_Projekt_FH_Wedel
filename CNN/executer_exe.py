@@ -1,8 +1,7 @@
 import time
-from CNN.training.CNN_TimeSeriesModel_exe import CNN_TimeSeriesModel
-from preprocessing.Preprocessor import Preprocessor
-from training.Importer import Importer
-from preprocessing.services.ExportService import ExportService
+from CNN_TimeSeriesModel_exe import CNN_TimeSeriesModel
+from Preprocessor import Preprocessor
+from Importer import Importer
 
 '''
     Verwaltet die Ausführung verschiedener ModelTypen und ihr Training.

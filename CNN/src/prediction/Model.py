@@ -2,7 +2,7 @@ from typing import Iterable
 
 from torch.jit import ScriptModule
 
-from CNN.prediction.services.ModelImportService import ModelImportService
+from src.prediction.services.ModelImportService import ModelImportService
 
 
 class Model:

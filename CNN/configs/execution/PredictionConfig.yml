@@ -27,7 +27,7 @@ FEATURES: [
   "Open", "Volume", "Open_MCHI", "Open_IVV"
 ]
 
-MODEL_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\training\\result\\"
+MODEL_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\src\\training\\result\\"
 MODELS_TO_LOAD: {
   dayTrading: [
     1: {

@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from CNN.preprocessing.services.ImportService import importService
+from src.preprocessing.services.ImportService import importService
 
 
 class DataMergerService:

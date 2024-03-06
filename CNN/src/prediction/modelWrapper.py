@@ -2,11 +2,11 @@ import os
 
 import pandas as pd
 
-from CNN.prediction.Model import Model
-from CNN.prediction.abstract_model import resolution
-from CNN.prediction.services.preprocessingServices import Preprocessor
-from CNN.preprocessing.services.DifferencingService import differencingService
-from CNN.preprocessing.services.TimeModificationService import TimeModificationService
+from src.prediction.Model import Model
+from src.prediction.abstract_model import resolution
+from src.prediction.services.preprocessingServices import Preprocessor
+from src.preprocessing.services.DifferencingService import differencingService
+from src.preprocessing.services.TimeModificationService import TimeModificationService
 
 TRADING_PARAMS = {
     'M': {'interval': 15, 'length': 20},  # dayTrading = minute

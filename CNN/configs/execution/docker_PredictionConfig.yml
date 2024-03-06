@@ -1,7 +1,7 @@
 # Model Config
 ### TEST CONFIG FOR MVP
 
-RSC_ROOT: "./data/"
+RSC_ROOT: "../data/"
 
 RSC_DATA_FILES: [
   #key: [fileName, [columns in file], [relevant feature columns], y-variable]
@@ -27,7 +27,7 @@ FEATURES: [
   "Open", "Volume", "Open_MCHI", "Open_IVV"
 ]
 
-MODEL_FOLDER: "./CNN/training/result/"
+MODEL_FOLDER: "./src/training/result/"
 MODELS_TO_LOAD: {
   dayTrading: [
     1: {

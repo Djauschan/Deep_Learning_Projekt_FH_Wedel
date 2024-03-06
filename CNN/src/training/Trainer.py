@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import DataLoader
 from datetime import datetime
 
-from CNN.preprocessing.services.ExportService import ExportService
+from src.preprocessing.services.ExportService import ExportService
 
 if torch.cuda.is_available():
     dev = "cuda"

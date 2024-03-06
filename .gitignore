@@ -1,7 +1,7 @@
 #CNN
 CNN/__pycache__/
 CNN/data/*
-CNN/training/result/*
+CNN/src/training/result/*
 CNN/training/result/*.csv
 
 # Custom

@@ -4,14 +4,14 @@ import pandas as pd
 import torch
 
 from numpy import float32
-from CNN.prediction.services.DataLoaderService import DataLoaderService
-from CNN.prediction.services.DataMergerService import DataMergerService
-from CNN.preprocessing.services.AverageService import AverageService
-from CNN.preprocessing.services.GafService import gafService
-from CNN.preprocessing.services.NormalisationService import NormalisationService
-from CNN.preprocessing.services.TimeBuildService import TimeSeriesBuilder
-from CNN.preprocessing.services.TimeModificationService import TimeModificationService
-from CNN.preprocessing.services.DifferencingService import differencingService
+from src.prediction.services.DataLoaderService import DataLoaderService
+from src.prediction.services.DataMergerService import DataMergerService
+from src.preprocessing.services.AverageService import AverageService
+from src.preprocessing.services.GafService import gafService
+from src.preprocessing.services.NormalisationService import NormalisationService
+from src.preprocessing.services.TimeBuildService import TimeSeriesBuilder
+from src.preprocessing.services.TimeModificationService import TimeModificationService
+from src.preprocessing.services.DifferencingService import differencingService
 
 """
 @auther ayk.gue

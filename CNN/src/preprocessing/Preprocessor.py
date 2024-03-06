@@ -5,17 +5,17 @@ import pandas as pd
 import os
 import numpy as np
 
-from CNN.preprocessing.services.AverageService import AverageService
-from CNN.preprocessing.services.DataMergerService import DataMergerService
-from CNN.preprocessing.services.ExportService import ExportService
-from CNN.preprocessing.services.GafService import gafService
-from CNN.preprocessing.services.TimeBuildService import TimeSeriesBuilder
-from CNN.preprocessing.services.ConfigService import ConfigService
-from CNN.preprocessing.services.DifferencingService import differencingService
-from CNN.preprocessing.services.TimeModificationService import TimeModificationService
-from CNN.preprocessing.services.GafService import gafService
-from CNN.preprocessing.services.ImportService import importService
-from CNN.preprocessing.services.NormalisationService import NormalisationService
+from src.preprocessing.services.AverageService import AverageService
+from src.preprocessing.services.DataMergerService import DataMergerService
+from src.preprocessing.services.ExportService import ExportService
+from src.preprocessing.services.GafService import gafService
+from src.preprocessing.services.TimeBuildService import TimeSeriesBuilder
+from src.preprocessing.services.ConfigService import ConfigService
+from src.preprocessing.services.DifferencingService import differencingService
+from src.preprocessing.services.TimeModificationService import TimeModificationService
+from src.preprocessing.services.GafService import gafService
+from src.preprocessing.services.ImportService import importService
+from src.preprocessing.services.NormalisationService import NormalisationService
 
 
 class Preprocessor:

@@ -9,7 +9,7 @@ DROPOUT: 0.0 #First Overfit
 LOGGING_INTERVAL: 10 #every x value will be logged
 LOSS_PLOT_INTERVAL: 100
 PROJECT_ROOT : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\"
-RESULT_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\training\\result\\"
+RESULT_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\src\\training\\result\\"
 RSC_DATA_ROOT: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\data\\train_data\\"
 TRAINING_FOLDER: "longTrayding_20_300_20_DATA_Open_Volume_MCHI_IVV_MVG_ahead20\\"
 MODEL_NAME: "20_300_20_longTrayding_4" # must be equal to training_folder

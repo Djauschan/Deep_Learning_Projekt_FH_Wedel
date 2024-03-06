@@ -5,8 +5,8 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 
 ### DeepLearning Project ###
-from CNN.preprocessing.services.ConfigService import ConfigService
-from CNN.preprocessing.services.ImportService import importService
+from src.preprocessing.services.ConfigService import ConfigService
+from src.preprocessing.services.ImportService import importService
 
 # RESCOURCE DIRS
 RSC_ROOT = "rsc/"
