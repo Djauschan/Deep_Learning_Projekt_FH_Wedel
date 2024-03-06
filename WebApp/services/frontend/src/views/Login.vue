@@ -131,7 +131,7 @@ export default defineComponent({
             }).then((result) => {
                 if (result.value) {
                     console.log("Hi");
-                    this.showRegister = !this.showRegister;
+                    showRegister.value = !showRegister.value;
                 } else {
                     console.log("ciao");
                 }

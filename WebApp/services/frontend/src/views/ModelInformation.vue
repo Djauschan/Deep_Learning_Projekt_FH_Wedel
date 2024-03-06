@@ -8,7 +8,14 @@
         </div>
       </div>
       <div class="topics-container">
-        <TopicDisplay v-for="(topic, index) in topics" :key="topic.id" :topic="topic" />
+        <TopicDisplay
+          v-for="(topic, index) in topics"
+          :key="topic.id"
+          :topic="topic"
+          :image-url="getTopicImageUrl(topic)"
+          :image-max-width="'800px'"
+          :image-max-height="'auto'"
+        />
       </div>
     </div>
   </div>
@@ -30,20 +37,27 @@ export default {
           id: 1,
           title: 'Transformer',
           description: '<b>Input:</b><br> Einen Startzeitpunkt und einen Endzeitpunkt (bis wohin predicted werden soll). <br><b>Output:</b><br> vorhergesagten Kursänderungen der Aktien bis zum angegebenen Endzeitpunkt.',
+          image: '/Transformer.png'
         },
         {
           id: 2,
           title: 'CNN',
-          description: "<b>Input:</b><br> 30x6 Daten Matrix, wobei 30 Tageswerte und 7 die Features sind (GoldPreis und verschiedene ETFs) (in der Datengrundlage ggb.).<br> Dieser Input wird transformiert in 7x30x30 array => somit ist der fertig Model Input = 6x30x30; <br><b>Output:</b><br>Ein Skalar, welcher die Kurs Veränderung nach 5 Tagen predicted.",
+          description: "<b>Input:</b><br> 30x6 Daten Matrix, wobei 30 Tageswerte und 7 die Features sind (GoldPreis und verschiedene ETFs) (in der Datengrundlage ggb.).<br> Dieser Input wird transformiert in 7x30x30 array => somit ist der fertig Model Input = 6x30x30; <br><b>Output:</b><br>Ein Skalar, welcher die Kurs Veränderung nach 5 Tagen predicted."
         },
         {
           id: 3,
           title: 'ANN',
           description: '<b>Input:</b><br> Forecast Horizon. <br> <b>Output:</b><br>  Dictionary, mit Angabe, welche Modelle welche Prognosen abgeben.',
+          image: '' // No image for this topic
         },
       ],
     };
   },
+  methods: {
+    getTopicImageUrl(topic) {
+      return topic.image || ''; // Return the image URL if it exists, otherwise return an empty string
+    }
+  }
 };
 </script>
 

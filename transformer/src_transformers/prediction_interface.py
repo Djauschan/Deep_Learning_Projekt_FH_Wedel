@@ -102,7 +102,7 @@ class TransformerInterface(AbstractModel):
         self.interval_minutes = 120
         self.num_intervals = 24
         self.model_path = Path("data", "output", "models",
-                               "TransformerModel_v3.pt")
+                               "TransformerModel_v2.pt")
         self.data_path = Path("data", "output", "tt_dataset_for_rl.csv")
         self.prices_path = Path("data", "output", "tt_prices_for_rl.pkl")
         self.config_path = Path("data", "test_configs",
