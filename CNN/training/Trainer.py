@@ -180,7 +180,8 @@ class ModelTrainer:
 
         return test_logging_arr
 
-    def training_step(self, model, x, y, loss, optimizer):
+    @staticmethod
+    def training_step(model, x, y, loss, optimizer):
         x = x.to(device)
         y = y.to(device)
         model_out = model(x.float())

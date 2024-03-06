@@ -4,8 +4,6 @@ import pandas as pd
 
 from CNN.prediction.Model import Model
 from CNN.prediction.abstract_model import resolution
-from CNN.prediction.services.DataLoaderService import DataLoaderService
-from CNN.prediction.services.ModelImportService import ModelImportService
 from CNN.prediction.services.preprocessingServices import Preprocessor
 from CNN.preprocessing.services.DifferencingService import differencingService
 from CNN.preprocessing.services.TimeModificationService import TimeModificationService
@@ -81,7 +79,8 @@ class ModelWrapper:
         dateTimeList = TimeModificationService.reArrangeDateTimeList(dateTimeList)
         return predictionList, dateTimeList
 
-    def createPredictionDataframe(self, resultMap, dateTimes) -> pd.DataFrame:
+    @staticmethod
+    def createPredictionDataframe(resultMap, dateTimes) -> pd.DataFrame:
         """
             IN: resultMap:
                     AAL:

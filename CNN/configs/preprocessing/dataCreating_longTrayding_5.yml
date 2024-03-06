@@ -10,9 +10,12 @@ RSC_DATA_FILES: [
   AAPL: ["AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   AMD: ["AMD_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   C: ["C_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
+  MRNS: ["MRNS_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   NIO: ["NIO_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
-  TSLA: ["TSLA_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
-  NVDA: ["NVDA_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"]
+  NVDA: ["NVDA_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
+  SNAP: ["SNAP_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
+  SQ: ["SQ:_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
+  TSLA: ["TSLA_1min.txt", [ "DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume" ], "Open" ]
 ]
 
 OTHER_FEATURES_TO_LOAD : [

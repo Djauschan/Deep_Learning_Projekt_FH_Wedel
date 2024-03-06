@@ -18,7 +18,13 @@ TRAINING_DATA_LIST: [
   AAL: ["AAL\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "AAL\\ImageGafData\\LABELS.npy"],
   AAPL: ["AAPL\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "AAPL\\ImageGafData\\LABELS.npy"],
   AMD: ["AMD\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "AMD\\ImageGafData\\LABELS.npy"],
-  C: ["C\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "C\\ImageGafData\\LABELS.npy"]
+  C: ["C\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "C\\ImageGafData\\LABELS.npy"],
+  MRNS: [ "MRNS\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "MRNS\\ImageGafData\\LABELS.npy" ],
+  NIO: [ "NIO\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "NIO\\ImageGafData\\LABELS.npy" ],
+  NVDA: [ "NVDA\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "NVDA\\ImageGafData\\LABELS.npy" ],
+  SNAP: [ "SNAP\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "SNAP\\ImageGafData\\LABELS.npy" ],
+  SQ: [ "SQ\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "SQ\\ImageGafData\\LABELS.npy" ],
+  TSLA: [ "TSLA\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead10.npy", "TSLA\\ImageGafData\\LABELS.npy" ]
 ]
 FEATURE_LIST: [
   "Open", "Volume", "Open_MCHI", "Open_IVV", "mvgAvg"

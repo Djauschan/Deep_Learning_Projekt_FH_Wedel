@@ -45,3 +45,8 @@ startDate = pd.Timestamp("2021-02-01 04:00:00")
 endDate = pd.Timestamp("2021-02-18 16:00:00")
 t = model_Exe.predict("[AAL, AAPL, TSLA]", startDate, endDate, resolution.TWO_HOURLY)
 print(t)
+
+#TODO, create data of rest
+#train data of rest,
+#add modells to config
+#end

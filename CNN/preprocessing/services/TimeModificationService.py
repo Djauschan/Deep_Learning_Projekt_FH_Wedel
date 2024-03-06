@@ -10,9 +10,9 @@ class TimeModificationService:
         pass
 
     def transformTimestap(self, data, dropDateTime: bool):
-        return self._dataAugmentationAddContiniousMinuteOfDay(data, dropDateTime)
+        return self._dataAugmentationAddContinuousMinuteOfDay(data, dropDateTime)
 
-    def _dataAugmentationAddContiniousMinuteOfDay(self, data, dropDateTime: bool):
+    def _dataAugmentationAddContinuousMinuteOfDay(self, data, dropDateTime: bool):
         dateTimeArr = data['DateTime']
         conti_minute_arr = self.addPosixTimeStamp(dateTimeArr)
         # data['posixMinute'] = conti_minute_arr
@@ -55,6 +55,8 @@ class TimeModificationService:
                     modifiedTime = TimeModificationService.getNextDayVal(modifiedTime, 1)
                 toReturnList.append(modifiedTime)
             else:
+                if currentRawTime.hour > TRADING_END or currentRawTime.hour < TRADING_START:
+                    currentRawTime = TimeModificationService.getNextDayVal(currentRawTime, 1)
                 toReturnList.append(currentRawTime)
 
             i += 1
