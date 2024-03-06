@@ -9,8 +9,8 @@ model_parameters:
     dropout: 0
 training_parameters:
   batch_size: 10000
-  epochs: 800
-  learning_rate: 0.001
+  epochs: 2000
+  learning_rate: 0.00125
   loss: "mse" #Options: "mse", "rmse", "rmsle", "expmse"
   seed: 42
   patience: 10000
@@ -26,6 +26,7 @@ dataset_parameters:
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol_Train.csv"
   time_resolution: 120 # Time resolution of the data in minutes 
+  outlier_quantile: 0.99995 # Set to 1 to disable outlier removal
   data_selection_config:
     ignore_nights: true # If true, only the data between start_day_time and end_day_time is used
     ignore_weekends: false # If true, Saturday and Sunday are ignored
