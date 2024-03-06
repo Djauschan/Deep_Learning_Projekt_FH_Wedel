@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from CNN.prediction.abstract_model import AbstractModel
-from CNN.prediction.services.preprocessingServices import ConfigService, ModelImportService, Preprocessor
+from src.prediction.abstract_model import AbstractModel
+from src.prediction.services.preprocessingServices import ConfigService, ModelImportService, Preprocessor
 
 
 class ModelExe(AbstractModel):

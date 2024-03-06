@@ -1,6 +1,8 @@
 import pandas as pd
 from fastapi import FastAPI
-from CNN.prediction.model_exe import ModelExe
+
+from src.prediction.abstract_model import resolution as resolutionType
+from src.prediction.model_exe import ModelExe
 
 app = FastAPI()
 
@@ -11,17 +13,23 @@ async def root():
 
 
 @app.get("/predict/")
-def predict_cnn(stock_symbol: str, start_date: str, end_date: str):
+def predict_cnn(stock_symbol: str, start_date: str, end_date: str, resolution: resolutionType):
+    stock_symbols = stock_symbol[1:-1].split(", ")
     cnn_interface = ModelExe()
+    prediction = cnn_interface.predict(stock_symbols, pd.to_datetime(start_date),
+                                       pd.to_datetime(end_date), resolution)
+    print("############")
+    print("############")
+    print(prediction)
+    print("############")
+    print("############")
+    #prediction.set_index('Timestamp', inplace=True)
+    #prediction = prediction.astype("Float64")
 
-    prediction = cnn_interface.predict(pd.to_datetime(
-        start_date), pd.to_datetime(end_date), 120)
-
-    prediction.set_index('Timestamp', inplace=True)
-    prediction = prediction.astype("Float64")
-
-    prediction_data = prediction[stock_symbol.upper()]
-    data = [{"date": date, "value": value}
-            for date, value in prediction_data.items()]
+    data = {}
+    for symbol in stock_symbols:
+        symbol_prediction = prediction[f"{symbol}"]
+        data[symbol] = [{"date": date, "value": value}
+                        for date, value in symbol_prediction.items()]
 
     return data

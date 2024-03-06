@@ -5,33 +5,25 @@ import pandas as pd
 import os
 import numpy as np
 
-from CNN.preprocessing.services.AverageService import AverageService
-from CNN.preprocessing.services.DataMergerService import DataMergerService
-from CNN.preprocessing.services.ExportService import ExportService
-from CNN.preprocessing.services.GafService import gafService
-from CNN.preprocessing.services.TimeBuildService import TimeSeriesBuilder
-from CNN.preprocessing.services.ConfigService import ConfigService
-from CNN.preprocessing.services.DifferencingService import differencingService
-from CNN.preprocessing.services.TimeModificationService import TimeModificationService
-from CNN.preprocessing.services.GafService import gafService
-from CNN.preprocessing.services.ImportService import importService
-from CNN.preprocessing.services.NormalisationService import NormalisationService
-
-'''
-DATA CREATION muss anders ablaufen:
-1.) ein Durchlauf zum erzeugen von TrainingsDaten muss:
-TrainingsDaten sind: Liste von Aktien [AAPL,AAL,AMD,C,MRNA,NIO,NVDA,SNAP,SQ,TSLA]
-Für jede Datei d:
--> d einlesen: Bspw Apple
-- - - > Davon muss der Volumen und der Open als Feature für jeden Zeitpunkt x Extrahiert werden
-- - - > Zusätzlich muss für jede Datei d, features in form einer Liste [EWA, EWC.. GOLD..] "auf den posixTimeStamp gejoint" werden.
-- - - > Das Label für diese Datei d muss ebenFalls extrahiert werden
-- - - > Eine Zeitreihe wird gebildet, 
--> für das nächste d bspw: AMD, muss ein "append" stattfinden das alle daten "nach unten erweitert"
-'''
+from src.preprocessing.services.AverageService import AverageService
+from src.preprocessing.services.DataMergerService import DataMergerService
+from src.preprocessing.services.ExportService import ExportService
+from src.preprocessing.services.GafService import gafService
+from src.preprocessing.services.TimeBuildService import TimeSeriesBuilder
+from src.preprocessing.services.ConfigService import ConfigService
+from src.preprocessing.services.DifferencingService import differencingService
+from src.preprocessing.services.TimeModificationService import TimeModificationService
+from src.preprocessing.services.GafService import gafService
+from src.preprocessing.services.ImportService import importService
+from src.preprocessing.services.NormalisationService import NormalisationService
 
 
 class Preprocessor:
+    """
+        a class to preprocess data defined a @ymlModelConfigPath
+        and executes a collection of service methods on it (avaraging, normalisation..)
+        and finally saves the preprocessed data as .npy file in defined folders
+    """
 
     def __init__(self, ymlModelConfigPath):
         confService = ConfigService()
@@ -50,28 +42,27 @@ class Preprocessor:
         self.TIME_SPAN_BEGIN = self.modelParameters['TIME_SPAN_BEGIN']
         self.TIME_SPAN_END = self.modelParameters['TIME_SPAN_END']
         self.DATA_FEATURE_NAME = self.modelParameters['DATA_FEATURE_NAME']
-        '''
-        OTHER FEATURES IN OTHER FILES:
-        '''
+        """
+            OTHER FEATURES IN OTHER FILES:
+        """
         self.TO_FIND_OTHER_FEATURE_RSC_FOLDER = self.modelParameters['TO_FIND_OTHER_FEATURE_RSC_FOLDER']
         self.OTHER_FEATURES_TO_LOAD = self.modelParameters['OTHER_FEATURES_TO_LOAD']
         self.ENHANCE_DIFFERENCE = self.modelParameters['ENHANCE_DIFFERENCE']
 
-        # All Services Used during Preprocessing
+        """
+            All Services Used during Preprocessing
+        """
         self.featureDataMergeService = DataMergerService()
         self.timeSeriesBuilderService = TimeSeriesBuilder()
         self.timeModificationService = TimeModificationService()
         self.normalisationService = NormalisationService()
-        self.avaragingService = AverageService()
+        self.averagingService = AverageService()
         self.differenceService = differencingService(self.ENHANCE_DIFFERENCE)
         self.GAFservice = gafService()
 
         # MAIN DATA & LABEL PREPROCESSING
-        self.data = {}  # each data entry has key of item and value is the numpy TimeSeriesData
-        # check and create a rsc folder struc with:
-
         trainingDataPath = str(self.TS_LENGTH) + '_' + str(self.TS_INTERVAL) + '_' + str(self.TS_AHEAD) + '_' + \
-                           self.DATA_FEATURE_NAME + '_' + self.TIME_SPAN_BEGIN + '_' + self.TIME_SPAN_END
+            self.DATA_FEATURE_NAME + '_' + self.TIME_SPAN_BEGIN + '_' + self.TIME_SPAN_END
         sub_path = os.path.join(self.TO_SAVE_RSC_FOLDER, trainingDataPath)
         if not os.path.exists(self.TO_SAVE_RSC_FOLDER):
             os.makedirs(self.TO_SAVE_RSC_FOLDER)
@@ -99,7 +90,7 @@ class Preprocessor:
                 df = self.getAndMergeFeatureDataWithMainData(df)
                 data, labels = self.createSeries(df, self.FEATURES, label_name)
                 # create a feature Row with avg vals for open
-                data = self.avaragingService.calcAvg(data)
+                data = self.averagingService.calcAvg(data)
                 # All feature Data will be differenced
                 data, labels = self.differenceService.transformSeriesAndLabel(data, labels)
                 # Only the Data will be normalised
@@ -115,9 +106,9 @@ class Preprocessor:
                 featureShapedData = self.reshapeDataToFeatureList(data, countOfFeatures)
                 # list(features) to -> np.array(len_of_feature, anz_aller_ts, länge_einzelner_ts, länge_einzelner_ts)
                 gafData = self.GAFservice.createGAFfromMultivariateTimeSeries(featureShapedData)
-                #swap shape of gafData
-                #(features, datapoints, len_ts, len_ts) -> (datapoints, features, len_ts, len_Ts)
-                #from (5, 5000, 10, 10) ->  (5000, 5, 10, 10)
+                # swap shape of gafData
+                # (features, datapoints, len_ts, len_ts) -> (datapoints, features, len_ts, len_Ts)
+                # from (5, 5000, 10, 10) ->  (5000, 5, 10, 10)
                 gafData = np.transpose(gafData, (1, 0, 2, 3))
                 if not os.path.exists(imgDataPath):
                     os.makedirs(imgDataPath)

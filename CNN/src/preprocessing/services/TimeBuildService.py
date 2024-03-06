@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from numpy import ndarray
 
-from CNN.preprocessing.services.TimeModificationService import TimeModificationService
+from src.preprocessing.services.TimeModificationService import TimeModificationService
 
 
 class TimeSeriesBuilder:
@@ -63,9 +63,9 @@ class TimeSeriesBuilder:
                     while reTryCounter < RETRY_TRESHOLD and noValidAlternativeFound:
                         optimalDateTimeFromPosix = pd.Timestamp.fromtimestamp(nextOptimalMinute * 60) - \
                                                    pd.Timedelta(hours=1)
-                        prevDay = self._getPriviousDayVal(optimalDateTimeFromPosix, reTryCounter)
+                        prevDay = TimeModificationService.getPreviousDayVal(optimalDateTimeFromPosix, reTryCounter)
                         candidateIdx, minimalAbw, closestCandidateIdx = \
-                            self._binary_search_dateTime(df, previousCandidateIdx, len_df - 1,
+                            self._binary_search_dateTime(df, 1, previousCandidateIdx - 1,
                                                          prevDay, 100000, -1, True)
                         reTryCounter += 1
                         if candidateIdx != -1:

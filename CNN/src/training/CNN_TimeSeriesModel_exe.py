@@ -1,12 +1,12 @@
 import os
 from datetime import datetime
 
-from CNN.training.Importer import Importer, ModelData
-from CNN.training.Trainer import ModelTrainer
-from CNN.training.datasets.StockPriceTimeSeriesDataSet_tX import StockPriceTimeSeriesDataSet
-from CNN.modelStructures.CNN_multiVariat import CNN_Model
-from CNN.preprocessing.services.ExportService import ExportService
-from CNN.preprocessing.services.TimeSeriesTensorTransformer import ToTensor, CorrectData
+from src.training.Importer import Importer, ModelData
+from src.training.Trainer import ModelTrainer
+from src.training.datasets.StockPriceTimeSeriesDataSet_tX import StockPriceTimeSeriesDataSet
+from modelStructures.CNN_multiVariat import CNN_Model
+from src.preprocessing.services.ExportService import ExportService
+from src.preprocessing.services.TimeSeriesTensorTransformer import ToTensor, CorrectData
 from torchvision import transforms
 import torch
 

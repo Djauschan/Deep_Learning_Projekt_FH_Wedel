@@ -74,4 +74,4 @@ class differencingService:
         if ENHANCE_DIFFERENCE:
             val = 1000
 
-        return (1 + (y_change / val)) * endPrice
+        return round((1 + (y_change / val)) * endPrice, 2)

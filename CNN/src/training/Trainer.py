@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import DataLoader
 from datetime import datetime
 
-from CNN.preprocessing.services.ExportService import ExportService
+from src.preprocessing.services.ExportService import ExportService
 
 if torch.cuda.is_available():
     dev = "cuda"
@@ -180,7 +180,8 @@ class ModelTrainer:
 
         return test_logging_arr
 
-    def training_step(self, model, x, y, loss, optimizer):
+    @staticmethod
+    def training_step(model, x, y, loss, optimizer):
         x = x.to(device)
         y = y.to(device)
         model_out = model(x.float())
