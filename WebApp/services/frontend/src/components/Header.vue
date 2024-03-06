@@ -40,7 +40,7 @@ export default defineComponent({
 }
 
 .Header {
-    background-color: #3c4e74;
+    background-color: red;
     height: 100px;
     border-bottom: 1px solid grey;
 }
