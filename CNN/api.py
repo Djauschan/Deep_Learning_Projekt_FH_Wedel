@@ -2,7 +2,7 @@ import pandas as pd
 from fastapi import FastAPI
 
 from src.prediction.abstract_model import resolution as resolutionType
-from src.prediction.model_exe import ModelExe
+from src.prediction.model_cnn_implementation import ModelExe
 
 app = FastAPI()
 

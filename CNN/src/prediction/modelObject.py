@@ -6,6 +6,10 @@ from src.prediction.services.ModelImportService import ModelImportService
 
 
 class Model:
+    """
+        loads and stores a single pytorch model from jit
+        executes predict method and return structured object with prediction result back
+    """
 
     def __init__(self, stock_symbol: str, horizon: int, completePath):
         self.modelImportService = ModelImportService(completePath)
