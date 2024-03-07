@@ -43,6 +43,7 @@ class differencingService:
         if self.ENHANCE_DIFFERENCE:
             val = 1000
 
+
         return ((newVal - baseVal) / baseVal) * val
 
     def transformSingleSeries(self, data):

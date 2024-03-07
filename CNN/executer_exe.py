@@ -1,4 +1,7 @@
 import time
+
+import numpy as np
+
 from CNN_TimeSeriesModel_exe import CNN_TimeSeriesModel
 from Preprocessor import Preprocessor
 from Importer import Importer
