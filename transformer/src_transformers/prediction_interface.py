@@ -7,22 +7,19 @@ The PredictionDataset class is a PyTorch Dataset for making predictions.
 The TransformerInterface class provides methods for loading data, loading a model, making
 predictions, and converting relative prices to absolute prices.
 """
+import datetime as dt
 import pickle
 from datetime import timedelta
 from pathlib import Path
 
-import datetime as dt
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 import yaml
-from torch.utils.data import DataLoader, Dataset
-from src_transformers.abstract_model import resolution
-
-from src_transformers.abstract_model import AbstractModel
-
+from src_transformers.abstract_model import AbstractModel, resolution
 from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
+from torch.utils.data import DataLoader, Dataset
 
 
 class PredictionDataset(Dataset):
@@ -107,27 +104,6 @@ class TransformerInterface(AbstractModel):
         self.prices_path = Path("data", "output", "tt_prices_for_120_min.pkl")
         self.config_path = Path("data", "test_configs",
                                 "training_config_tt_train.yaml")
-
-    def predict(self,
-                timestamp_start: pd.Timestamp,
-                timestamp_end: pd.Timestamp,
-                interval: int = 0) -> pd.DataFrame:
-        """
-        Makes predictions for the given time period.
-
-        This method loads the data for making predictions, makes predictions using the model, and
-        converts the predictions to absolute prices. It then returns a DataFrame with the predicted
-        prices for each stock.
-
-        Args:
-            timestamp_start (pd.Timestamp): The start timestamp for the predictions.
-            timestamp_end (pd.Timestamp): The end timestamp for the predictions.
-            interval (int, optional): The interval between predictions in minutes. Defaults to 0.
-
-        Returns:
-            pd.DataFrame: A DataFrame with the predicted prices for each stock.
-        """
-        pass
 
     def predict(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, resolution: resolution) -> pd.DataFrame:
         """predicts the stock prices for the given symbols and time range.
@@ -225,50 +201,6 @@ class TransformerInterface(AbstractModel):
 
         return prediction
 
-    def insert_valid_daytime_entries(self, timeseries: pd.Series, valid_entries: pd.DataFrame) -> pd.DataFrame:
-        """
-        Insert entries in a dataframe at the timestamps where stocks are traded.
-
-        Args:
-            timeseries (pd.Series): The original timeseries containing valid and invalid entries.
-            valid_entries (pd.DataFrame): Predictions made by the model. These are inserted at the timestamps where stocks are traded.
-
-        Returns:
-            pd.DataFrame: A DataFrame with the valid entries inserted at the correct timestamps. The entries at the invalid timestamps are nan.
-        """
-        # Get the index of the first valid entry
-        first_valid_index = timeseries.index[(timeseries.apply(
-            lambda d: d.hour) >= 4) & (timeseries.apply(lambda d: d.hour) < 20)][0]
-        print(timeseries.apply(lambda d: d.hour))
-        # Create a DataFrame with valid entries and their corresponding timestamps
-        valid_df = pd.DataFrame(valid_entries, columns=['Values'],
-                                index=pd.date_range(start=first_valid_index, periods=len(valid_entries), freq='2H'))
-
-        # Concatenate the original DataFrame and the DataFrame with valid entries
-        result_df = pd.concat([valid_df, timeseries])
-
-        return result_df
-
-    def insert_rows_with_zeros(self, df: pd.DataFrame, row_number: int, count: int) -> pd.DataFrame:
-        """
-        Inserts count rows with zeros at the given row number in the given dataframe.
-
-        Args:
-            df (pd.DataFrame): DataFrame to insert the rows into.
-            row_number (int): The row number to insert the rows at.
-            count (int): The number of rows to insert.
-
-        Returns:
-            pd.DataFrame: The DataFrame with the inserted rows.
-        """
-        for _ in range(count):
-            df = pd.concat(
-                [df.iloc[:row_number], pd.DataFrame(
-                    [[0] * len(df.columns)], columns=df.columns), df.iloc[row_number:]],
-                ignore_index=True)
-            row_number += 1
-        return df
-
     def load_data(self, timestamp_start: pd.Timestamp) -> tuple[dict[str, float], PredictionDataset]:
         """
         Loads the data for making predictions.
@@ -356,10 +288,3 @@ class TransformerInterface(AbstractModel):
                       for i in range(num_intervals)]
 
         return timestamps
-
-
-if __name__ == "__main__":
-    interface = TransformerInterface()
-    result = interface.predict(["AAPL", "NVDA"], pd.to_datetime('2021-01-04'),
-                               pd.to_datetime('2021-01-06'), resolution.TWO_HOURLY)
-    result.to_csv("data/output/predictions.csv")
