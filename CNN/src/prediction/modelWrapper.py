@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from src.prediction.Model import Model
+from src.prediction.modelObject import Model
 from src.prediction.abstract_model import resolution
 from src.prediction.services.preprocessingServices import Preprocessor
 from src.preprocessing.services.DifferencingService import differencingService
@@ -17,7 +17,9 @@ TRADING_PARAMS = {
 
 class ModelWrapper:
     """
-        class that loads all modells and distributes requests to the correct modell
+        class that loads all specified models from config,
+        distributes requests to the correct model and finally stores desired results in
+        dataframe to return back
     """
 
     def __init__(self, config):
@@ -60,6 +62,10 @@ class ModelWrapper:
 
     @staticmethod
     def getAllPredictionsForSingleStock(modelsToExecute, stock_symbol, modelInputData, endDate, rawEndPrice, interval):
+        """
+            execute predictions iteratively for all horizons defined
+            for a single Model for a specified stock_symbol
+        """
         predictionList = []
         dateTimeList = []
         for modelEntry in modelsToExecute:
@@ -82,6 +88,7 @@ class ModelWrapper:
     @staticmethod
     def createPredictionDataframe(resultMap, dateTimes) -> pd.DataFrame:
         """
+            reformats collected predictions to the defined DataFrame type
             IN: resultMap:
                     AAL:
                         DateTime: 01.01.2023:15:00, result: 16,02

@@ -10,11 +10,11 @@ RSC_DATA_FILES: [
   #AAPL: ["AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   #AMD: ["AMD_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   #C: ["C_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
-  MRNS: ["MRNS_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
+  #MRNS: ["MRNS_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   #NIO: ["NIO_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   #NVDA: ["NVDA_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
-  SNAP: ["SNAP_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
-  SQ: ["SQ:_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
+  #SNAP: ["SNAP_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
+  SQ: ["SQ_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   #TSLA: [ "TSLA_1min.txt", [ "DateTime", "Open", "a", "b", "c", "Volume" ], [ "DateTime", "Open", "Volume" ], "Open" ]
 
 ]
@@ -32,7 +32,7 @@ OTHER_FEATURES_TO_LOAD : [
   IVV: ["IVV_1min.txt", ["DateTime", "Open_IVV", "a", "b", "c", "Volume"], ["DateTime", "Open_IVV"]] #USA
 ]
 
-TIME_SPAN_BEGIN: "2005-01-01"
+TIME_SPAN_BEGIN: "2005-08-01"
 TIME_SPAN_END: "2021-01-30"
 TIMESERIES_SEQUENCE_LEN: 20  # length  of the TimeSeries; 1 : no series at all
 TIMESTEPS_AHEAD: 4  # predict 60min
