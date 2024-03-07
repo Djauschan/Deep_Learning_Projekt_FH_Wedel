@@ -36,10 +36,38 @@ class TradingEnvironment:
         # Letzter Portfolio-Wert für den Aggregationsagenten
         self.last_portfolio_values['aggregation'] = self.calculate_portfolio_value('aggregation')
 
+    """
+    #Das Training/Prognose auf eine neue Datei -> keine Prognose)
+    def load_new_data(self, new_data):
+        if new_data.empty:
+            raise ValueError("The provided data is empty!")
+        self.data = new_data
+        self.std_devs = self.calculate_std_deviation(self.config.get_parameter('agent_types'))
+        self.reset()  # Reset the environment with the new data
+    """
+    def load_new_data(self, new_data):
+        if new_data.empty:
+            raise ValueError("The provided data is empty!")
+        self.data = new_data
+        self.std_devs = self.calculate_std_deviation(self.config.get_parameter('agent_types'))
+        # Ruft reset auf, aber behält dabei die aktuellen 'stocks'-Werte bei
+        self.reset(retain_stocks=True)
+
+
+
+
+
+
+    # Anpassung-> Standardabweichung beschränkt sich nur auf die letzten 220 Werten (Aufgrund verfügbarer Vorlauf in den DAten für Prediction)
     def calculate_std_deviation(self, ma_columns):
         std_devs = {}
         for ma_column in ma_columns:
-            deviation = (self.data['close'] - self.data[ma_column]) / self.data[ma_column] * 100
+            # Beschränkung auf die letzten 220 Werte
+            recent_prices = self.data['close'].tail(220)
+            recent_ma_values = self.data[ma_column].tail(220)
+            
+            # Berechnung der Abweichung auf den letzten 220 Werten
+            deviation = (recent_prices - recent_ma_values) / recent_ma_values * 100
             std_devs[ma_column] = deviation.std()
         return std_devs
 
@@ -52,19 +80,41 @@ class TradingEnvironment:
         scaled_deviation = (deviation + max_deviation) / (2 * max_deviation)
         return max(0, min(int(scaled_deviation * n_bins), n_bins - 1))
 
+    """
     def reset(self):
         self.current_step = 0
         self.done = False
+        self.first_step_after_new_data = True  # Set to True to indicate new data has been loaded
         for agent_type in self.agent_portfolios:
             self.agent_portfolios[agent_type]['cash'] = self.config.get_parameter('start_cash_monitoring', 'train_parameters')
             self.agent_portfolios[agent_type]['stocks'] = self.config.get_parameter('start_stock_monitoring', 'train_parameters')
             self.last_portfolio_values[agent_type] = self.calculate_portfolio_value(agent_type)
         return self.get_state()
+    """
+
+    def reset(self, retain_stocks=False):
+        self.current_step = 0
+        self.done = False
+        if not retain_stocks:
+            # Zurücksetzen von 'cash' und 'stocks' zu den Anfangswerten, falls nicht beibehalten werden soll
+            for agent_type in self.agent_portfolios:
+                self.agent_portfolios[agent_type]['cash'] = self.config.get_parameter('start_cash_monitoring', 'train_parameters')
+                self.agent_portfolios[agent_type]['stocks'] = self.config.get_parameter('start_stock_monitoring', 'train_parameters')
+        # Immer den letzten Portfolio-Wert aktualisieren, unabhängig davon, ob 'stocks' beibehalten werden
+        for agent_type in self.agent_portfolios:
+            self.last_portfolio_values[agent_type] = self.calculate_portfolio_value(agent_type)
+
+        return self.get_state()
+
+
 
     def step(self, action, agent_type, calculate_value=True):
+            # Überprüfen, ob das Ende der Daten erreicht ist
         if self.current_step >= len(self.data) - 1:
             self.done = True
-            return [], 0, self.done
+            # Da keine weiteren Daten vorhanden sind, kannst du neutrale Zustände zurückgeben
+            neutral_states = {agent_type: 0 for agent_type in self.config.get_parameter('agent_types')}
+            return neutral_states, 0, self.done
 
         reward = 0
         self.stock_price = current_price = self.data['close'].iloc[self.current_step]
@@ -118,9 +168,21 @@ class TradingEnvironment:
 
         # Überprüfen der Wertänderung
         if change_percentage > 10:
-            reward += self.config.get_parameter('threshold_reward', 'train_parameters')
+            reward += self.config.get_parameter('threshold_reward10', 'train_parameters')
         elif change_percentage < -10:
-            reward -= self.config.get_parameter('threshold_penalty', 'train_parameters')
+            reward -= self.config.get_parameter('threshold_penalty10', 'train_parameters')
+        elif 10 > change_percentage > 5:
+            reward += self.config.get_parameter('threshold_reward5', 'train_parameters')
+        elif -10 < change_percentage < -5:
+            reward -= self.config.get_parameter('threshold_penalty5', 'train_parameters')
+        elif 5 > change_percentage > 2:
+            reward += self.config.get_parameter('threshold_reward2', 'train_parameters')
+        elif -5 < change_percentage < -2:
+            reward -= self.config.get_parameter('threshold_penalty2', 'train_parameters')
+        elif 2 > change_percentage > 1:
+            reward += self.config.get_parameter('threshold_reward1', 'train_parameters')
+        elif -2 < change_percentage < -1:
+            reward -= self.config.get_parameter('threshold_penalty1', 'train_parameters')
 
         # Aktualisieren des letzten Portfolio-Wertes
         if calculate_value:

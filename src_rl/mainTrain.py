@@ -1,3 +1,6 @@
+
+
+"""
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -23,6 +26,44 @@ def main():
     agent_types = config.get_parameter('agent_types')
     ql_agents = [QLearningAgent(agent_type, state_size, 'config/config.yml') for agent_type in agent_types]
     aggregation_agent = QLearningAgent('aggregation', aggregation_state_size, 'config/config.yml')
+"""
+
+import os
+import pandas as pd
+import numpy as np
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+from environments.TraidingEnvironment_q_learning import TradingEnvironment
+from utils.read_config import Config_reader
+from agents.q_learning import QLearningAgent
+from utils.aggregationfunction import aggregate_actions
+from main import Preprocess
+
+def main():
+    # Konfigurationsdatei einlesen
+    config = Config_reader('config/config.yml')
+    train_data_directory = config.get_parameter('train_data_directory', 'directories')
+    
+    # Finde alle "train_" Dateien im Verzeichnis
+    train_files = [file for file in os.listdir(train_data_directory) if file.startswith("train_")]
+    
+    for file in train_files:
+        train_data_path = os.path.join(train_data_directory, file)
+        train_data = pd.read_csv(train_data_path)
+        
+        # Initialisiere die Umgebung und Agenten mit den neuen Daten
+        env = TradingEnvironment(train_data)
+        state_size = config.get_parameter('state_size', 'train_parameters')
+        aggregation_state_size = config.get_parameter('aggregation_state_size', 'aggregation')
+        agent_types = config.get_parameter('agent_types')
+        ql_agents = [QLearningAgent(agent_type, state_size, 'config/config.yml') for agent_type in agent_types]
+        aggregation_agent = QLearningAgent('aggregation', aggregation_state_size, 'config/config.yml')
+        
+        # Hier folgt der Trainingsprozess, ähnlich wie vorher
+        
+        # Notiz: Du musst sicherstellen, dass die Funktionen `train_individual_agent` und `train_aggregation_agent` 
+        # so angepasst werden, dass sie mit der neuen Initialisierung der Agenten und Umgebung pro Datei umgehen können.
+        # Eventuell musst du diese Funktionen innerhalb dieser Schleife aufrufen und die relevanten Variablen entsprechend übergeben.
 
     # Trainingsparameter
     NUM_EPISODES = config.get_parameter('epochs', 'train_parameters')
@@ -38,7 +79,7 @@ def main():
         train_individual_agent(agent, agent_type, NUM_EPISODES, env, config, cumulative_rewards, portfolio_values)
 
     # Trainingsprozess für den Aggregationsagenten
-    train_aggregation_agent(train_data, aggregation_agent, ql_agents, agent_types, NUM_EPISODES, env, config, cumulative_rewards, portfolio_values)
+    #train_aggregation_agent(train_data, aggregation_agent, ql_agents, agent_types, NUM_EPISODES, env, config, cumulative_rewards, portfolio_values)
 
     # Speichern der Modelle
     save_models(ql_agents, agent_types, aggregation_agent)
@@ -54,7 +95,10 @@ def train_individual_agent(agent, agent_type, num_episodes, env, config, cumulat
         while not done:
             state = states[agent_type]
             action = agent.act(state)
+
+            
             next_states, reward, done = env.step(action, agent_type)
+            next_state = next_states[agent_type]
             if not done:
                 next_state = next_states[agent_type]
                 agent.learn([state], action, reward, next_state, True, done)
@@ -105,10 +149,10 @@ def save_models(ql_agents, agent_types, aggregation_agent):
 
 def save_models(ql_agents, agent_types, aggregation_agent):
     for agent, agent_type in zip(ql_agents, agent_types):
-        model_file_path = f'models/{agent_type}_agent_q_table.npy'
+        model_file_path = f'models/{agent_type}_agent_q_table_1h.npy'
         np.save(model_file_path, agent.q_table)
     
-    np.save('models/aggregation_agent_q_table.npy', aggregation_agent.q_table)
+    #np.save('models/aggregation_agent_q_table.npy', aggregation_agent.q_table)
 
 def visualize_performance(agent_types, cumulative_rewards, portfolio_values, config):
     NUM_EPISODES = config.get_parameter('epochs', 'train_parameters')
@@ -126,6 +170,7 @@ def visualize_performance(agent_types, cumulative_rewards, portfolio_values, con
         plt.legend()
         plt.show()
 
+    """
     # Visualisierung für die Aggregationsfunktion
     plt.figure(figsize=(12, 5))
     plt.plot([pv[-1] for pv in portfolio_values['aggregation'] if pv], label="Portfolio-Werte (Aggregation)")
@@ -137,6 +182,7 @@ def visualize_performance(agent_types, cumulative_rewards, portfolio_values, con
     plt.ylabel("Wert")
     plt.legend()
     plt.show()
+    """
 
 def update_aggregation_state(current_state, agent_actions, rsi_action):
     # Erstellen eines neuen Zustands mit der aktuellen Aktion jedes Agenten und der RSI-Aktion
@@ -147,4 +193,8 @@ def update_aggregation_state(current_state, agent_actions, rsi_action):
 
 if __name__ == "__main__":
     main()
+
+
+
+
 

@@ -174,12 +174,13 @@ def main():
     if 'ma200' in test_data.columns:
         ax1.plot(test_data['ma200'], label='MA 200 Tage', color='red')
 
+    """
     for step, price, stop_type in stop_losses:
         if stop_type == 'buy':
             ax1.plot([step-5, step+5], [price, price], color='red', linestyle='--', linewidth=2)  # Kurze horizontale Linie für Kauf-Stop-Loss
         elif stop_type == 'sell':
             ax1.plot([step-5, step+5], [price, price], color='blue', linestyle='--', linewidth=2)  # Kurze horizontale Linie für Verkauf-Stop-Loss
-
+    """
 
 
     for i, action in enumerate(actions):

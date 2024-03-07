@@ -1,6 +1,7 @@
 directories:
   train_data: data/train_data.csv # Path to training data
   test_data: data/test_data.csv # Path to test data
+  train_data_directory: data
 
 agent_types: ['ma5', 'ma30', 'ma200', 'rsi']
 
@@ -16,12 +17,12 @@ q_models: # Path to q-models
 
 
 train_parameters:
-  epochs: 120  # 150 # Number of epochs to train
+  epochs: 300  # 150 # Number of epochs to train
   state_size: 20  # Number of different states that an agent can distinguish 
   action_size: 3   # Possible actions: sell (+1), hold (0), buy (+2)
 
   #monitor the Portfoliovalue over the trainingcycle:
-  start_cash_monitoring: 1000 #monitor the cashvalue over the trainingcycle
+  start_cash_monitoring: 1000000 #monitor the cashvalue over the trainingcycle
   start_stock_monitoring: 0 #monitor the stockamount over the trainingcycle
 
   # parameters for Q-Learning Agents
@@ -38,8 +39,14 @@ train_parameters:
 
   #additional penalty, when the portfolio value undercut the min threshold
   min_portfolio_threshold: 0.3 #< 30% from the started value
-  threshold_penalty: -1
-  threshold_reward: 1
+  threshold_penalty10: -1
+  threshold_reward10: 1
+  threshold_penalty5: -0.5
+  threshold_reward5: 0.5
+  threshold_penalty2: -0.2
+  threshold_reward2: 0.2
+  threshold_penalty1: -0.1
+  threshold_reward1: 0.1
 
 #Use manual Stopp loss orders:
 stopp_loss:

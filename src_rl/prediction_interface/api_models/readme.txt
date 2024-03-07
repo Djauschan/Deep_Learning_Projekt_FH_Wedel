@@ -88,6 +88,15 @@ Für die Prediction der MA Werte ist eine Diskretisierungsfunktion erforderlich 
 
 
 
+#für RF, GBM und Transformer:
+    def action_from_q_table(prediction_des_Modells, last_price, q_table_des_Modells):
+        # Bestimmen des Zustands basierend auf der Preisveränderung
+        price_diff = prediction_des_Modells - last_price
+        state = min(int(abs(price_diff) / last_price * 10), 9)
+        # Aktion mit dem höchsten Q-Wert für diesen Zustand
+        action = np.argmax(q_table_des_Modells[state])
+        return action
+
 
 
 #Aggregationsmodell: 
