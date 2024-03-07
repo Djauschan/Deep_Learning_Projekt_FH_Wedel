@@ -320,8 +320,8 @@ def predict_cnn(stock_symbol: str = ['aapl', 'nvda'], start_date: str = '2021-01
 
 
 @app.get("/predict/randomForest")
-def predict_randomForest(stock_symbol: str, start_date: str, end_date: str, resolution: str):
-    data_to_send = {"stock_symbol": stock_symbol,
+def predict_randomForest(stock_symbols: str, start_date: str, end_date: str, resolution: str):
+    data_to_send = {"stock_symbols": stock_symbols,
                     "start_date": start_date,
                     "end_date": end_date,
                     "resolution": resolution}
