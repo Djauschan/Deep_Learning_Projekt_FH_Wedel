@@ -78,6 +78,7 @@ class Preprocessor:
                 allDataColumns = v[1]
                 column_featureName = v[2]
                 label_name = v[3]
+                print("IN DATA: " + str(k))
                 imgDataPath = os.path.join(kuerzel_folder_path, 'ImageGafData')
                 df = self.loadMainData(fileName, allDataColumns, column_featureName)
                 """ 
@@ -90,11 +91,34 @@ class Preprocessor:
                 df = self.getAndMergeFeatureDataWithMainData(df)
                 data, labels = self.createSeries(df, self.FEATURES, label_name)
                 # create a feature Row with avg vals for open
+                nanCount = np.count_nonzero(~np.isnan(data))
+                if nanCount < (len(data)*len(data[0])*len(data[0][0])):
+                    print("NaN AFTER createSeries")
+                    print(2/0)
+                    data = np.nan_to_num(data)
+
                 data = self.averagingService.calcAvg(data)
+                if nanCount < (len(data)*len(data[0])*len(data[0][0])):
+                    print("NaN AFTER averagingService")
+                    print(2 / 0)
+                    data = np.nan_to_num(data)
+
                 # All feature Data will be differenced
                 data, labels = self.differenceService.transformSeriesAndLabel(data, labels)
+                nanCount = np.count_nonzero(~np.isnan(data))
+                if nanCount < (len(data)*len(data[0])*len(data[0][0])):
+                    print("NaN AFTER differenceService")
+                    print(2 / 0)
+                    data = np.nan_to_num(data)
+
                 # Only the Data will be normalised
                 data = self.normalisationService.normMinusPlusOne(data)
+                nanCount = np.count_nonzero(~np.isnan(data))
+                if nanCount < (len(data)*len(data[0])*len(data[0][0])):
+                    print("NaN AFTER normalisationService")
+                    print(2 / 0)
+                    data = np.nan_to_num(data)
+
                 #########################
                 #### EXPORT THE DATA ####
                 # self.exportLabelsToNpy(kuerzel_folder_path, labels) #no need to save TS
@@ -119,8 +143,8 @@ class Preprocessor:
                 # Test Images for Visualisation
                 # create imgaes for first 3 feautre to Visualize
                 self.createSingleGafImg(gafData[0][0], imgDataPath + '0_gaf.png')
-                self.createSingleGafImg(gafData[1][0], imgDataPath + '1_gaf.png')
-                self.createSingleGafImg(gafData[2][0], imgDataPath + '2_gaf.png')
+                #self.createSingleGafImg(gafData[1][0], imgDataPath + '1_gaf.png')
+                #self.createSingleGafImg(gafData[2][0], imgDataPath + '2_gaf.png')
                 # self.exportGafData(imgDataPath, gafData, self.FEATURES) deprecated
 
     def loadMainData(self, fileName, allDataColumns, column_featureName) -> pd.DataFrame:
@@ -165,15 +189,18 @@ class Preprocessor:
         print(len(labels))
         return data, labels
 
-    def exportGafData(self, path, data, features):
+    @staticmethod
+    def exportGafData(path, data, features):
         exporter = ExportService(path)
         exporter.storeGAFNumpyFeatureDataSeperatly(data, features, '_GAF_DATA')
 
-    def createSingleGafImg(self, data, path):
+    @staticmethod
+    def createSingleGafImg(data, path):
         GAFservice = gafService()
         GAFservice.saveGAFimg(data, path)
 
-    def reshapeDataToFeatureList(self, arr, COUNT_OF_FEATURES: int) -> list:
+    @staticmethod
+    def reshapeDataToFeatureList(arr, COUNT_OF_FEATURES: int) -> list:
         """
             param:
                 arr = dimension (länge_aller_ts, länge_einzelner_ts, features)

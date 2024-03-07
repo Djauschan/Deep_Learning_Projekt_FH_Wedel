@@ -20,13 +20,13 @@ class executer:
         SCONFIG_PATH1 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_swingTrayding_1.yml"
         preProcessingService = Preprocessor(SCONFIG_PATH1)
         print('SWING 1 -> BUILD ALL DATA with CONFIG_PATH 2')
-        SCONFIG_PATH2 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_swingTrayding_1.yml"
+        SCONFIG_PATH2 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_swingTrayding_2.yml"
         preProcessingService = Preprocessor(SCONFIG_PATH2)
         print('SWING 2 -> BUILD ALL DATA with CONFIG_PATH 2')
-        SCONFIG_PATH3 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_swingTrayding_1.yml"
+        SCONFIG_PATH3 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_swingTrayding_3.yml"
         preProcessingService = Preprocessor(SCONFIG_PATH3)
         print('SWING 3 -> BUILD ALL DATA with CONFIG_PATH 2')
-        SCONFIG_PATH4 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_swingTrayding_1.yml"
+        SCONFIG_PATH4 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_swingTrayding_4.yml"
         preProcessingService = Preprocessor(SCONFIG_PATH4)
         print('SWING 4 -> BUILD ALL DATA with CONFIG_PATH 2')
         ###############################
@@ -44,6 +44,10 @@ class executer:
 
         LCONFIG_PATH4 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_longTrayding_4.yml"
         preProcessingService = Preprocessor(LCONFIG_PATH4)
+        print('LONG 4 -> BUILD ALL DATA with CONFIG_PATH 4')
+
+        LCONFIG_PATH5 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\configs\\preprocessing\\dataCreating_longTrayding_5.yml"
+        preProcessingService = Preprocessor(LCONFIG_PATH5)
         print('LONG 4 -> BUILD ALL DATA with CONFIG_PATH 4')
 
     def startTraining_w(self):

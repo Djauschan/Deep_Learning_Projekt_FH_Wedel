@@ -43,7 +43,7 @@ class gafService:
 
             # logging prgress
             perc_done = int((i * 100) / len_series)
-            if perc_done % 10 == 0:
+            if perc_done % 100 == 0:
                 print('% done: ' + str(perc_done))
 
             gafData[i] = self._createSingleGAF(x_arr)
@@ -52,9 +52,11 @@ class gafService:
 
     def createSingleGAFfromMultivariateTimeSeries(self, data: np.ndarray) -> np.ndarray:
         """
-        param:
-        @data: numpy arr with dimensions of (length, features) => (30, 10)
-        @return = np.array (len_of_feature, länge_ts, länge_ts)
+            param:
+                @data: numpy arr with dimensions of (length, features) => (30, 10)
+                @return = np.array (len_of_feature, länge_ts, länge_ts)
+            return:
+                numpyArray with elements containing GAF data
         """
         data = data.transpose()  # (10, 30)
         gafDataFeatureSeparated = np.zeros(
@@ -62,17 +64,30 @@ class gafService:
         )  # 10x30x30
         i = 0
         while i < len(data):
-            gafDataFeatureSeparated[i] = self._createSingleGAF(data[i])
+            res = self._createSingleGAF(data[i])
+            if res != -1:
+                gafDataFeatureSeparated[i] = self._createSingleGAF(data[i])
+            else:
+                gafDataFeatureSeparated[i] = self._createSingleGAF(data[i-1])
             i = i + 1
 
         return gafDataFeatureSeparated
 
     def _createSingleGAF(self, x_arr: np.ndarray):
+        """
+            method to create a single GAF, based on preprocessed numpy array
+        """
+        nanCount = np.count_nonzero(~np.isnan(x_arr))
+        if nanCount < (len(x_arr)):
+            print("NaN in _createSingleGAF")
+            x_arr = np.nan_to_num(x_arr)
+
         # Compute Gramian angular fields
         gasf = GramianAngularField(method='summation')
         # takes (features, anz_timpstamp)
         # x_arr = [-0.16094916 -0.21443595 -0.14302942 -0.08939169 -0.12541136 -0.10782134]
         X_gasf = gasf.fit_transform([x_arr])
+
         '''
         X_gasf =
         [[[-0.95823126  0.14451426 -0.99999702 -0.14451428 -0.95746452,   -0.80345206],  
@@ -88,7 +103,11 @@ class gafService:
         # X_gadf = gadf.fit_transform(x_arr)
         return X_gasf
 
-    def saveGAFimg(self, data, savePath):
+    @staticmethod
+    def saveGAFimg(data, savePath):
+        """
+            creates a image from given GAF data to test / visualize
+        """
         print('data: single imageData')
         # [[-0.95823126  0.14451426 -0.99999702 -0.14451428 -0.95746452 -0.80345206],
         # [ 0.14451426  1.         -0.14210009 -1.         -0.42388929 -0.70522997],
