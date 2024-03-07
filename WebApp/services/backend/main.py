@@ -177,7 +177,7 @@ def predict_transformer(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '
 
 
 @app.get("/predict/cnn")
-def predict_cnn(stock_symbol: str = ['aapl', 'nvda'], start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
+def predict_cnn(stock_symbol: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
     data_to_send = {"stock_symbol": stock_symbol,
                     "start_date": start_date,
                     "end_date": end_date,
@@ -320,11 +320,18 @@ def predict_cnn(stock_symbol: str = ['aapl', 'nvda'], start_date: str = '2021-01
 
 
 @app.get("/predict/randomForest")
-def predict_randomForest(stock_symbols: str, start_date: str, end_date: str, resolution: str):
+def predict_randomForest(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
+    if(resolution != "D"):
+        start_date += " 10:00:00"
+        end_date += " 14:00:00"
+
     data_to_send = {"stock_symbols": stock_symbols,
                     "start_date": start_date,
                     "end_date": end_date,
                     "resolution": resolution}
+    
+    print(data_to_send)
+
     api_url = "http://predict_ann:8000/predict/randomForest"
     response = requests.get(api_url, params=data_to_send)
 
@@ -338,11 +345,18 @@ def predict_randomForest(stock_symbols: str, start_date: str, end_date: str, res
 
 
 @app.get("/predict/gradientBoost")
-def predict_gradientBoost(stock_symbols: str, start_date: str, end_date: str, resolution: str):
+def predict_gradientBoost(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
+    if(resolution != "D"):
+        start_date += " 10:00:00"
+        end_date += " 14:00:00"
+
     data_to_send = {"stock_symbols": stock_symbols,
                     "start_date": start_date,
                     "end_date": end_date,
                     "resolution": resolution}
+    
+    print(data_to_send)
+
     api_url = "http://predict_ann:8000/predict/gradientBoost"
     response = requests.get(api_url, params=data_to_send)
 
@@ -419,11 +433,16 @@ def predict_rl(stock_symbols: str, start_date: str, end_date: str, resolution: s
 
 
 @app.get("/load/data")
-def load_data():
+def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
     allColumns = ["DateTime", "Open", "Close", "High", "Low", "a"]
     relevantColumns = ["DateTime", "Open", "Close", "High", "Low"]
-    start_date = pd.Timestamp("2021-01-04")
-    end_date = pd.Timestamp("2021-01-06")
+    #start_date = pd.Timestamp("2021-01-04")
+    #end_date = pd.Timestamp("2021-01-06")
 
-    return crud.loadDataFromFile(start_date=start_date, end_date=end_date, rsc_completePath="../data/Aktien/AAPL_1min.txt",
-                                 ALL_DATA_COLUMNS=allColumns, COLUMNS_TO_KEEP=relevantColumns)
+    return crud.loadDataFromFile(stock_symbols=stock_symbols,
+                                 start_date=pd.Timestamp(start_date),
+                                 end_date=pd.Timestamp(end_date),
+                                 interval=resolution,
+                                 rsc_completePath="../data/Aktien/AAPL_1min.txt",
+                                 ALL_DATA_COLUMNS=allColumns,
+                                 COLUMNS_TO_KEEP=relevantColumns)
