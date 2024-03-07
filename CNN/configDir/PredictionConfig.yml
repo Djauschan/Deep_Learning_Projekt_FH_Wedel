@@ -1,0 +1,25 @@
+# Model Config
+### TEST CONFIG FOR MVP
+
+RSC_ROOT: "../data/"
+STOCK_FOLDER: "Aktien/"
+ETF_FOLDER: "ETF/"
+MODEL_FOLDER: "./modelDir/"
+MODELS_TO_LOAD: [
+  "20_120_1_MODEL1612024_129.pt","20_120_4_MODEL1612024_1245.pt", "20_120_8_MODEL1612024_1317.pt"
+]
+
+RSC_DATA_FILES: [
+  #key: [fileName, [columns in file], [relevant feature columns], y-variable]
+  AAPL: ["AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]]
+]
+
+FEATURES_DATA_TO_LOAD : [
+  #key: [fileName, [columns in file], [relevant feature columns]
+  MCHI: ["MCHI_1min.txt", ["DateTime", "Open_MCHI", "a", "b", "c", "Volume"], ["DateTime", "Open_MCHI"]], #China
+  IVV: ["IVV_1min.txt", ["DateTime", "Open_IVV", "a", "b", "c", "Volume"], ["DateTime", "Open_IVV"]] #USA
+]
+
+FEATURES: [
+  "Open", "Volume", "Open_MCHI", "Open_IVV"
+]

@@ -1,0 +1,5 @@
+*.txt
+*.csv
+
+# Upload the handmade index dictionary
+!index_mapping.csv

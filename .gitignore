@@ -2,10 +2,19 @@
 runs/
 *.deb
 
+# MacOs attribute file
+.DS_Store
+
+# database
+*.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+venv/
+.deepmind/
+lightning_logs
 
 # C extensions
 *.so
@@ -165,4 +174,3 @@ cython_debug/
 
 # VS Code Configurations
 .vscode/
-/src_transformers/__init__.py
