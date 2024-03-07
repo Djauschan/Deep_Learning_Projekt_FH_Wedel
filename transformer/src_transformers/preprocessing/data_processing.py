@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Final, Optional
 
 import pandas as pd
-
 from src_transformers.preprocessing.txtReader import DataReader
 from src_transformers.utils.logger import Logger
 
@@ -84,13 +83,11 @@ def add_time_information(df: pd.DataFrame, time_feature: dict[str] = None) -> pd
         df['last of day'] = df['last of day'].astype(int)
 
     # Convert python time to posix time.
-    # df['posix_time'] = df['timestamp'].apply(
-    #     lambda x: x.timestamp())
+    df['posix_time'] = df['timestamp'].apply(
+        lambda x: x.timestamp())
 
-    # df.set_index('posix_time', inplace=True)
-    # df.drop(columns=['timestamp'], inplace=True)
-
-    df.set_index('timestamp', inplace=True)
+    df.set_index('posix_time', inplace=True)
+    df.drop(columns=['timestamp'], inplace=True)
 
     return df
 
