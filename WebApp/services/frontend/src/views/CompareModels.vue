@@ -1,6 +1,11 @@
 <template>
   <Header />
+  <div class="home-container01">
+     <span class="home-logo">Compare Models!</span>
+  </div>
   <div class="center">
+    <button class="button-stock" @click="updateChart">Load Charts</button>
+    <div class="separator"></div>
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
     <button class="button-stock" @click="updateChart">Show Stock</button>!-->
@@ -39,6 +44,7 @@
         </option>
       </select>
     </div>
+    <div class="separator"></div>
     <span class="selection">Time Interval</span>
     <div class="selector">
       <select v-model="selectedTime" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
@@ -53,7 +59,7 @@
         </option>
       </select>
     </div>
-    <button class="button-stock" @click="updateChart">Load Charts</button>
+    <div class="separator"></div>
     <button class="button-stock" @click="showAll">Check All</button>
     <button class="button-stock" @click="hideAll">Uncheck All</button>
     <!-- Add checkboxes for additional data points -->
@@ -767,8 +773,21 @@ export default {
   justify-content: center;
   align-items: center;
   height: 10%;
-  background-color: lightgray;
+  background-color: white;
   padding: 1%;
+  border: 2px solid #ccc; /* Adjust border thickness and color as needed */
+}
+
+.selection{
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.separator {
+  height: 100px;
+  width: 2px; /* Adjust the width of the separator */
+  background-color: #817f7f; /* Adjust the color of the separator */
+  margin: 0 10px; /* Adjust the margin around the separator */
 }
 
 select {
@@ -783,7 +802,6 @@ select {
 
 input {
   color: #ffffff;
-  background-color: grey;
   margin-right: 1%;
 }
 
@@ -791,6 +809,19 @@ input {
   width: 10%;
   direction: rtl;
 }
+
+.home-container01 {
+  width: 100%;
+  flex: 0 0 auto;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 30px; /* Adjust the font size as needed */
+  margin-top: 15px;
+}
+
 
 .text-input {
   color: #ffffff;
@@ -814,6 +845,13 @@ input::placeholder {
   transition: background-color 0.3s ease;
   border-radius: 12px;
   box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.checkboxes4{
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .button-stock:hover {
