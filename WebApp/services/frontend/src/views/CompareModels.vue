@@ -1,53 +1,65 @@
 <template>
   <Header />
+  <div class="home-container01">
+     <span class="home-logo">Compare Models!</span>
+  </div>
   <div class="center">
+    <button class="button-stock" @click="updateChart">Load Charts</button>
+    <div class="separator"></div>
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
     <button class="button-stock" @click="updateChart">Show Stock</button>!-->
     <span class="selection">Stock</span>
     <div class="selector">
       <select v-model="selectedStock" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
-        <option value="Option 1" selected>
-          Apple
-        </option>
-        <option value="Option 2">
+        <option value="AAL" selected>
           American Airlines
         </option>
-        <option value="Option 3">
+        <option value="AAPL">
+          Apple
+        </option>
+        <option value="AMD">
           Advanced Micro Devices
         </option>
-        <option value="Option 4">
+        <option value="C">
           Citigroup
         </option>
-        <option value="Option 5">
-          NVIDIA
+        <option value="MRNS">
+          Marinus Pharmaceuticals Inc
         </option>
-        <option value="Option 6">
-          Snap
+        <option value="NIO">
+          Nio Inc
         </option>
-        <option value="Option 7">
-          Block
+        <option value="NVDA">
+          Nvdia
         </option>
-        <option value="Option 8">
+        <option value="SNAP">
+          Snap Inc
+        </option>
+        <option value="SQ">
+          Block Inc
+        </option>
+        <option value="TSLA">
           Tesla
         </option>
       </select>
     </div>
+    <div class="separator"></div>
     <span class="selection">Time Interval</span>
     <div class="selector">
       <select v-model="selectedTime" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
-        <option value="Option 1" selected>
+        <option value="D" selected>
           Daily
         </option>
-        <option value="Option 2">
+        <option value="H">
           Hourly
         </option>
-        <option value="Option 3">
+        <option value="M">
           Minutely
         </option>
       </select>
     </div>
-    <button class="button-stock" @click="updateChart">Load Charts</button>
+    <div class="separator"></div>
     <button class="button-stock" @click="showAll">Check All</button>
     <button class="button-stock" @click="hideAll">Uncheck All</button>
     <!-- Add checkboxes for additional data points -->
@@ -80,20 +92,20 @@
       <DxSeries :name=selectedStock open-value-field="Open" high-value-field="High" low-value-field="Low"
         close-value-field="Close" argument-field="DateTime">
       </DxSeries>
-      <DxSeries v-if="showCNNLine" :name="'CNN' + selectedStock" :data-source="combinedData" type="line"
+      <DxSeries v-if="showCNNLine" :name="'CNN' + this.selectedStock" :data-source="combinedData" type="line"
         value-field="CNNValue" argument-field="date" :color="seriesColors[0]">
       </DxSeries>
-      <DxSeries v-if="showTransformerLine" :name="'Transformer' + selectedStock" :data-source="combinedData"
+      <DxSeries v-if="showTransformerLine" :name="'Transformer' + this.selectedStock" :data-source="combinedData"
         type="line" value-field="TransformerValue" argument-field="date" :color="seriesColors[1]">
       </DxSeries>
-      <DxSeries v-if="showLSTMLine" :name="'LSTM' + selectedStock" :data-source="combinedData" type="line"
+      <DxSeries v-if="showLSTMLine" :name="'LSTM' + this.selectedStock" :data-source="combinedData" type="line"
         value-field="LSTMValue" argument-field="date" :color="seriesColors[2]">
       </DxSeries>
-      <DxSeries v-if="showrandomForestLine" :name="'randomForest' + selectedStock"
-        :data-source="combinedData" type="line" value-field="randomForestValue" argument-field="date" :color="seriesColors[3]">
+      <DxSeries v-if="showrandomForestLine" :name="'randomForest' + this.selectedStock" :data-source="combinedData"
+        type="line" value-field="randomForestValue" argument-field="date" :color="seriesColors[3]">
       </DxSeries>
-      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost' + selectedStock"
-        :data-source="combinedData" type="line" value-field="gradientBoostValue" argument-field="date" :color="seriesColors[4]">
+      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost' + this.selectedStock" :data-source="combinedData"
+        type="line" value-field="gradientBoostValue" argument-field="date" :color="seriesColors[4]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -127,10 +139,12 @@
     </DxChart>
   </div>
   <div class="newChart">
-   <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="this.transformerData" :title="TransformerchartTitle">
-    <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[1]">
-    </DxSeries>
+    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="this.transformerData"
+      :title="TransformerchartTitle">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line"
+        :color="seriesColors[1]">
+      </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
@@ -142,7 +156,7 @@
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
-   </DxChart>
+    </DxChart>
   </div>
   <div class="newChart">
     <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData" :title="LSTMchartTitle">
@@ -163,9 +177,11 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart" :data-source="this.randomForestData" :title="RandomForestchartTitle">
+    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart" :data-source="this.randomForestData"
+      :title="RandomForestchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line"
+        :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -181,9 +197,11 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart" :data-source="this.gradientBoostData" :title="GradientBoostchartTitle">
+    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart" :data-source="this.gradientBoostData"
+      :title="GradientBoostchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[4]">
+      <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line"
+        :color="seriesColors[4]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -222,21 +240,21 @@ import { useMyPiniaStore } from "../store.js";
 
 // Add the calculateMeanErrorAndMeanAbsoluteError function here
 function calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues) {
-    if (actualValues.length !== predictedValues.length) {
-        throw new Error("The lengths of actualValues and predictedValues should be the same.");
-    }
+  if (actualValues.length !== predictedValues.length) {
+    throw new Error("The lengths of actualValues and predictedValues should be the same.");
+  }
 
-    // Calculate errors for each data point
-    const errors = actualValues.map((actual, index) => predictedValues[index] - actual);
+  // Calculate errors for each data point
+  const errors = actualValues.map((actual, index) => predictedValues[index] - actual);
 
-    // Calculate mean error
-    const meanError = errors.reduce((sum, error) => sum + error, 0) / errors.length;
+  // Calculate mean error
+  const meanError = errors.reduce((sum, error) => sum + error, 0) / errors.length;
 
-    // Calculate mean absolute error
-    const absoluteErrors = errors.map(error => Math.abs(error));
-    const meanAbsoluteError = absoluteErrors.reduce((sum, error) => sum + error, 0) / absoluteErrors.length;
+  // Calculate mean absolute error
+  const absoluteErrors = errors.map(error => Math.abs(error));
+  const meanAbsoluteError = absoluteErrors.reduce((sum, error) => sum + error, 0) / absoluteErrors.length;
 
-    return { meanError, meanAbsoluteError };
+  return { meanError, meanAbsoluteError };
 };
 
 export default {
@@ -257,9 +275,9 @@ export default {
   async created() {
     this.dataSource = [];
     this.selectedDays = null;
-    this.transformerData =[];
-    this.LSTMData =[];
-    this.CNNData =[];
+    this.transformerData = [];
+    this.LSTMData = [];
+    this.CNNData = [];
     this.randomForestData = [];
     this.gradientBoostData = [];
   },
@@ -271,7 +289,6 @@ export default {
       CNNData: [],
       randomForestData: [],
       gradientBoostData: [],
-      selectedStock: "",
       selectedDays: null,
       showChart: false,
       priceRange: { min: null, max: null },
@@ -287,8 +304,8 @@ export default {
       gradientBoostpredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
-      selectedTime: 'Option 1',
-      selectedStock: 'Option 1',
+      selectedTime: "H",
+      selectedStock: "AAPL",
       seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'], // Array of colors for each series
       meanError: null,
       meanAbsoluteError: null,
@@ -311,12 +328,12 @@ export default {
       return `Gradient Boost Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
     },
     tooltip: {
-          enabled: true,
-          // Customize tooltip appearance or behavior if needed
-        },
-  },  
-  
-  mounted(){
+      enabled: true,
+      // Customize tooltip appearance or behavior if needed
+    },
+  },
+
+  mounted() {
     this.handleSelection();
   },
 
@@ -336,99 +353,102 @@ export default {
       this.calculateErrorsAndDisplay(actualValues, predictedValues);
     },
 
-    handleSelection(){
+    handleSelection() {
       console.log("SelectedTime:", this.selectedTime);
-      console.log("SelectedStock:", this.SelectedStock);
+      console.log("SelectedStock:", this.selectedStock);
     },
 
     async updateCombinedData() {
-    // Map dataSource points with TransformerValue set to null
-    const combinedDataWithNull = this.dataSource.map(data => ({
-      ...data,
-      TransformerValue: null,
-      CNNValue: null,
-      LSTMValue: null,
-      randomForestValue: null,
-      gradientBoostValue: null,
-    }));
+      // Map dataSource points with TransformerValue set to null
+      const combinedDataWithNull = this.dataSource.map(data => ({
+        ...data,
+        TransformerValue: null,
+        CNNValue: null,
+        LSTMValue: null,
+        randomForestValue: null,
+        gradientBoostValue: null,
+      }));
 
-    // Merge transformerData points into combinedData
-    this.transformerData.forEach(transformerDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === transformerDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].TransformerValue = transformerDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: transformerDataPoint.date,
-          TransformerValue: transformerDataPoint.value,
-        });
+      // Merge transformerData points into combinedData
+      this.transformerData.keys().forEach(transformerDataPoint => {
+        const index = combinedDataWithNull.findIndex(data => data.date === transformerDataPoint.date);
+        if (index !== -1) {
+          // If date exists in combinedData, update TransformerValue
+          combinedDataWithNull[index].TransformerValue = transformerDataPoint.value;
+        } else {
+          // If date doesn't exist in combinedData, add a new point
+          combinedDataWithNull.push({
+            date: transformerDataPoint.date,
+            TransformerValue: transformerDataPoint.value,
+          });
+        }
+      });
+
+      this.LSTMData.forEach(LSTMDataPoint => {
+        const index = combinedDataWithNull.findIndex(data => data.date === LSTMDataPoint.date);
+        if (index !== -1) {
+          // If date exists in combinedData, update TransformerValue
+          combinedDataWithNull[index].LSTMValue = LSTMDataPoint.value;
+        } else {
+          // If date doesn't exist in combinedData, add a new point
+          combinedDataWithNull.push({
+            date: LSTMDataPoint.date,
+            LSTMValue: LSTMDataPoint.value,
+          });
+        }
+      });
+
+
+      for (let value in this.CNNData) {
+        this.CNNData[value].forEach(Item => {
+          const index = combinedDataWithNull.findIndex(data => data.date === Item.date);
+          if (index !== -1) {
+            combinedDataWithNull[index].CNNValue = Item.value;
+          }
+          else {
+            combinedDataWithNull.push({
+              date: Item.date,
+              CNNValue: Item.value,
+            });
+          }
+        })
       }
-    });
 
-    this.LSTMData.forEach(LSTMDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === LSTMDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].LSTMValue = LSTMDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: LSTMDataPoint.date,
-          LSTMValue: LSTMDataPoint.value,
-        });
-      }
-    });
 
-    this.CNNData.forEach(CNNDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === CNNDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].CNNValue = CNNDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: CNNDataPoint.date,
-          CNNValue: CNNDataPoint.value,
-        });
-      }
-    });
+      this.randomForestData.forEach(randomForestDataPoint => {
+        const index = combinedDataWithNull.findIndex(data => data.date === randomForestDataPoint.date);
+        if (index !== -1) {
+          // If date exists in combinedData, update TransformerValue
+          combinedDataWithNull[index].randomForestValue = randomForestDataPoint.value;
+        } else {
+          // If date doesn't exist in combinedData, add a new point
+          combinedDataWithNull.push({
+            date: randomForestDataPoint.date,
+            randomForestValue: randomForestDataPoint.value,
+          });
+        }
+      });
 
-    this.randomForestData.forEach(randomForestDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === randomForestDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].randomForestValue = randomForestDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: randomForestDataPoint.date,
-          randomForestValue: randomForestDataPoint.value,
-        });
-      }
-    });
+      this.gradientBoostData.forEach(gradientBoostDataPoint => {
+        const index = combinedDataWithNull.findIndex(data => data.date === gradientBoostDataPoint.date);
+        if (index !== -1) {
+          // If date exists in combinedData, update TransformerValue
+          combinedDataWithNull[index].gradientBoostValue = gradientBoostDataPoint.value;
+        } else {
+          // If date doesn't exist in combinedData, add a new point
+          combinedDataWithNull.push({
+            date: gradientBoostDataPoint.date,
+            gradientBoostValue: gradientBoostDataPoint.value,
+          });
+        }
+      });
 
-    this.gradientBoostData.forEach(gradientBoostDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === gradientBoostDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update TransformerValue
-        combinedDataWithNull[index].gradientBoostValue = gradientBoostDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: gradientBoostDataPoint.date,
-          gradientBoostValue: gradientBoostDataPoint.value,
-        });
-      }
-    });
+      // Set the result to combinedData
+      this.combinedData = combinedDataWithNull;
 
-    // Set the result to combinedData
-    this.combinedData = combinedDataWithNull;
-
-    console.log("combinedData");
-    console.log(this.combinedData);
-  },
+      console.log("combinedData");
+      console.log(this.combinedData);
+    },
 
     async hideAll() {
       this.showCNNLine = false;
@@ -450,8 +470,10 @@ export default {
       try {
         const response = await axios.get(this.store.API + "/getStock", {
           params: {
-            stock_symbol: stock_symbol,
-            days_back: days_back,
+            stock_symbol: this.selectedStock,
+            start_date: "2021-02-04", // Replace with the start date of the prediction
+            end_date: "2021-02-06", // Replace with the end date of the prediction
+            resolution: this.selectedtime, // Replace with the resolution:
           }
         });
         console.log([response.data])
@@ -481,7 +503,10 @@ export default {
       try {
         const response = await axios.get(`${this.store.API}/predict/cnn`, {
           params: {
-            stock_symbol: "AAPL"
+            stock_symbol: "[" + this.selectedStock + "]",
+            start_date: "2021-02-04", // Replace with the start date of the prediction
+            end_date: "2021-02-06", // Replace with the end date of the prediction
+            resolution: this.selectedtime, // Replace with the resolution:
           }
         });
 
@@ -509,7 +534,10 @@ export default {
       try {
         const response = await axios.get(`${this.store.API}/predict/lstm`, {
           params: {
-            stock_symbol: "AAPL"
+            stock_symbol: "[" + this.selectedStock + "]",
+            start_date: "2021-02-04", // Replace with the start date of the prediction
+            end_date: "2021-02-06", // Replace with the end date of the prediction
+            resolution: this.selectedtime, // Replace with the resolution:
           }
         });
 
@@ -534,7 +562,10 @@ export default {
       try {
         const response = await axios.get(`${this.store.API}/predict/transformer`, {
           params: {
-            stock_symbol: "AAPL"
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: "2021-02-04", // Replace with the start date of the prediction
+            end_date: "2021-02-06", // Replace with the end date of the prediction
+            resolution: this.selectedtime, // Replace with the resolution:
           }
         });
 
@@ -565,7 +596,10 @@ export default {
       try {
         const response = await axios.get(`${this.store.API}/predict/randomForest`, {
           params: {
-            stock_symbol: "AAPL"
+            stock_symbol: "[" + this.selectedStock + "]",
+            start_date: "2021-02-04", // Replace with the start date of the prediction
+            end_date: "2021-02-06", // Replace with the end date of the prediction
+            resolution: this.selectedtime, // Replace with the resolution:
           }
         });
 
@@ -590,7 +624,10 @@ export default {
       try {
         const response = await axios.get(`${this.store.API}/predict/gradientBoost`, {
           params: {
-            stock_symbol: "AAPL"
+            stock_symbol: "[" + this.selectedStock + "]",
+            start_date: "2021-02-04", // Replace with the start date of the prediction
+            end_date: "2021-02-06", // Replace with the end date of the prediction
+            resolution: this.selectedtime, // Replace with the resolution:
           }
         });
 
@@ -614,6 +651,12 @@ export default {
     async load_data() {
       try {
         const response = await axios.get(this.store.API + "/load/data", {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: "2021-02-04", // Replace with the start date of the prediction
+            end_date: "2021-02-06", // Replace with the end date of the prediction
+            resolution: this.selectedtime, 
+          }
         });
         console.log("normal loaded")
         console.log([response.data])
@@ -640,34 +683,64 @@ export default {
     },
 
     async updateChart() {
-      this.dataSource = await this.load_data();
-      this.transformerData = await this.load_transformer_data();
-      this.randomForestData = await this.load_randomForest_data();
-      this.gradientBoostData = await this.load_gradientBoost_data();
-      this.LSTMData = await this.load_LSTM_data();
-      this.CNNData = await this.load_CNN_data();
-      
+      console.log("##### SelectedTime: ", this.selectedTime);
+      console.log("##### SelectedStock:", this.selectedStock);
+      console.log("##### checkAllBoxes:", this.checkAllBoxes());
 
-      console.log(this.dataSource)
-      
-      if (this.dataSource) {
+      if (this.selectedStock && this.selectedTime && this.checkAllBoxes()) {
+        this.dataSource = await this.load_data();
+        if (this.showCNNLine == true) {
+          this.CNNData = await this.load_CNN_data();
+        } else if (this.showTransformerLine) {
+          this.transformerData = await this.load_transformer_data();
+        } else if (this.showLSTMLine) {
+          this.LSTMData = await this.load_LSTM_data();
+        } else if (this.showrandomForestLine) {
+          this.randomForestData = await this.load_randomForest_data();
+        } else if (this.showgradientBoostLine) {
+          this.gradientBoostData = await this.load_gradientBoost_data();
+        } else {
+          console.log("No model selected");
+        }
 
-        const prices = this.dataSource.flatMap(data => [data.open, data.close]);
-        this.priceRange = {
-          min: Math.min(...prices) * 0.5,
-          max: Math.max(...prices) * 2
-        };
-        this.priceRangeKey = Math.random();
-        console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
+        console.log("datasource: " + this.dataSource)
+
+        if (this.dataSource) {
+
+          const prices = this.dataSource.flatMap(data => [data.open, data.close]);
+          this.priceRange = {
+            min: Math.min(...prices) * 0.5,
+            max: Math.max(...prices) * 2
+          };
+          this.priceRangeKey = Math.random();
+          console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
+        }
+
+        await this.updateCombinedData();
+        this.showChart = true;
+
+      } else {
+        Swal.fire({
+          title: "Error at getting data",
+          text: "Please select a stock, the time interval and a model",
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
       }
-      
-      await this.updateCombinedData();
-      this.showChart = true;
-      //}
+    },
+    checkAllBoxes() {
+      if (this.showCNNLine || this.showTransformerLine || this.showLSTMLine || this.showrandomForestLine || this.showgradientBoostLine) {
+        return true;
+      } else {
+        return false;
+      }
     },
   },
 };
 </script>
+
 <style>
 #chart {
   height: 30%;
@@ -700,8 +773,21 @@ export default {
   justify-content: center;
   align-items: center;
   height: 10%;
-  background-color: lightgray;
+  background-color: white;
   padding: 1%;
+  border: 2px solid #ccc; /* Adjust border thickness and color as needed */
+}
+
+.selection{
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.separator {
+  height: 100px;
+  width: 2px; /* Adjust the width of the separator */
+  background-color: #817f7f; /* Adjust the color of the separator */
+  margin: 0 10px; /* Adjust the margin around the separator */
 }
 
 select {
@@ -716,7 +802,6 @@ select {
 
 input {
   color: #ffffff;
-  background-color: grey;
   margin-right: 1%;
 }
 
@@ -724,6 +809,19 @@ input {
   width: 10%;
   direction: rtl;
 }
+
+.home-container01 {
+  width: 100%;
+  flex: 0 0 auto;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 30px; /* Adjust the font size as needed */
+  margin-top: 15px;
+}
+
 
 .text-input {
   color: #ffffff;
@@ -747,6 +845,13 @@ input::placeholder {
   transition: background-color 0.3s ease;
   border-radius: 12px;
   box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.checkboxes4{
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .button-stock:hover {

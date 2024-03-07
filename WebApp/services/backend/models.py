@@ -13,6 +13,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     password = Column(String)
     is_active = Column(Boolean, default=True)
+    budget = Column(Float, default=0.0)
 
 # Class for sqlalchemy to create db table named "login"
 class Login(Base):
