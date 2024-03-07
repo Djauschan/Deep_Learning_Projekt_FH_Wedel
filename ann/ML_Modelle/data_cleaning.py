@@ -15,14 +15,22 @@ class DataCleaner:
         self.df_normal = self.normal()  
         self.df_hourly = self.hourly()
         self.df_minute = self.minute()
-        self.df_daily = self.daily()
+        #self.df_daily = self.daily()
         self.df_busi = self.busi()
     
     def normal(self):
         return self.raw_data
     
     def hourly(self):
-        hourly = self.raw_data.resample('H').mean()
+        hourly = self.raw_data
+        
+        # Spezifische Stunden für das Model
+        specific_hours = ['09:30', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00']
+        hourly = hourly[hourly.index.strftime('%H:%M').isin(specific_hours)]
+
+        hourly = hourly.resample('H').mean()
+        hourly = hourly.between_time('09:00', '16:00')
+
         return hourly.ffill()
     
     def minute(self):
@@ -30,10 +38,10 @@ class DataCleaner:
         minute = minute.between_time('09:30', '16:00')
         return minute.ffill()
     
-    def daily(self):
-        daily = self.raw_data.between_time('16:00:00', '16:00:00')
-        daily = daily.resample('D').mean()
-        return daily.ffill()
+    # def daily(self):
+    #     daily = self.raw_data.between_time('16:00:00', '16:00:00')
+    #     daily = daily.resample('D').mean()
+    #     return daily.ffill()
     
     def busi(self):
         busi = self.raw_data.between_time('16:00:00', '16:00:00')
