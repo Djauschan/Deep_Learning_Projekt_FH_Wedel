@@ -64,16 +64,13 @@ class gafService:
         )  # 10x30x30
         i = 0
         while i < len(data):
-            res = self._createSingleGAF(data[i])
-            if res != -1:
-                gafDataFeatureSeparated[i] = self._createSingleGAF(data[i])
-            else:
-                gafDataFeatureSeparated[i] = self._createSingleGAF(data[i-1])
+            gafDataFeatureSeparated[i] = self._createSingleGAF(data[i])
             i = i + 1
 
         return gafDataFeatureSeparated
 
-    def _createSingleGAF(self, x_arr: np.ndarray):
+    @staticmethod
+    def _createSingleGAF(x_arr: np.ndarray):
         """
             method to create a single GAF, based on preprocessed numpy array
         """
