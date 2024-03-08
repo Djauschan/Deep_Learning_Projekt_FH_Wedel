@@ -9,7 +9,7 @@ model_parameters:
     dropout: 0
 training_parameters:
   batch_size: 10000
-  epochs: 800
+  epochs: 600
   learning_rate: 0.00125
   loss: "mse" #Options: "mse", "rmse", "rmsle", "expmse"
   seed: 42
