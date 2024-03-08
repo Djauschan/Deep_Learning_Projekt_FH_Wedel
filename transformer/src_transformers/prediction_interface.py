@@ -7,7 +7,6 @@ The PredictionDataset class is a PyTorch Dataset for making predictions.
 The TransformerInterface class provides methods for loading data, loading a model, making
 predictions, and converting relative prices to absolute prices.
 """
-import datetime as dt
 import pickle
 from datetime import timedelta
 from pathlib import Path
@@ -17,7 +16,8 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import yaml
-from src_transformers.abstract_model import AbstractModel, resolution
+from src_transformers.abstract_model import AbstractModel
+from src_transformers.abstract_model import resolution as resolution_enum
 from src_transformers.pipelines.constants import MODEL_NAME_MAPPING
 from torch.utils.data import DataLoader, Dataset
 
@@ -35,7 +35,7 @@ class PredictionDataset(Dataset):
         data (pd.DataFrame): The DataFrame containing the data for making predictions.
     """
 
-    def __init__(self, data: pd.DataFrame, first_index: int) -> None:
+    def __init__(self, data: pd.DataFrame, first_index: int, encoder_intervals: int) -> None:
         """
         Initializes the PredictionDataset with the given data and index.
 
@@ -43,7 +43,7 @@ class PredictionDataset(Dataset):
             data (pd.DataFrame): The DataFrame containing the data for making predictions.
             first_index (int): The index of the first row of data not included in the sample.
         """
-        self.data = data.iloc[first_index - 96: first_index, :]
+        self.data = data.iloc[first_index - encoder_intervals: first_index, :]
         self.data.set_index("posix_time", inplace=True)
 
     def __len__(self) -> int:
@@ -71,6 +71,10 @@ class PredictionDataset(Dataset):
         Returns:
             torch.Tensor: The sample.
         """
+        timestamps = np.array(self.data.index)
+        timestamps = pd.DatetimeIndex(timestamps * 1e9)
+        print(timestamps)
+
         return torch.tensor(self.data.to_numpy(), dtype=torch.float32)
 
 
@@ -89,23 +93,50 @@ class TransformerInterface(AbstractModel):
         prices_path (Path): The path to the prices file.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, resolution: resolution_enum) -> None:
         """
         Initializes the TransformerInterface with default values.
 
         This method sets the interval between predictions, the number of intervals,
         and the paths to the model file, the data file, and the prices file.
         """
-        self.interval_minutes = 120
-        self.num_intervals = 24
-        self.model_path = Path("data", "output", "models",
-                               "TransformerModel_v2.pt")
-        self.data_path = Path("data", "output", "120_min_input_data.csv")
-        self.prices_path = Path("data", "output", "tt_prices_for_120_min.pkl")
-        self.config_path = Path("data", "test_configs",
-                                "training_config_tt_train.yaml")
+        if resolution == resolution.MINUTE:
+            # Not implemented for minute resolution
+            raise NotImplementedError()
+        elif resolution == resolution.TWO_HOURLY:
+            self.model_path = Path("data", "output", "models",
+                                   "TransformerModel_v2.pt")
+            self.data_path = Path("data", "output", "120_min_input_data.csv")
+            self.prices_path = Path(
+                "data", "output", "tt_prices_for_120_min.pkl")
+            config_path = Path(
+                "data", "test_configs", "training_config_tt_train.yaml")
+        elif resolution == resolution.DAILY:
+            self.model_path = Path("data", "output", "models",
+                                   "TransformerModel_v4.pt")
+            self.data_path = Path("data", "output", "960_min_input_data.csv")
+            self.prices_path = Path(
+                "data", "output", "tt_prices_for_960_min.pkl")
+            config_path = Path(
+                "data", "test_configs", "training_config_tt_train.yaml")
+        else:
+            # Invalid resolution
+            raise ValueError("Invalid resolution")
 
-    def predict(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, resolution: resolution) -> pd.DataFrame:
+        # Get config
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+
+        model_parameters = config.pop('model_parameters').popitem()[1]
+        self.encoder_length = model_parameters['seq_len_encoder']
+        self.decoder_length = model_parameters['seq_len_decoder']
+
+        dataset_parameters = config.pop('dataset_parameters')
+        self.time_resolution = dataset_parameters['time_resolution']
+        self.start_day = dataset_parameters["data_selection_config"]["start_day_time"]
+        self.end_day = dataset_parameters["data_selection_config"]["end_day_time"]
+
+    def predict(self, symbol_list: list, timestamp_start: pd.Timestamp) -> pd.DataFrame:
         """predicts the stock prices for the given symbols and time range.
 
         Args:
@@ -116,29 +147,6 @@ class TransformerInterface(AbstractModel):
 
         Returns:
             pd.DataFrame: The predicted stock prices.
-        """
-        if resolution == resolution.MINUTE:
-            # Not implemented for minute resolution
-            raise NotImplementedError()
-        elif resolution == resolution.TWO_HOURLY:
-            return self.perdict_two_hourly(symbol_list, timestamp_start, timestamp_end)
-        elif resolution == resolution.DAILY:
-            raise NotImplementedError()
-        else:
-            # Invalid resolution
-            raise ValueError("Invalid resolution")
-
-    def perdict_two_hourly(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp) -> pd.DataFrame:
-        """
-        Makes predictions for the given time period for the given symbols with a resolution of two hours.
-
-        Args:
-            symbol_list (list): The list of symbols for which the stock prices should be predicted.
-            timestamp_start (pd.Timestamp): The start of the time range for which the stock prices should be predicted.
-            timestamp_end (pd.Timestamp): The end of the time range for which the stock prices should be predicted.
-
-        Returns:
-            pd.DataFrame: A DataFrame with the predicted prices for each stock.
         """
         # Load the data for making predictions
         prices_before_prediction, dataset = self.load_data(timestamp_start)
@@ -161,31 +169,35 @@ class TransformerInterface(AbstractModel):
 
         # Generate the timestamps for the predictions
         timestamps = self.generate_timestamps(timestamp_start,
-                                              self.interval_minutes,
-                                              self.num_intervals)
+                                              self.time_resolution,
+                                              self.decoder_length)
 
-        # Get config
-        with open(self.config_path, "r", encoding="utf-8") as f:
-            config = yaml.safe_load(f)
+        prediction.index = pd.Index(timestamps)
 
-        start_day = config['dataset_parameters']['data_selection_config']['start_day_time']
-        start_day = dt.datetime.strptime(start_day, '%H:%M').time().hour
-        end_day = config['dataset_parameters']['data_selection_config']['end_day_time']
-        end_day = dt.datetime.strptime(end_day, '%H:%M').time().hour
+        # # Get config
+        # with open(self.config_path, "r", encoding="utf-8") as f:
+        #     config = yaml.safe_load(f)
 
-        # TODO: Timestamps aus Dataloader holen?
-        empty_df = pd.DataFrame([], index=pd.Index(
-            timestamps), columns=prediction.columns)
+        # start_day = config['dataset_parameters']['data_selection_config']['start_day_time']
+        # start_day = dt.datetime.strptime(start_day, '%H:%M').time().hour
+        # end_day = config['dataset_parameters']['data_selection_config']['end_day_time']
+        # end_day = dt.datetime.strptime(end_day, '%H:%M').time().hour
 
-        i = 0
-        for timestamp in timestamps:
-            if timestamp.hour >= start_day and timestamp.hour < end_day:
-                # Insert prediction where timestamp matches index
-                # Insert data from prediction at row i
-                empty_df.loc[timestamp] = prediction.iloc[i]
-                i += 1
+        # # TODO: Timestamps aus Dataloader holen?
+        # empty_df = pd.DataFrame([], index=pd.Index(
+        #     timestamps), columns=prediction.columns)
 
-        prediction = empty_df.fillna(0)
+        # i = 0
+        # for timestamp in timestamps:
+        #     if timestamp.hour >= start_day and timestamp.hour < end_day:
+        #         # Insert prediction where timestamp matches index
+        #         # Insert data from prediction at row i
+        #         empty_df.loc[timestamp] = prediction.iloc[i]
+        #         i += 1
+
+        # print(prediction)
+        # prediction = empty_df.fillna(0)
+        # print(prediction)
 
         # Convert the relative prices to absolute prices
         for symbol, price in prices_before_prediction.items():
@@ -200,6 +212,102 @@ class TransformerInterface(AbstractModel):
         prediction = prediction[[f"close {symbol}" for symbol in symbol_list]]
 
         return prediction
+
+    # def predict(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, resolution: resolution) -> pd.DataFrame:
+    #     """predicts the stock prices for the given symbols and time range.
+
+    #     Args:
+    #         symbol_list (list): The list of symbols for which the stock prices should be predicted.
+    #         timestamp_start (pd.Timestamp): The start of the time range for which the stock prices should be predicted.
+    #         timestamp_end (pd.Timestamp): The end of the time range for which the stock prices should be predicted.
+    #         resolution (resolution): The resolution of the stock data.
+
+    #     Returns:
+    #         pd.DataFrame: The predicted stock prices.
+    #     """
+    #     if resolution == resolution.MINUTE:
+    #         # Not implemented for minute resolution
+    #         raise NotImplementedError()
+    #     elif resolution == resolution.TWO_HOURLY:
+    #         return self.perdict_two_hourly(symbol_list, timestamp_start, timestamp_end)
+    #     elif resolution == resolution.DAILY:
+    #         raise NotImplementedError()
+    #     else:
+    #         # Invalid resolution
+    #         raise ValueError("Invalid resolution")
+
+    # def perdict_two_hourly(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp) -> pd.DataFrame:
+    #     """
+    #     Makes predictions for the given time period for the given symbols with a resolution of two hours.
+
+    #     Args:
+    #         symbol_list (list): The list of symbols for which the stock prices should be predicted.
+    #         timestamp_start (pd.Timestamp): The start of the time range for which the stock prices should be predicted.
+    #         timestamp_end (pd.Timestamp): The end of the time range for which the stock prices should be predicted.
+
+    #     Returns:
+    #         pd.DataFrame: A DataFrame with the predicted prices for each stock.
+    #     """
+    #     # Load the data for making predictions
+    #     prices_before_prediction, dataset = self.load_data(timestamp_start)
+    #     data_loader = DataLoader(dataset, shuffle=False)
+
+    #     # Get the input for the model
+    #     model_input = next(iter(data_loader))
+    #     model = self.load_model()
+
+    #     # Make predictions using the model
+    #     with torch.no_grad():
+    #         output = model(model_input)
+
+    #     # Squeeze the batch dimension and convert the output to a 2 dimensional numpy array
+    #     output = torch.squeeze(output, 0).cpu().numpy()
+    #     # Create a DataFrame with the predictions (and mapping to the correct column names)
+    #     columns = ["close AAPL", "close AAL", "close AMD", "close C", "close NVDA", "close SNAP", "close SQ",
+    #                "close TSLA"]
+    #     prediction = pd.DataFrame(output, columns=columns)
+
+    #     # Generate the timestamps for the predictions
+    #     timestamps = self.generate_timestamps(timestamp_start,
+    #                                           self.interval_minutes,
+    #                                           self.num_intervals)
+
+    #     # Get config
+    #     with open(self.config_path, "r", encoding="utf-8") as f:
+    #         config = yaml.safe_load(f)
+
+    #     start_day = config['dataset_parameters']['data_selection_config']['start_day_time']
+    #     start_day = dt.datetime.strptime(start_day, '%H:%M').time().hour
+    #     end_day = config['dataset_parameters']['data_selection_config']['end_day_time']
+    #     end_day = dt.datetime.strptime(end_day, '%H:%M').time().hour
+
+    #     # TODO: Timestamps aus Dataloader holen?
+    #     empty_df = pd.DataFrame([], index=pd.Index(
+    #         timestamps), columns=prediction.columns)
+
+    #     i = 0
+    #     for timestamp in timestamps:
+    #         if timestamp.hour >= start_day and timestamp.hour < end_day:
+    #             # Insert prediction where timestamp matches index
+    #             # Insert data from prediction at row i
+    #             empty_df.loc[timestamp] = prediction.iloc[i]
+    #             i += 1
+
+    #     prediction = empty_df.fillna(0)
+
+    #     # Convert the relative prices to absolute prices
+    #     for symbol, price in prices_before_prediction.items():
+    #         if f"close {symbol}" in columns:
+    #             relative_prices = list(prediction[f"close {symbol}"])
+    #             absolute_prices = self.calculate_absolute_prices(prices=relative_prices,
+    #                                                              start_price=price)
+    #             prediction[f"close {symbol}"] = np.round(
+    #                 absolute_prices, decimals=2)
+
+    #     # Only select the stock symbols [close {symbol}] that are in the symbol list [symbol, symbol]
+    #     prediction = prediction[[f"close {symbol}" for symbol in symbol_list]]
+
+    #     return prediction
 
     def load_data(self, timestamp_start: pd.Timestamp) -> tuple[dict[str, float], PredictionDataset]:
         """
@@ -223,7 +331,7 @@ class TransformerInterface(AbstractModel):
         data_after_start = data[data["posix_time"]
                                 >= timestamp_start.value / 1e9]
         first_index = data_after_start.index[0]
-        dataset = PredictionDataset(data, first_index)
+        dataset = PredictionDataset(data, first_index, self.encoder_length)
 
         # Load the prices of the stocks before the data
         prices_before_data = pickle.load(open(self.prices_path, "rb"))
@@ -288,3 +396,15 @@ class TransformerInterface(AbstractModel):
                       for i in range(num_intervals)]
 
         return timestamps
+
+
+# if __name__ == "__main__":
+#     # convert stock_symbols to list "[AAPL, AAL, AMD]" -> ["AAPL", "AAL", "AMD"]
+#     symbols_list = ["AAPL", "AAL", "AMD"]
+#     transformer_interface = TransformerInterface(resolution_enum.DAILY)
+
+#     # TODO: Remove resolution from the function signature and use the resolution_enum.TWO_HOURLY directly
+#     # prediction = transformer_interface.predict(symbols_list, pd.to_datetime(
+#     #     start_date), pd.to_datetime(end_date), resolution.TWO_HOURLY)
+#     prediction = transformer_interface.predict(
+#         symbols_list, pd.to_datetime("2021-02-01"))
