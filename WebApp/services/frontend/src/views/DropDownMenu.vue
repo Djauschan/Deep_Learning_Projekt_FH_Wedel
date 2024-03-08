@@ -7,6 +7,8 @@
             <button @click="goToModelInformation" class="menu-item">Model Information</button>
             <button @click="goToStatistics" class="menu-item">Statistic</button>
             <button @click="goToStockList" class="menu-item">StockList</button>
+            <button @click="goToCompareModels" class="menu-item">CompareModels</button>
+            <button @click="goToCompareStocks" class="menu-item">CompareStocks</button>
             <button type="submit" @click="logout" class="menu-item">Logout</button>
         </div>
         <div v-if="isDropdownOpen" class="background" @click="closeDropdown"></div>
@@ -47,9 +49,20 @@ export default defineComponent({
             router.push('/StockList');
         };
 
+        const goToCompareModels = () => {
+            closeDropdown();
+            router.push('/CompareModels');
+        };
+
+        const goToCompareStocks = () => {
+            closeDropdown();
+            router.push('/CompareStocks');
+        };
+
         const logout = () => {
             localStorage.removeItem('logged_user');
             localStorage.removeItem('logged_user_id');
+            localStorage.removeItem('logged_email');
             localStorage.removeItem('logged_email');
             localStorage.setItem('isLoggedIn', false);
             router.push('/login');
@@ -66,6 +79,8 @@ export default defineComponent({
             goToStatistics,
             goToModelInformation,
             goToStockList,
+            goToCompareModels,
+            goToCompareStocks,
             logout,
             closeDropdown
         };

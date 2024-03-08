@@ -4,15 +4,19 @@ class UserBase(BaseModel):
     email: str
     username: str
     password: str
+
     class Config:
         from_attributes = True
+        orm_mode = True
 
 class User(UserBase):
     id: int
     is_active: bool
+    budget: float
 
     class Config:
         from_attributes = True
+        orm_mode = True
 
 class UserCreate(UserBase):
     pass
@@ -20,6 +24,11 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     username: str
     email: str
+    budget: float
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
     
 class PasswordUpdate(BaseModel):
     current_password: str
@@ -38,6 +47,7 @@ class Login(LoginBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
         
 class LoginRequest(BaseModel):
     user: str
@@ -45,3 +55,4 @@ class LoginRequest(BaseModel):
 
     class Config:
         orm_mode = True
+        from_attributes = True

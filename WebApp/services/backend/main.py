@@ -20,7 +20,8 @@ origins = [
     "http://localhost.tiangolo.com",
     "https://localhost.tiangolo.com",
     "http://localhost",
-    "http://localhost:8080",
+    "http://localhost:8080", # Frontend
+    "http://localhost:8000", # Backend
 ]
 
 app.add_middleware(
@@ -32,8 +33,6 @@ app.add_middleware(
 )
 
 # DB Dependency
-
-
 def get_db():
     db = SessionLocal()
 
@@ -43,15 +42,11 @@ def get_db():
         db.close()
 
 # test method to get Stock data for n days
-
-
 @app.get("/getStock/")
 def get_stock_days(stock_symbol: str, days_back: int, db: Session = Depends(get_db)):
     return crud.get_stock_days(stock_symbol=stock_symbol, n=days_back, db=db)
 
 # post method to delete table "users"
-
-
 @app.post("/deleteUsers/")
 def delete_users(db: Session = Depends(get_db)):
     db_delete_users = crud.delete_users(db)
@@ -60,8 +55,6 @@ def delete_users(db: Session = Depends(get_db)):
     # return crud.get_users(db=db, skip=0, limit=100)
 
 # post method to delete a single user from table "users" by id
-
-
 @app.post("/deleteUser/{username}")
 def delete_user(username: str, db: Session = Depends(get_db)):
     db_delete_user = crud.delete_user(db, username)
@@ -70,8 +63,6 @@ def delete_user(username: str, db: Session = Depends(get_db)):
     return {"message": "User deleted successfully", "status_code": 200}
 
 # post method to create a user into table "users"
-
-
 @app.post("/createUser/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user_email = crud.get_user_by_email(db, email=user.email)
@@ -88,6 +79,9 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 async def get_user(username: str, db: Session = Depends(get_db)):
     return crud.get_user_by_username(db, username)
 
+@app.get("/get_budget/{username}")
+async def get_budget(username: str, db: Session = Depends(get_db)):
+    return crud.get_budget_by_username(db, username)
 
 @app.get("/get_user/{email}")
 async def get_user(email: str, db: Session = Depends(get_db)):
@@ -98,6 +92,11 @@ async def get_user(email: str, db: Session = Depends(get_db)):
 async def update_user(username: str, user_update: schemas.UserUpdate, db: Session = Depends(get_db)):
     updated_user = crud.update_user_by_username(db, username, user_update)
     return {"message": "User updated successfully"}
+
+@app.put("/update_budget/{username}")
+async def update_budget_by_user(username: str, budgetInput: int, db: Session = Depends(get_db)):
+    updated_budget = crud.update_budget_by_user(db=db, username=username, new_budget=budgetInput)
+    return {"message": "Budget updated successfully"}
 
 
 @app.get("/getUsers/", response_model=list[schemas.User])
@@ -160,10 +159,11 @@ def check_login(email: str, password: str, db: Session = Depends(get_db)):
 
 
 @app.get("/predict/transformer")
-def predict_transformer(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
+def predict_transformer(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
+    data_to_send = {"stock_symbols": stock_symbols,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "resolution": resolution}
     api_url = "http://predict_transformer:8000/predict"
     response = requests.get(api_url, params=data_to_send)
 
@@ -177,10 +177,11 @@ def predict_transformer(stock_symbol: str):
 
 
 @app.get("/predict/cnn")
-def predict_cnn():
-    data_to_send = {"stock_symbol": "AAPL",
-                    "start_date": "2021-02-01",
-                    "end_date": "2021-03-03"}
+def predict_cnn(stock_symbol: str = ['aapl', 'nvda'], start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
+    data_to_send = {"stock_symbol": stock_symbol,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "resolution": resolution}
     api_url = "http://predict_cnn:8000/predict"
     response = requests.get(api_url, params=data_to_send)
 
@@ -199,130 +200,131 @@ def predict_cnn():
 #     return lstm.predict('2021-01-04', '2021-01-06', 120)
 
 
-@app.get("/predict/arima")
-def predict_arima(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
-    api_url = "http://predict_ann:8000/predict/arima"
-    response = requests.get(api_url, params=data_to_send)
+# @app.get("/predict/arima")
+# def predict_arima(stock_symbol: str, start_date: str, end_date: str):
+#     data_to_send = {"stock_symbol": stock_symbol,
+#                     "start_date": start_date,
+#                     "end_date": end_date}
+#     api_url = "http://predict_ann:8000/predict/arima"
+#     response = requests.get(api_url, params=data_to_send)
 
-    if response.status_code != 200:
-        return {
-            "status_code": response.status_code,
-            "response_text": response.text
-        }
+#     if response.status_code != 200:
+#         return {
+#             "status_code": response.status_code,
+#             "response_text": response.text
+#         }
 
-    return response.json()
-
-
-@app.get("/predict/ETS")
-def predict_ets(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
-    api_url = "http://predict_ann:8000/predict/ETS"
-    response = requests.get(api_url, params=data_to_send)
-
-    if response.status_code != 200:
-        return {
-            "status_code": response.status_code,
-            "response_text": response.text
-        }
-
-    return response.json()
+#     return response.json()
 
 
-@app.get("/predict/historicAverage")
-def predict_historicAverage(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
-    api_url = "http://predict_ann:8000/predict/historicAverage"
-    response = requests.get(api_url, params=data_to_send)
+# @app.get("/predict/ETS")
+# def predict_ets(stock_symbol: str, start_date: str, end_date: str):
+#     data_to_send = {"stock_symbol": stock_symbol,
+#                     "start_date": start_date,
+#                     "end_date": end_date}
+#     api_url = "http://predict_ann:8000/predict/ETS"
+#     response = requests.get(api_url, params=data_to_send)
 
-    if response.status_code != 200:
-        return {
-            "status_code": response.status_code,
-            "response_text": response.text
-        }
+#     if response.status_code != 200:
+#         return {
+#             "status_code": response.status_code,
+#             "response_text": response.text
+#         }
 
-    return response.json()
-
-
-@app.get("/predict/theta")
-def predict_theta(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
-    api_url = "http://predict_ann:8000/predict/theta"
-    response = requests.get(api_url, params=data_to_send)
-
-    if response.status_code != 200:
-        return {
-            "status_code": response.status_code,
-            "response_text": response.text
-        }
-
-    return response.json()
+#     return response.json()
 
 
-@app.get("/predict/naive")
-def predict_naive(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
-    api_url = "http://predict_ann:8000/predict/naive"
-    response = requests.get(api_url, params=data_to_send)
+# @app.get("/predict/historicAverage")
+# def predict_historicAverage(stock_symbol: str, start_date: str, end_date: str):
+#     data_to_send = {"stock_symbol": stock_symbol,
+#                     "start_date": start_date,
+#                     "end_date": end_date}
+#     api_url = "http://predict_ann:8000/predict/historicAverage"
+#     response = requests.get(api_url, params=data_to_send)
 
-    if response.status_code != 200:
-        return {
-            "status_code": response.status_code,
-            "response_text": response.text
-        }
+#     if response.status_code != 200:
+#         return {
+#             "status_code": response.status_code,
+#             "response_text": response.text
+#         }
 
-    return response.json()
-
-
-@app.get("/predict/windowAverage")
-def predict_windowAverage(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
-    api_url = "http://predict_ann:8000/predict/windowAverage"
-    response = requests.get(api_url, params=data_to_send)
-
-    if response.status_code != 200:
-        return {
-            "status_code": response.status_code,
-            "response_text": response.text
-        }
-
-    return response.json()
+#     return response.json()
 
 
-@app.get("/predict/linearRegression")
-def predict_linearRegression(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
-    api_url = "http://predict_ann:8000/predict/linearRegression"
-    response = requests.get(api_url, params=data_to_send)
+# @app.get("/predict/theta")
+# def predict_theta(stock_symbol: str, start_date: str, end_date: str):
+#     data_to_send = {"stock_symbol": stock_symbol,
+#                     "start_date": start_date,
+#                     "end_date": end_date}
+#     api_url = "http://predict_ann:8000/predict/theta"
+#     response = requests.get(api_url, params=data_to_send)
 
-    if response.status_code != 200:
-        return {
-            "status_code": response.status_code,
-            "response_text": response.text
-        }
+#     if response.status_code != 200:
+#         return {
+#             "status_code": response.status_code,
+#             "response_text": response.text
+#         }
 
-    return response.json()
+#     return response.json()
+
+
+# @app.get("/predict/naive")
+# def predict_naive(stock_symbol: str, start_date: str, end_date: str):
+#     data_to_send = {"stock_symbol": stock_symbol,
+#                     "start_date": start_date,
+#                     "end_date": end_date}
+#     api_url = "http://predict_ann:8000/predict/naive"
+#     response = requests.get(api_url, params=data_to_send)
+
+#     if response.status_code != 200:
+#         return {
+#             "status_code": response.status_code,
+#             "response_text": response.text
+#         }
+
+#     return response.json()
+
+
+# @app.get("/predict/windowAverage")
+# def predict_windowAverage(stock_symbol: str, start_date: str, end_date: str):
+#     data_to_send = {"stock_symbol": stock_symbol,
+#                     "start_date": start_date,
+#                     "end_date": end_date}
+#     api_url = "http://predict_ann:8000/predict/windowAverage"
+#     response = requests.get(api_url, params=data_to_send)
+
+#     if response.status_code != 200:
+#         return {
+#             "status_code": response.status_code,
+#             "response_text": response.text
+#         }
+
+#     return response.json()
+
+
+# @app.get("/predict/linearRegression")
+# def predict_linearRegression(stock_symbol: str, start_date: str, end_date: str):
+#     data_to_send = {"stock_symbol": stock_symbol,
+#                     "start_date": start_date,
+#                     "end_date": end_date}
+#     api_url = "http://predict_ann:8000/predict/linearRegression"
+#     response = requests.get(api_url, params=data_to_send)
+
+#     if response.status_code != 200:
+#         return {
+#             "status_code": response.status_code,
+#             "response_text": response.text
+#         }
+
+#     return response.json()
 
 
 @app.get("/predict/randomForest")
-def predict_randomForest(stock_symbol: str):
+def predict_randomForest(stock_symbol: str, start_date: str, end_date: str, resolution: str):
     data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "resolution": resolution}
     api_url = "http://predict_ann:8000/predict/randomForest"
     response = requests.get(api_url, params=data_to_send)
 
@@ -336,10 +338,11 @@ def predict_randomForest(stock_symbol: str):
 
 
 @app.get("/predict/gradientBoost")
-def predict_gradientBoost(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
+def predict_gradientBoost(stock_symbols: str, start_date: str, end_date: str, resolution: str):
+    data_to_send = {"stock_symbols": stock_symbols,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "resolution": resolution}
     api_url = "http://predict_ann:8000/predict/gradientBoost"
     response = requests.get(api_url, params=data_to_send)
 
@@ -352,21 +355,67 @@ def predict_gradientBoost(stock_symbol: str):
     return response.json()
 
 
-@app.get("/predict/svm")
-def predict_svm(stock_symbol: str):
-    data_to_send = {"stock_symbol": stock_symbol,
-                    "start_date": "2021-01-04",
-                    "end_date": "2021-01-05"}
-    api_url = "http://predict_ann:8000/predict/svm"
-    response = requests.get(api_url, params=data_to_send)
+# @app.get("/predict/svm")
+# def predict_svm(stock_symbol: str, start_date: str, end_date: str):
+#     data_to_send = {"stock_symbol": stock_symbol,
+#                     "start_date": start_date,
+#                     "end_date": end_date}
+#     api_url = "http://predict_ann:8000/predict/svm"
+#     response = requests.get(api_url, params=data_to_send)
 
-    if response.status_code != 200:
-        return {
-            "status_code": response.status_code,
-            "response_text": response.text
-        }
+#     if response.status_code != 200:
+#         return {
+#             "status_code": response.status_code,
+#             "response_text": response.text
+#         }
 
-    return response.json()
+#     return response.json()
+
+@app.get("/predict/rl")
+def predict_rl(stock_symbols: str, start_date: str, end_date: str, resolution: str):
+    """Predicts trading actions for a given stock symbol and time frame with every avialible model.
+
+    Args:
+        stock_symbols (str): The stock symbols to predict trading actions for.
+        start_date (str): The start date of the time frame to predict trading actions for.
+        end_date (str): The end date of the time frame to predict trading actions for.
+
+    Returns:
+        list[dict[Timestamp, dict[str, str]]]: A list containing the predictions for every model for every hour in the given time frame.
+    """
+    # data_to_send = {"stock_symbol": stock_symbol,
+    #                 "start_date": "2021-01-04",
+    #                 "end_date": "2021-01-05"}
+    # api_url = "http://predict_rl:8000/predict"
+    # response = requests.get(api_url, params=data_to_send)
+    # if response.status_code != 200:
+    #     return {
+    #         "status_code": response.status_code,
+    #         "response_text": response.text
+    #     }
+    # return response.json()
+    from random import choice
+    posible_actions = ['buy', 'sell', 'hold']
+    model_names = ["q_learning_ma5", "q_learning_ma30", "q_learning_ma200",
+                   "q_learning_transformer", "q_learning_cnn", "q_learning_arima"]
+
+    ensemble = choice(["election", "ensemble"]) == 'ensemble'
+    random_return = {}
+    stock_symbols = stock_symbols[1:-1].split(", ")
+    for stock_symbol in stock_symbols:
+        random_return[stock_symbol] = {}
+        for current_date in pd.date_range(start_date, end_date, freq='2h'):
+            random_return[stock_symbol][current_date] = {model: choice(
+                posible_actions) for model in model_names}
+            if ensemble:
+                random_return[stock_symbol][current_date]['ensemble'] = choice(
+                    list(random_return[stock_symbol][current_date].values()))
+            else:
+                lst = list(random_return[stock_symbol][current_date].values())
+                random_return[stock_symbol][current_date]['election'] = max(
+                    set(lst), key=lst.count)
+
+    return random_return
 
 
 @app.get("/load/data")

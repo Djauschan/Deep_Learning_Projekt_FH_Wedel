@@ -1,204 +1,217 @@
 <template>
   <Header />
   <div :class="{ 'dark-mode': isDarkMode }">
-  <div class="home-container">
-    <div class="home-header">
-      <header data-thq="thq-navbar" class="home-navbar-interactive">
-        <div class="home-container01">
-          <span class="home-logo">Alles auf einen Blick!</span>
-          <button ref="myButton1" @mouseover="changeCursor" @mouseleave="resetCursor"  @click="toggleDarkMode">Toggle Dark Mode</button>
-        </div>
-        <div class="home-container02">
-          <div data-thq="thq-navbar-nav" class="home-desktop-menu"></div>
-        </div>
-        <div data-thq="thq-burger-menu" class="home-burger-menu">
-          <svg viewBox="0 0 1024 1024" class="home-icon02">
-            <path
-              d="M128 554.667h768c23.552 0 42.667-19.115 42.667-42.667s-19.115-42.667-42.667-42.667h-768c-23.552 0-42.667 19.115-42.667 42.667s19.115 42.667 42.667 42.667zM128 298.667h768c23.552 0 42.667-19.115 42.667-42.667s-19.115-42.667-42.667-42.667h-768c-23.552 0-42.667 19.115-42.667 42.667s19.115 42.667 42.667 42.667zM128 810.667h768c23.552 0 42.667-19.115 42.667-42.667s-19.115-42.667-42.667-42.667h-768c-23.552 0-42.667 19.115-42.667 42.667s19.115 42.667 42.667 42.667z">
-            </path>
-          </svg>
-        </div>
-      </header>
-    </div>
-    <div class="home-container05">
-      <div class="home-container18">
-        <div class="home-container19">
-          <div class="home-container20">
-            <div class="home-container21">
-              <div class="home-container22">
-                <div class="hover-effect">
-                <div class="home-container30">
-                  <div class="home-container31">
-                    <span>Aktie</span>
+    <div class="home-container">
+      <div class="home-header">
+        <header data-thq="thq-navbar" class="home-navbar-interactive">
+          <div class="home-container01">
+            <span class="home-logo">Alles auf einen Blick!</span>
+            <button ref="myButton1" @mouseover="changeCursor" @mouseleave="resetCursor" @click="toggleDarkMode">Toggle
+              Dark Mode</button>
+          </div>
+          <div class="home-container02">
+            <div data-thq="thq-navbar-nav" class="home-desktop-menu"></div>
+          </div>
+          <div data-thq="thq-burger-menu" class="home-burger-menu">
+            <svg viewBox="0 0 1024 1024" class="home-icon02">
+              <path
+                d="M128 554.667h768c23.552 0 42.667-19.115 42.667-42.667s-19.115-42.667-42.667-42.667h-768c-23.552 0-42.667 19.115-42.667 42.667s19.115 42.667 42.667 42.667zM128 298.667h768c23.552 0 42.667-19.115 42.667-42.667s-19.115-42.667-42.667-42.667h-768c-23.552 0-42.667 19.115-42.667 42.667s19.115 42.667 42.667 42.667zM128 810.667h768c23.552 0 42.667-19.115 42.667-42.667s-19.115-42.667-42.667-42.667h-768c-23.552 0-42.667 19.115-42.667 42.667s19.115 42.667 42.667 42.667z">
+              </path>
+            </svg>
+          </div>
+        </header>
+      </div>
+      <div class="home-container05">
+        <div class="home-container18">
+          <div class="home-container19">
+            <div class="home-container20">
+              <div class="home-container21">
+                <div class="home-container22">
+                  <div class="hover-effect">
+                    <div class="home-container23">
+                      <span>Budget:</span>
+                      <div class="home-container24">
+                        <span>{{ budget }}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div class="spread">
-                    <div class="home-container32">
-                      <svg viewBox="0 0 1024 1024" class="home-icon30">
+                </div>
+                <div class="home-container25">
+                  <div class="seperator"></div>
+                  <div class="home-container29">
+                    <div class="hover-effect">
+                      <div class="home-container26">
+                        <span>Budget aufladen:</span>
+                        <div class="middleInput">
+                          <input type="text" placeholder="Wert in Euro" class="home-textinput" v-model="budgetInput" />
+                        </div>
+                        <div class="home-container27">
+                          <button ref="myButton4" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
+                            class="button" @click="update_budget">Aufladen</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="seperator"></div>
+                <div class="home-container29">
+                  <div class="hover-effect">
+                    <div class="home-container262">
+                      <div class="home-container23">
+                        <span>Modell Guthaben</span>
+                      </div>
+                      <div class="home-container24">
+                        <svg viewBox="0 0 1024 1024" class="home-icon28">
+                          <path
+                            d="M928 128h-832c-52.8 0-96 43.2-96 96v576c0 52.8 43.2 96 96 96h832c52.8 0 96-43.2 96-96v-576c0-52.8-43.2-96-96-96zM96 192h832c17.346 0 32 14.654 32 32v96h-896v-96c0-17.346 14.654-32 32-32zM928 832h-832c-17.346 0-32-14.654-32-32v-288h896v288c0 17.346-14.654 32-32 32zM128 640h64v128h-64zM256 640h64v128h-64zM384 640h64v128h-64z">
+                          </path>
+                        </svg>
+                        <input type="text" placeholder="Wert in Euro" class="home-textinput" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="seperator"></div>
+                <div class="hover-effect">
+                  <div class="home-container71">
+                    <div class="home-container33">
+                      <div class="home-container34">
+                        <span>Aktienwahl</span>
+                      </div>
+                      <div class="home-container35">
+                        <select v-model="selectedStock" ref="myButton3" @mouseover="changeCursor"
+                          @mouseleave="resetCursor">
+                          <option value="Option 1" selected>
+                            Apple
+                          </option>
+                          <option value="Option 2">
+                            American Airlines
+                          </option>
+                          <option value="Option 3">
+                            Advanced Micro Devices
+                          </option>
+                          <option value="Option 4">
+                            Citigroup
+                          </option>
+                          <option value="Option 5">
+                            NVIDIA
+                          </option>
+                          <option value="Option 6">
+                            Snap
+                          </option>
+                          <option value="Option 7">
+                            Block
+                          </option>
+                          <option value="Option 8">
+                            Tesla
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="seperator"></div>
+                <div class="hover-effect">
+                  <div class="home-container33">
+                    <div class="home-container34">
+                      <span>Los geht&apos;s!</span>
+                    </div>
+                    <div class="home-container35">
+                      <svg viewBox="0 0 1024 1024" class="home-icon33">
                         <path
-                          d="M914.005 409.344l-275.84-278.827c-56.704-56.747-131.712-87.851-211.499-87.851s-154.795 31.104-211.2 87.509c-60.416 60.331-90.752 143.189-86.485 226.731-28.245 46.293-43.648 99.413-43.648 155.051 0 79.787 31.104 154.795 87.509 211.2l130.261 127.317 148.565 148.48c16.683 16.725 38.485 25.045 60.331 25.045s43.648-8.32 60.331-25.003l298.667-298.667c33.195-33.195 33.365-86.955 0.341-120.32l-3.968-4.011 46.293-46.336c33.195-33.195 33.365-86.955 0.341-120.32zM512 938.667l-149.248-149.205-129.579-126.635c-83.328-83.328-83.328-218.411 0-301.653 41.643-41.685 96.256-62.507 150.827-62.507s109.184 20.821 150.827 62.507l275.84 278.827-298.667 298.667zM595.499 301.184c-56.704-56.747-131.712-87.851-211.499-87.851-54.443 0-106.539 14.805-152.107 41.899 10.283-23.467 24.704-45.525 43.947-64.768 41.643-41.643 96.256-62.464 150.827-62.464s109.184 20.821 150.827 62.507l275.84 278.827-45.995 45.995-211.84-214.144z">
+                          d="M480 64c-265.096 0-480 214.904-480 480s214.904 480 480 480c265.098 0 480-214.902 480-480s-214.902-480-480-480zM480 928c-212.078 0-384-171.922-384-384s171.922-384 384-384c212.076 0 384 171.922 384 384s-171.924 384-384 384z">
                         </path>
                         <path
-                          d="M384 447.957c35.413 0 64 28.672 64 64.043 0 35.413-28.587 63.957-64 63.957s-64-28.544-64-63.957c0-35.371 28.587-64.043 64-64.043M384 405.291c-58.795 0-106.667 47.872-106.667 106.709 0 58.795 47.872 106.624 106.667 106.624s106.667-47.829 106.667-106.624c0-58.837-47.872-106.709-106.667-106.709z">
+                          d="M670.824 644.34c-15.27-8.884-34.862-3.708-43.75 11.57-17.256 29.662-49.088 48.090-83.074 48.090h-128c-41.716 0-77.286-26.754-90.496-64h154.496c17.672 0 32-14.326 32-32s-14.328-32-32-32h-160v-64h160c17.672 0 32-14.328 32-32s-14.328-32-32-32h-154.496c13.21-37.246 48.78-64 90.496-64h128c33.986 0 65.818 18.426 83.074 48.090 8.888 15.276 28.478 20.456 43.752 11.568 15.276-8.888 20.456-28.476 11.568-43.752-28.672-49.288-81.702-79.906-138.394-79.906h-128c-77.268 0-141.914 55.056-156.78 128h-35.22c-17.672 0-32 14.328-32 32s14.328 32 32 32h32v64h-32c-17.672 0-32 14.326-32 32s14.328 32 32 32h35.22c14.866 72.944 79.512 128 156.78 128h128c56.692 0 109.72-30.62 138.394-79.91 8.888-15.276 3.708-34.864-11.57-43.75z">
                         </path>
                       </svg>
-                      <div class="buttonBG">
-                      <select ref="myButton4" @mouseover="changeCursor" @mouseleave="resetCursor">
-                        <option value="Option 1" selected>
-                          E-Mart
-                        </option>
-                        <option value="Option 2">
-                          Amazon
-                        </option>
-                      </select>
-                      </div>
-                      <div class="search">
-                        <search-bar ref="searchbar"></search-bar>
-                      </div>
+                      <button ref="myButton2" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
+                        class="button" @click="simulateProgress">Prognose</button>
                     </div>
                   </div>
                 </div>
-              </div>
-              </div>
-              <div class="seperator"></div>
-              <div class="home-container25">
-                <div class="hover-effect">
-                <div class="home-container26">
-                  <div class="home-container27">
-                    <span>aktives Modell</span>
-                  </div>
-                  <div class="home-container28">
-                    <svg viewBox="0 0 1024 1024" class="home-icon26">
-                      <path
-                        d="M512 682.667h-341.333c-11.776 0-22.4-4.736-30.165-12.501s-12.501-18.389-12.501-30.165v-426.667c0-11.776 4.736-22.4 12.501-30.165s18.389-12.501 30.165-12.501h682.667c11.776 0 22.4 4.736 30.165 12.501s12.501 18.389 12.501 30.165v426.667c0 11.776-4.736 22.4-12.501 30.165s-18.389 12.501-30.165 12.501zM469.333 768v85.333h-128c-23.552 0-42.667 19.115-42.667 42.667s19.115 42.667 42.667 42.667h341.333c23.552 0 42.667-19.115 42.667-42.667s-19.115-42.667-42.667-42.667h-128v-85.333h298.667c35.328 0 67.413-14.379 90.496-37.504s37.504-55.168 37.504-90.496v-426.667c0-35.328-14.379-67.413-37.504-90.496s-55.168-37.504-90.496-37.504h-682.667c-35.328 0-67.413 14.379-90.496 37.504s-37.504 55.168-37.504 90.496v426.667c0 35.328 14.379 67.413 37.504 90.496s55.168 37.504 90.496 37.504z">
-                      </path>
-                    </svg>
-                    <div class="buttonBG">
-                    <select ref="myButton5" @mouseover="changeCursor" @mouseleave="resetCursor">
-                      <option value="Option 1" selected>CNN</option>
-                      <option value="Option 2">ANN</option>
-                      <option value="Option 1">Transformer</option>
-                      <option value="Option 2">LSTM</option>
-                    </select>
+                <div class="seperator"></div>
+                <!--<div class="hover-effect">>-->
+                <div class="home-container70">
+                  <div class="home-container33">
+                    <div class="home-container34">
+                      <span>Der Agent empfiehlt:</span>
                     </div>
+                    <span>Kaufen!</span>
+                    <!--<button ref="myButton" @click="extractLastEnsembleValue" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
+                        class="button"><pre>{{ this.lastEnsembleValue }}</pre></button>-->
+                  </div>
+                </div>
+                <!--</div>>-->
+              </div>
+            </div>
+            <div class="home-container36">
+              <div class="home-container37">
+                <div class="home-container38">
+                  <div class="home-container39">
+                    <DxChart id="chart" :data-source="dataSource" title="Predicted Stock Price">
+                      <DxCommonSeriesSettings argument-field="date" type="stock" />
+                      <DxSeries name="E-Mart" open-value-field="o" high-value-field="h" low-value-field="l"
+                        close-value-field="c">
+                        <DxReduction color="red" />
+                      </DxSeries>
+                      <DxArgumentAxis :workdays-only="true">
+                        <DxLabel format="shortDate" />
+                      </DxArgumentAxis>
+                      <DxValueAxis :tick-interval="1">
+                        <DxTitle text="US dollars" />
+                        <DxLabel>
+                          <DxFormat :precision="0" type="currency" />
+                        </DxLabel>
+                      </DxValueAxis>
+                      <DxExport :enabled="true" />
+                      <DxTooltip :enabled="true" :customize-tooltip="customizeTooltip" location="edge" />
+                    </DxChart>
                   </div>
                 </div>
               </div>
-              </div>
-              <div class="seperator"></div>
-              <div class="home-container29">
-                <div class="hover-effect">
-                <div class="home-container26">
-                  <div class="home-container23">
-                    <span>Modell Guthaben</span>
+              <div class="home-container40">
+                <div class="home-container43">
+                  <div class="home-container42">
+                    <span>Detailed Agent Info</span>
                   </div>
-                  <div class="home-container24">
-                    <svg viewBox="0 0 1024 1024" class="home-icon28">
-                    <path
-                      d="M928 128h-832c-52.8 0-96 43.2-96 96v576c0 52.8 43.2 96 96 96h832c52.8 0 96-43.2 96-96v-576c0-52.8-43.2-96-96-96zM96 192h832c17.346 0 32 14.654 32 32v96h-896v-96c0-17.346 14.654-32 32-32zM928 832h-832c-17.346 0-32-14.654-32-32v-288h896v288c0 17.346-14.654 32-32 32zM128 640h64v128h-64zM256 640h64v128h-64zM384 640h64v128h-64z">
-                    </path>
-                    </svg>
-                    <input type="text" placeholder="Wert in Euro" class="home-textinput input" />
+                  <div class="table-container" v-if="rlData">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th v-for="stock in Object.keys(rlData[Object.keys(rlData)[0]])">{{ stock }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(dateData, date) in rlData" :key="date">
+                          <td>{{ date }}</td>
+                          <td v-for="stockData in Object.values(dateData)">
+                            <pre>{{ formatStockData(stockData) }}</pre>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
-                </div>
-              </div>
-              </div>
-              <div class="seperator"></div>
-              <div class="hover-effect">
-              <div class="home-container33">
-                <div class="home-container34">
-                  <span>Los geht&apos;s!</span>
-                </div>
-                <div class="home-container35">
-                  <svg viewBox="0 0 1024 1024" class="home-icon33">
-                    <path
-                      d="M480 64c-265.096 0-480 214.904-480 480s214.904 480 480 480c265.098 0 480-214.902 480-480s-214.902-480-480-480zM480 928c-212.078 0-384-171.922-384-384s171.922-384 384-384c212.076 0 384 171.922 384 384s-171.924 384-384 384z">
-                    </path>
-                    <path
-                      d="M670.824 644.34c-15.27-8.884-34.862-3.708-43.75 11.57-17.256 29.662-49.088 48.090-83.074 48.090h-128c-41.716 0-77.286-26.754-90.496-64h154.496c17.672 0 32-14.326 32-32s-14.328-32-32-32h-160v-64h160c17.672 0 32-14.328 32-32s-14.328-32-32-32h-154.496c13.21-37.246 48.78-64 90.496-64h128c33.986 0 65.818 18.426 83.074 48.090 8.888 15.276 28.478 20.456 43.752 11.568 15.276-8.888 20.456-28.476 11.568-43.752-28.672-49.288-81.702-79.906-138.394-79.906h-128c-77.268 0-141.914 55.056-156.78 128h-35.22c-17.672 0-32 14.328-32 32s14.328 32 32 32h32v64h-32c-17.672 0-32 14.326-32 32s14.328 32 32 32h35.22c14.866 72.944 79.512 128 156.78 128h128c56.692 0 109.72-30.62 138.394-79.91 8.888-15.276 3.708-34.864-11.57-43.75z">
-                    </path>
-                  </svg>
-                  <button ref="myButton2" @mouseover="changeCursor" @mouseleave="resetCursor"  type="button" class="button" @click="simulateProgress">Prognose</button>
-                </div>
-              </div>
-              </div>
-              <div class="seperator"></div>
-              <div class="hover-effect">
-              <div class="home-container70">
-               <div class="home-container33">
-                <div class="home-container34">
-                  <span>Der Agent empfiehlt:</span>
-                </div>
-                <button ref="myButton" @mouseover="changeCursor" @mouseleave="resetCursor" type="button" class="button">Aktie Kaufen!</button>
-               </div>
-              </div>
-              </div>
-            <div class="seperator"></div>
-            <div class="hover-effect">
-            <div class="home-container71">
-              <div class="home-container33">
-                <div class="home-container34">
-                  <span>Zuletzt angesehen</span>
-                </div>
-                <div class="home-container35">
-                 <select ref="myButton3" @mouseover="changeCursor" @mouseleave="resetCursor">
-                   <option value="Option 1" selected>
-                     E-Mart
-                   </option>
-                   <option value="Option 2">
-                    Amazon
-                   </option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            </div>
-            </div>
-          </div>
-          <div class="home-container36">
-            <div class="home-container37">
-              <div class="home-container38">
-                <div class="home-container39">
-                  <DxChart id="chart" :data-source="dataSource" title="Predicted Stock Price">
-                   <DxCommonSeriesSettings argument-field="date" type="stock" />
-                    <DxSeries name="E-Mart" open-value-field="o" high-value-field="h" low-value-field="l" close-value-field="c">
-                     <DxReduction color="red" />
-                    </DxSeries>
-                    <DxArgumentAxis :workdays-only="true">
-                      <DxLabel format="shortDate" />
-                    </DxArgumentAxis>
-                    <DxValueAxis :tick-interval="1">
-                      <DxTitle text="US dollars" />
-                      <DxLabel>
-                        <DxFormat :precision="0" type="currency" />
-                      </DxLabel>
-                    </DxValueAxis>
-                    <DxExport :enabled="true" />
-                    <DxTooltip :enabled="true" :customize-tooltip="customizeTooltip" location="edge" />
-                  </DxChart>
-                </div>
-              </div>
-            </div>
-            <div class="home-container40">
-              <div class="home-container43">
-                <div class="home-container42">
-                 <span>Additional Information</span>
-                </div>
-                <span>Model Calculating...</span>
-                <div class="home-container12">
-                 <ProgressBar ref="progressBar" />
+
+                  <!--<div class="home-container12">
+                    <ProgressBar ref="progressBar" />
+                  </div>-->
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <div class="home-container48"></div>
     </div>
-    <div class="home-container48"></div>
-  </div>
   </div>
 </template>
 
-<script>import DxChart, {
+<script>
+import DxChart, {
   DxCommonSeriesSettings,
   DxSeries,
   DxReduction,
@@ -215,6 +228,10 @@ import { dataSource } from './data.js';
 import Header from './Header.vue'
 import ProgressBar from "@/components/ProgressBar.vue";
 import SearchBar from '@/components/SearchBar.vue';
+import { useMyPiniaStore } from "../store.js";
+import { defineComponent, computed, ref } from "vue";
+import axios from 'axios';
+import Swal from "sweetalert2/dist/sweetalert2.js";
 
 export default {
   name: "Home",
@@ -234,31 +251,169 @@ export default {
     ProgressBar,
     SearchBar,
   },
+  setup() {
+
+    const isUserLoggedIn = computed(() => {
+      return localStorage.logged_user !== null;
+    });
+
+    return {
+      isUserLoggedIn,
+      username: localStorage.logged_user,
+      email: localStorage.logged_email,
+    };
+  },
+  async created() {
+    this.load_rl_data();
+    this.budget = await this.get_budget();
+  },
   data() {
     return {
       dataSource,
       isDarkMode: false,
+      budgetInput: null,
+      store: useMyPiniaStore(),
+      rlData: null,
+      lastEnsembleValue: null, // Property to store the last ensemble value
+      budget: null,
+      username: localStorage.logged_user,
+      email: localStorage.logged_email,
     };
   },
+  mounted() {
+    // Scroll to a specific position on the page after it's loaded
+    this.scrollToPosition(0, 500); // Example: scroll to the top of the page with animation duration of 500ms
+
+
+    // Extract the last "ensemble" value
+    this.extractLastEnsembleValue();
+  },
+
   methods: {
+    extractLastEnsembleValue() {
+      // Assuming rlData is available in your component's data
+      if (this.rlData) {
+        const lastDate = Object.keys(this.rlData).pop(); // Get the last date entry
+        this.lastEnsembleValue = this.rlData[lastDate].ensemble; // Extract the last "ensemble" value
+      }
+    },
+
+    scrollToPosition(x, y, duration = 0) {
+      const scrollOptions = {
+        left: x,
+        top: y,
+        behavior: 'smooth' // Smooth scrolling behavior
+      };
+      setTimeout(() => {
+        window.scrollTo(scrollOptions);
+      }, duration);
+    },
+
+    formatStockData(data) {
+      let formattedData = "";
+      for (const [key, value] of Object.entries(data)) {
+        formattedData += `${key}: ${value}\n`;
+      }
+      return formattedData;
+    },
+
+
+    async load_rl_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/rl`, { // Use store.state.API
+          params: {
+            stock_symbols: '[AAPL, AAL, SNAP, TSLA]',
+            start_date: '2021-01-04',
+            end_date: '2021-01-08',
+            resolution: 'H'
+          }
+        });
+        this.rlData = response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async get_budget() {
+      const username = this.username;
+      try {
+        const response = await axios.get(this.store.API + "/get_budget/" + username, {
+          params: {
+            username: username,
+          }
+        });
+        console.log([response.data])
+        return response.data
+      } catch (error) {
+        Swal.fire({
+          title: "Error at getting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.detail
+        ) {
+          console.log(error.response.data.detail);
+        } else {
+          console.log(error);
+        }
+      }
+    },
+    async update_budget() {
+      console.log(this.budget);
+      try {
+        const response = await axios.put(this.store.API + "/update_user/" + this.username, {
+
+          username: this.username,
+          email: this.username,
+          budget: this.budgetInput,
+
+        });
+        console.log([response.data])
+        this.budget = await this.get_budget();
+        return response.data
+      } catch (error) {
+        Swal.fire({
+          title: "Error at getting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.detail
+        ) {
+          console.log(error.response.data.detail);
+        } else {
+          console.log(error);
+        }
+      }
+    },
     changeCursor() {
-      this.$refs.myButton.style.cursor = 'pointer'; // or any other cursor value
+      //this.$refs.myButton.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton1.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton2.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton3.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton4.style.cursor = 'pointer'; // or any other cursor value
-      this.$refs.myButton5.style.cursor = 'pointer'; // or any other cursor value
+      //this.$refs.myButton5.style.cursor = 'pointer'; // or any other cursor value
     },
     resetCursor() {
-      this.$refs.myButton.style.cursor = 'auto'; // reset to the default cursor
+      //this.$refs.myButton.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton1.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton2.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton3.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton4.style.cursor = 'auto'; // reset to the default cursor
-      this.$refs.myButton5.style.cursor = 'auto'; // reset to the default cursor
+      //this.$refs.myButton5.style.cursor = 'auto'; // reset to the default cursor
     },
     toggleDarkMode() {
-        this.isDarkMode = !this.isDarkMode;
+      this.isDarkMode = !this.isDarkMode;
     },
     checkAuth() {
 
@@ -289,6 +444,7 @@ export default {
       }, 500);
     },
   },
+
   metaInfo: {
     title: "frontend",
     meta: [
@@ -302,37 +458,48 @@ export default {
 </script>
 
 <style scoped>
-.home-container { 
+.home-container {
   width: 100%;
   display: flex;
   overflow: auto;
   align-items: center;
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Set initial height to 100% of viewport height */
-  flex:1;
+  height: 100vh;
+  /* Set initial height to 100% of viewport height */
+  flex: 1;
 }
 
 .dark-mode {
-    background-color: #333; /* Dark background color */
-    color: #fff; /* Light text color for better contrast */
-  }
+  background-color: #333;
+  /* Dark background color */
+  color: #fff;
+  /* Light text color for better contrast */
+}
 
 
 
 .loading-spinner {
-    border: 4px solid #f3f3f3; /* Light gray border */
-    border-top: 4px solid #3498db; /* Blue border for spinner animation */
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    animation: spin 1s linear infinite; /* Spinner animation */
+  border: 4px solid #f3f3f3;
+  /* Light gray border */
+  border-top: 4px solid #3498db;
+  /* Blue border for spinner animation */
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  /* Spinner animation */
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  100% {
+    transform: rotate(360deg);
   }
+}
 
 #chart {
   height: 100%;
@@ -344,7 +511,7 @@ export default {
   margin-left: 15%;
 }
 
-.spread{
+.spread {
   width: 100%;
   display: flex;
   align-items: center;
@@ -380,7 +547,7 @@ export default {
 }
 
 .home-logo {
-  font-size: 75px;
+  font-size: 65px;
   align-self: flex-start;
   font-family: "Lato";
   font-weight: bold;
@@ -404,6 +571,9 @@ export default {
   flex-direction: column;
 }
 
+.home-header {
+  height: 90px;
+}
 
 .home-desktop-menu {
   flex: 1;
@@ -481,7 +651,7 @@ export default {
 }
 
 .home-login {
-  border-color:  #E0E0E0;
+  border-color: #E0E0E0;
   border-width: 1px;
   margin-right: var(--dl-space-space-twounits);
   padding-left: 1.5rem;
@@ -548,18 +718,20 @@ export default {
   width: 100%;
   height: auto;
   display: flex;
-  align-items: center; /* Center items along the cross axis */
-  justify-content: space-between; /* Distribute items along the main axis with equal space */
+  align-items: center;
+  /* Center items along the cross axis */
+  justify-content: space-between;
+  /* Distribute items along the main axis with equal space */
 }
 
-.seperator{
+.seperator {
   border: 1px solid #E0E0E0;
   height: 100%;
 }
 
 .home-container22 {
   flex: 0 0 auto;
-  width: 320px;
+  width: 140px;
   height: 100px;
   display: flex;
   align-items: center;
@@ -575,7 +747,8 @@ export default {
   align-items: center;
   flex-direction: column;
   justify-content: center;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container24 {
@@ -585,14 +758,46 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
+
+.table-container {
+  overflow-x: auto;
+  /* Add horizontal scrollbar if content exceeds container width */
+  max-width: 100%;
+  /* Limit the maximum width of the container */
+}
+
+table {
+  width: 100%;
+  /* Ensure table takes up full width of its container */
+  border-collapse: collapse;
+  /* Collapse borders between cells */
+}
+
+th,
+td {
+  padding: 8px;
+  /* Add padding to cells */
+  text-align: left;
+  /* Align text to the left within cells */
+  border: 1px solid #ddd;
+  /* Add border to cells */
+}
+
+th {
+  background-color: #f2f2f2;
+  /* Add background color to header cells */
+}
+
 
 .home-icon26 {
   width: 24px;
   height: 24px;
   margin-right: var(--dl-space-space-halfunit);
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container25 {
@@ -613,14 +818,25 @@ export default {
   justify-content: center;
 }
 
+.home-container262 {
+  width: 100%;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .home-container27 {
+  margin-top: 5px;
   width: 200px;
   height: 27px;
   display: flex;
   align-items: center;
   flex-direction: column;
   justify-content: center;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container28 {
@@ -630,20 +846,28 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-icon28 {
   width: 24px;
   height: 24px;
   margin-right: var(--dl-space-space-halfunit);
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
+}
+
+.middleInput {
+  justify-content: center;
+
 }
 
 .home-textinput {
   width: 174px;
   height: 24px;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container29 {
@@ -673,7 +897,8 @@ export default {
   flex-direction: column;
   justify-content: center;
   margin-top: 5px;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container32 {
@@ -683,7 +908,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container70 {
@@ -708,12 +934,13 @@ export default {
   width: 50px;
   height: 50px;
   margin-right: var(--dl-space-space-halfunit);
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container33 {
   flex: 0 0 auto;
-  width: 200px;
+  width: 180px;
   height: 100px;
   display: flex;
   align-items: center;
@@ -723,13 +950,14 @@ export default {
 }
 
 .home-container34 {
-  width: 200px;
+  width: 180px;
   height: 27px;
   display: flex;
   align-items: center;
   flex-direction: column;
   justify-content: center;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-container35 {
@@ -739,7 +967,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 10px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-icon33 {
@@ -758,7 +987,7 @@ export default {
 
 .home-container37 {
   flex: 0 0 auto;
-  width: 70%;
+  width: 50%;
   height: auto;
   display: flex;
   align-self: top;
@@ -772,14 +1001,16 @@ export default {
 }
 
 .hover-effect:hover {
-    transform: scale(1.05); /* Adjust scale factor for the desired effect */
-    transition: transform 0.3s ease; /* Add a smooth transition */
-  }
+  transform: scale(1.05);
+  /* Adjust scale factor for the desired effect */
+  transition: transform 0.3s ease;
+  /* Add a smooth transition */
+}
 
 .home-container38 {
   width: 100%;
   height: 90%;
-  border-color:  #E0E0E0;
+  border-color: #E0E0E0;
   border-style: groove;
   border-width: 1px;
 }
@@ -790,13 +1021,14 @@ export default {
 
 .home-container40 {
   flex: 0 0 auto;
-  width: 25%;
-  height: 60%;
+  width: 45%;
+  height: 80%;
   display: flex;
   align-self: center;
   align-items: space-between;
   flex-direction: column;
-  border-radius: 20px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 20px;
+  /* Adjust the value to control the roundness of the corners */
   margin-right: 1%;
 }
 
@@ -811,7 +1043,8 @@ export default {
   background-size: contain;
   justify-content: flex-start;
   background-image: url("/oie_q3itd7eu4hf6-300h.jpg");
-  border-radius: 20px; /* Adjust the value to control the roundness of the corners */
+  border-radius: 20px;
+  /* Adjust the value to control the roundness of the corners */
 }
 
 .home-text12 {
@@ -843,7 +1076,7 @@ export default {
 
 .home-container42 {
   width: 100%;
-  Height: 100%;
+  Height: 10%;
   font-size: 26px;
   align-self: left;
 }
@@ -862,7 +1095,7 @@ export default {
   display: flex;
   align-items: center;
   margin-left: var(--dl-space-space-unit);
-  border-color:  #E0E0E0;
+  border-color: #E0E0E0;
   border-style: groove;
   border-width: 1px;
   flex-direction: column;
