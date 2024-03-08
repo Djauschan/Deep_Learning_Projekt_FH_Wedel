@@ -4,7 +4,7 @@ model_parameters:
     num_heads: 4
     num_layers: 2
     d_ff: 80
-    seq_len_encoder: 60 #96
+    seq_len_encoder: 90 #96
     seq_len_decoder: 30 #24
     dropout: 0
 training_parameters:
