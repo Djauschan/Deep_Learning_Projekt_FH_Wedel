@@ -6,8 +6,6 @@
         <header data-thq="thq-navbar" class="home-navbar-interactive">
           <div class="home-container01">
             <span class="home-logo">Alles auf einen Blick!</span>
-            <button ref="myButton1" @mouseover="changeCursor" @mouseleave="resetCursor" @click="toggleDarkMode">Toggle
-              Dark Mode</button>
           </div>
           <div class="home-container02">
             <div data-thq="thq-navbar-nav" class="home-desktop-menu"></div>
@@ -128,7 +126,7 @@
                         </path>
                       </svg>
                       <button ref="myButton2" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
-                        class="button" @click="simulateProgress">Prognose</button>
+                        class="button" @click="">Prognose</button>
                     </div>
                   </div>
                 </div>
@@ -398,7 +396,7 @@ export default {
     },
     changeCursor() {
       //this.$refs.myButton.style.cursor = 'pointer'; // or any other cursor value
-      this.$refs.myButton1.style.cursor = 'pointer'; // or any other cursor value
+      //this.$refs.myButton1.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton2.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton3.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton4.style.cursor = 'pointer'; // or any other cursor value
@@ -406,7 +404,7 @@ export default {
     },
     resetCursor() {
       //this.$refs.myButton.style.cursor = 'auto'; // reset to the default cursor
-      this.$refs.myButton1.style.cursor = 'auto'; // reset to the default cursor
+      //this.$refs.myButton1.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton2.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton3.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton4.style.cursor = 'auto'; // reset to the default cursor
@@ -759,6 +757,7 @@ export default {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
+  margin-top: 5px;
   /* Adjust the value to control the roundness of the corners */
 }
 

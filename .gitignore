@@ -1,3 +1,8 @@
+#CNN
+CNN/__pycache__/
+CNN/data/*
+CNN/src/training/result/**/*.csv
+
 # Custom
 runs/
 *.deb
@@ -6,7 +11,7 @@ runs/
 .DS_Store
 
 # database
-*.db
+sql_app.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -174,3 +179,4 @@ cython_debug/
 
 # VS Code Configurations
 .vscode/
+/src_transformers/__init__.py

@@ -163,8 +163,10 @@ def update_budget_by_user(db: Session, username: str, updated_data: schemas.User
     
 
 # method to load data from csv file
-def loadDataFromFile(start_date: pd.Timestamp, end_date: pd.Timestamp, rsc_completePath: str,
+def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.Timestamp, interval: str, rsc_completePath: str,
                      ALL_DATA_COLUMNS: list, COLUMNS_TO_KEEP: list) -> pd.DataFrame:
+
+    stock_symbol_list = stock_symbols[1:-1].split(", ")
 
     df = pd.read_csv(rsc_completePath, sep=",",
                      names=ALL_DATA_COLUMNS, index_col=False)
@@ -181,12 +183,29 @@ def loadDataFromFile(start_date: pd.Timestamp, end_date: pd.Timestamp, rsc_compl
 
     data = data[(data['DateTime'] >= start_date)
                 & (data['DateTime'] <= end_date)]
+    
+    print(data.head())
+
+    # Filter data based on stock symbols
+    data = data[data["AAPL"].isin(stock_symbol_list)]
 
     # Set 'DateTime' as the index (required for resampling)
     data.set_index('DateTime', inplace=True)
 
-    # Resample to 30-minute intervals
-    data = data.resample('30T').mean()
+    # Resample the data to the specified interval
+    if interval == 'H':
+        # Resample to 1-hour intervals
+        data = data.resample('2H').mean()
+    elif interval == 'D':
+        # Resample to 24H-minute intervals
+        data = data.resample('24H').mean()
+    elif interval == 'M':
+        # Resample to 20-minute intervals
+        data = data.resample('20T').mean()
+    else:
+        # Default: Resample to 1-hour intervals
+        data = data.resample('2H').mean()
+
 
     # Replace non-compliant values with a compliant value (e.g., None)
     data.replace([np.inf, -np.inf, np.nan], None, inplace=True)
