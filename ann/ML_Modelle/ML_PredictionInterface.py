@@ -43,7 +43,7 @@ class ML_PredictionInterface_RandomForest(AbstractModel):
             interval = 2
         elif resolution == resolution.MINUTE:
             chosen_interface = ABC_RandomForestModel_min
-            interval = 20
+            interval = 1
         else:
             raise NotImplementedError()
         for stock_symbol in symbol_list:
@@ -99,7 +99,7 @@ class ML_PredictionInterface_GradientBoostingModel(AbstractModel):
             interval = 2
         elif resolution == resolution.MINUTE:
             chosen_interface = ABC_GradientBoostingModel_min
-            interval = 20
+            interval = 1
         else:
             raise NotImplementedError()
         for stock_symbol in symbol_list:
