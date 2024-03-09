@@ -7,6 +7,7 @@ def aggregate_actions(aggregation_agent, actions):
     for i, action in enumerate(actions):
         weighted_actions += aggregation_agent.q_table[i, action]
 
+    #print(aggregation_agent.q_table)
     # Wenn alle gewichteten Aktionen gleich sind, wähle zufällig
     if np.all(weighted_actions == weighted_actions[0]):
         return np.random.choice(len(weighted_actions))

@@ -87,7 +87,7 @@ Für die Prediction der MA Werte ist eine Diskretisierungsfunktion erforderlich 
     prediction_ma5 = make_prediction(current_price, ma5_value, ma5_agent)
 
 
-
+Achtung schlechtere Ergebnisse!!!!
 #für RF, GBM und Transformer:
     def action_from_q_table(prediction_des_Modells, last_price, q_table_des_Modells):
         # Bestimmen des Zustands basierend auf der Preisveränderung
@@ -96,6 +96,15 @@ Für die Prediction der MA Werte ist eine Diskretisierungsfunktion erforderlich 
         # Aktion mit dem höchsten Q-Wert für diesen Zustand
         action = np.argmax(q_table_des_Modells[state])
         return action
+
+Besser wenn Modelle direkt Predictions in Aggregationsfunktion einfliessen lassen:
+
+                if prediction > last_price:
+                    model_action = 1  # Kaufen, wenn die Vorhersage für t+1 höher ist als der Preis bei t
+                elif prediction < last_price:
+                    model_action = 2  # Verkaufen, wenn die Vorhersage für t+1 niedriger ist als der Preis bei t
+                else:
+                    model_action = 0 
 
 
 
@@ -121,4 +130,4 @@ def aggregate_actions(aggregation_agent, actions):
 
 
 Beispiel:
-proposed_action = aggregate_actions(aggregation_agent, [0,1,2,0,1])
+proposed_action = aggregate_actions(aggregation_agent, [0,1,2,0,1,2,1])

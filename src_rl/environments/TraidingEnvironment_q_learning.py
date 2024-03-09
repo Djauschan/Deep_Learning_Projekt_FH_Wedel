@@ -54,10 +54,6 @@ class TradingEnvironment:
         self.reset(retain_stocks=True)
 
 
-
-
-
-
     # Anpassung-> Standardabweichung beschränkt sich nur auf die letzten 220 Werten (Aufgrund verfügbarer Vorlauf in den DAten für Prediction)
     def calculate_std_deviation(self, ma_columns):
         std_devs = {}
@@ -79,18 +75,6 @@ class TradingEnvironment:
         deviation = (price - ma_value) / ma_value * 100
         scaled_deviation = (deviation + max_deviation) / (2 * max_deviation)
         return max(0, min(int(scaled_deviation * n_bins), n_bins - 1))
-
-    """
-    def reset(self):
-        self.current_step = 0
-        self.done = False
-        self.first_step_after_new_data = True  # Set to True to indicate new data has been loaded
-        for agent_type in self.agent_portfolios:
-            self.agent_portfolios[agent_type]['cash'] = self.config.get_parameter('start_cash_monitoring', 'train_parameters')
-            self.agent_portfolios[agent_type]['stocks'] = self.config.get_parameter('start_stock_monitoring', 'train_parameters')
-            self.last_portfolio_values[agent_type] = self.calculate_portfolio_value(agent_type)
-        return self.get_state()
-    """
 
     def reset(self, retain_stocks=False):
         self.current_step = 0

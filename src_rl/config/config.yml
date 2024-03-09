@@ -1,23 +1,26 @@
 directories:
   train_data: data/train_data.csv # Path to training data
-  test_data: data/test_data.csv # Path to test data
+  test_data: data/train_AAL_combined_data.csv # Path to test data
   train_data_directory: data
 
-agent_types: ['ma5', 'ma30', 'ma200', 'rsi']
+agent_types: ['ma5', 'ma30', 'ma200']
 
 aggregation:
-  aggregation_state_size: 5 #Inputsize from each agent
+  aggregation_state_size: 7 #Inputsize from each agent
   
 q_models: # Path to q-models
-  ma5: models/ma5_agent_q_table.npy
-  ma30: models/ma5_agent_q_table.npy
-  ma200: models/ma5_agent_q_table.npy
-  rsi: models/rsi_agent_q_table.npy
+  ma5: models/1_ma5_agent_q_table.npy
+  ma30: models/2_ma30_agent_q_table.npy
+  ma200: models/3_ma200_agent_q_table.npy
+  rsi: models/4_rsi_agent_q_table.npy
+  rf: models/5_rf_agent_q_table.npy
+  gbm: models/6_gbm_agent_q_table.npy
+  transformer: models/7_trans_agent_q_table.npy
   aggregation: models/aggregation_agent_q_table.npy
 
 
 train_parameters:
-  epochs: 300  # 150 # Number of epochs to train
+  epochs: 100  # 150 # Number of epochs to train
   state_size: 20  # Number of different states that an agent can distinguish 
   action_size: 3   # Possible actions: sell (+1), hold (0), buy (+2)
 
