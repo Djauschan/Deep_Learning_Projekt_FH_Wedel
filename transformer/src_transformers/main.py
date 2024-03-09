@@ -4,7 +4,6 @@ from typing import Final
 import torch
 import yaml
 from src_transformers.pipelines.model_service import ModelService
-from src_transformers.pipelines.predictor import Predictor
 from src_transformers.pipelines.trainer import Trainer
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
