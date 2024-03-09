@@ -45,6 +45,7 @@ dataset_parameters:
     day_of_week: false
     month: false
     hour: false
+    first_and_last: false
   encoder_symbols:
   # stocks
     - "AAPL" # Apple

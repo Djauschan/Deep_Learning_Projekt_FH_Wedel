@@ -107,8 +107,11 @@ class TransformerInterface(AbstractModel):
         # The division sign is used to join paths in pathlib
         # self.num_intervals defines the number of intervals for the prediction
         if resolution == resolution.MINUTE:
-            # Not implemented for minute resolution
-            raise NotImplementedError()
+            self.num_intervals = 20
+            self.model_path = models_path / "TransformerEncoder_v23.pt"
+            self.data_path = data_path / "1_min_input_data.csv"
+            self.prices_path = data_path / "te_prices_for_1_min.pkl"
+            config_path = configs_path / "training_config_encoder_1min.yaml"
         elif resolution == resolution.TWO_HOURLY:
             self.num_intervals = 24
             self.model_path = models_path / "TransformerModel_v2.pt"
@@ -129,8 +132,9 @@ class TransformerInterface(AbstractModel):
             config = yaml.safe_load(f)
 
         # Get the encoder length as it is needed for the prediction dataset
-        model_parameters = config.pop('model_parameters').popitem()[1]
-        self.encoder_length = model_parameters['seq_len_encoder']
+        model_parameters = config.pop('model_parameters').popitem()
+        self.model_name = model_parameters[0]
+        self.encoder_length = model_parameters[1]['seq_len_encoder']
 
         # Get the time resolution and the start and end day from the dataset parameters
         # They are also needed for the timestamp generation
@@ -173,10 +177,12 @@ class TransformerInterface(AbstractModel):
                                               self.time_resolution,
                                               self.num_intervals)
 
-        if self.resolution == resolution_enum.DAILY:
+        if self.resolution == resolution_enum.MINUTE:
+            prediction.index = pd.Index(timestamps)
+        elif self.resolution == resolution_enum.DAILY:
             # Set the timestamps as the index of the DataFrame and set the time to 20:00
             prediction.index = pd.Index(timestamps) + pd.Timedelta(hours=20)
-        if self.resolution == resolution_enum.TWO_HOURLY:
+        elif self.resolution == resolution_enum.TWO_HOURLY:
             # When dealing with 2-hourly data, we need to add in the weeken days
             start_day = dt.datetime.strptime(
                 self.start_day, '%H:%M').time().hour
@@ -251,23 +257,19 @@ class TransformerInterface(AbstractModel):
     def preprocess(self) -> None:
         """Not implemented in this interface as stored data is already preprocessed."""
 
-    def load_model(self, model_name: str = "torch_transformer") -> nn.Module:
+    def load_model(self) -> nn.Module:
         """
         Loads a PyTorch model from a file.
 
         This method loads a PyTorch model from the file specified by the `model_path` attribute.
         It then sets the model's device to CPU and switches the model to evaluation mode.
 
-        Args:
-            model_name (str, optional): The name of the model to be loaded. Defaults to "torch_transformer".
-
         Returns:
             nn.Module: The loaded PyTorch model.
         """
-
         state_dict, params = torch.load(
             self.model_path, map_location=torch.device('cpu'))
-        model = MODEL_NAME_MAPPING[model_name](**params)
+        model = MODEL_NAME_MAPPING[self.model_name](**params)
         model.load_state_dict(state_dict)
         model.to(torch.device("cpu"))
         # Set model device attribute to CPU so that masks are on CPU as well
