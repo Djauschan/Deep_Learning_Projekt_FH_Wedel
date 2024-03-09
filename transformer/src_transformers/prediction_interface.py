@@ -7,8 +7,8 @@ The PredictionDataset class is a PyTorch Dataset for making predictions.
 The TransformerInterface class provides methods for loading data, loading a model, making
 predictions, and converting relative prices to absolute prices.
 """
+import datetime as dt
 import pickle
-from datetime import timedelta
 from pathlib import Path
 
 import numpy as np
@@ -100,6 +100,8 @@ class TransformerInterface(AbstractModel):
         This method sets the interval between predictions, the number of intervals,
         and the paths to the model file, the data file, and the prices file.
         """
+        self.resolution = resolution
+
         # Set paths to the directories for readability in the following if-else statements
         data_path = Path("data", "output")
         models_path = Path("data", "output", "models")
@@ -116,7 +118,7 @@ class TransformerInterface(AbstractModel):
             self.prices_path = data_path / "tt_prices_for_120_min.pkl"
             config_path = configs_path / "config_tt_hourly.yaml"
         elif resolution == resolution.DAILY:
-            self.model_path = models_path / "TransformerModel_v4.pt"
+            self.model_path = models_path / "TransformerModel_v5.pt"
             self.data_path = data_path / "1440_min_input_data.csv"
             self.prices_path = data_path / "tt_prices_for_1440_min.pkl"
             config_path = configs_path / "config_tt_daily.yaml"
@@ -179,24 +181,24 @@ class TransformerInterface(AbstractModel):
         prediction.index = pd.Index(timestamps)
 
         # TODO: Mit Phillip und/oder Niklas klären, wie wir Timestamps machen wollen
-        # start_day = dt.datetime.strptime(self.start_day, '%H:%M').time().hour
-        # end_day = dt.datetime.strptime(self.end_day, '%H:%M').time().hour
+        start_day = dt.datetime.strptime(self.start_day, '%H:%M').time().hour
+        end_day = dt.datetime.strptime(self.end_day, '%H:%M').time().hour
 
-        # # TODO: Timestamps aus Dataloader holen?
-        # empty_df = pd.DataFrame([], index=pd.Index(
-        #     timestamps), columns=prediction.columns)
+        # TODO: Timestamps aus Dataloader holen?
+        empty_df = pd.DataFrame([], index=pd.Index(
+            timestamps), columns=prediction.columns)
 
-        # i = 0
-        # for timestamp in timestamps:
-        #     if timestamp.hour >= start_day and timestamp.hour < end_day:
-        #         # Insert prediction where timestamp matches index
-        #         # Insert data from prediction at row i
-        #         empty_df.loc[timestamp] = prediction.iloc[i]
-        #         i += 1
+        i = 0
+        for timestamp in timestamps:
+            if timestamp.hour >= start_day and timestamp.hour < end_day:
+                # Insert prediction where timestamp matches index
+                # Insert data from prediction at row i
+                empty_df.loc[timestamp] = prediction.iloc[i]
+                i += 1
 
-        # print(prediction)
-        # prediction = empty_df.fillna(0)
-        # print(prediction)
+        print(prediction)
+        prediction = empty_df.fillna(0)
+        print(prediction)
 
         # Convert the relative prices to absolute prices
         for symbol, price in prices_before_prediction.items():
@@ -293,7 +295,11 @@ class TransformerInterface(AbstractModel):
         Returns:
             list[pd.Timestamp]: List of timestamps.
         """
-        timestamps = [timestamp_start + timedelta(minutes=i * interval_minutes)
+        timestamps = [timestamp_start + pd.Timedelta(minutes=i * interval_minutes)
                       for i in range(num_intervals)]
+
+        if self.resolution == resolution_enum.DAILY:
+            timestamps = [timestamp +
+                          pd.Timedelta(hours=20) for timestamp in timestamps]
 
         return timestamps

@@ -22,6 +22,10 @@ def predict_random_forest(stock_symbols: str, start_date: str, end_date: str, re
     prediction = random_forest_interface.predict(symbols_list, pd.to_datetime(
         start_date), pd.to_datetime(end_date), resolution)
 
+    # Set the index of the prediction dataframe to be shifted by 20 hours for daily predictions
+    if resolution == resolution_enum.DAILY:
+        prediction.index = prediction.index + pd.Timedelta(hours=20)
+
     data = {}
     for symbol in symbols_list:
         symbol_prediction = prediction[f"{symbol}_Predicted_Close"]
@@ -38,6 +42,10 @@ def predict_gradient_boost(stock_symbols: str, start_date: str, end_date: str, r
     gradient_boost_interface = ML_PredictionInterface_GradientBoostingModel()
     prediction = gradient_boost_interface.predict(
         symbols_list, pd.to_datetime(start_date), pd.to_datetime(end_date), resolution)
+
+    # Set the index of the prediction dataframe to be shifted by 20 hours for daily predictions
+    if resolution == resolution_enum.DAILY:
+        prediction.index = prediction.index + pd.Timedelta(hours=20)
 
     data = {}
     for symbol in symbols_list:

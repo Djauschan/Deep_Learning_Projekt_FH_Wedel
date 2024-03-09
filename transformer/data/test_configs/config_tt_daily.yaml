@@ -9,7 +9,7 @@ model_parameters:
     dropout: 0
 training_parameters:
   batch_size: 10000
-  epochs: 600
+  epochs: 800
   learning_rate: 0.00125
   loss: "mse" #Options: "mse", "rmse", "rmsle", "expmse"
   seed: 42
@@ -17,7 +17,7 @@ training_parameters:
   log_image_frequency: 10
 dataset_parameters:
   read_all_files: false
-  first_date: 2000-01-01 # YYYY-MM-DD First date of the data to be read in
+  first_date: 2004-03-01 # YYYY-MM-DD First date of the data to be read in
   last_date: 2021-01-03 # YYYY-MM-DD Last date of the data to be read in
   data_usage_ratio: 1 # Only the last 35% of the read data are used in the dataset
   subseries_amount: 4 # The time series will be cut into 4 subseries (which each consist of a train and validation set)
@@ -25,10 +25,10 @@ dataset_parameters:
   create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
   scaler: "MinMaxScaler" #Options: "StandardScaler", "MinMaxScaler", "QuantileTransformer", "PowerTransformer"
   data_file: "data/output/Multi_Symbol_Train.csv"
-  time_resolution: 960 # Time resolution of the data in minutes 
+  time_resolution: 1440 # Time resolution of the data in minutes 
   outlier_quantile: 0.99995 # Set to 1 to disable outlier removal
   data_selection_config:
-    ignore_nights: true # If true, only the data between start_day_time and end_day_time is used
+    ignore_nights: false # If true, only the data between start_day_time and end_day_time is used
     ignore_weekends: false # If true, Saturday and Sunday are ignored
     start_day_time: '04:00' # Start time of the day if ignore_nights is true
     end_day_time: '20:00' # End time of the day if ignore_nights is true
