@@ -21,7 +21,7 @@
         </div>
         <div class="calendar-days">
           <div v-for="day in daysInMonth" :key="day" class="calendar-day"
-               :class="{ 'selected-start': day === startDate, 'selected-end': day === endDate, 'selected-range': day > startDate && day < endDate }"
+               :class="{ 'selected-start': day === startDate}"
                @click="selectDay(day)">
             {{ day }}
           </div>
@@ -33,12 +33,6 @@
     </div>
     <div>
       <input type="text" v-model="formattedStartDate" readonly class="short-input">
-    </div>
-    <div>
-      <label>Selected End Date:</label>
-    </div>
-    <div>
-      <input type="text" v-model="formattedEndDate" readonly class="short-input">
     </div>
   </div>
 
@@ -352,7 +346,6 @@ export default {
       currentYear: '', // Current year displayed in the header
       daysInMonth: [], // Array to hold days of the month
       startDate: null, // Selected start date
-      endDate: null, // Selected end date
       selectingStart: true // Flag to indicate if currently selecting start date
     };
   },
@@ -404,9 +397,6 @@ export default {
     formattedStartDate() {
       return this.startDate ? this.formatDate(this.startDate) : '';
     },
-    formattedEndDate() {
-      return this.endDate ? this.formatDate(this.endDate) : '';
-    },
   },
 
   mounted() {
@@ -427,7 +417,6 @@ export default {
     
     toggleCalendar() {
       this.startDate = null;
-      this.endDate = null;
       this.selectingStart = true;
       this.showCalendar = !this.showCalendar;
     },
@@ -435,10 +424,7 @@ export default {
       // Handle day selection
       if (this.selectingStart) {
         this.startDate = day;
-        this.selectingStart = false; // Switch to selecting end date
-      } else {
-        this.endDate = day;
-        this.showCalendar = false; // Close the calendar after selecting end date
+        this.showCalendar = false;
       }
     },
     previousMonth() {
@@ -568,7 +554,6 @@ export default {
           params: {
             stock_symbol: this.selectedStock,
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
@@ -601,7 +586,6 @@ export default {
           params: {
             stock_symbol: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
@@ -632,7 +616,6 @@ export default {
           params: {
             stock_symbol: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
@@ -663,7 +646,6 @@ export default {
           params: {
             stock_symbols: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
@@ -697,7 +679,6 @@ export default {
           params: {
             stock_symbol: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
@@ -731,7 +712,6 @@ export default {
           params: {
             stock_symbol: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
@@ -765,7 +745,6 @@ export default {
           params: {
             stock_symbols: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime,
           }
         });
@@ -895,10 +874,6 @@ export default {
 
 .selected-start {
   background-color: #90EE90; /* Light green */
-}
-
-.selected-end {
-  background-color: #FFA07A; /* Light salmon */
 }
 
 .selected-range {
