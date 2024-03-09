@@ -178,7 +178,8 @@ def calculate_end_date(start_date: str, resolution: str):
     elif resolution == "H":
         return (pd.Timestamp(start_date) + pd.Timedelta(days=2)).strftime("%Y-%m-%d")
     elif resolution == "M":
-        return (pd.Timestamp(start_date) + pd.Timedelta(minutes=20)).strftime("%Y-%m-%d %H:%M:%S")
+        # We use 19 minutes because of the ann prediction interface implementation (it returns 1 value too much)
+        return (pd.Timestamp(start_date) + pd.Timedelta(minutes=19)).strftime("%Y-%m-%d %H:%M:%S")
     else:
         raise ValueError("Invalid resolution")
 
@@ -188,7 +189,7 @@ def predict_transformer(stock_symbols: str = "[AAPL, NVDA]",
                         start_date: str = "2021-01-04",
                         resolution: str = "D"):
     if resolution == "M":
-        start_date += " 10:00:00"
+        start_date += " 10:01:00"
 
     end_date = calculate_end_date(start_date, resolution)
     data_to_send = {"stock_symbols": stock_symbols,
@@ -240,7 +241,7 @@ def predict_randomForest(stock_symbols: str = "[AAPL, NVDA]",
                          start_date: str = "2021-01-04",
                          resolution: str = "D"):
     if resolution == "M":
-        start_date += " 10:00:00"
+        start_date += " 10:01:00"
     end_date = calculate_end_date(start_date, resolution)
     if resolution == "H":
         start_date += " 10:00:00"
@@ -268,7 +269,7 @@ def predict_gradientBoost(stock_symbols: str = "[AAPL, NVDA]",
                           start_date: str = "2021-01-04",
                           resolution: str = "D"):
     if resolution == "M":
-        start_date += " 10:00:00"
+        start_date += " 10:01:00"
     end_date = calculate_end_date(start_date, resolution)
     if resolution == "H":
         start_date += " 10:00:00"
