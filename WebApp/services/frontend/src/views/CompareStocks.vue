@@ -1,6 +1,12 @@
 <template>
   <Header />
+  <div class="home-container01">
+     <span class="home-logo">Compare Stocks!</span>
+  </div>
   <div class="center">
+    
+    <button class="button-stock" @click="updateChart">Show Predictions</button>
+    <div class="separator"></div>
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
     <button class="button-stock" @click="updateChart">Show Stock</button>!-->
@@ -20,6 +26,7 @@
       </select>
     </div>
     <br>
+    <div class="separator"></div>
     <span class="selection">Model</span>
     <div class="selector">
       <select v-model="selectedModel" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
@@ -37,6 +44,10 @@
         </option>
       </select>
     </div>
+    <div class="separator"></div>
+    <button class="button-stock" @click="showAll">Check All</button>
+    <br>
+    <button class="button-stock" @click="hideAll">Uncheck All</button>
     <div class="checkboxes">
       <div class="checkboxes1">
         <label>
@@ -68,11 +79,7 @@
           <input type="checkbox" v-model="showTSLALine"> Tesla
         </label>
       </div>
-      <button class="button-stock" @click="showAll">Check All</button>
       <br>
-      <button class="button-stock" @click="hideAll">Uncheck All</button>
-      <br>
-      <button class="button-stock" @click="updateChart">Show Predictions</button>
     </div>
   </div>
   <!-- Combined Chart -->
@@ -865,14 +872,42 @@ export default {
   justify-content: center;
   align-items: center;
   height: 10%;
-  background-color: lightgray;
+  background-color: white;
   padding: 1%;
+  border: 2px solid #ccc; /* Adjust border thickness and color as needed */
+}
+
+.home-container01 {
+  width: 100%;
+  flex: 0 0 auto;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 30px; /* Adjust the font size as needed */
+  margin-top: 15px;
 }
 
 select {
   color: #ffffff;
   background-color: grey;
   margin-right: 1%;
+}
+
+.checkboxes1{
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.checkboxes2{
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.checkboxes3{
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 #select-id option {
@@ -913,7 +948,21 @@ input::placeholder {
   border-radius: 12px;
   box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
   height: 30px;
+  margin-right: 5px;
   margin-left: 5px;
+}
+
+.selection{
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.separator {
+  height: 100px;
+  width: 2px; /* Adjust the width of the separator */
+  background-color: #817f7f; /* Adjust the color of the separator */
+  margin: 0 10px; /* Adjust the margin around the separator */
+  border-radius: 1px; /* Adjust the border radius for a rounder appearance */
 }
 
 .button-stock:hover {

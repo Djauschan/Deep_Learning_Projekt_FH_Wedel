@@ -4,6 +4,7 @@ import Statistik from "./views/statistik.vue";
 import ModelInformation from "./views/ModelInformation.vue";
 import StockList from "./views/StockList.vue";
 import CompareStocks from "./views/CompareStocks.vue";
+import CompareModels from "./views/CompareModels.vue";
 import NotFound from "./views/not-found.vue";
 import Login from "./views/Login.vue";
 import "./style.css";
@@ -35,6 +36,11 @@ const router = createRouter({
     {
       path: "/CompareStocks",
       component: CompareStocks,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/CompareModels",
+      component: CompareModels,
       meta: { requiresAuth: true },
     },
     {

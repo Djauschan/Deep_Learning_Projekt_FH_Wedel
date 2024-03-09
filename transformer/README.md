@@ -6,26 +6,52 @@ The codebase can be used to train transformer models for predicting time series,
 
 ## Installation
 
-If you want to run any of our code locally, you can do so by following these steps:
+If you want to run any of our code locally, you need to create an development environment and install the dependencies by following these steps:
 
 1. Navigate into the transformer group's directory.
-<br>```cd transformer```
+<br>`cd transformer`
 2. Create a conda environment (python version 3.11 is preferred).
-<br>```conda create -n transformer_env python==3.11```
+<br>`conda create -n transformer_env python==3.11`
 3. Activate your environment.
-<br>```conda activate transformer_env```
+<br>`conda activate transformer_env`
 4. Install PyTorch.
-<br>```pip install -r requirements_torch.txt```
+<br>`pip install -r requirements_torch.txt`
 5. Install the other requirements.
-<br>```pip install -r requirements.txt```
+<br>`pip install -r requirements.txt`
 
 If you just want to run a training or prediction pipeline or launch the tensorboard, you can avoid installing anything by just using our docker setup.
 
 ## Usage
 
+To run the training and prediction pipeline locally, follow these steps:
+
+1. Navigate into the transformer group's directory.
+<br>`cd transformer`
+2. Activate the environment you have created using your installation guide.
+<br>`conda activate transformer_env`
+3. Run a pipeline like this:
+<br>`python -m src_transformers.main -c "path/to/config" -p train`
+<br>Or like this:
+<br>`python -m src_transformers.main --config "path/to/config" --pipeline train`
+4. To run a prediction pipeline use the argument `predict` instead of `train`.
+
+If you want to use our docker setup, navigate into this directory (`transformer/`). Afterwards, you can start different processes with the following commands:
+
+- Start the training pipeline.
+<br>`docker compose up train_transformer`
+- Start the prediction pipeline.
+<br>`docker compose up predict_transformer`
+- Start the visualiasation utility script.
+<br>`docker compose up visualize_data`
+- Launch the tensorboard to look at your past training summaries.
+<br>`docker compose up tensorboard`
+
+NOTE: As the main goal of this project was to create a fully-fledged web application, we directly created a prediction API instead of a prediction pipeline. So there is no actual need to run the prediction pipeline as it will just print out a notification which refers you to the prediction API.
+
 ## Project Structure
 
 - `data/`: The directory containing all data (input data for model training, output data such as scaler and model files, all configs used for our pipelines and miscellaneous data, e.g. the index mappings).
+- `notebooks`: ?
 - `scoring_functions/`: ?
 - `scripts/`: Contains some scripts that we used during development. They are not relevant for the functionality of the code and can therefore be ignored.
 - `src_transformers/`: Holds the actual codebase used for model training and prediction.

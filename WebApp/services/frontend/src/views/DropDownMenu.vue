@@ -4,11 +4,10 @@
         <div v-if="isDropdownOpen" class="overlay">
             <button @click="toggleDropdown" class="dropdown-button2">☰</button>
             <button @click="goToHome" class="menu-item">Home</button>
-            <button @click="goToModelInformation" class="menu-item">Model Information</button>
-            <button @click="goToStatistics" class="menu-item">Statistic</button>
-            <button @click="goToStockList" class="menu-item">StockList</button>
             <button @click="goToCompareModels" class="menu-item">CompareModels</button>
             <button @click="goToCompareStocks" class="menu-item">CompareStocks</button>
+            <button @click="goToModelInformation" class="menu-item">Model Information</button>
+            <button @click="goToStockList" class="menu-item">StockList</button>
             <button type="submit" @click="logout" class="menu-item">Logout</button>
         </div>
         <div v-if="isDropdownOpen" class="background" @click="closeDropdown"></div>
