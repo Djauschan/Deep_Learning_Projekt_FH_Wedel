@@ -20,6 +20,11 @@ services:
         "-c",
         "uvicorn main:app --host 0.0.0.0 --port 8000"
       ]
+    depends_on:
+      - predict_transformer
+      - predict_cnn
+      - predict_ann
+      - predict_rl
     networks:
       - backend_network
 
