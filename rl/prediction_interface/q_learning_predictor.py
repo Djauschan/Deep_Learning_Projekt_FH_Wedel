@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import requests
 
 class QLearningPredictor():
     """QLearningPredictor class for the prediction API. This class is used to predict trading actions.
