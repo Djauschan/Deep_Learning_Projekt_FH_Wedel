@@ -1,51 +1,49 @@
 import pandas as pd
 from fastapi import FastAPI
+from src_transformers.abstract_model import resolution as resolution_enum
 from src_transformers.prediction_interface import TransformerInterface
-from src_transformers.abstract_model import resolution
 
 app = FastAPI()
 
 
 @app.get("/")
-async def root():
+async def root() -> dict:
+    """
+    This endpoint returns the description of the API.
+
+    Returns:
+        dict: Description of the API.
+    """
     return {"message": "Prediction API for the Transformer group :)))"}
 
 
 @app.get("/predict")
-def predict_transformer(stock_symbols: str, start_date: str, end_date: str, resolution: resolution) -> dict:
-    # convert stock_symbols to list "[AAPL, AAL, AMD]" -> ["AAPL", "AAL", "AMD"]
-    stock_symbols = stock_symbols[1:-1].split(", ")
-    transformer_interface = TransformerInterface()
+def predict_transformer(stock_symbols: str = "[AAPL, AAL, AMD]",
+                        start_date: str = "2021-02-01",
+                        end_date: str = "2021-05-01",
+                        resolution: resolution_enum = resolution_enum.DAILY) -> dict:
+    """
+    This endpoint returns the stock predictions for the given stock symbols, start date, end date and resolution.
 
-    prediction = transformer_interface.predict(stock_symbols, pd.to_datetime(
-        start_date), pd.to_datetime(end_date), resolution.TWO_HOURLY)
+    Args:
+        stock_symbols (str): Stock symbols for which the predictions should be made.
+        start_date (str): Start date for the predictions.
+        end_date (str): End date for the predictions.
+        resolution (resolution): Time resolution for the predictions.
+
+    Returns:
+        dict: Predictions for the given stock symbols for the given time range and resolution.
+    """
+    # convert stock_symbols to list "[AAPL, AAL, AMD]" -> ["AAPL", "AAL", "AMD"]
+    symbols_list = stock_symbols[1:-1].split(", ")
+
+    transformer_interface = TransformerInterface(resolution)
+    prediction = transformer_interface.predict(
+        symbols_list, pd.to_datetime(start_date))
 
     data = {}
-    for symbol in stock_symbols:
-        symbol_prediction = prediction[f"close {symbol}"]
+    for symbol in symbols_list:
         data[symbol] = [{"date": date, "value": value}
-                        for date, value in symbol_prediction.items()]
+                        for date, value in prediction[symbol].items()]
 
     return data
-
-
-if __name__ == "__main__":
-    symbols = ["AAPL", "AAL", "AMD", "C", "NVDA", "SNAP", "SQ", "TSLA"]
-    start_date = "2019-01-30"
-    end_date = "2019-02-04"
-    predictions = []
-
-    # Generate time range for every 2 hours between start_date and end_date
-    date_range = pd.date_range(start_date, end_date, freq="2H")
-
-    for timestamp in date_range:
-        step_predictions = {}
-        prediction = predict_transformer(
-            symbols, timestamp, None, resolution.TWO_HOURLY)
-        for symbol in symbols:
-            step_predictions[symbol] = prediction[symbol][0]["value"]
-        predictions.append(step_predictions)
-
-    prediction = pd.DataFrame(predictions, index=date_range)
-
-    prediction.to_csv("data/output/prediction_data_rl.csv")

@@ -133,10 +133,6 @@ class MultiSymbolDataset(Dataset):
             cls.stocks, cls.prices, data_df = fill_dataframe(
                 data_df, data_reader, time_resolution, data_selection_config)
 
-            # Select Data for Prediction Interface
-            # Only Select timestamp index is greater or equal to 2020-12-22 04:00:00
-            # data_df = data_df[(data_df['timestamp'] >= pd.to_datetime("2020-12-22 04:00:00", format="%Y-%m-%d %H:%M:%S"))]
-
             Logger.log_text(
                 "Filled the timestamp dataframe with data from the selected stocks and symbols.")
             data_df = add_time_information(data_df, time_feature)
@@ -192,14 +188,11 @@ class MultiSymbolDataset(Dataset):
 
                 train_indeces, validation_indecies = instance_multi_symbol_dataset.get_subset_indices()
 
-                # NOTE: This is only to create the dataset for the prediction interface
-                scaler = pickle.load(
-                    open("data/output/Multi_Symbol_Train_scaler.pkl", "rb"))
-                with open("data/output/tt_prices_for_rl.pkl", 'wb') as file:
+                with open("data/output/absolut_prices.pkl", 'wb') as file:
                     pickle.dump(instance_multi_symbol_dataset.prices, file)
 
                 # Fit scaler to each volume column only with train data
-                # scaler.fit(data_df[volume_cols].iloc[train_indeces])
+                scaler.fit(data_df[volume_cols].iloc[train_indeces])
 
                 # Transform train and test data
                 data_df[volume_cols] = scaler.transform(data_df[volume_cols])
@@ -214,8 +207,6 @@ class MultiSymbolDataset(Dataset):
             data_df.to_csv(data_file, mode='w', header=True)
             Logger.log_text(
                 f"Dataframe holding the preprocessed data was stored to the file '{data_file}'.")
-
-            exit()
 
         return instance_multi_symbol_dataset
 

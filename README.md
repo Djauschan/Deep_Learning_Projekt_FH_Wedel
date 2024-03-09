@@ -1,7 +1,7 @@
 # Project Deep Learning - Trading Agent & Stock Predice Predictor
 
 This repository contains the source code of a web application developed in the context of the module "Project Deep Learning" at the FH Wedel.
-It was developed by the class of the winter semester 2023/2024. 
+It was developed by the class of the winter semester 2023/2024.
 
 The web application is designed to be able to give a user recommendations for trading a specific selection of stocks. Furthermore, it can predict and visualize the prices of the stocks in question. The trading recommendations are given by a Reinforcement Learning agent and the stock prices are predicted using advanced machine learning and deep learning techniques, namely Gradient-Boosted Trees, Convolutional Neural Networks, and Transformers.
 
@@ -17,9 +17,7 @@ The class organized itself into the following subgroups:
 
 To get the application up and running, navigate to the root directory of the project and start it with the following command:
 
-```
-docker compose up
-```
+`docker compose up`
 
 That's it! After a first installation, which might take a while as it collects and installs all dependencies in the containers, you can boot up the application in a matter of seconds.
 
