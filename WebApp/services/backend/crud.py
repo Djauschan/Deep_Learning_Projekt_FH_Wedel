@@ -6,6 +6,7 @@ import models
 import numpy as np
 import pandas as pd
 import schemas
+import os
 
 # import pandas_market_calendars as mcal
 # import yfinance as yf
@@ -163,60 +164,59 @@ def update_budget_by_user(db: Session, username: str, updated_data: schemas.User
     
 
 # method to load data from csv file
-def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.Timestamp, interval: str, rsc_completePath: str,
+def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.Timestamp, interval: str,
                      ALL_DATA_COLUMNS: list, COLUMNS_TO_KEEP: list) -> pd.DataFrame:
 
     stock_symbol_list = stock_symbols[1:-1].split(", ")
 
-    df = pd.read_csv(rsc_completePath, sep=",",
-                     names=ALL_DATA_COLUMNS, index_col=False)
+    dfs = []  # List to store DataFrames for each stock
 
-    toRemove = []
-    for col in df:
-        if col not in COLUMNS_TO_KEEP:
+    for stock in stock_symbol_list:
+        rsc_completePath = f"../data/Aktien/{stock}_1min.txt"
+        if os.path.exists(rsc_completePath):
+            df = pd.read_csv(rsc_completePath, sep=",", names=ALL_DATA_COLUMNS, index_col=False)
 
-            toRemove.append(col)
+            toRemove = []
+            for col in df:
+                if col not in COLUMNS_TO_KEEP:
+                    toRemove.append(col)
 
-    data = df.drop(toRemove, axis=1)
+            data = df.drop(toRemove, axis=1)
+            data['DateTime'] = pd.to_datetime(data['DateTime'])
+            data = data[(data['DateTime'] >= start_date) & (data['DateTime'] <= end_date)]
+            data.set_index('DateTime', inplace=True)
 
-    data['DateTime'] = pd.to_datetime(data['DateTime'])
+            # Resample the data to the specified interval
+            if interval == 'H':
+                data = data.resample('2H').mean()
+            #elif interval == 'D':
+                #data = data.resample('24H').mean()
+            elif interval == 'M':
+                data = data.resample('20T').mean()
+            else:
+                data = data.resample('1H').mean()
 
-    data = data[(data['DateTime'] >= start_date)
-                & (data['DateTime'] <= end_date)]
-    
-    print(data.head())
+            # Filter out data from 20:00 to 04:00
+            # if not data.empty and isinstance(data.index, pd.DatetimeIndex):
+            #     data = data[(data.index.hour <= 20) & (data.index.hour >= 4)]
+            # else:
+            #     print("The DataFrame is either empty or its index is not a DatetimeIndex.")
 
-    # Filter data based on stock symbols
-    data = data[data["AAPL"].isin(stock_symbol_list)]
+            # Reset the index
+            data.reset_index(inplace=True)
 
-    # Set 'DateTime' as the index (required for resampling)
-    data.set_index('DateTime', inplace=True)
+            # Replace non-compliant values with a compliant value (e.g., None)
+            data.replace([np.inf, -np.inf, np.nan], None, inplace=True)
 
-    # Resample the data to the specified interval
-    if interval == 'H':
-        # Resample to 1-hour intervals
-        data = data.resample('2H').mean()
-    elif interval == 'D':
-        # Resample to 24H-minute intervals
-        data = data.resample('24H').mean()
-    elif interval == 'M':
-        # Resample to 20-minute intervals
-        data = data.resample('20T').mean()
-    else:
-        # Default: Resample to 1-hour intervals
-        data = data.resample('2H').mean()
+            # Filter the data to include only the rows at 16:00:00
+            if(interval == 'D'):
+                data = data[data['DateTime'].dt.time == pd.to_datetime('16:00:00').time()]
 
+            dfs.append(data)  # Add the DataFrame to the list
 
-    # Replace non-compliant values with a compliant value (e.g., None)
-    data.replace([np.inf, -np.inf, np.nan], None, inplace=True)
-
-    # Filter out data from 20:00 to 04:00
-    data = data[(data.index.hour < 20) & (data.index.hour >= 4)]
-
-    # Reset the index
-    data.reset_index(inplace=True)
+    return_data = pd.concat(dfs)
 
     # Convert the DataFrame to a list of dictionaries
-    return_data = data.to_dict(orient='records')
+    return_data = return_data.to_dict(orient='records')
 
     return return_data
