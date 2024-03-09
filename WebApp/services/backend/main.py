@@ -4,7 +4,6 @@ import models
 import pandas as pd
 import requests
 import schemas
-from abstract_model import resolution as resolution_enum
 from database import SessionLocal, engine
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -293,50 +292,34 @@ def predict_gradientBoost(stock_symbols: str = "[AAPL, NVDA]",
 
 
 @app.get("/predict/rl")
-def predict_rl(stock_symbols: str, start_date: str, resolution: str):
+def predict_rl(stock_symbols: str = "[AAPL, NVDA]",
+               start_date: str = "2021-01-04",
+               resolution: str = "D"):
     """Predicts trading actions for a given stock symbol and time frame with every avialible model.
 
     Args:
         stock_symbols (str): The stock symbols to predict trading actions for.
         start_date (str): The start date of the time frame to predict trading actions for.
-        end_date (str): The end date of the time frame to predict trading actions for.
+        resolution (str): The resolution for the prediction.
 
     Returns:
-        list[dict[Timestamp, dict[str, str]]]: A list containing the predictions for every model for every hour in the given time frame.
+        dict[Timestamp, dict[str, str]]: A list containing the predictions for every model for every hour in the given time frame.
     """
-    # data_to_send = {"stock_symbol": stock_symbol,
-    #                 "start_date": "2021-01-04",
-    #                 "end_date": "2021-01-05"}
-    # api_url = "http://predict_rl:8000/predict"
-    # response = requests.get(api_url, params=data_to_send)
-    # if response.status_code != 200:
-    #     return {
-    #         "status_code": response.status_code,
-    #         "response_text": response.text
-    #     }
-    # return response.json()
-    from random import choice
-    posible_actions = ['buy', 'sell', 'hold']
-    model_names = ["q_learning_ma5", "q_learning_ma30", "q_learning_ma200",
-                   "q_learning_transformer", "q_learning_cnn", "q_learning_arima"]
+    if resolution == "M":
+        start_date += " 10:00:00"
+    data_to_send = {"stock_symbol": stock_symbols,
+                    "start_date": start_date,
+                    "end_date": calculate_end_date(start_date, resolution),
+                    "resolution": resolution}
+    api_url = "http://predict_rl:8000/predict"
+    response = requests.get(api_url, params=data_to_send)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
+    return response.json()
 
-    ensemble = choice(["election", "ensemble"]) == 'ensemble'
-    random_return = {}
-    stock_symbols = stock_symbols[1:-1].split(", ")
-    for stock_symbol in stock_symbols:
-        random_return[stock_symbol] = {}
-        for current_date in pd.date_range(start_date, end_date, freq='2h'):
-            random_return[stock_symbol][current_date] = {model: choice(
-                posible_actions) for model in model_names}
-            if ensemble:
-                random_return[stock_symbol][current_date]['ensemble'] = choice(
-                    list(random_return[stock_symbol][current_date].values()))
-            else:
-                lst = list(random_return[stock_symbol][current_date].values())
-                random_return[stock_symbol][current_date]['election'] = max(
-                    set(lst), key=lst.count)
-
-    return random_return
 
 
 @app.get("/load/data")

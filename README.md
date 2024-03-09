@@ -12,6 +12,7 @@ The class organized itself into the following subgroups:
 - Transformers
 - CNN
 - ANN (Machine Learning and Statistical methods)
+- RL (Reinforcement Learning)
 
 ## Installation
 
@@ -30,6 +31,7 @@ Open your web browser and navigate to `http://localhost:8080` to start using the
 - `ann/`: The project directory of the ANN group.
 - `CNN/`: The project directory of the CNN group.
 - `data/`: Contains the raw, unprocessed data that all groups use in their projects.
+- `rl/`: The project directory of the RL group.
 - `transformer/`: The project directory of the Transformer group.
 - `WebApp/`: Contains the project directories of the Frontend and Backend groups.
 - `.gitignore`: Global gitignore file for the whole project.
