@@ -21,6 +21,7 @@ class RLInterface:
         
         self.action_map = {0: 'hold', 1: 'buy', 2: 'sell'}
         self.data = self._read_data()
+        self.response = {}
         
         
     def predict(self, stock_symbol : str, start_date : str , end_date : str, resolution: resolution_type) -> dict[str, dict[str, str]]:        
@@ -30,9 +31,10 @@ class RLInterface:
             stock_symbol (str): The stock symbol to predict trading actions for.
             start_date (str): The start date of the time frame to predict trading actions for.
             end_date (str): The end date of the time frame to predict trading actions for.
+            resolution (resolution_type): The resolution of the stock data.
 
         Returns:
-            dict[pd.Timestamp, dict[str, str]]: A dictionary containing the predictions for every model for every hour in the given time frame.
+            dict[pd.Timestamp, dict[str, str]]: A dictionary containing the predictions for every model for every timestep in the given time frame.
         """
         predictions = {}
         relevant_data = self.data[stock_symbol.upper()]
@@ -102,10 +104,16 @@ class RLInterface:
         Returns:
             pd.DataFrame: The stock data for the given stock symbol and time frame.
         """
-        response = requests.get(url, params={'stock_symbols': f'[{stock_symbol.upper()}]',
-                                             'start_date': start_date.strftime('%Y-%m-%d'),
-                                             'resolution': resolution})
-        return response.json()
+        start_date = start_date.strftime('%Y-%m-%d')
+        if resolution == 'D':
+            cache_parameter = f'{url}_{stock_symbol}_{resolution}'
+        else:
+            cache_parameter = f'{url}_{stock_symbol}_{start_date}_{resolution}'
+        if cache_parameter not in self.response.keys():
+            self.response[cache_parameter] = requests.get(url, params={'stock_symbols': f'[{stock_symbol.upper()}]',
+                                                                       'start_date': start_date,
+                                                                       'resolution': resolution})
+        return self.response[cache_parameter].json()
     
     def _get_prediction_from_dict_list(self, dict_list : list[dict[str : str]], desired_date : pd.Timestamp) -> float:
         """Gets the value for the given date from the given dictionary list.

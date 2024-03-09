@@ -69,10 +69,10 @@ class MAPredictor():
             float: The calculated moving average.
         """
         if len(data) < self.ma_variant:
-            # Nicht genügend Daten für den vollständigen MA
+            # Not enough data for the complete MA
             return data.mean()
         else:
-            # Berechnen des Durchschnitts der letzten 'period' Werte
+            # Calcuate the MA for the last X days. The Variant specifies the number of days
             return data.iloc[-self.ma_variant:].mean()
     
     def _calculate_state(self, current_price : np.array, ma_value : float) -> int:
@@ -127,18 +127,18 @@ class RSIPredictor():
         if len(data) < period:
             return 50  # Neutraler RSI-Wert bei unzureichenden Daten
 
-        # Berechnung der Differenzen
+        # Calculate the difference between the closing prices
         delta = data.Close.diff()
         
-        # Ermittlung von Gewinnen und Verlusten über die letzten 'period' Tage
+        # Calculate the gain and loss for the given period
         gain = delta.clip(lower=0).iloc[-period:].mean()
         loss = -delta.clip(upper=0).iloc[-period:].mean()
 
-        # Vermeidung der Division durch Null
+        # Avoid division by zero
         if loss == 0:
             return 100 if gain > 0 else 50
 
-        # Berechnung des RSI
+        # Calculate the RSI
         RS = gain / loss
         RSI = 100 - (100 / (1 + RS))
         return RSI
@@ -154,11 +154,11 @@ class RSIPredictor():
         """
         rsi_value = self._calculate_RSI(data)
         if rsi_value < self.low_threshold:
-            return 1  # Kaufen
+            return 1  # buy
         elif rsi_value > self.high_threshold:
-            return 2  # Verkaufen
+            return 2  # sell
         else:
-            return 0  # Halten
+            return 0  # hold
 
 class EnsemblePredictor():
     """ensemblePredictor class for the prediction API. This class is used to predict trading actions based on the ensemble of all models.
@@ -185,11 +185,10 @@ class EnsemblePredictor():
     
         for i, action in enumerate(actions):
             weighted_actions[action] += self.q_table[i, action]
-        # Wenn alle gewichteten Aktionen gleich sind, wähle zufällig
+        # Return a random action if all actions have the same weight
         if np.all(weighted_actions == weighted_actions[0]):
             return np.random.choice(len(weighted_actions))
-        else:
-            return np.argmax(weighted_actions)
+        return np.argmax(weighted_actions)
 
 class MLModelPredictor():
     """MLModelPredictor class for the prediction API. This class is used to predict trading actions based on ML Model predictions.
@@ -201,7 +200,6 @@ class MLModelPredictor():
             model_path (str): The path to the model to load.
         """
         # Check if the model is supported
-        print(model_path)
         if 'rf_agent' in model_path.lower():
             self.model = np.load(model_path)
             self.name = "Q_learning_RandomForest-ML"
@@ -219,6 +217,14 @@ class MLModelPredictor():
             self.name = "unsupported"
         
     def predict(self, data : list[int]) -> int:
+        """Predicts trading actions for the given data.
+
+        Args:
+            data (list[int]): The data to predict trading actions for. The first element is the last price, the second element is the prediction for the next price.
+
+        Returns:
+            int: The predicted trading action.
+        """
         last_price = data[0]
         prediction = data[1]
         if prediction == None:
