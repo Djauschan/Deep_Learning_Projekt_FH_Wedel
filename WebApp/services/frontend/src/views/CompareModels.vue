@@ -6,6 +6,43 @@
   <div class="center">
     <button class="button-stock" @click="updateChart">Load Charts</button>
     <div class="separator"></div>
+    <div>
+    <button class="button-stock" @click="toggleCalendar">Select Dates</button>
+    <div class="calendar-popup" v-if="showCalendar">
+      <div class="calendar">
+        <div class="calendar-header">
+          <button @click="previousMonth">&lt;</button>
+          <div>
+            <h2>{{ currentMonthName }}</h2>
+            <h2>{{ currentMonth }}</h2>
+            <h2>{{ currentYear }}</h2>
+          </div>
+          <button @click="nextMonth">&gt;</button>
+        </div>
+        <div class="calendar-days">
+          <div v-for="day in daysInMonth" :key="day" class="calendar-day"
+               :class="{ 'selected-start': day === startDate, 'selected-end': day === endDate, 'selected-range': day > startDate && day < endDate }"
+               @click="selectDay(day)">
+            {{ day }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <label>Selected Start Date:</label>
+    </div>
+    <div>
+      <input type="text" v-model="formattedStartDate" readonly class="short-input">
+    </div>
+    <div>
+      <label>Selected End Date:</label>
+    </div>
+    <div>
+      <input type="text" v-model="formattedEndDate" readonly class="short-input">
+    </div>
+  </div>
+
+    <div class="separator"></div>
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
     <button class="button-stock" @click="updateChart">Show Stock</button>!-->
@@ -309,9 +346,43 @@ export default {
       seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'], // Array of colors for each series
       meanError: null,
       meanAbsoluteError: null,
+      showCalendar: false,
+      currentDate: new Date(), // Current date
+      currentMonth: '', // Current month displayed in the header
+      currentMonthName: '', // Current month name displayed in the header
+      currentYear: '', // Current year displayed in the header
+      daysInMonth: [], // Array to hold days of the month
+      startDate: null, // Selected start date
+      endDate: null, // Selected end date
+      selectingStart: true // Flag to indicate if currently selecting start date
     };
   },
+  
+  watch: {
+    currentDate() {
+      this.getDaysInMonth();
+      this.updateCurrentMonth();
+    },
+  },
+
   computed: {
+    
+    currentMonth() {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    let currentMonthIndex = this.currentDate.getMonth() + (this.currentMonthOffset-this.currentMonthOffset);
+
+    // Adjust the index to handle cases where it goes beyond the boundaries
+    if (currentMonthIndex < 0) {
+      currentMonthIndex += 12; // Wrap around to December
+    } else if (currentMonthIndex >= 12) {
+      currentMonthIndex -= 12; // Wrap around to January
+    }
+
+
+    
+    return months[currentMonthIndex];
+  },
+
     CNNchartTitle() {
       return `CNN Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
     },
@@ -331,13 +402,89 @@ export default {
       enabled: true,
       // Customize tooltip appearance or behavior if needed
     },
+    formattedStartDate() {
+      return this.startDate ? this.formatDate(this.startDate) : '';
+    },
+    formattedEndDate() {
+      return this.endDate ? this.formatDate(this.endDate) : '';
+    },
   },
 
   mounted() {
     this.handleSelection();
+    this.getDaysInMonth();
+    this.updateCalendar();
   },
 
   methods: {
+    updateCalendarPopup() {
+      // Remove the color from the start day
+      const startDayElement = document.querySelector('.selected-start');
+      if (startDayElement) {
+        startDayElement.classList.remove('selected-start');
+      }
+    },
+      
+    
+    toggleCalendar() {
+      this.startDate = null;
+      this.endDate = null;
+      this.selectingStart = true;
+      this.showCalendar = !this.showCalendar;
+    },
+    selectDay(day) {
+      // Handle day selection
+      if (this.selectingStart) {
+        this.startDate = day;
+        this.selectingStart = false; // Switch to selecting end date
+      } else {
+        this.endDate = day;
+        this.showCalendar = false; // Close the calendar after selecting end date
+      }
+    },
+    previousMonth() {
+      // Logic for moving to the previous month
+      this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+      this.updateCalendarPopup();
+      this.updateCalendar();
+    },
+    nextMonth() {
+      // Logic for moving to the next month
+      this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+      this.updateCalendarPopup();
+      this.updateCalendar();
+    },
+    updateCalendar() {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      this.currentMonthName = monthNames[month];
+      this.currentMonth = month + 1;
+      this.currentYear = year;
+      this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    },
+    formatDate(date) {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      return new Date(year, month, date).toLocaleDateString('en-US');
+    },
+  
+
+
+  getDaysInMonth() {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  },
+  
+  selectDate(day) {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth() + 1; // Month is zero-based
+    this.selectedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    this.showDatePicker = false;
+  },
     // Method to calculate mean error and mean absolute error
     calculateErrorsAndDisplay(actualValues, predictedValues) {
       const { meanError, meanAbsoluteError } = calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues);
@@ -742,6 +889,146 @@ export default {
 </script>
 
 <style>
+.short-input {
+  width: 100px; /* Adjust width as needed */
+}
+
+.calendar-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+}
+
+.calendar {
+  font-family: Arial, sans-serif;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendar-day {
+  padding: 10px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.selected-start {
+  background-color: #90EE90; /* Light green */
+}
+
+.selected-end {
+  background-color: #FFA07A; /* Light salmon */
+}
+
+.selected-range {
+  background-color: #ADD8E6; /* Light blue */
+}
+
+.calendar-day:hover {
+  background-color: #f0f0f0;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+}
+
+.popup-content {
+  position: relative;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  max-width: 400px; /* Adjust max-width as needed */
+  max-height: 300px; /* Adjust max-height as needed */
+  overflow-y: auto; /* Add scrollbar when content exceeds max-height */
+}
+
+.date-picker-popup {
+  width: 100%; /* Make date picker content full width */
+}
+
+.time-picker-popup {
+  width: 100%; /* Make time picker content full width */
+}
+
+.popup h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.popup button {
+  margin-top: 10px;
+}
+
+
+.date-time-picker {
+  display: flex;
+}
+
+.popup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  border-radius: 5px;
+}
+
+.time-wheel {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.hour,
+.minute {
+  flex: 1 0 20%;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.hour:first-child,
+.minute:first-child {
+  border-top-left-radius: 5px;
+}
+
+.hour:last-child,
+.minute:last-child {
+  border-top-right-radius: 5px;
+}
+
+.hour:nth-last-child(1),
+.minute:nth-last-child(1) {
+  border-bottom-left-radius: 5px;
+}
+
+.hour:nth-last-child(2),
+.minute:nth-last-child(2) {
+  border-bottom-right-radius: 5px;
+}
+
 #chart {
   height: 30%;
 }
