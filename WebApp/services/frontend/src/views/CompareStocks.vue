@@ -7,6 +7,36 @@
     
     <button class="button-stock" @click="updateChart">Show Predictions</button>
     <div class="separator"></div>
+    <div>
+    <button class="button-stock" @click="toggleCalendar">Select Dates</button>
+    <div class="calendar-popup" v-if="showCalendar">
+      <div class="calendar">
+        <div class="calendar-header">
+          <button @click="previousMonth">&lt;</button>
+          <div>
+            <h2>{{ currentMonthName }}</h2>
+            <h2>{{ currentMonth }}</h2>
+            <h2>{{ currentYear }}</h2>
+          </div>
+          <button @click="nextMonth">&gt;</button>
+        </div>
+        <div class="calendar-days">
+          <div v-for="day in daysInMonth" :key="day" class="calendar-day"
+               :class="{ 'selected-start': day === startDate}"
+               @click="selectDay(day)">
+            {{ day }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <label>Selected Start Date:</label>
+    </div>
+    <div>
+      <input type="text" v-model="formattedStartDate" readonly class="short-input">
+    </div>
+  </div>
+    <div class="separator"></div>
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
     <button class="button-stock" @click="updateChart">Show Stock</button>!-->
@@ -361,10 +391,61 @@ export default {
       store: useMyPiniaStore(),
       selectedTime: 'Option 1',
       selectedModel: 'Option 1',
-      seriesColors:  ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC', '#FFB733', '#FF3385', '#33B5FF'] // Array of colors for each series
+      seriesColors:  ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC', '#FFB733', '#FF3385', '#33B5FF'], // Array of colors for each series
+      showCalendar: false,
+      currentDate: new Date(), // Current date
+      currentMonth: '', // Current month displayed in the header
+      currentMonthName: '', // Current month name displayed in the header
+      currentYear: '', // Current year displayed in the header
+      daysInMonth: [], // Array to hold days of the month
+      startDate: null, // Selected start date
+      selectingStart: true, // Flag to indicate if currently selecting start date
     };
   },
+
+  watch: {
+    currentDate() {
+      this.getDaysInMonth();
+      this.updateCurrentMonth();
+    },
+  },
+
   computed: {
+    currentMonth() {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    let currentMonthIndex = this.currentDate.getMonth() + (this.currentMonthOffset-this.currentMonthOffset);
+
+    // Adjust the index to handle cases where it goes beyond the boundaries
+    if (currentMonthIndex < 0) {
+      currentMonthIndex += 12; // Wrap around to December
+    } else if (currentMonthIndex >= 12) {
+      currentMonthIndex -= 12; // Wrap around to January
+    }
+
+
+    
+    return months[currentMonthIndex];
+  },
+
+    CNNchartTitle() {
+      return `CNN Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+    },
+    TransformerchartTitle() {
+      return `Transformer Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+    },
+    LSTMchartTitle() {
+      return `LSTM Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+    },
+    RandomForestchartTitle() {
+      return `Random Forest Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+    },
+    GradientBoostchartTitle() {
+      return `Gradient Boost Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+    },
+    formattedStartDate() {
+      return this.startDate ? this.formatDate(this.startDate) : '';
+    },
+
     tooltip: {
           enabled: true,
           // Customize tooltip appearance or behavior if needed
@@ -373,9 +454,80 @@ export default {
 
   mounted(){
     this.handleSelection();
+    this.getDaysInMonth();
+    this.updateCalendar();
   },
 
   methods: {
+    toggleCalendar() {
+      this.startDate = null;
+      this.selectingStart = true;
+      this.showCalendar = !this.showCalendar;
+    },
+    selectDay(day) {
+      // Handle day selection
+      if (this.selectingStart) {
+        this.startDate = day;
+        this.showCalendar = false; // Close the calendar after selecting end date
+      }
+    },
+    previousMonth() {
+      // Logic for moving to the previous month
+      this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+      this.updateCalendar();
+    },
+    nextMonth() {
+      // Logic for moving to the next month
+      this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+      this.updateCalendar();
+    },
+    updateCalendar() {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      this.currentMonthName = monthNames[month];
+      this.currentMonth = month + 1;
+      this.currentYear = year;
+      this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    },
+    formatDate(date) {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      return new Date(year, month, date).toLocaleDateString('en-US');
+    },
+  
+
+
+  getDaysInMonth() {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  },
+  
+  selectDate(day) {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth() + 1; // Month is zero-based
+    this.selectedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    this.showDatePicker = false;
+  },
+
+    // Method to calculate mean error and mean absolute error
+    calculateErrorsAndDisplay(actualValues, predictedValues) {
+      const { meanError, meanAbsoluteError } = calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues);
+      this.meanError = meanError.toFixed(2); // Round to 2 decimal places
+      this.meanAbsoluteError = meanAbsoluteError.toFixed(2); // Round to 2 decimal places
+    },
+
+    // Example method to trigger calculation and display
+    displayErrors() {
+      // Example actual and predicted data
+      const actualValues = [10, 20, 30, 40, 50];
+      const predictedValues = [12, 18, 28, 38, 48];
+      this.calculateErrorsAndDisplay(actualValues, predictedValues);
+    },
+
     handleSelection(){
       console.log("SelectedTime:", this.selectedTime);
       console.log("SelectedModel:", this.selectedModel);
@@ -841,6 +993,142 @@ export default {
 };
 </script>
 <style>
+.short-input {
+  width: 100px; /* Adjust width as needed */
+}
+
+.calendar-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+}
+
+.calendar {
+  font-family: Arial, sans-serif;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendar-day {
+  padding: 10px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.selected-start {
+  background-color: #90EE90; /* Light green */
+}
+
+.selected-range {
+  background-color: #ADD8E6; /* Light blue */
+}
+
+.calendar-day:hover {
+  background-color: #f0f0f0;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+}
+
+.popup-content {
+  position: relative;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  max-width: 400px; /* Adjust max-width as needed */
+  max-height: 300px; /* Adjust max-height as needed */
+  overflow-y: auto; /* Add scrollbar when content exceeds max-height */
+}
+
+.date-picker-popup {
+  width: 100%; /* Make date picker content full width */
+}
+
+.time-picker-popup {
+  width: 100%; /* Make time picker content full width */
+}
+
+.popup h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.popup button {
+  margin-top: 10px;
+}
+
+
+.date-time-picker {
+  display: flex;
+}
+
+.popup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  border-radius: 5px;
+}
+
+.time-wheel {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.hour,
+.minute {
+  flex: 1 0 20%;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.hour:first-child,
+.minute:first-child {
+  border-top-left-radius: 5px;
+}
+
+.hour:last-child,
+.minute:last-child {
+  border-top-right-radius: 5px;
+}
+
+.hour:nth-last-child(1),
+.minute:nth-last-child(1) {
+  border-bottom-left-radius: 5px;
+}
+
+.hour:nth-last-child(2),
+.minute:nth-last-child(2) {
+  border-bottom-right-radius: 5px;
+}
+
 #chart {
   height: 30%;
 }
@@ -877,6 +1165,38 @@ export default {
   border: 2px solid #ccc; /* Adjust border thickness and color as needed */
 }
 
+.selection{
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.separator {
+  height: 100px;
+  width: 2px; /* Adjust the width of the separator */
+  background-color: #817f7f; /* Adjust the color of the separator */
+  margin: 0 10px; /* Adjust the margin around the separator */
+}
+
+select {
+  color: #ffffff;
+  background-color: grey;
+  margin-right: 1%;
+}
+
+#select-id option {
+  color: #ffffff;
+}
+
+input {
+  color: #ffffff;
+  margin-right: 1%;
+}
+
+.number-input {
+  width: 10%;
+  direction: rtl;
+}
+
 .home-container01 {
   width: 100%;
   flex: 0 0 auto;
@@ -889,41 +1209,6 @@ export default {
   margin-top: 15px;
 }
 
-select {
-  color: #ffffff;
-  background-color: grey;
-  margin-right: 1%;
-}
-
-.checkboxes1{
-  margin-right: 5px;
-  margin-left: 5px;
-}
-
-.checkboxes2{
-  margin-right: 5px;
-  margin-left: 5px;
-}
-
-.checkboxes3{
-  margin-right: 5px;
-  margin-left: 5px;
-}
-
-#select-id option {
-  color: #ffffff;
-}
-
-input {
-  color: #ffffff;
-  background-color: grey;
-  margin-right: 1%;
-}
-
-.number-input {
-  width: 10%;
-  direction: rtl;
-}
 
 .text-input {
   color: #ffffff;
@@ -947,22 +1232,13 @@ input::placeholder {
   transition: background-color 0.3s ease;
   border-radius: 12px;
   box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-  height: 30px;
   margin-right: 5px;
   margin-left: 5px;
 }
 
-.selection{
+.checkboxes4{
   margin-right: 5px;
   margin-left: 5px;
-}
-
-.separator {
-  height: 100px;
-  width: 2px; /* Adjust the width of the separator */
-  background-color: #817f7f; /* Adjust the color of the separator */
-  margin: 0 10px; /* Adjust the margin around the separator */
-  border-radius: 1px; /* Adjust the border radius for a rounder appearance */
 }
 
 .button-stock:hover {

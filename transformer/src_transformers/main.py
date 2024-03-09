@@ -3,13 +3,11 @@ from typing import Final
 
 import torch
 import yaml
-from torch import cuda
-
 from src_transformers.pipelines.model_service import ModelService
-from src_transformers.pipelines.predictor import Predictor
 from src_transformers.pipelines.trainer import Trainer
 from src_transformers.preprocessing.multi_symbol_dataset import MultiSymbolDataset
 from src_transformers.utils.logger import Logger
+from torch import cuda
 
 TRAIN_COMMAND: Final[str] = "train"
 EVAL_COMMAND: Final[str] = "evaluate"
@@ -114,13 +112,7 @@ def main() -> None:
         trainer.start_training()
         trainer.evaluate()
     elif args.pipeline == PREDICT_COMMAND:
-        model = ModelService.load_newest_model(model_name=model_name)
-        predictor = Predictor(model=model,
-                              device=device,
-                              dataset=dataset)
-
-        prediction = predictor.predict()
-        print(prediction)
+        print("For prediction, please refer to our prediction interface.")
 
 
 if __name__ == "__main__":

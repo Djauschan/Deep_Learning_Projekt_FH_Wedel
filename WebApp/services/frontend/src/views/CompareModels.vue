@@ -1,10 +1,41 @@
 <template>
   <Header />
   <div class="home-container01">
-     <span class="home-logo">Compare Models!</span>
+    <span class="home-logo">Compare Models!</span>
   </div>
   <div class="center">
     <button class="button-stock" @click="updateChart">Load Charts</button>
+    <div class="separator"></div>
+    <div>
+    <button class="button-stock" @click="toggleCalendar">Select Dates</button>
+    <div class="calendar-popup" v-if="showCalendar">
+      <div class="calendar">
+        <div class="calendar-header">
+          <button @click="previousMonth">&lt;</button>
+          <div>
+            <h2>{{ currentMonthName }}</h2>
+            <h2>{{ currentMonth }}</h2>
+            <h2>{{ currentYear }}</h2>
+          </div>
+          <button @click="nextMonth">&gt;</button>
+        </div>
+        <div class="calendar-days">
+          <div v-for="day in daysInMonth" :key="day" class="calendar-day"
+               :class="{ 'selected-start': day === startDate}"
+               @click="selectDay(day)">
+            {{ day }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <label>Selected Start Date:</label>
+    </div>
+    <div>
+      <input type="text" v-model="formattedStartDate" readonly class="short-input">
+    </div>
+  </div>
+
     <div class="separator"></div>
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
     <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
@@ -232,7 +263,6 @@ import DxChart, {
   DxTooltip,
 } from 'devextreme-vue/chart';
 
-//import { dataSource } from './data.js';
 import Header from './Header.vue'
 import axios from "axios";
 import Swal from "sweetalert2/dist/sweetalert2.js";
@@ -309,9 +339,42 @@ export default {
       seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'], // Array of colors for each series
       meanError: null,
       meanAbsoluteError: null,
+      showCalendar: false,
+      currentDate: new Date(), // Current date
+      currentMonth: '', // Current month displayed in the header
+      currentMonthName: '', // Current month name displayed in the header
+      currentYear: '', // Current year displayed in the header
+      daysInMonth: [], // Array to hold days of the month
+      startDate: null, // Selected start date
+      selectingStart: true // Flag to indicate if currently selecting start date
     };
   },
+  
+  watch: {
+    currentDate() {
+      this.getDaysInMonth();
+      this.updateCurrentMonth();
+    },
+  },
+
   computed: {
+    
+    currentMonth() {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    let currentMonthIndex = this.currentDate.getMonth() + (this.currentMonthOffset-this.currentMonthOffset);
+
+    // Adjust the index to handle cases where it goes beyond the boundaries
+    if (currentMonthIndex < 0) {
+      currentMonthIndex += 12; // Wrap around to December
+    } else if (currentMonthIndex >= 12) {
+      currentMonthIndex -= 12; // Wrap around to January
+    }
+
+
+    
+    return months[currentMonthIndex];
+  },
+
     CNNchartTitle() {
       return `CNN Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
     },
@@ -331,13 +394,82 @@ export default {
       enabled: true,
       // Customize tooltip appearance or behavior if needed
     },
+    formattedStartDate() {
+      return this.startDate ? this.formatDate(this.startDate) : '';
+    },
   },
 
   mounted() {
     this.handleSelection();
+    this.getDaysInMonth();
+    this.updateCalendar();
   },
 
   methods: {
+    updateCalendarPopup() {
+      // Remove the color from the start day
+      const startDayElement = document.querySelector('.selected-start');
+      if (startDayElement) {
+        startDayElement.classList.remove('selected-start');
+      }
+    },
+      
+    
+    toggleCalendar() {
+      this.startDate = null;
+      this.selectingStart = true;
+      this.showCalendar = !this.showCalendar;
+    },
+    selectDay(day) {
+      // Handle day selection
+      if (this.selectingStart) {
+        this.startDate = day;
+        this.showCalendar = false;
+      }
+    },
+    previousMonth() {
+      // Logic for moving to the previous month
+      this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+      this.updateCalendarPopup();
+      this.updateCalendar();
+    },
+    nextMonth() {
+      // Logic for moving to the next month
+      this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+      this.updateCalendarPopup();
+      this.updateCalendar();
+    },
+    updateCalendar() {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      this.currentMonthName = monthNames[month];
+      this.currentMonth = month + 1;
+      this.currentYear = year;
+      this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    },
+    formatDate(date) {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      return new Date(year, month, date).toLocaleDateString('en-US');
+    },
+  
+
+
+  getDaysInMonth() {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  },
+  
+  selectDate(day) {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth() + 1; // Month is zero-based
+    this.selectedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    this.showDatePicker = false;
+  },
     // Method to calculate mean error and mean absolute error
     calculateErrorsAndDisplay(actualValues, predictedValues) {
       const { meanError, meanAbsoluteError } = calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues);
@@ -359,7 +491,7 @@ export default {
     },
 
     async updateCombinedData() {
-      // Map dataSource points with TransformerValue set to null
+      // Map dataSource points with all values set to null
       const combinedDataWithNull = this.dataSource.map(data => ({
         ...data,
         TransformerValue: null,
@@ -369,79 +501,29 @@ export default {
         gradientBoostValue: null,
       }));
 
-      // Merge transformerData points into combinedData
-      this.transformerData.keys().forEach(transformerDataPoint => {
-        const index = combinedDataWithNull.findIndex(data => data.date === transformerDataPoint.date);
-        if (index !== -1) {
-          // If date exists in combinedData, update TransformerValue
-          combinedDataWithNull[index].TransformerValue = transformerDataPoint.value;
-        } else {
-          // If date doesn't exist in combinedData, add a new point
-          combinedDataWithNull.push({
-            date: transformerDataPoint.date,
-            TransformerValue: transformerDataPoint.value,
+      // Function to merge data points into combinedData
+      const mergeDataPoints = (dataPoints, valueKey) => {
+        for (let value in dataPoints) {
+          dataPoints[value].forEach(Item => {
+            const index = combinedDataWithNull.findIndex(data => data.date === Item.date);
+            if (index !== -1) {
+              combinedDataWithNull[index][valueKey] = Item.value;
+            } else {
+              combinedDataWithNull.push({
+                date: Item.date,
+                [valueKey]: Item.value,
+              });
+            }
           });
         }
-      });
+      };
 
-      this.LSTMData.forEach(LSTMDataPoint => {
-        const index = combinedDataWithNull.findIndex(data => data.date === LSTMDataPoint.date);
-        if (index !== -1) {
-          // If date exists in combinedData, update TransformerValue
-          combinedDataWithNull[index].LSTMValue = LSTMDataPoint.value;
-        } else {
-          // If date doesn't exist in combinedData, add a new point
-          combinedDataWithNull.push({
-            date: LSTMDataPoint.date,
-            LSTMValue: LSTMDataPoint.value,
-          });
-        }
-      });
-
-
-      for (let value in this.CNNData) {
-        this.CNNData[value].forEach(Item => {
-          const index = combinedDataWithNull.findIndex(data => data.date === Item.date);
-          if (index !== -1) {
-            combinedDataWithNull[index].CNNValue = Item.value;
-          }
-          else {
-            combinedDataWithNull.push({
-              date: Item.date,
-              CNNValue: Item.value,
-            });
-          }
-        })
-      }
-
-
-      this.randomForestData.forEach(randomForestDataPoint => {
-        const index = combinedDataWithNull.findIndex(data => data.date === randomForestDataPoint.date);
-        if (index !== -1) {
-          // If date exists in combinedData, update TransformerValue
-          combinedDataWithNull[index].randomForestValue = randomForestDataPoint.value;
-        } else {
-          // If date doesn't exist in combinedData, add a new point
-          combinedDataWithNull.push({
-            date: randomForestDataPoint.date,
-            randomForestValue: randomForestDataPoint.value,
-          });
-        }
-      });
-
-      this.gradientBoostData.forEach(gradientBoostDataPoint => {
-        const index = combinedDataWithNull.findIndex(data => data.date === gradientBoostDataPoint.date);
-        if (index !== -1) {
-          // If date exists in combinedData, update TransformerValue
-          combinedDataWithNull[index].gradientBoostValue = gradientBoostDataPoint.value;
-        } else {
-          // If date doesn't exist in combinedData, add a new point
-          combinedDataWithNull.push({
-            date: gradientBoostDataPoint.date,
-            gradientBoostValue: gradientBoostDataPoint.value,
-          });
-        }
-      });
+      // Merge all data points into combinedData
+      mergeDataPoints(this.LSTMData, 'LSTMValue');
+      mergeDataPoints(this.CNNData, 'CNNValue');
+      mergeDataPoints(this.transformerData, 'TransformerValue');
+      mergeDataPoints(this.randomForestData, 'randomForestValue');
+      mergeDataPoints(this.gradientBoostData, 'gradientBoostValue');
 
       // Set the result to combinedData
       this.combinedData = combinedDataWithNull;
@@ -472,7 +554,6 @@ export default {
           params: {
             stock_symbol: this.selectedStock,
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
@@ -505,12 +586,11 @@ export default {
           params: {
             stock_symbol: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
 
-        console.log("Prediction loaded");
+        console.log("Prediction cnn loaded");
         console.log(response.data);
 
         // Assuming the response.data is an object with date and close properties
@@ -536,10 +616,12 @@ export default {
           params: {
             stock_symbol: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
+
+        console.log("Prediction lstm loaded");
+        console.log(response.data);
 
         // Assuming the response.data is an object with date and close properties
         this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
@@ -564,18 +646,17 @@ export default {
           params: {
             stock_symbols: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
 
-        console.log("Prediction loaded");
+        console.log("Prediction transformer loaded");
         console.log(response.data);
 
         // Assuming the response.data is an object with date and close properties
         this.transformerData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
-        console.log("mapped");
+        console.log("mapped transformerData:");
         console.log(this.transformerData);
 
         return response.data;
@@ -598,13 +679,18 @@ export default {
           params: {
             stock_symbol: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
 
+        console.log("Prediction randomforst loaded");
+        console.log(response.data);
+
         // Assuming the response.data is an object with date and close properties
         this.randomForestData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        console.log("mapped randomForestData:");
+        console.log(this.randomForestData);
 
         return response.data;
       } catch (error) {
@@ -626,13 +712,18 @@ export default {
           params: {
             stock_symbol: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
             resolution: this.selectedtime, // Replace with the resolution:
           }
         });
 
+        console.log("Prediction gradientBoost loaded");
+        console.log(response.data);
+
         // Assuming the response.data is an object with date and close properties
         this.gradientBoostData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        console.log("mapped gradientBoostData:");
+        console.log(this.gradientBoostData);
 
         return response.data;
       } catch (error) {
@@ -654,11 +745,10 @@ export default {
           params: {
             stock_symbols: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
-            end_date: "2021-02-06", // Replace with the end date of the prediction
-            resolution: this.selectedtime, 
+            resolution: this.selectedtime,
           }
         });
-        console.log("normal loaded")
+        console.log("### normal loaded ###")
         console.log([response.data])
         return response.data
       } catch (error) {
@@ -691,16 +781,18 @@ export default {
         this.dataSource = await this.load_data();
         if (this.showCNNLine == true) {
           this.CNNData = await this.load_CNN_data();
-        } else if (this.showTransformerLine) {
+        }
+        if (this.showTransformerLine) {
           this.transformerData = await this.load_transformer_data();
-        } else if (this.showLSTMLine) {
-          this.LSTMData = await this.load_LSTM_data();
-        } else if (this.showrandomForestLine) {
+        }
+        if (this.showLSTMLine) {
+          //this.LSTMData = await this.load_LSTM_data();
+        }
+        if (this.showrandomForestLine) {
           this.randomForestData = await this.load_randomForest_data();
-        } else if (this.showgradientBoostLine) {
+        }
+        if (this.showgradientBoostLine) {
           this.gradientBoostData = await this.load_gradientBoost_data();
-        } else {
-          console.log("No model selected");
         }
 
         console.log("datasource: " + this.dataSource)
@@ -742,6 +834,142 @@ export default {
 </script>
 
 <style>
+.short-input {
+  width: 100px; /* Adjust width as needed */
+}
+
+.calendar-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+}
+
+.calendar {
+  font-family: Arial, sans-serif;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendar-day {
+  padding: 10px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.selected-start {
+  background-color: #90EE90; /* Light green */
+}
+
+.selected-range {
+  background-color: #ADD8E6; /* Light blue */
+}
+
+.calendar-day:hover {
+  background-color: #f0f0f0;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+}
+
+.popup-content {
+  position: relative;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  max-width: 400px; /* Adjust max-width as needed */
+  max-height: 300px; /* Adjust max-height as needed */
+  overflow-y: auto; /* Add scrollbar when content exceeds max-height */
+}
+
+.date-picker-popup {
+  width: 100%; /* Make date picker content full width */
+}
+
+.time-picker-popup {
+  width: 100%; /* Make time picker content full width */
+}
+
+.popup h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.popup button {
+  margin-top: 10px;
+}
+
+
+.date-time-picker {
+  display: flex;
+}
+
+.popup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  border-radius: 5px;
+}
+
+.time-wheel {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.hour,
+.minute {
+  flex: 1 0 20%;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.hour:first-child,
+.minute:first-child {
+  border-top-left-radius: 5px;
+}
+
+.hour:last-child,
+.minute:last-child {
+  border-top-right-radius: 5px;
+}
+
+.hour:nth-last-child(1),
+.minute:nth-last-child(1) {
+  border-bottom-left-radius: 5px;
+}
+
+.hour:nth-last-child(2),
+.minute:nth-last-child(2) {
+  border-bottom-right-radius: 5px;
+}
+
 #chart {
   height: 30%;
 }
@@ -775,19 +1003,23 @@ export default {
   height: 10%;
   background-color: white;
   padding: 1%;
-  border: 2px solid #ccc; /* Adjust border thickness and color as needed */
+  border: 2px solid #ccc;
+  /* Adjust border thickness and color as needed */
 }
 
-.selection{
+.selection {
   margin-right: 5px;
   margin-left: 5px;
 }
 
 .separator {
   height: 100px;
-  width: 2px; /* Adjust the width of the separator */
-  background-color: #817f7f; /* Adjust the color of the separator */
-  margin: 0 10px; /* Adjust the margin around the separator */
+  width: 2px;
+  /* Adjust the width of the separator */
+  background-color: #817f7f;
+  /* Adjust the color of the separator */
+  margin: 0 10px;
+  /* Adjust the margin around the separator */
 }
 
 select {
@@ -818,7 +1050,8 @@ input {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 30px; /* Adjust the font size as needed */
+  font-size: 30px;
+  /* Adjust the font size as needed */
   margin-top: 15px;
 }
 
@@ -849,7 +1082,7 @@ input::placeholder {
   margin-left: 5px;
 }
 
-.checkboxes4{
+.checkboxes4 {
   margin-right: 5px;
   margin-left: 5px;
 }

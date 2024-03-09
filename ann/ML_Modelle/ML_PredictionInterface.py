@@ -1,14 +1,28 @@
 import pandas as pd
-
-from ML_Modelle.ML_PredictionInterface_daily import ABC_LinearRegressionModel_daily, ABC_RandomForestModel_daily, ABC_GradientBoostingModel_daily, ABC_SVMModel_daily
-from ML_Modelle.ML_PredictionInterface_hour import ABC_LinearRegressionModel_hour, ABC_RandomForestModel_hour, ABC_GradientBoostingModel_hour, ABC_SVMModel_hour
-from ML_Modelle.ML_PredictionInterface_min import ABC_LinearRegressionModel_min, ABC_RandomForestModel_min, ABC_GradientBoostingModel_min, ABC_SVMModel_min
-
 from ML_Modelle.abstract_model import AbstractModel, resolution
+from ML_Modelle.ML_PredictionInterface_daily import (
+    ABC_GradientBoostingModel_daily,
+    ABC_LinearRegressionModel_daily,
+    ABC_RandomForestModel_daily,
+    ABC_SVMModel_daily,
+)
+from ML_Modelle.ML_PredictionInterface_hour import (
+    ABC_GradientBoostingModel_hour,
+    ABC_LinearRegressionModel_hour,
+    ABC_RandomForestModel_hour,
+    ABC_SVMModel_hour,
+)
+from ML_Modelle.ML_PredictionInterface_min import (
+    ABC_GradientBoostingModel_min,
+    ABC_LinearRegressionModel_min,
+    ABC_RandomForestModel_min,
+    ABC_SVMModel_min,
+)
+
 
 class ML_PredictionInterface_RandomForest(AbstractModel):
 
-    def predict(self, symbol_list : list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, resolution : resolution) -> pd.DataFrame:
+    def predict(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, resolution: resolution) -> pd.DataFrame:
         """predicts the stock prices for the given symbols and time range.
 
         Args:
@@ -33,14 +47,15 @@ class ML_PredictionInterface_RandomForest(AbstractModel):
         else:
             raise NotImplementedError()
         for stock_symbol in symbol_list:
-            results.append(chosen_interface().predict(stock_symbol, timestamp_start, timestamp_end, interval))
-        
+            results.append(chosen_interface().predict(
+                stock_symbol, timestamp_start, timestamp_end, interval))
+
         result_df = pd.DataFrame()
-        
+
         for result in results:
             result_df = pd.concat([result_df, result], axis=1)
-        
-        return result_df
+
+        return result_df.round(2)
 
     def load_data(self) -> None:
         """load data from database and stores it in a class variable
@@ -59,10 +74,11 @@ class ML_PredictionInterface_RandomForest(AbstractModel):
 
         """
         pass
-    
+
+
 class ML_PredictionInterface_GradientBoostingModel(AbstractModel):
 
-    def predict(self, symbol_list : list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, resolution : resolution) -> pd.DataFrame:
+    def predict(self, symbol_list: list, timestamp_start: pd.Timestamp, timestamp_end: pd.Timestamp, resolution: resolution) -> pd.DataFrame:
         """predicts the stock prices for the given symbols and time range.
 
         Args:
@@ -87,14 +103,15 @@ class ML_PredictionInterface_GradientBoostingModel(AbstractModel):
         else:
             raise NotImplementedError()
         for stock_symbol in symbol_list:
-            results.append(chosen_interface().predict(stock_symbol, timestamp_start, timestamp_end, interval))
-        
+            results.append(chosen_interface().predict(
+                stock_symbol, timestamp_start, timestamp_end, interval))
+
         result_df = pd.DataFrame()
-        
+
         for result in results:
             result_df = pd.concat([result_df, result], axis=1)
-        
-        return result_df
+
+        return result_df.round(2)
 
     def load_data(self) -> None:
         """load data from database and stores it in a class variable
