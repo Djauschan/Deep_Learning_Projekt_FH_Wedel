@@ -117,8 +117,8 @@ class TransformerInterface(AbstractModel):
             config_path = configs_path / "config_tt_hourly.yaml"
         elif resolution == resolution.DAILY:
             self.model_path = models_path / "TransformerModel_v4.pt"
-            self.data_path = data_path / "960_min_input_data.csv"
-            self.prices_path = data_path / "tt_prices_for_960_min.pkl"
+            self.data_path = data_path / "1440_min_input_data.csv"
+            self.prices_path = data_path / "tt_prices_for_1440_min.pkl"
             config_path = configs_path / "config_tt_daily.yaml"
         else:
             raise ValueError("Invalid resolution")
