@@ -397,7 +397,7 @@ def predict_rl(stock_symbols: str, start_date: str, end_date: str, resolution: s
     Returns:
         list[dict[str, dict[object, dict[str, str]]]]: A list containing the predictions for every every stock symbol, every model for every 2hours in the given time frame.
     """
-    data_to_send = {"stock_symbol": stock_symbols,
+    data_to_send = {"stock_symbols": stock_symbols,
                     "start_date": start_date,
                     "end_date": end_date,
                     "resolution": resolution}

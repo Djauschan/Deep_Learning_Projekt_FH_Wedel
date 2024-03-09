@@ -1,7 +1,7 @@
 from prediction_interface.rl_interface import RLInterface
+from prediction_interface.abstract_model import resolution as resolution_type
 
 from fastapi import FastAPI
-import pandas as pd
 
 interface = RLInterface()
 app = FastAPI()
@@ -16,7 +16,10 @@ async def root() -> dict[str, str]:
     return {"message": "Prediction API for the RL group :)))"}
 
 @app.get("/predict/")
-def predict_rl(stock_symbols: str = '[aapl, snap]', start_date: str = '2021-01-04', end_date: str = '2021-01-05') -> list[dict[str, dict[object, dict[str, str]]]]:
+def predict_rl(stock_symbols: str = '[aapl, snap]',
+               start_date: str = '2021-01-04',
+               end_date: str = '2021-01-05',
+               resolution: resolution_type = resolution_type.TWO_HOURLY) -> list[dict[str, dict[object, dict[str, str]]]]:
     """Predicts trading actions for a given stock symbol and time frame with every avialible model.
 
     Args:
@@ -31,6 +34,5 @@ def predict_rl(stock_symbols: str = '[aapl, snap]', start_date: str = '2021-01-0
     stock_symbols = stock_symbols[1:-1].split(", ")
     return_dict = {}
     for stock_symbol in stock_symbols:
-        return_dict[stock_symbol] = interface.predict(stock_symbol, start_date, end_date)
-        print(interface.predict(stock_symbol, start_date, end_date))
+        return_dict[stock_symbol] = interface.predict(stock_symbol, start_date, end_date, resolution)
     return [return_dict]

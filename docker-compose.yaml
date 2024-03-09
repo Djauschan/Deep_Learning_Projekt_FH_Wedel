@@ -115,12 +115,12 @@ services:
   predict_rl:
     # Specify the build context for this service (current directory)
     build:
-      context: ./src_rl
+      context: ./rl
       dockerfile: Dockerfile
 
     # Bind mount the current directory to /app in the container
     volumes:
-      - ./src_rl:/app
+      - ./rl:/app
       - ./data:/data
 
     # Map port 8004 on the host to port 8000 in the container

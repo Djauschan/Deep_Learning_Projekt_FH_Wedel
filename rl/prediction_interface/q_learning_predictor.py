@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import requests
 
 class QLearningPredictor():
     """QLearningPredictor class for the prediction API. This class is used to predict trading actions.
@@ -13,25 +14,37 @@ class QLearningPredictor():
         if 'ma' in model_path.lower():
             self.model = MAPredictor(model_path)
         elif 'rsi' in model_path.lower():
-            self.model = RSIPredictor(model_path)
+            self.model = RSIPredictor()
         elif 'aggregation' in model_path.lower():
-            self.model = ensemblePredictor(model_path)
+            self.model = EnsemblePredictor(model_path)
+        else:
+            self.model = MLModelPredictor(model_path)
         try:
             self.name = self.model.name
         except AttributeError:
             self.name = 'unsupported'
     
-    def predict(self, data : pd.DataFrame) -> int:
+    def predict(self, data : object) -> int:
         """Predicts trading actions for the given data.
 
         Args:
-            data (pd.DataFrame): The data to predict trading actions for.
+            data (object): The data to predict trading actions for. Can be a pd.DataFrame, list[int] or an dict depending on the underlying model.
 
         Returns:
             int: The predicted trading action.
         """
         return self.model.predict(data)
-            
+    
+    def get_api_url(self) -> str:
+        """Returns the API URL for the underlying model.
+
+        Returns:
+            str: The API URL for the underlying model.
+        """
+        try:
+            return self.model.get_api_url()
+        except AttributeError:
+            return "unsupported"
 
 class MAPredictor():
     """MAPredictor class for the prediction API. This class is used to predict trading actions based on the moving average.
@@ -94,11 +107,8 @@ class MAPredictor():
 class RSIPredictor():
     """RSIPredictor class for the prediction API. This class is used to predict trading actions based on the RSI.
     """
-    def __init__(self, model_path : str) -> None:
+    def __init__(self) -> None:
         """Initializes the RSIPredictor by loading the model from the given path.
-
-        Args:
-            model_path (str): The path to the model to load.
         """
         self.name = 'RSI_decision'
         self.low_threshold = 30
@@ -150,7 +160,7 @@ class RSIPredictor():
         else:
             return 0  # Halten
 
-class ensemblePredictor():
+class EnsemblePredictor():
     """ensemblePredictor class for the prediction API. This class is used to predict trading actions based on the ensemble of all models.
     """
     def __init__(self, model_path : str) -> None:
@@ -174,11 +184,50 @@ class ensemblePredictor():
         weighted_actions = np.zeros(3)  # Angenommen, es gibt 3 mögliche Aktionen (kaufen, nichts tun, und verkaufen)
     
         for i, action in enumerate(actions):
-            weighted_actions += self.q_table[i, action]
-
+            weighted_actions[action] += self.q_table[i, action]
         # Wenn alle gewichteten Aktionen gleich sind, wähle zufällig
         if np.all(weighted_actions == weighted_actions[0]):
             return np.random.choice(len(weighted_actions))
         else:
             return np.argmax(weighted_actions)
+
+class MLModelPredictor():
+    """MLModelPredictor class for the prediction API. This class is used to predict trading actions based on ML Model predictions.
+    """
+    def __init__(self, model_path : str) -> None:
+        """Initializes the MLModelPredictor by loading the model from the given path.
+
+        Args:
+            model_path (str): The path to the model to load.
+        """
+        # Check if the model is supported
+        print(model_path)
+        if 'rf_agent' in model_path.lower():
+            self.model = np.load(model_path)
+            self.name = "Q_learning_RandomForest-ML"
+            self.api_url = "http://backend:8000/predict/randomForest"
+        elif 'gbm_agent' in model_path.lower():
+            self.model = np.load(model_path)
+            self.name = "Q_learning_GradientBoostingTree-ML"
+            self.api_url = "http://backend:8000/predict/gradientBoost"
+        elif 'trans_agent' in model_path.lower():
+            self.model = np.load(model_path)
+            self.name = "Q_learning_Transformer-ML"
+            self.api_url = "http://backend:8000/predict/transformer"
+        else:
+            self.model = None
+            self.name = "unsupported"
         
+    def predict(self, data : list[int]) -> int:
+        last_price = data[0]
+        prediction = data[1]
+        if prediction == None:
+            return 0  # Hold because no prediction is available
+        if prediction > last_price:
+            return 1  # buy if the prediction for t+1 is higher than the price at t
+        elif prediction < last_price:
+            return 2  # sell if the prediction for t+1 is lower than the price at t
+        return 0 
+    
+    def get_api_url(self) -> str:
+        return self.api_url
