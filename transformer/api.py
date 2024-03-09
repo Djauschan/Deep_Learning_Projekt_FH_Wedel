@@ -36,18 +36,14 @@ def predict_transformer(stock_symbols: str = "[AAPL, AAL, AMD]",
     """
     # convert stock_symbols to list "[AAPL, AAL, AMD]" -> ["AAPL", "AAL", "AMD"]
     symbols_list = stock_symbols[1:-1].split(", ")
-    transformer_interface = TransformerInterface(resolution)
 
-    # TODO: Remove resolution from the function signature and use the resolution_enum.TWO_HOURLY directly
-    # prediction = transformer_interface.predict(symbols_list, pd.to_datetime(
-    #     start_date), pd.to_datetime(end_date), resolution.TWO_HOURLY)
+    transformer_interface = TransformerInterface(resolution)
     prediction = transformer_interface.predict(
         symbols_list, pd.to_datetime(start_date))
 
     data = {}
     for symbol in symbols_list:
-        symbol_prediction = prediction[f"close {symbol}"]
         data[symbol] = [{"date": date, "value": value}
-                        for date, value in symbol_prediction.items()]
+                        for date, value in prediction[symbol].items()]
 
     return data

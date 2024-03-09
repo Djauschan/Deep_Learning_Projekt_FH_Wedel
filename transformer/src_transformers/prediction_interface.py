@@ -71,10 +71,10 @@ class PredictionDataset(Dataset):
         Returns:
             torch.Tensor: The sample.
         """
-        timestamps = np.array(self.data.index)
-        timestamps = pd.DatetimeIndex(timestamps * 1e9)
-        print(timestamps)
-
+        # TODO: Remove later
+        # timestamps = np.array(self.data.index)
+        # timestamps = pd.DatetimeIndex(timestamps * 1e9)
+        # print(timestamps)
         return torch.tensor(self.data.to_numpy(), dtype=torch.float32)
 
 
@@ -100,37 +100,41 @@ class TransformerInterface(AbstractModel):
         This method sets the interval between predictions, the number of intervals,
         and the paths to the model file, the data file, and the prices file.
         """
+        # Set paths to the directories for readability in the following if-else statements
+        data_path = Path("data", "output")
+        models_path = Path("data", "output", "models")
+        configs_path = Path("data", "test_configs")
+
+        # Set the correct model, data and config paths based on the requested resolution
+        # The division sign is used to join paths in pathlib
         if resolution == resolution.MINUTE:
             # Not implemented for minute resolution
             raise NotImplementedError()
         elif resolution == resolution.TWO_HOURLY:
-            self.model_path = Path("data", "output", "models",
-                                   "TransformerModel_v2.pt")
-            self.data_path = Path("data", "output", "120_min_input_data.csv")
-            self.prices_path = Path(
-                "data", "output", "tt_prices_for_120_min.pkl")
-            config_path = Path(
-                "data", "test_configs", "training_config_tt_train.yaml")
+            self.model_path = models_path / "TransformerModel_v2.pt"
+            self.data_path = data_path / "120_min_input_data.csv"
+            self.prices_path = data_path / "tt_prices_for_120_min.pkl"
+            config_path = configs_path / "config_tt_hourly.yaml"
         elif resolution == resolution.DAILY:
-            self.model_path = Path("data", "output", "models",
-                                   "TransformerModel_v4.pt")
-            self.data_path = Path("data", "output", "960_min_input_data.csv")
-            self.prices_path = Path(
-                "data", "output", "tt_prices_for_960_min.pkl")
-            config_path = Path(
-                "data", "test_configs", "training_config_tt_train.yaml")
+            self.model_path = models_path / "TransformerModel_v4.pt"
+            self.data_path = data_path / "960_min_input_data.csv"
+            self.prices_path = data_path / "tt_prices_for_960_min.pkl"
+            config_path = configs_path / "config_tt_daily.yaml"
         else:
-            # Invalid resolution
             raise ValueError("Invalid resolution")
 
-        # Get config
+        # Load configuration file of the chosen model
         with open(config_path, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
 
+        # Get the encoder and decoder length from the model parameters
+        # They are needed for the prediction dataset and the timestamp generation
         model_parameters = config.pop('model_parameters').popitem()[1]
         self.encoder_length = model_parameters['seq_len_encoder']
         self.decoder_length = model_parameters['seq_len_decoder']
 
+        # Get the time resolution and the start and end day from the dataset parameters
+        # They are also needed for the timestamp generation
         dataset_parameters = config.pop('dataset_parameters')
         self.time_resolution = dataset_parameters['time_resolution']
         self.start_day = dataset_parameters["data_selection_config"]["start_day_time"]
@@ -143,7 +147,6 @@ class TransformerInterface(AbstractModel):
             symbol_list (list): The list of symbols for which the stock prices should be predicted.
             timestamp_start (pd.Timestamp): The start of the time range for which the stock prices should be predicted.
             timestamp_end (pd.Timestamp): The end of the time range for which the stock prices should be predicted.
-            resolution (resolution): The resolution of the stock data.
 
         Returns:
             pd.DataFrame: The predicted stock prices.
@@ -163,8 +166,7 @@ class TransformerInterface(AbstractModel):
         # Squeeze the batch dimension and convert the output to a 2 dimensional numpy array
         output = torch.squeeze(output, 0).cpu().numpy()
         # Create a DataFrame with the predictions (and mapping to the correct column names)
-        columns = ["close AAPL", "close AAL", "close AMD", "close C", "close NVDA", "close SNAP", "close SQ",
-                   "close TSLA"]
+        columns = ["AAPL", "AAL", "AMD", "C", "NVDA", "SNAP", "SQ", "TSLA"]
         prediction = pd.DataFrame(output, columns=columns)
 
         # Generate the timestamps for the predictions
@@ -172,16 +174,13 @@ class TransformerInterface(AbstractModel):
                                               self.time_resolution,
                                               self.decoder_length)
 
+        # Set the timestamps as the index of the DataFrame
+        # This is the simplest approach
         prediction.index = pd.Index(timestamps)
 
-        # # Get config
-        # with open(self.config_path, "r", encoding="utf-8") as f:
-        #     config = yaml.safe_load(f)
-
-        # start_day = config['dataset_parameters']['data_selection_config']['start_day_time']
-        # start_day = dt.datetime.strptime(start_day, '%H:%M').time().hour
-        # end_day = config['dataset_parameters']['data_selection_config']['end_day_time']
-        # end_day = dt.datetime.strptime(end_day, '%H:%M').time().hour
+        # TODO: Mit Phillip und/oder Niklas klären, wie wir Timestamps machen wollen
+        # start_day = dt.datetime.strptime(self.start_day, '%H:%M').time().hour
+        # end_day = dt.datetime.strptime(self.end_day, '%H:%M').time().hour
 
         # # TODO: Timestamps aus Dataloader holen?
         # empty_df = pd.DataFrame([], index=pd.Index(
@@ -201,17 +200,15 @@ class TransformerInterface(AbstractModel):
 
         # Convert the relative prices to absolute prices
         for symbol, price in prices_before_prediction.items():
-            if f"close {symbol}" in columns:
-                relative_prices = list(prediction[f"close {symbol}"])
+            if symbol in columns:
+                relative_prices = list(prediction[f"{symbol}"])
                 absolute_prices = self.calculate_absolute_prices(prices=relative_prices,
                                                                  start_price=price)
-                prediction[f"close {symbol}"] = np.round(
+                prediction[f"{symbol}"] = np.round(
                     absolute_prices, decimals=2)
 
-        # Only select the stock symbols [close {symbol}] that are in the symbol list [symbol, symbol]
-        prediction = prediction[[f"close {symbol}" for symbol in symbol_list]]
-
-        return prediction
+        # Only return the predictions for the requested stock symbols
+        return prediction[symbol_list]
 
     def load_data(self, timestamp_start: pd.Timestamp) -> tuple[dict[str, float], PredictionDataset]:
         """
