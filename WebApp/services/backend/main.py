@@ -305,7 +305,7 @@ def predict_rl(stock_symbols: str = "[AAPL, NVDA]",
         dict[Timestamp, dict[str, str]]: A list containing the predictions for every model for every hour in the given time frame.
     """
     if resolution == "M":
-        start_date += " 10:00:00"
+        start_date += " 10:01:00"
     data_to_send = {"stock_symbol": stock_symbols,
                     "start_date": start_date,
                     "end_date": calculate_end_date(start_date, resolution),
