@@ -35,7 +35,6 @@ app.add_middleware(
 # DB Dependency
 def get_db():
     db = SessionLocal()
-
     try:
         yield db
     finally:
@@ -74,7 +73,6 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
             status_code=400, detail="Username already registered")
     return crud.create_user(db=db, user=user)
 
-
 @app.get("/get_user/{username}")
 async def get_user(username: str, db: Session = Depends(get_db)):
     return crud.get_user_by_username(db, username)
@@ -87,7 +85,6 @@ async def get_budget(username: str, db: Session = Depends(get_db)):
 async def get_user(email: str, db: Session = Depends(get_db)):
     return crud.get_user_by_email(db, email)
 
-
 @app.put("/update_user/{username}")
 async def update_user(username: str, user_update: schemas.UserUpdate, db: Session = Depends(get_db)):
     updated_user = crud.update_user_by_username(db, username, user_update)
@@ -98,12 +95,10 @@ async def update_budget_by_user(username: str, budgetInput: int, db: Session = D
     updated_budget = crud.update_budget_by_user(db=db, username=username, new_budget=budgetInput)
     return {"message": "Budget updated successfully"}
 
-
 @app.get("/getUsers/", response_model=list[schemas.User])
 def read_users(query: str = '', limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, query=query, limit=limit)
     return users
-
 
 @app.get("/users/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(get_db)):
@@ -111,7 +106,6 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
-
 
 @app.post("/login/")
 def user_login(login_request: schemas.LoginRequest, db: Session = Depends(get_db)):
@@ -137,18 +131,15 @@ def user_login(login_request: schemas.LoginRequest, db: Session = Depends(get_db
         "is_active": user.is_active
     }
 
-
 @app.get("/getLogins/", response_model=list[schemas.Login])
 def get_logins(query: str = '', limit: int = 100, db: Session = Depends(get_db)):
     logins = crud.get_logins(db, query=query, limit=limit)
     return logins
 
-
 @app.get("/getLoginByUser_ID/", response_model=list[schemas.Login])
 def get_logins(user_id: int, db: Session = Depends(get_db)):
     logins = crud.get_logins_by_user_id(db, owner_id=user_id)
     return logins
-
 
 @app.get("/login/validation")
 def check_login(email: str, password: str, db: Session = Depends(get_db)):
@@ -156,7 +147,6 @@ def check_login(email: str, password: str, db: Session = Depends(get_db)):
 
     if user:
         raise HTTPException(status_code=400, detail="Email does not exist")
-
 
 @app.get("/predict/transformer")
 def predict_transformer(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
@@ -175,13 +165,13 @@ def predict_transformer(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '
 
     return response.json()
 
-
 @app.get("/predict/cnn")
 def predict_cnn(stock_symbol: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-05', resolution: str = 'H'):
     data_to_send = {"stock_symbol": stock_symbol,
                     "start_date": start_date,
                     "end_date": end_date,
                     "resolution": resolution}
+    
     api_url = "http://predict_cnn:8000/predict"
     response = requests.get(api_url, params=data_to_send)
 
@@ -193,12 +183,140 @@ def predict_cnn(stock_symbol: str = "[AAPL, NVDA]", start_date: str = '2021-01-0
 
     return response.json()
 
-
 # @app.get("/predict/lstm")
 # def predict_lstm(stock_symbol: str):
 #     lstm = LstmInterface()
 #     return lstm.predict('2021-01-04', '2021-01-06', 120)
 
+@app.get("/predict/randomForest")
+def predict_randomForest(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
+    if(resolution != "D"):
+        start_date += " 10:00:00"
+        end_date += " 14:00:00"
+
+    data_to_send = {"stock_symbols": stock_symbols,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "resolution": resolution}
+    
+    print(data_to_send)
+
+    api_url = "http://predict_ann:8000/predict/randomForest"
+    response = requests.get(api_url, params=data_to_send)
+
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
+
+    return response.json()
+
+@app.get("/predict/gradientBoost")
+def predict_gradientBoost(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
+    if(resolution != "D"):
+        start_date += " 10:00:00"
+        end_date += " 14:00:00"
+
+    data_to_send = {"stock_symbols": stock_symbols,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "resolution": resolution}
+    
+    print(data_to_send)
+
+    api_url = "http://predict_ann:8000/predict/gradientBoost"
+    response = requests.get(api_url, params=data_to_send)
+
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
+
+    return response.json()
+
+@app.get("/predict/rl")
+def predict_rl(stock_symbols: str, start_date: str, end_date: str, resolution: str):
+    """Predicts trading actions for a given stock symbol and time frame with every avialible model.
+
+    Args:
+        stock_symbols (str): The stock symbols to predict trading actions for.
+        start_date (str): The start date of the time frame to predict trading actions for.
+        end_date (str): The end date of the time frame to predict trading actions for.
+
+    Returns:
+        list[dict[Timestamp, dict[str, str]]]: A list containing the predictions for every model for every hour in the given time frame.
+    """
+    # data_to_send = {"stock_symbol": stock_symbol,
+    #                 "start_date": "2021-01-04",
+    #                 "end_date": "2021-01-05"}
+    # api_url = "http://predict_rl:8000/predict"
+    # response = requests.get(api_url, params=data_to_send)
+    # if response.status_code != 200:
+    #     return {
+    #         "status_code": response.status_code,
+    #         "response_text": response.text
+    #     }
+    # return response.json()
+    from random import choice
+    posible_actions = ['buy', 'sell', 'hold']
+    model_names = ["q_learning_ma5", "q_learning_ma30", "q_learning_ma200",
+                   "q_learning_transformer", "q_learning_cnn", "q_learning_arima"]
+
+    ensemble = choice(["election", "ensemble"]) == 'ensemble'
+    random_return = {}
+    stock_symbols = stock_symbols[1:-1].split(", ")
+    for stock_symbol in stock_symbols:
+        random_return[stock_symbol] = {}
+        for current_date in pd.date_range(start_date, end_date, freq='2h'):
+            random_return[stock_symbol][current_date] = {model: choice(
+                posible_actions) for model in model_names}
+            if ensemble:
+                random_return[stock_symbol][current_date]['ensemble'] = choice(
+                    list(random_return[stock_symbol][current_date].values()))
+            else:
+                lst = list(random_return[stock_symbol][current_date].values())
+                random_return[stock_symbol][current_date]['election'] = max(
+                    set(lst), key=lst.count)
+
+    return random_return
+
+@app.get("/load/data")
+def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
+    allColumns = ["DateTime", "Open", "Close", "High", "Low", "a"]
+    relevantColumns = ["DateTime", "Open", "Close", "High", "Low"]
+
+    print(f"{stock_symbols}, {resolution=}, {start_date=}, {end_date=}")
+
+    data = crud.loadDataFromFile(stock_symbols=stock_symbols,
+                                 start_date=pd.Timestamp(start_date),
+                                 end_date=pd.Timestamp(end_date),
+                                 interval=resolution,
+                                 ALL_DATA_COLUMNS=allColumns,
+                                 COLUMNS_TO_KEEP=relevantColumns)
+
+    return data
+
+
+
+""" Outdated code from the original main.py"""
+
+# @app.get("/predict/svm")
+# def predict_svm(stock_symbol: str, start_date: str, end_date: str):
+#     data_to_send = {"stock_symbol": stock_symbol,
+#                     "start_date": start_date,
+#                     "end_date": end_date}
+#     api_url = "http://predict_ann:8000/predict/svm"
+#     response = requests.get(api_url, params=data_to_send)
+
+#     if response.status_code != 200:
+#         return {
+#             "status_code": response.status_code,
+#             "response_text": response.text
+#         }
+
+#     return response.json()
 
 # @app.get("/predict/arima")
 # def predict_arima(stock_symbol: str, start_date: str, end_date: str):
@@ -317,132 +435,3 @@ def predict_cnn(stock_symbol: str = "[AAPL, NVDA]", start_date: str = '2021-01-0
 #         }
 
 #     return response.json()
-
-
-@app.get("/predict/randomForest")
-def predict_randomForest(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
-    if(resolution != "D"):
-        start_date += " 10:00:00"
-        end_date += " 14:00:00"
-
-    data_to_send = {"stock_symbols": stock_symbols,
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "resolution": resolution}
-    
-    print(data_to_send)
-
-    api_url = "http://predict_ann:8000/predict/randomForest"
-    response = requests.get(api_url, params=data_to_send)
-
-    if response.status_code != 200:
-        return {
-            "status_code": response.status_code,
-            "response_text": response.text
-        }
-
-    return response.json()
-
-
-@app.get("/predict/gradientBoost")
-def predict_gradientBoost(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
-    if(resolution != "D"):
-        start_date += " 10:00:00"
-        end_date += " 14:00:00"
-
-    data_to_send = {"stock_symbols": stock_symbols,
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "resolution": resolution}
-    
-    print(data_to_send)
-
-    api_url = "http://predict_ann:8000/predict/gradientBoost"
-    response = requests.get(api_url, params=data_to_send)
-
-    if response.status_code != 200:
-        return {
-            "status_code": response.status_code,
-            "response_text": response.text
-        }
-
-    return response.json()
-
-
-# @app.get("/predict/svm")
-# def predict_svm(stock_symbol: str, start_date: str, end_date: str):
-#     data_to_send = {"stock_symbol": stock_symbol,
-#                     "start_date": start_date,
-#                     "end_date": end_date}
-#     api_url = "http://predict_ann:8000/predict/svm"
-#     response = requests.get(api_url, params=data_to_send)
-
-#     if response.status_code != 200:
-#         return {
-#             "status_code": response.status_code,
-#             "response_text": response.text
-#         }
-
-#     return response.json()
-
-@app.get("/predict/rl")
-def predict_rl(stock_symbols: str, start_date: str, end_date: str, resolution: str):
-    """Predicts trading actions for a given stock symbol and time frame with every avialible model.
-
-    Args:
-        stock_symbols (str): The stock symbols to predict trading actions for.
-        start_date (str): The start date of the time frame to predict trading actions for.
-        end_date (str): The end date of the time frame to predict trading actions for.
-
-    Returns:
-        list[dict[Timestamp, dict[str, str]]]: A list containing the predictions for every model for every hour in the given time frame.
-    """
-    # data_to_send = {"stock_symbol": stock_symbol,
-    #                 "start_date": "2021-01-04",
-    #                 "end_date": "2021-01-05"}
-    # api_url = "http://predict_rl:8000/predict"
-    # response = requests.get(api_url, params=data_to_send)
-    # if response.status_code != 200:
-    #     return {
-    #         "status_code": response.status_code,
-    #         "response_text": response.text
-    #     }
-    # return response.json()
-    from random import choice
-    posible_actions = ['buy', 'sell', 'hold']
-    model_names = ["q_learning_ma5", "q_learning_ma30", "q_learning_ma200",
-                   "q_learning_transformer", "q_learning_cnn", "q_learning_arima"]
-
-    ensemble = choice(["election", "ensemble"]) == 'ensemble'
-    random_return = {}
-    stock_symbols = stock_symbols[1:-1].split(", ")
-    for stock_symbol in stock_symbols:
-        random_return[stock_symbol] = {}
-        for current_date in pd.date_range(start_date, end_date, freq='2h'):
-            random_return[stock_symbol][current_date] = {model: choice(
-                posible_actions) for model in model_names}
-            if ensemble:
-                random_return[stock_symbol][current_date]['ensemble'] = choice(
-                    list(random_return[stock_symbol][current_date].values()))
-            else:
-                lst = list(random_return[stock_symbol][current_date].values())
-                random_return[stock_symbol][current_date]['election'] = max(
-                    set(lst), key=lst.count)
-
-    return random_return
-
-
-@app.get("/load/data")
-def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
-    allColumns = ["DateTime", "Open", "Close", "High", "Low", "a"]
-    relevantColumns = ["DateTime", "Open", "Close", "High", "Low"]
-    #start_date = pd.Timestamp("2021-01-04")
-    #end_date = pd.Timestamp("2021-01-06")
-
-    return crud.loadDataFromFile(stock_symbols=stock_symbols,
-                                 start_date=pd.Timestamp(start_date),
-                                 end_date=pd.Timestamp(end_date),
-                                 interval=resolution,
-                                 rsc_completePath="../data/Aktien/AAPL_1min.txt",
-                                 ALL_DATA_COLUMNS=allColumns,
-                                 COLUMNS_TO_KEEP=relevantColumns)

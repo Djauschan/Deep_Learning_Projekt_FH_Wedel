@@ -1,7 +1,7 @@
 <template>
   <Header />
   <div class="home-container01">
-     <span class="home-logo">Compare Models!</span>
+    <span class="home-logo">Compare Models!</span>
   </div>
   <div class="center">
     <button class="button-stock" @click="updateChart">Load Charts</button>
@@ -232,7 +232,6 @@ import DxChart, {
   DxTooltip,
 } from 'devextreme-vue/chart';
 
-//import { dataSource } from './data.js';
 import Header from './Header.vue'
 import axios from "axios";
 import Swal from "sweetalert2/dist/sweetalert2.js";
@@ -359,7 +358,7 @@ export default {
     },
 
     async updateCombinedData() {
-      // Map dataSource points with TransformerValue set to null
+      // Map dataSource points with all values set to null
       const combinedDataWithNull = this.dataSource.map(data => ({
         ...data,
         TransformerValue: null,
@@ -369,79 +368,29 @@ export default {
         gradientBoostValue: null,
       }));
 
-      // Merge transformerData points into combinedData
-      this.transformerData.keys().forEach(transformerDataPoint => {
-        const index = combinedDataWithNull.findIndex(data => data.date === transformerDataPoint.date);
-        if (index !== -1) {
-          // If date exists in combinedData, update TransformerValue
-          combinedDataWithNull[index].TransformerValue = transformerDataPoint.value;
-        } else {
-          // If date doesn't exist in combinedData, add a new point
-          combinedDataWithNull.push({
-            date: transformerDataPoint.date,
-            TransformerValue: transformerDataPoint.value,
+      // Function to merge data points into combinedData
+      const mergeDataPoints = (dataPoints, valueKey) => {
+        for (let value in dataPoints) {
+          dataPoints[value].forEach(Item => {
+            const index = combinedDataWithNull.findIndex(data => data.date === Item.date);
+            if (index !== -1) {
+              combinedDataWithNull[index][valueKey] = Item.value;
+            } else {
+              combinedDataWithNull.push({
+                date: Item.date,
+                [valueKey]: Item.value,
+              });
+            }
           });
         }
-      });
+      };
 
-      this.LSTMData.forEach(LSTMDataPoint => {
-        const index = combinedDataWithNull.findIndex(data => data.date === LSTMDataPoint.date);
-        if (index !== -1) {
-          // If date exists in combinedData, update TransformerValue
-          combinedDataWithNull[index].LSTMValue = LSTMDataPoint.value;
-        } else {
-          // If date doesn't exist in combinedData, add a new point
-          combinedDataWithNull.push({
-            date: LSTMDataPoint.date,
-            LSTMValue: LSTMDataPoint.value,
-          });
-        }
-      });
-
-
-      for (let value in this.CNNData) {
-        this.CNNData[value].forEach(Item => {
-          const index = combinedDataWithNull.findIndex(data => data.date === Item.date);
-          if (index !== -1) {
-            combinedDataWithNull[index].CNNValue = Item.value;
-          }
-          else {
-            combinedDataWithNull.push({
-              date: Item.date,
-              CNNValue: Item.value,
-            });
-          }
-        })
-      }
-
-
-      this.randomForestData.forEach(randomForestDataPoint => {
-        const index = combinedDataWithNull.findIndex(data => data.date === randomForestDataPoint.date);
-        if (index !== -1) {
-          // If date exists in combinedData, update TransformerValue
-          combinedDataWithNull[index].randomForestValue = randomForestDataPoint.value;
-        } else {
-          // If date doesn't exist in combinedData, add a new point
-          combinedDataWithNull.push({
-            date: randomForestDataPoint.date,
-            randomForestValue: randomForestDataPoint.value,
-          });
-        }
-      });
-
-      this.gradientBoostData.forEach(gradientBoostDataPoint => {
-        const index = combinedDataWithNull.findIndex(data => data.date === gradientBoostDataPoint.date);
-        if (index !== -1) {
-          // If date exists in combinedData, update TransformerValue
-          combinedDataWithNull[index].gradientBoostValue = gradientBoostDataPoint.value;
-        } else {
-          // If date doesn't exist in combinedData, add a new point
-          combinedDataWithNull.push({
-            date: gradientBoostDataPoint.date,
-            gradientBoostValue: gradientBoostDataPoint.value,
-          });
-        }
-      });
+      // Merge all data points into combinedData
+      mergeDataPoints(this.LSTMData, 'LSTMValue');
+      mergeDataPoints(this.CNNData, 'CNNValue');
+      mergeDataPoints(this.transformerData, 'TransformerValue');
+      mergeDataPoints(this.randomForestData, 'randomForestValue');
+      mergeDataPoints(this.gradientBoostData, 'gradientBoostValue');
 
       // Set the result to combinedData
       this.combinedData = combinedDataWithNull;
@@ -510,7 +459,7 @@ export default {
           }
         });
 
-        console.log("Prediction loaded");
+        console.log("Prediction cnn loaded");
         console.log(response.data);
 
         // Assuming the response.data is an object with date and close properties
@@ -541,6 +490,9 @@ export default {
           }
         });
 
+        console.log("Prediction lstm loaded");
+        console.log(response.data);
+
         // Assuming the response.data is an object with date and close properties
         this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
@@ -569,13 +521,13 @@ export default {
           }
         });
 
-        console.log("Prediction loaded");
+        console.log("Prediction transformer loaded");
         console.log(response.data);
 
         // Assuming the response.data is an object with date and close properties
         this.transformerData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
-        console.log("mapped");
+        console.log("mapped transformerData:");
         console.log(this.transformerData);
 
         return response.data;
@@ -603,8 +555,14 @@ export default {
           }
         });
 
+        console.log("Prediction randomforst loaded");
+        console.log(response.data);
+
         // Assuming the response.data is an object with date and close properties
         this.randomForestData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        console.log("mapped randomForestData:");
+        console.log(this.randomForestData);
 
         return response.data;
       } catch (error) {
@@ -631,8 +589,14 @@ export default {
           }
         });
 
+        console.log("Prediction gradientBoost loaded");
+        console.log(response.data);
+
         // Assuming the response.data is an object with date and close properties
         this.gradientBoostData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        console.log("mapped gradientBoostData:");
+        console.log(this.gradientBoostData);
 
         return response.data;
       } catch (error) {
@@ -655,10 +619,10 @@ export default {
             stock_symbols: "[" + this.selectedStock + "]",
             start_date: "2021-02-04", // Replace with the start date of the prediction
             end_date: "2021-02-06", // Replace with the end date of the prediction
-            resolution: this.selectedtime, 
+            resolution: this.selectedtime,
           }
         });
-        console.log("normal loaded")
+        console.log("### normal loaded ###")
         console.log([response.data])
         return response.data
       } catch (error) {
@@ -691,16 +655,18 @@ export default {
         this.dataSource = await this.load_data();
         if (this.showCNNLine == true) {
           this.CNNData = await this.load_CNN_data();
-        } else if (this.showTransformerLine) {
+        }
+        if (this.showTransformerLine) {
           this.transformerData = await this.load_transformer_data();
-        } else if (this.showLSTMLine) {
-          this.LSTMData = await this.load_LSTM_data();
-        } else if (this.showrandomForestLine) {
+        }
+        if (this.showLSTMLine) {
+          //this.LSTMData = await this.load_LSTM_data();
+        }
+        if (this.showrandomForestLine) {
           this.randomForestData = await this.load_randomForest_data();
-        } else if (this.showgradientBoostLine) {
+        }
+        if (this.showgradientBoostLine) {
           this.gradientBoostData = await this.load_gradientBoost_data();
-        } else {
-          console.log("No model selected");
         }
 
         console.log("datasource: " + this.dataSource)
@@ -775,19 +741,23 @@ export default {
   height: 10%;
   background-color: white;
   padding: 1%;
-  border: 2px solid #ccc; /* Adjust border thickness and color as needed */
+  border: 2px solid #ccc;
+  /* Adjust border thickness and color as needed */
 }
 
-.selection{
+.selection {
   margin-right: 5px;
   margin-left: 5px;
 }
 
 .separator {
   height: 100px;
-  width: 2px; /* Adjust the width of the separator */
-  background-color: #817f7f; /* Adjust the color of the separator */
-  margin: 0 10px; /* Adjust the margin around the separator */
+  width: 2px;
+  /* Adjust the width of the separator */
+  background-color: #817f7f;
+  /* Adjust the color of the separator */
+  margin: 0 10px;
+  /* Adjust the margin around the separator */
 }
 
 select {
@@ -818,7 +788,8 @@ input {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 30px; /* Adjust the font size as needed */
+  font-size: 30px;
+  /* Adjust the font size as needed */
   margin-top: 15px;
 }
 
@@ -849,7 +820,7 @@ input::placeholder {
   margin-left: 5px;
 }
 
-.checkboxes4{
+.checkboxes4 {
   margin-right: 5px;
   margin-left: 5px;
 }
