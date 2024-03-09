@@ -43,16 +43,16 @@ class RLInterface:
             time_range = pd.date_range(start_date, end_date, freq='2h')
             resolution = 'H'
         elif resolution == resolution_type.MINUTE:
-            time_range = pd.date_range(start_date, end_date, freq='20min')
+            time_range = pd.date_range(start_date, end_date, freq='min')
             resolution = 'M'
         else:
             raise ValueError(f'Resolution {resolution} not supported')
         last_timestamp = None
         for current_date in time_range:
-            if current_date not in relevant_data.index:
+            if current_date not in relevant_data.index and resolution_type(resolution) != resolution_type.DAILY:
                 continue
             if last_timestamp is not None:
-                data = relevant_data.loc[:last_timestamp]
+                data = relevant_data.loc[relevant_data.index <= current_date]
                 ensemble_input = []
                 predictions[current_date] = {}
                 for model_name, model in self.models.items():
@@ -62,9 +62,9 @@ class RLInterface:
                         predictions[current_date][model_name] = self.action_map[current_prediction]
                     elif 'ML' in model_name:
                         model_prediction = self._get_prediction_from_dict_list(
-                            self._get_data_from_api(model.get_api_url(), stock_symbol, start_date, end_date, resolution)[stock_symbol.upper()],
+                            self._get_data_from_api(model.get_api_url(), stock_symbol, current_date, resolution)[stock_symbol.upper()],
                             current_date)
-                        data_to_send = [data.Close[last_timestamp], model_prediction]
+                        data_to_send = [data.Close[-1], model_prediction]
                         current_prediction = model.predict(data_to_send)
                         ensemble_input.append(current_prediction)
                         predictions[current_date][model_name.split('-')[0]] = self.action_map[current_prediction]
@@ -91,21 +91,19 @@ class RLInterface:
         
         return dataDict
     
-    def _get_data_from_api(self, url : str, stock_symbol : str, start_date : str, end_date : str, resolution) -> pd.DataFrame:
+    def _get_data_from_api(self, url : str, stock_symbol : str, start_date : pd.Timestamp, resolution) -> pd.DataFrame:
         """Gets the stock data from the given API.
 
         Args:
             url (str): The API URL to get the stock data from.
             stock_symbol (str): The stock symbol to get the data for.
-            start_date (str): The start date of the time frame to get the data for.
-            end_date (str): The end date of the time frame to get the data for.
+            start_date (pd.Timestamp): The start date of the time frame to get the data for.
 
         Returns:
             pd.DataFrame: The stock data for the given stock symbol and time frame.
         """
         response = requests.get(url, params={'stock_symbols': f'[{stock_symbol.upper()}]',
-                                             'start_date': start_date,
-                                             'end_date': end_date,
+                                             'start_date': start_date.strftime('%Y-%m-%d'),
                                              'resolution': resolution})
         return response.json()
     
@@ -119,7 +117,7 @@ class RLInterface:
         Returns:
             float: The desired prediction value.
         """
-        for dictionary in dict_list:
-            if pd.Timestamp(dictionary['date']) == desired_date:
-                return dictionary['value']
-        return None
+        try:
+            return pd.DataFrame(dict_list, index=[pd.Timestamp(dictionary['date']) for dictionary in dict_list]).loc[desired_date].value
+        except KeyError:
+            return None

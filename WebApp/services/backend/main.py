@@ -296,17 +296,18 @@ def predict_rl(stock_symbols: str, start_date: str, resolution: str):
     Returns:
         list[dict[Timestamp, dict[str, str]]]: A list containing the predictions for every model for every hour in the given time frame.
     """
-    # data_to_send = {"stock_symbol": stock_symbol,
-    #                 "start_date": "2021-01-04",
-    #                 "end_date": "2021-01-05"}
-    # api_url = "http://predict_rl:8000/predict"
-    # response = requests.get(api_url, params=data_to_send)
-    # if response.status_code != 200:
-    #     return {
-    #         "status_code": response.status_code,
-    #         "response_text": response.text
-    #     }
-    # return response.json()
+    data_to_send = {"stock_symbol": stock_symbols,
+                    "start_date": start_date,
+                    "end_date": calculate_end_date(start_date, resolution),
+                    resolution: resolution}
+    api_url = "http://predict_rl:8000/predict"
+    response = requests.get(api_url, params=data_to_send)
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
+    return response.json()
 
 
 
