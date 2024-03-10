@@ -337,8 +337,16 @@ export default {
       selectedTime: "H",
       selectedStock: "AAL",
       seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'], // Array of colors for each series
-      meanError: null,
-      meanAbsoluteError: null,
+      cnnMeanError: null,
+      cnnMeanAbsoluteError: null,
+      tfMeanError: null,
+      tfMeanAbsoluteError: null,
+      lstmMeanError: null,
+      lstmMeanAbsoluteError: null,
+      gbMeanError: null,
+      gbMeanAbsoluteError: null,
+      rfMeanError: null,
+      rfMeanAbsoluteError: null,
       showCalendar: false,
       currentDate: new Date("2021-01-04"), // Current date
       currentMonth: '', // Current month displayed in the header
@@ -374,19 +382,19 @@ export default {
     },
 
     CNNchartTitle() {
-      return `CNN Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `CNN Chart; Mean Error: ${this.cnnMeanError}; Mean Absolute Error: ${this.cnnMeanAbsoluteError}`;
     },
     TransformerchartTitle() {
-      return `Transformer Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `Transformer Chart; Mean Error: ${this.tfMeanError}; Mean Absolute Error: ${this.tfMeanAbsoluteError}`;
     },
     LSTMchartTitle() {
-      return `LSTM Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `LSTM Chart; Mean Error: ${this.lstmMeanError}; Mean Absolute Error: ${this.lstmMeanAbsoluteError}`;
     },
     RandomForestchartTitle() {
-      return `Random Forest Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `Random Forest Chart; Mean Error: ${this.rfMeanError}; Mean Absolute Error: ${this.rfMeanAbsoluteError}`;
     },
     GradientBoostchartTitle() {
-      return `Gradient Boost Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `Gradient Boost Chart; Mean Error: ${this.gbMeanError}; Mean Absolute Error: ${this.gbMeanAbsoluteError}`;
     },
     tooltip: {
       enabled: true,
@@ -578,7 +586,24 @@ export default {
         console.log("Prediction cnn loaded");
         console.log(response.data);
 
+        // Assuming the response.data is an object with date and close properties
+        this.CNNData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        console.log("mapped cnnData:");
+        console.log(this.CNNData);
+
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "cnn",
+          }
+        });
+        this.cnnMeanError = maeResponse.data[this.selectedStock].ME;
+        this.cnnMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
         return response.data;
+
       } catch (error) {
         Swal.fire({
           title: "Error at predicting data",
@@ -600,16 +625,25 @@ export default {
             resolution: this.selectedTime, // Replace with the resolution:
           }
         });
-
+        
         console.log("Prediction transformer loaded");
         console.log(response.data);
-
+        
         // Assuming the response.data is an object with date and close properties
         this.transformerData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
         console.log("mapped transformerData:");
         console.log(this.transformerData);
-
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "transformer",
+          }
+        });
+        this.tfMeanError = maeResponse.data[this.selectedStock].ME;
+        this.tfMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -637,6 +671,21 @@ export default {
         console.log("Prediction randomforst loaded");
         console.log(response.data);
 
+        // Assuming the response.data is an object with date and close properties
+        this.randomForestData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        console.log("mapped randomForestData:");
+        console.log(this.randomForestData);
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "randomforest",
+          }
+        });
+        this.rfMeanError = maeResponse.data[this.selectedStock].ME;
+        this.rfMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -664,6 +713,21 @@ export default {
         console.log("Prediction gradientBoost loaded");
         console.log(response.data);
 
+        // Assuming the response.data is an object with date and close properties
+        this.gradientBoostData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        console.log("mapped gradientBoostData:");
+        console.log(this.gradientBoostData);
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "gradientboost",
+          }
+        });
+        this.gbMeanError = maeResponse.data[this.selectedStock].ME;
+        this.gbMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
         return response.data;
       } catch (error) {
         Swal.fire({

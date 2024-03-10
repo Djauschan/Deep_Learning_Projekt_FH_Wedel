@@ -399,11 +399,11 @@ def get_MAE_for_model(stock_symbols: str = '[AAPL, SNAP]', start_date: str = '20
             df_complete.dropna(inplace=True)
             print(df_complete)
             
-            return_dict[stock_symbol] = {'MAN' : round(mean_absolute_error(df_complete["value_pred"].values,df_complete["value"].values), 2),
+            return_dict[stock_symbol] = {'MAE' : round(mean_absolute_error(df_complete["value_pred"].values,df_complete["value"].values), 2),
                                         'ME' : round(mean_error(df_complete["value_pred"].values, df_complete["value"].values), 2)}
         except Exception as e:
             print(f"Error: {e}")
-            return_dict[stock_symbol] = {'MAN' : -999.9,
+            return_dict[stock_symbol] = {'MAE' : -999.9,
                                          'ME' : -999.9}
 
     return return_dict
