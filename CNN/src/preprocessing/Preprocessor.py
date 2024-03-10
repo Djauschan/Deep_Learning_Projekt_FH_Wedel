@@ -91,33 +91,43 @@ class Preprocessor:
                 df = self.getAndMergeFeatureDataWithMainData(df)
                 data, labels = self.createSeries(df, self.FEATURES, label_name)
                 # create a feature Row with avg vals for open
+                countOfTotalNumbers = len(data)*len(data[0])*len(data[0][0])
                 nanCount = np.count_nonzero(~np.isnan(data))
-                if nanCount < (len(data)*len(data[0])*len(data[0][0])):
+                if nanCount < countOfTotalNumbers:
                     print("NaN AFTER createSeries")
-                    print(2/0)
-                    data = np.nan_to_num(data)
+                    nan_rows = np.isnan(data).any(axis=(1, 2))
+                    data = data[~nan_rows]
+                    labels = labels[~nan_rows]
 
                 data = self.averagingService.calcAvg(data)
-                if nanCount < (len(data)*len(data[0])*len(data[0][0])):
+                countOfTotalNumbers = len(data)*len(data[0])*len(data[0][0])
+                nanCount = np.count_nonzero(~np.isnan(data))
+                if nanCount < countOfTotalNumbers:
                     print("NaN AFTER averagingService")
-                    print(2 / 0)
-                    data = np.nan_to_num(data)
+                    nan_rows = np.isnan(data).any(axis=(1, 2))
+                    data = data[~nan_rows]
+                    labels = labels[~nan_rows]
 
                 # All feature Data will be differenced
                 data, labels = self.differenceService.transformSeriesAndLabel(data, labels)
+                countOfTotalNumbers = len(data)*len(data[0])*len(data[0][0])
                 nanCount = np.count_nonzero(~np.isnan(data))
-                if nanCount < (len(data)*len(data[0])*len(data[0][0])):
+                if nanCount < countOfTotalNumbers:
                     print("NaN AFTER differenceService")
-                    print(2 / 0)
-                    data = np.nan_to_num(data)
+                    nan_rows = np.isnan(data).any(axis=(1, 2))
+                    data = data[~nan_rows]
+                    labels = labels[~nan_rows]
+
 
                 # Only the Data will be normalised
                 data = self.normalisationService.normMinusPlusOne(data)
+                countOfTotalNumbers = len(data)*len(data[0])*len(data[0][0])
                 nanCount = np.count_nonzero(~np.isnan(data))
-                if nanCount < (len(data)*len(data[0])*len(data[0][0])):
+                if nanCount < countOfTotalNumbers:
                     print("NaN AFTER normalisationService")
-                    print(2 / 0)
-                    data = np.nan_to_num(data)
+                    nan_rows = np.isnan(data).any(axis=(1, 2))
+                    data = data[~nan_rows]
+                    labels = labels[~nan_rows]
 
                 #########################
                 #### EXPORT THE DATA ####
