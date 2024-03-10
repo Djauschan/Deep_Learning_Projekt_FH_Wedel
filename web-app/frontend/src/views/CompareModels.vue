@@ -4,8 +4,6 @@
     <span class="home-logo">Compare Models!</span>
   </div>
   <div class="center">
-    <button class="button-stock" @click="updateChart">Load Charts</button>
-    <div class="separator"></div>
     <div>
     <button class="button-stock" @click="toggleCalendar">Select Dates</button>
     <div class="calendar-popup" v-if="showCalendar">
@@ -115,6 +113,8 @@
         </label>
       </div>
     </div>
+    <div class="separator"></div>
+    <button class="button-stock" @click="updateChart">Load Charts</button>
   </div>
   <!-- Combined Chart -->
   <div class="newChart">
@@ -304,6 +304,7 @@ export default {
   },
   async created() {
     this.dataSource = [];
+    this.real_data = [];
     this.selectedDays = null;
     this.transformerData = [];
     this.LSTMData = [];
@@ -340,7 +341,7 @@ export default {
       meanError: null,
       meanAbsoluteError: null,
       showCalendar: false,
-      currentDate: new Date(), // Current date
+      currentDate: new Date("2021-01-04"), // Current date
       currentMonth: '', // Current month displayed in the header
       currentMonthName: '', // Current month name displayed in the header
       currentYear: '', // Current year displayed in the header
@@ -474,7 +475,9 @@ export default {
     calculateErrorsAndDisplay(actualValues, predictedValues) {
       const { meanError, meanAbsoluteError } = calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues);
       this.meanError = meanError.toFixed(2); // Round to 2 decimal places
+      console.log("MA " + str(this.meanError))
       this.meanAbsoluteError = meanAbsoluteError.toFixed(2); // Round to 2 decimal places
+      console.log("MAN " + str(this.meanAbsoluteError))
     },
 
     // Example method to trigger calculation and display
@@ -595,7 +598,7 @@ export default {
 
         // Assuming the response.data is an object with date and close properties
         this.CNNData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
+        this.calculateErrorsAndDisplay(this.real_data.map(data => data.close), this.CNNData.map(data => data.value));
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -655,7 +658,17 @@ export default {
 
         // Assuming the response.data is an object with date and close properties
         this.transformerData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
+        console.log("===================================================================================");
+        console.log("===================================================================================");
+        console.log("transformerData:");
+        
+        this.transformerData.forEach(item => {
+          console.log(item.value);
+        });
+        console.log("===================================================================================");
+        console.log("===================================================================================");
+        // console.log(this.transformerData[this.selectedStock][0].value);
+        this.calculateErrorsAndDisplay(this.real_data.map(data => data.close), this.transformerData.map(data => data.value));
         console.log("mapped transformerData:");
         console.log(this.transformerData);
 
@@ -779,6 +792,7 @@ export default {
 
       if (this.selectedStock && this.selectedTime && this.checkAllBoxes()) {
         this.dataSource = await this.load_data();
+        this.real_data = await this.load_data();
         if (this.showCNNLine == true) {
           this.CNNData = await this.load_CNN_data();
         }

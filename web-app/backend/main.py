@@ -323,15 +323,15 @@ def predict_rl(stock_symbols: str = "[AAPL, NVDA]",
 
 
 @app.get("/load/data")
-def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
+def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', resolution: str = "H"):
     allColumns = ["DateTime", "Open", "Close", "High", "Low", "a"]
     relevantColumns = ["DateTime", "Open", "Close", "High", "Low"]
 
-    print(f"{stock_symbols}, {resolution=}, {start_date=}, {end_date=}")
+    print(f"{stock_symbols}, {resolution=}, {start_date=}")
 
     data = crud.loadDataFromFile(stock_symbols=stock_symbols,
                                  start_date=pd.Timestamp(start_date),
-                                 end_date=pd.Timestamp(end_date),
+                                 end_date=pd.Timestamp(calculate_end_date(start_date, resolution)),
                                  interval=resolution,
                                  ALL_DATA_COLUMNS=allColumns,
                                  COLUMNS_TO_KEEP=relevantColumns)
