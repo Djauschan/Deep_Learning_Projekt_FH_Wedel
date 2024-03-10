@@ -44,6 +44,6 @@ FEATURES: [
 ]
 MVG_AVG: True #if moving Avg should be a feature
 
-DATA_FEATURE_NAME: "DATA_Open_Volume_MCHI_IVV_MVG_ahead10"
+DATA_FEATURE_NAME: "swing_ahead10"
 ALLOW_SERIES_INTERVAL_TOLERANCE: true
 ENHANCE_DIFFERENCE: true
