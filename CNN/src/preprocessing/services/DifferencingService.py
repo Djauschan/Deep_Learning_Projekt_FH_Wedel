@@ -39,9 +39,21 @@ class differencingService:
         return differenceArray, labelVal
 
     def _calcPercentageDifference(self, baseVal, newVal):
+        i = 0
         val = 100
+        impurityCoef = 0.00001
         if self.ENHANCE_DIFFERENCE:
             val = 1000
+
+        #prevent devision with 0
+        if hasattr(baseVal, "__len__"):
+            while i < len(baseVal):
+                if (baseVal[i] == newVal[i]) or (baseVal[i] == 0.0) or (baseVal[i] == 0.):
+                    baseVal[i] = baseVal[i] + impurityCoef
+                i = i + 1
+        else:
+            if baseVal == newVal:
+                baseVal = baseVal + impurityCoef
 
         return ((newVal - baseVal) / baseVal) * val
 

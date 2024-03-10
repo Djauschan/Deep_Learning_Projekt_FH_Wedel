@@ -43,7 +43,7 @@ class gafService:
 
             # logging prgress
             perc_done = int((i * 100) / len_series)
-            if perc_done % 100 == 0:
+            if perc_done % 10000 == 0:
                 print('% done: ' + str(perc_done))
 
             gafData[i] = self._createSingleGAF(x_arr)
@@ -74,10 +74,6 @@ class gafService:
         """
             method to create a single GAF, based on preprocessed numpy array
         """
-        nanCount = np.count_nonzero(~np.isnan(x_arr))
-        if nanCount < (len(x_arr)):
-            print("NaN in _createSingleGAF")
-            x_arr = np.nan_to_num(x_arr)
 
         # Compute Gramian angular fields
         gasf = GramianAngularField(method='summation')

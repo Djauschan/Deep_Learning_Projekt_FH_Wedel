@@ -14,7 +14,7 @@ RSC_DATA_FILES: [
   NIO: ["NIO_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   NVDA: ["NVDA_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   SNAP: ["SNAP_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
-  SQ: ["SQ:_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
+  SQ: ["SQ_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"],
   TSLA: ["TSLA_1min.txt", [ "DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume" ], "Open" ]
 ]
 
