@@ -33,7 +33,7 @@ Open your web browser and navigate to `http://localhost:8080` to start using the
 - `CNN/`: The project directory of the CNN group.
 - `data/`: Contains the raw, unprocessed data that all groups use in their projects.
 - `rl/`: The project directory of the RL group.
-- `transformers/`: The project directory of the Transformers group.
+- `transformer/`: The project directory of the Transformers group.
 - `web-app/`: Contains the project directories of the Frontend and Backend groups.
 - `.gitignore`: Global gitignore file for the whole project.
 - `docker-compose.yaml`: The docker-compose file which starts all containers (frontend, backend, prediction APIs of each model group).

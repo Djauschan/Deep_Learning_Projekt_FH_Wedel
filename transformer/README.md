@@ -52,7 +52,7 @@ NOTE: As the main goal of this project was to create a fully-fledged web applica
 
 - `data/`: The directory containing all data (input data for model training, output data such as scaler and model files, all configs used for our pipelines and miscellaneous data, e.g. the index mappings).
 - `notebooks`: Contains a notebook for the analysis of the distribution of the data (time distribution, impact of normalization and outlier detection).
-- `scoring_functions/`: Contains the evaluation functions, developed for the comparison between the model as well as sample data to test the functions
+- `scoring_functions/`: Contains the evaluation functions, developed for the comparison between the model as well as sample data to test the functions.
 - `src_transformers/`: Holds the actual codebase used for model training and prediction.
 - `api.py`: The API that is started inside the transformers docker container. Requests to it are sent from the web application's backend and it returns the model predictions.
 - `compose.yaml`: The docker compose file used to call the train and predict pipelines of this codebase. It can also be used to launch Tensorboard to visualize the training processes.
