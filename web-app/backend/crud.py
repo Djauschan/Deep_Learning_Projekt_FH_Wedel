@@ -193,6 +193,9 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
                 data.index = data.index.shift(20, freq='H').shift(00, freq='T')
                 complete_index = complete_index.shift(20, freq='H').shift(00, freq='T')
 
+                # Filter the data to only include dates within the specified range
+                data = data[(data.index >= start_date) & (data.index <= end_date)]
+
             print(f"2: {data.head()}")
 
             data.replace([np.inf, -np.inf], np.nan, inplace=True)
