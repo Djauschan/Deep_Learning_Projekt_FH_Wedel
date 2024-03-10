@@ -46,12 +46,12 @@ services:
   predict_transformer:
     # Specify the build context for this service (current directory)
     build:
-      context: ./transformers
+      context: ./transformer
       dockerfile: Dockerfile
 
     # Bind mount the current directory to /app in the container
     volumes:
-      - ./transformers:/app
+      - ./transformer:/app
 
     # Map port 8001 on the host to port 8000 in the container
     ports:
@@ -71,12 +71,12 @@ services:
   predict_cnn:
     # Specify the build context for this service (current directory)
     build:
-      context: ./CNN
+      context: ./cnn
       dockerfile: Dockerfile
 
     # Bind mount the current directory to /app in the container
     volumes:
-      - ./CNN:/app
+      - ./cnn:/app
       - ./data:/data
 
     # Map port 8002 on the host to port 8000 in the container
