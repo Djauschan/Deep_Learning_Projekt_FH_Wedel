@@ -127,8 +127,7 @@ class ModelTrainer:
                         print("Training Loss: {}".format(loss_val))
                         print('________________')
                         # '''
-            #soll-ist logging training epoch
-
+            # soll-ist logging training epoch
 
             ##### TEST FOR EACH EPOCH
             with torch.no_grad():
@@ -145,7 +144,7 @@ class ModelTrainer:
         exporter.createLossPlot(train_logging_arr, LOSS_PLOT_INTERVAL, logColumns_train,
                                 'TRAINING', 'TRAINING_LOGGING_INTERVAL')
         exporter.createLogAndPlot_epoch_test(test_logging_arr, self.NUM_EPOCH + 1, logColumns_test, 'TEST',
-                                       'ALL_TEST_RESULTS')
+                                             'ALL_TEST_RESULTS')
 
         now = datetime.now()
         end_time = now.strftime("%Y-%m-%d_%H_%M_%S")

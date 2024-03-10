@@ -54,7 +54,10 @@ class ModelWrapper:
         elif trading_type == resolution.DAILY:
             modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'longTrading']
             startDate_dateTime = TimeModificationService.getSameDay8pm(endDate)
-            timestamps_array = [startDate_dateTime, [startDate_dateTime + pd.Timedelta(days=1) for i in range(3)]]
+            timestamps_array = [startDate_dateTime]
+            #when time ahead model 5 was executed
+            #timestamps_array.extend([startDate_dateTime + pd.Timedelta(days=1) for i in range(3)])
+            timestamps_array.extend([startDate_dateTime + pd.Timedelta(days=1) for i in range(2)])
             lastEle = timestamps_array[len(timestamps_array) - 1]
             timestamps_array.append(lastEle + pd.Timedelta(days=2))
         else:
