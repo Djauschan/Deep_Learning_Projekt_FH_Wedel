@@ -19,7 +19,7 @@ dataset_parameters:
   read_all_files: false
   first_date: 2000-01-01 # YYYY-MM-DD First date of the data to be read in
   last_date: 2021-01-03 # YYYY-MM-DD Last date of the data to be read in
-  data_usage_ratio: 1 # Only the last 35% of the read data are used in the dataset
+  data_usage_ratio: 0.35 # Only the last 35% of the read data are used in the dataset
   subseries_amount: 4 # The time series will be cut into 4 subseries (which each consist of a train and validation set)
   validation_split: 0.15 # The last 15% of timestamps in a subseries are used for validation
   create_new_file: true # This parameter must be set to true if the symbols to be read in are changed.
