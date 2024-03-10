@@ -552,7 +552,7 @@ export default {
         console.log(response.data);
 
         // Assuming the response.data is an object with date and close properties
-        this.CNNData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+        //this.CNNData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
         console.log("mapped cnnData:");
         console.log(this.CNNData);
@@ -637,7 +637,7 @@ export default {
         console.log(response.data);
 
         // Assuming the response.data is an object with date and close properties
-        this.randomForestData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+        //this.randomForestData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
         console.log("mapped randomForestData:");
         console.log(this.randomForestData);
@@ -679,7 +679,7 @@ export default {
         console.log(response.data);
 
         // Assuming the response.data is an object with date and close properties
-        this.gradientBoostData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+        //this.gradientBoostData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
         console.log("mapped gradientBoostData:");
         console.log(this.gradientBoostData);
@@ -721,7 +721,7 @@ export default {
         console.log(response.data);
 
         // Assuming the response.data is an object with date and close properties
-        this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+        //this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
         return response.data;
       } catch (error) {
@@ -796,7 +796,7 @@ export default {
 
         console.log("datasource: " + this.dataSource)
 
-        /*
+        
         if (this.dataSource) {
 
           const prices = this.dataSource.flatMap(data => [data.open, data.close]);
@@ -807,7 +807,7 @@ export default {
           this.priceRangeKey = Math.random();
           console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
         }
-        */
+        
 
         await this.updateCombinedData();
         this.showChart = true;
