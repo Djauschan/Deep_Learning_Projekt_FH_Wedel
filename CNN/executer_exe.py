@@ -121,5 +121,5 @@ class executer:
         print('END 4: train & export Model')
 
 exe = executer()
-exe.buildTimeSeriesData_w()
-#exe.startTraining_w()
+#exe.buildTimeSeriesData_w()
+exe.startTraining_w()
