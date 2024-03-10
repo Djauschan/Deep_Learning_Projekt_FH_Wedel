@@ -144,7 +144,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -162,7 +162,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -182,7 +182,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -200,7 +200,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -220,7 +220,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -240,7 +240,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -335,7 +335,9 @@ export default {
       currentYear: '', // Current year displayed in the header
       daysInMonth: [], // Array to hold days of the month
       startDate: null, // Selected start date
-      selectingStart: true // Flag to indicate if currently selecting start date
+      selectingStart: true, // Flag to indicate if currently selecting start date
+      minDate: new Date(2021, 0, 4), // January is 0 in JavaScript
+      maxDate: new Date(2021, 1, 10),
     };
   },
 
@@ -408,12 +410,17 @@ export default {
       this.showCalendar = !this.showCalendar;
     },
     selectDay(day) {
+    const selectedDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
+    if (selectedDate >= this.minDate && selectedDate <= this.maxDate) {
       // Handle day selection
       if (this.selectingStart) {
         this.startDate = day;
         this.showCalendar = false;
       }
-    },
+    } else {
+      alert('Please select a date between 2021-01-04 and 2021-02-10');
+    }
+  },
     previousMonth() {
       // Logic for moving to the previous month
       this.currentDate.setMonth(this.currentDate.getMonth() - 1);
@@ -493,10 +500,19 @@ export default {
 
       // Merge all data points into combinedData
       //mergeDataPoints(this.LSTMData, 'LSTMValue');
-      mergeDataPoints(this.CNNData, 'CNNValue');
-      mergeDataPoints(this.transformerData, 'TransformerValue');
-      mergeDataPoints(this.randomForestData, 'randomForestValue');
-      mergeDataPoints(this.gradientBoostData, 'gradientBoostValue');
+      if (this.showCNNLine) {
+        console.log("CNNData");
+        mergeDataPoints(this.CNNData, 'CNNValue');
+      }
+      if (this.showTransformerLine) {
+        mergeDataPoints(this.transformerData, 'TransformerValue');
+      }
+      if (this.showLSTMLine) {
+        mergeDataPoints(this.LSTMData, 'LSTMValue');
+      }
+      if (this.showrandomForestLine) {
+        mergeDataPoints(this.randomForestData, 'randomForestValue');
+      }
 
       // Set the result to combinedData
       this.combinedData = combinedDataWithNull;
@@ -550,6 +566,9 @@ export default {
 
         console.log("Prediction cnn loaded");
         console.log(response.data);
+        if (response.data['status_code'] !== undefined) {
+          this.showCNNLine = false;
+        }
 
         // Assuming the response.data is an object with date and close properties
         //this.CNNData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
@@ -600,6 +619,10 @@ export default {
 
         console.log("mapped transformerData:");
         console.log(this.transformerData);
+        if (response.data['status_code'] !== undefined) {
+          this.showTransformerLine = false;
+        }
+
         const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
           params: {
             stock_symbols: "[" + this.selectedStock + "]",
@@ -636,6 +659,9 @@ export default {
 
         console.log("Prediction randomforst loaded");
         console.log(response.data);
+        if (response.data['status_code'] !== undefined) {
+          this.showrandomForestLine = false;
+        }
 
         // Assuming the response.data is an object with date and close properties
         //this.randomForestData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
@@ -678,6 +704,9 @@ export default {
 
         console.log("Prediction gradientBoost loaded");
         console.log(response.data);
+        if (response.data['status_code'] !== undefined) {
+          this.showgradientBoostLine = false;
+        }
 
         // Assuming the response.data is an object with date and close properties
         //this.gradientBoostData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
@@ -720,6 +749,9 @@ export default {
 
         console.log("Prediction lstm loaded");
         console.log(response.data);
+        if (response.data['status_code'] !== undefined) {
+          this.showLSTMLine = false;
+        }
 
         // Assuming the response.data is an object with date and close properties
         //this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
@@ -748,8 +780,13 @@ export default {
           }
         });
         console.log("### normal loaded ###")
-        console.log(response.data[this.selectedStock])
-        return response.data[this.selectedStock]
+        if (response.data['status_code'] !== undefined) {
+          return [];
+        }
+        else {
+          console.log(response.data[this.selectedStock])
+          return response.data[this.selectedStock]
+        }
       } catch (error) {
         Swal.fire({
           title: "Error at getting data",
@@ -779,14 +816,14 @@ export default {
       if (this.selectedStock && this.selectedTime && this.checkAllBoxes() && this.startDate) {
         this.dataSource = await this.load_data();
         this.real_data = await this.load_data();
-        if (this.showCNNLine == true) {
+        if (this.showCNNLine) {
           this.CNNData = await this.load_CNN_data();
         }
         if (this.showTransformerLine) {
           this.transformerData = await this.load_transformer_data();
         }
         if (this.showLSTMLine) {
-          //this.LSTMData = await this.load_LSTM_data();
+          this.LSTMData = await this.load_LSTM_data();
         }
         if (this.showrandomForestLine) {
           this.randomForestData = await this.load_randomForest_data();

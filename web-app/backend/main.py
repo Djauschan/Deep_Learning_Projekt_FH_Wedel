@@ -266,7 +266,7 @@ def predict_gradientBoost(stock_symbols: str = "[AAPL]",
         start_date += " 10:01:00"
     end_date = calculate_end_date(start_date, resolution)
     if resolution == "H":
-        start_date += " 08:00:00"
+        start_date += " 10:00:00"
         end_date += " 18:00:00"
 
     data_to_send = {"stock_symbols": stock_symbols,
