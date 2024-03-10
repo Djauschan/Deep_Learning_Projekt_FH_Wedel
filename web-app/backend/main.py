@@ -284,6 +284,32 @@ def predict_gradientBoost(stock_symbols: str = "[AAPL]",
 
     return response.json()
 
+@app.get("/predict/lstm")
+def predict_lstm(stock_symbols: str = "[AAPL]",
+                          start_date: str = "2021-01-04",
+                          resolution: str = "H"):
+    if resolution == "M":
+        start_date += " 10:01:00"
+    end_date = calculate_end_date(start_date, resolution)
+    if resolution == "H":
+        start_date += " 08:00:00"
+        end_date += " 18:00:00"
+
+    data_to_send = {"stock_symbols": stock_symbols,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "resolution": resolution}
+
+    api_url = "http://predict_ann:8000/predict/lstm"
+    response = requests.get(api_url, params=data_to_send)
+
+    if response.status_code != 200:
+        return {
+            "status_code": response.status_code,
+            "response_text": response.text
+        }
+
+    return response.json()
 
 @app.get("/predict/rl")
 def predict_rl(stock_symbols: str = "[AAPL, NVDA]",
@@ -474,8 +500,3 @@ def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04
 #         }
 
 #     return response.json()
-
-# @app.get("/predict/lstm")
-# def predict_lstm(stock_symbol: str):
-#     lstm = LstmInterface()
-#     return lstm.predict('2021-01-04', '2021-01-06', 120)
