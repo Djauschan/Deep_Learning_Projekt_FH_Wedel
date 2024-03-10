@@ -41,12 +41,12 @@ services:
   predict_transformer:
     # Specify the build context for this service (current directory)
     build:
-      context: ./transformer
+      context: ./transformers
       dockerfile: Dockerfile
 
     # Bind mount the current directory to /app in the container
     volumes:
-      - ./transformer:/app
+      - ./transformers:/app
 
     # Map port 8001 on the host to port 8000 in the container
     ports:
