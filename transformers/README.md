@@ -1,6 +1,6 @@
-# Project Deep Learning - Transformer Group
+# Project Deep Learning - Transformers Group
 
-This directory contains the source code of the transformer group. The members of the transformer group in the class of the wintersemester 2023/2024 are: Philipp, Niklas, Eira & Luca.
+This directory contains the source code of the transformers group. The members of the transformers group in the class of the wintersemester 2023/2024 are: Philipp, Niklas, Eira & Luca.
 
 The codebase can be used to train transformer models for predicting time series, specifically stock prices. Furthermore, it also offers an interface to predict using the trained models and an API that returns the predictions in a format suitable for the web application to further process them. This API is started inside the transformers docker container which is built from the docker compose file in the project's root directory. The Dockerfile corresponding to the transformers docker container is also located here in this directory.
 
@@ -8,12 +8,12 @@ The codebase can be used to train transformer models for predicting time series,
 
 If you want to run any of our code locally, you need to create an development environment and install the dependencies by following these steps:
 
-1. Navigate into the transformer group's directory.
-<br>`cd transformer`
+1. Navigate into the transformers group's directory.
+<br>`cd transformers`
 2. Create a conda environment (python version 3.11 is preferred).
-<br>`conda create -n transformer_env python==3.11`
+<br>`conda create -n transformers_env python==3.11`
 3. Activate your environment.
-<br>`conda activate transformer_env`
+<br>`conda activate transformers_env`
 4. Install PyTorch.
 <br>`pip install -r requirements_torch.txt`
 5. Install the other requirements.
@@ -25,17 +25,17 @@ If you just want to run a training or prediction pipeline or launch the tensorbo
 
 To run the training and prediction pipeline locally, follow these steps:
 
-1. Navigate into the transformer group's directory.
-<br>`cd transformer`
+1. Navigate into the transformers group's directory.
+<br>`cd transformers`
 2. Activate the environment you have created using your installation guide.
-<br>`conda activate transformer_env`
+<br>`conda activate transformers_env`
 3. Run a pipeline like this:
 <br>`python -m src_transformers.main -c "path/to/config" -p train`
 <br>Or like this:
 <br>`python -m src_transformers.main --config "path/to/config" --pipeline train`
 4. To run a prediction pipeline use the argument `predict` instead of `train`.
 
-If you want to use our docker setup, navigate into this directory (`transformer/`). Afterwards, you can start different processes with the following commands:
+If you want to use our docker setup, navigate into this directory (`transformers/`). Afterwards, you can start different processes with the following commands:
 
 - Start the training pipeline.
 <br>`docker compose up train_transformer`
