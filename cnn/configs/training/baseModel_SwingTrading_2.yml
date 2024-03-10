@@ -8,9 +8,9 @@ L2RegularisationFactor: 0.00 #First Overfit
 DROPOUT: 0.0 #First Overfit
 LOGGING_INTERVAL: 10 #every x value will be logged
 LOSS_PLOT_INTERVAL: 1000
-PROJECT_ROOT : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\"
-RESULT_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\src\\training\\result\\"
-RSC_DATA_ROOT: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\data\\train_data\\"
+PROJECT_ROOT : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\"
+RESULT_FOLDER: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\src\\training\\result\\"
+RSC_DATA_ROOT: "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\data\\train_data\\"
 TRAINING_FOLDER: "swingTrayding_20_120_6_DATA_Open_Volume_MCHI_IVV_MVG_ahead6\\"
 MODEL_NAME: "20_120_6_swingTrayding_2"
 TRAINING_DATA_LIST: [
