@@ -37,6 +37,11 @@ class ModelWrapper:
             predicts the requested stock regarding trading type
             redirects the single predict to each respective model and collects the result
         """
+        interval = TRADING_PARAMS.get(trading_type.value).get('interval')
+        #the model input = the start of the dateTimes to predict is the last input of the model
+        endDate = startDate - pd.Timedelta(minutes=60)
+        startDate = startDate - pd.Timedelta(days=30)
+
         modelsToExecute = []
         if trading_type == resolution.MINUTE:
             modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'dayTrading']
@@ -47,7 +52,6 @@ class ModelWrapper:
         else:
             print("error")
 
-        interval = TRADING_PARAMS.get(trading_type.value).get('interval')
         preprocessor = Preprocessor(self.config)
         datesTimes = []
         for stock_symbol in symbol_list:
