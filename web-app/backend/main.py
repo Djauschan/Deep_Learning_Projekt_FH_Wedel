@@ -319,6 +319,8 @@ def predict_rl(stock_symbols: str = "[AAPL, NVDA]",
 
 @app.get("/load/data")
 def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', resolution: str = "H"):
+    if resolution == "M":
+        start_date += " 10:01:00"
     allColumns = ["DateTime", "Open", "Close", "High", "Low", "a"]
     relevantColumns = ["DateTime", "Open", "Close", "High", "Low"]
 
@@ -351,19 +353,33 @@ def get_MAE_for_model(stock_symbols: str = '[AAPL, SNAP]', start_date: str = '20
         pred_model = predict_gradientBoost
     else:
         raise ValueError("Invalid model type")
+    
+    return_dict = {}
+
     y_true = load_data(stock_symbols, start_date, resolution)
     y_pred = pred_model(stock_symbols, start_date, resolution)
+    print(y_pred)
     stock_symbols = stock_symbols[1:-1].split(", ")
     for stock_symbol in stock_symbols:
-        df_true = pd.DataFrame(y_true[stock_symbol])
-        df_pred = pd.DataFrame(y_pred[stock_symbol])
-        
-        df_complete = pd.concat([df_pred.set_index('date'), df_true.set_index('DateTime').Close], axis=1)
-        print("="*20)
-        print(stock_symbol)
-        print(df_complete)
-        print("="*20)
+        try:
+            df_true = pd.DataFrame(y_true[stock_symbol])
+            df_pred = pd.DataFrame(y_pred[stock_symbol]).rename(columns={"value": "value_pred"})
+            df_pred["date"] = pd.to_datetime(df_pred["date"])
+            df_true["date"] = pd.to_datetime(df_true["date"])
+            
+            df_complete = pd.concat([df_pred.set_index('date'), df_true.set_index('date')], axis=1)
+            print(df_complete)
+            df_complete.dropna(inplace=True)
+            print(df_complete)
+            
+            return_dict[stock_symbol] = {'MAN' : round(mean_absolute_error(df_complete["value_pred"].values,df_complete["value"].values), 2),
+                                        'ME' : round(mean_error(df_complete["value_pred"].values, df_complete["value"].values), 2)}
+        except Exception as e:
+            print(f"Error: {e}")
+            return_dict[stock_symbol] = {'MAN' : -999.9,
+                                         'ME' : -999.9}
 
+    return return_dict
 
 def mean_absolute_error(predictions, targets):
     """
