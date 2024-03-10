@@ -567,6 +567,7 @@ export default {
         });
         this.cnnMeanError = maeResponse.data[this.selectedStock].ME;
         this.cnnMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        
         return response.data;
 
       } catch (error) {

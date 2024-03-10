@@ -182,8 +182,16 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
                 data = data.resample('1min').mean().round(2)
                 complete_index = pd.date_range(start=start_date, end=end_date, freq='1min')
             elif interval == 'D':
-                data = data.resample('D').mean().round(2)
+                # Shift the time to start at '20:00:00' for each day
+                data.index = data.index.shift(-20, freq='H').shift(-00, freq='T')
+                
+                # Resample the data and create the date range with a 'D' frequency
+                data = data.resample('D').first().round(2)
                 complete_index = pd.date_range(start=start_date, end=end_date, freq='D')
+                
+                # Shift the time back to '20:00:00' for each day
+                data.index = data.index.shift(20, freq='H').shift(00, freq='T')
+                complete_index = complete_index.shift(20, freq='H').shift(00, freq='T')
 
             print(f"2: {data.head()}")
 
@@ -206,6 +214,8 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
             data_dict = data[['DateTime', 'Close', 'High', 'Low', 'Open']].to_dict('records')
 
             dfs[stock] = data_dict
+
+            print(f"4: {dfs[stock]}")
 
     return dfs
 
