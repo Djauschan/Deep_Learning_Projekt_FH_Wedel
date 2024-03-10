@@ -111,3 +111,27 @@ services:
       ]
     networks:
       - backend_network
+
+  predict_lstm:
+  # Specify the build context for this service (current directory)
+    build:
+      context: ./lstm
+      dockerfile: Dockerfile
+
+    # Bind mount the current directory to /app in the container
+    volumes:
+      - ./lstm:/app
+
+    # Map port 8003 on the host to port 8000 in the container
+    ports:
+      - 8005:8000
+      
+    # Set the entrypoint of the container to start a Uvicorn server running the app defined in 'api' of 'src_transformers' directory
+    entrypoint:
+      [
+        "bash",
+        "-c",
+        "uvicorn api:app --host 0.0.0.0 --port 8000"
+      ]
+    networks:
+      - backend_network
