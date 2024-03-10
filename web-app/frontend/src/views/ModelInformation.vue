@@ -50,6 +50,12 @@ export default {
           description: '<b>Input:</b><br> Forecast Horizon. <br> <b>Output:</b><br>  Dictionary, mit Angabe, welche Modelle welche Prognosen abgeben.',
           image: '' // No image for this topic
         },
+        {
+          id: 4,
+          title: 'LSTM',
+          description: "Das LSTM-Modell ist eine spezielle Art von rekurrentem neuronalem Netzwerk, das sich besonders gut für die Vorhersage von Zeitreihendaten eignet, wie sie im Finanzmarkt vorzufinden sind. LSTMs zeichnen sich durch ihre Fähigkeit aus, sowohl kurzfristige als auch langfristige Abhängigkeiten in den Daten zu erkennen und zu nutzen. Diese Eigenschaft ist besonders vorteilhaft für die Vorhersage von Aktienkursbewegungen, da sie eine umfassende Berücksichtigung historischer Daten ermöglicht, ohne dass ein explizites Feature-Engineering erforderlich ist. Die Stärke der LSTM-Modelle liegt in ihrer Struktur, die aus Zellen, Gates und Zuständen besteht, die es dem Modell ermöglichen, Informationen über lange Zeiträume zu speichern und zu vergessen."
+        },
+
       ],
     };
   },
@@ -103,4 +109,4 @@ export default {
   max-height: 70%;
 }
 
-</style>
+</style>../../../../../web-app/frontend/src/views/Header.vue
