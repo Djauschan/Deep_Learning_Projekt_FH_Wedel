@@ -1,5 +1,7 @@
 import pandas as pd
 from fastapi import FastAPI
+import warnings
+warnings.filterwarnings("ignore")
 from ML_Modelle.abstract_model import resolution as resolution_enum
 from ML_Modelle.ML_PredictionInterface import (
     ML_PredictionInterface_GradientBoostingModel,
