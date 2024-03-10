@@ -38,17 +38,25 @@ class ModelWrapper:
             redirects the single predict to each respective model and collects the result
         """
         interval = TRADING_PARAMS.get(trading_type.value).get('interval')
-        #the model input = the start of the dateTimes to predict is the last input of the model
-        endDate = startDate - pd.Timedelta(minutes=60)
+        # the model input = the start of the dateTimes to predict is the last input of the model
+        endDate = startDate
         startDate = startDate - pd.Timedelta(days=30)
 
         modelsToExecute = []
+        timestamps_array = []
         if trading_type == resolution.MINUTE:
             modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'dayTrading']
+            timestamps_array = [TimeModificationService.getSameDay1020am(endDate)]
         elif trading_type == resolution.TWO_HOURLY:
             modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'swingTrading']
+            startDate_dateTime = TimeModificationService.getSameDay10am(endDate)
+            timestamps_array = [startDate_dateTime + pd.Timedelta(hours=2 * i) for i in range(4)]
         elif trading_type == resolution.DAILY:
             modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'longTrading']
+            startDate_dateTime = TimeModificationService.getSameDay8pm(endDate)
+            timestamps_array = [startDate_dateTime, [startDate_dateTime + pd.Timedelta(days=1) for i in range(3)]]
+            lastEle = timestamps_array[len(timestamps_array) - 1]
+            timestamps_array.append(lastEle + pd.Timedelta(days=2))
         else:
             print("error")
 
@@ -57,12 +65,12 @@ class ModelWrapper:
         for stock_symbol in symbol_list:
             modelInputData, endRawPrice = preprocessor.pipeline(stock_symbol, startDate, endDate,
                                                                 length=20, interval=interval)
-            predictions, datesTimes = self.getAllPredictionsForSingleStock(modelsToExecute, stock_symbol,
-                                                                           modelInputData, endDate, endRawPrice,
-                                                                           interval)
+            predictions = self.getAllPredictionsForSingleStock(modelsToExecute, stock_symbol,
+                                                               modelInputData, endDate, endRawPrice,
+                                                               interval)
             self.modelResults.append({stock_symbol: predictions})
 
-        return self.createPredictionDataframe(self.modelResults, datesTimes)
+        return self.createPredictionDataframe(self.modelResults, timestamps_array)
 
     @staticmethod
     def getAllPredictionsForSingleStock(modelsToExecute, stock_symbol, modelInputData, endDate, rawEndPrice, interval):
@@ -78,16 +86,11 @@ class ModelWrapper:
                 # predict single model
                 model = modelEntry.get('model').predict(modelInputData)
                 modelResult = model.get('prediction')
-                horizon = modelEntry.get('horizon')
                 predictionEndPrice = differencingService.calcThePriceFromChange(True, modelResult.item(),
                                                                                 rawEndPrice)
-                predictionDateTime = TimeModificationService.calcDateTimeFromStartDateAndInterval(endDate, interval,
-                                                                                                  horizon)
                 predictionList.append(predictionEndPrice)
-                dateTimeList.append(predictionDateTime)
 
-        dateTimeList = TimeModificationService.reArrangeDateTimeList(dateTimeList)
-        return predictionList, dateTimeList
+        return predictionList
 
     @staticmethod
     def createPredictionDataframe(resultMap, dateTimes) -> pd.DataFrame:
