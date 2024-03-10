@@ -39,7 +39,7 @@ class ModelWrapper:
         """
         interval = TRADING_PARAMS.get(trading_type.value).get('interval')
         #the model input = the start of the dateTimes to predict is the last input of the model
-        endDate = startDate - pd.Timedelta(minutes=60)
+        endDate = startDate
         startDate = startDate - pd.Timedelta(days=30)
 
         modelsToExecute = []

@@ -788,8 +788,8 @@ export default {
           }
         });
         console.log("### normal loaded ###")
-        console.log([response.data])
-        return response.data
+        console.log(response.data[this.selectedStock])
+        return response.data[this.selectedStock]
       } catch (error) {
         Swal.fire({
           title: "Error at getting data",
@@ -837,6 +837,7 @@ export default {
 
         console.log("datasource: " + this.dataSource)
 
+        /*
         if (this.dataSource) {
 
           const prices = this.dataSource.flatMap(data => [data.open, data.close]);
@@ -847,6 +848,7 @@ export default {
           this.priceRangeKey = Math.random();
           console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
         }
+        */
 
         await this.updateCombinedData();
         this.showChart = true;
