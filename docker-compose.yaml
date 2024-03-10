@@ -7,12 +7,12 @@ networks:
 services:
   backend:
     build:
-      context: ./WebApp/services/backend
+      context: ./web-app/backend
       dockerfile: Dockerfile
     ports:
       - 8000:8000
     volumes:
-      - ./WebApp/services/backend:/app
+      - ./web-app/backend:/app
       - ./data:/data
     entrypoint:
       [
@@ -31,7 +31,7 @@ services:
   frontend:
     # user: "node"
     build:
-      context: ./WebApp/services/frontend
+      context: ./web-app/frontend
       dockerfile: Dockerfile
     ports:
       - 8080:8080
