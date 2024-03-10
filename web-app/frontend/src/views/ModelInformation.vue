@@ -42,7 +42,8 @@ export default {
         {
           id: 2,
           title: 'CNN',
-          description: "<b>Input:</b><br> 30x6 Daten Matrix, wobei 30 Tageswerte und 7 die Features sind (GoldPreis und verschiedene ETFs) (in der Datengrundlage ggb.).<br> Dieser Input wird transformiert in 7x30x30 array => somit ist der fertig Model Input = 6x30x30; <br><b>Output:</b><br>Ein Skalar, welcher die Kurs Veränderung nach 5 Tagen predicted."
+          description: "<b>Input:</b><br> 30x6 Daten Matrix, wobei 30 Tageswerte und 7 die Features sind (GoldPreis und verschiedene ETFs) (in der Datengrundlage ggb.).<br> Dieser Input wird transformiert in 7x30x30 array => somit ist der fertig Model Input = 6x30x30; <br><b>Output:</b><br>Ein Skalar, welcher die Kurs Veränderung nach 5 Tagen predicted. <br><b>CNN Restrictions:</b><br> Daily Predictions, only implemented for: AAL, AAPL, AMD, C",
+          image: '' // No image for this topic
         },
         {
           id: 3,
