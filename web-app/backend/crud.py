@@ -150,7 +150,7 @@ def update_budget_by_user(db: Session, username: str, updated_data: schemas.User
     else:
         raise HTTPException(status_code=404, detail="User not found")   
 
-# Python
+# method to get stock data of specific stock symbols for n days
 def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.Timestamp, interval: str,
                      ALL_DATA_COLUMNS: list, COLUMNS_TO_KEEP: list) -> pd.DataFrame:
 
@@ -173,6 +173,8 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
             data = data[(data['DateTime'] >= start_date) & (data['DateTime'] <= end_date)]
             data.set_index('DateTime', inplace=True)
 
+            print(f"1: {data.head()    }")
+
             if interval == 'H':
                 data = data.resample('2h').mean().round(2)
                 complete_index = pd.date_range(start=start_date, end=end_date, freq='2h')
@@ -180,19 +182,22 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
                 data = data.resample('1min').mean().round(2)
                 complete_index = pd.date_range(start=start_date, end=end_date, freq='1min')
             elif interval == 'D':
-                data = data.resample('24h').mean().round(2)
-                complete_index = pd.date_range(start=start_date, end=end_date, freq='24h')
+                data = data.resample('D').mean().round(2)
+                complete_index = pd.date_range(start=start_date, end=end_date, freq='D')
+
+            print(f"2: {data.head()}")
 
             data.replace([np.inf, -np.inf], np.nan, inplace=True)
             data.fillna(0, inplace=True)
 
             complete_data = pd.DataFrame(index=complete_index)
 
-            data = pd.merge(complete_data, data, left_index=True, right_index=True, how='left')
+            data = pd.merge(complete_data, data, left_index=True, right_index=True, how='right')
 
             # Fill missing values with the last valid observation and then the next valid one
             data.ffill(inplace=True)
-            data.bfill(inplace=True)
+            if data.isnull().any().any():
+                data.bfill(inplace=True)
 
             data.reset_index(inplace=True)
             data.rename(columns={'index': 'DateTime', 'Close': 'Close', 'High': 'High', 'Low': 'Low', 'Open': 'Open'}, inplace=True)
