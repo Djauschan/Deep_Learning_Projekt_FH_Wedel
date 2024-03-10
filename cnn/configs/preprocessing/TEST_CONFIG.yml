@@ -1,8 +1,8 @@
 AMOUNT_OF_DATA : 1
-TO_FIND_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\test\\data\\Aktien\\"
-TO_SAVE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\test\\data\\MAIN_DATA\\"
-TO_SAVE_IMAGE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\test\\data\\MAIN_DATA\\imageData\\"
-TO_SAVE_TS_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\test\\data\\MAIN_DATA\\timeSeriesData\\"
+TO_FIND_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_cnn\\project_deeplearning\\test\\data\\Aktien\\"
+TO_SAVE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_cnn\\project_deeplearning\\test\\data\\MAIN_DATA\\"
+TO_SAVE_IMAGE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_cnn\\project_deeplearning\\test\\data\\MAIN_DATA\\imageData\\"
+TO_SAVE_TS_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_cnn\\project_deeplearning\\test\\data\\MAIN_DATA\\timeSeriesData\\"
 
 ##AAPL,AAL,AMD,C,MRNA,NIO,NVDA,SNAP,SQ,TSLA
 RSC_DATA_FILES: [
@@ -10,9 +10,9 @@ RSC_DATA_FILES: [
   AAPL: ["AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"], "Open"]
 ]
 
-TO_FIND_OTHER_FEATURE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\test\\data\\ETF\\"
-TO_SAVE_OTHER_FEATURE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\test\\data\\FEATURE_DATA\\"
-TO_SAVE_OTHER_FEATURE_IMG_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_CNN\\project_deeplearning\\test\\data\\FEATURE_DATA\\"
+TO_FIND_OTHER_FEATURE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_cnn\\project_deeplearning\\test\\data\\ETF\\"
+TO_SAVE_OTHER_FEATURE_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_cnn\\project_deeplearning\\test\\data\\FEATURE_DATA\\"
+TO_SAVE_OTHER_FEATURE_IMG_RSC_FOLDER : "C:\\Projekte\\ProjectDeepLearning_cnn\\project_deeplearning\\test\\data\\FEATURE_DATA\\"
 OTHER_FEATURES_TO_LOAD : [
   #key: [fileName, [columns in file], [relevant feature columns]
   EWA: ["EWA_1min.txt", ["DateTime", "Open_EWA", "a", "b", "c", "Volume"], ["DateTime", "Open_EWA"]],

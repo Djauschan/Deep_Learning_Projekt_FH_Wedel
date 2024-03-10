@@ -1,7 +1,7 @@
 AMOUNT_OF_DATA : 1
-TO_FIND_RSC_FOLDER : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\data\\raw_data\\Aktien\\"
-TO_SAVE_RSC_FOLDER : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\data\\train_data\\"
-TO_FIND_OTHER_FEATURE_RSC_FOLDER : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\CNN\\data\\raw_data\\ETF\\"
+TO_FIND_RSC_FOLDER : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\data\\raw_data\\Aktien\\"
+TO_SAVE_RSC_FOLDER : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\data\\train_data\\"
+TO_FIND_OTHER_FEATURE_RSC_FOLDER : "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\data\\raw_data\\ETF\\"
 
 ##AAPL,AAL,AMD,C,MRNA,NIO,NVDA,SNAP,SQ,TSLA
 RSC_DATA_FILES: [
