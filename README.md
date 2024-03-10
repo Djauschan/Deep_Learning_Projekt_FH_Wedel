@@ -1,4 +1,4 @@
-# Project Deep Learning - Trading Agent & Stock Predice Predictor
+# Project Deep Learning - Trading Agent & Stock Price Predictor
 
 This repository contains the source code of a web application developed in the context of the module "Project Deep Learning" at the FH Wedel.
 It was developed by the class of the winter semester 2023/2024.
@@ -34,7 +34,7 @@ Open your web browser and navigate to `http://localhost:8080` to start using the
 - `data/`: Contains the raw, unprocessed data that all groups use in their projects.
 - `rl/`: The project directory of the RL group.
 - `transformers/`: The project directory of the Transformers group.
-- `WebApp/`: Contains the project directories of the Frontend and Backend groups.
+- `web-app/`: Contains the project directories of the Frontend and Backend groups.
 - `.gitignore`: Global gitignore file for the whole project.
 - `docker-compose.yaml`: The docker-compose file which starts all containers (frontend, backend, prediction APIs of each model group).
 - `README.md`: This file.
