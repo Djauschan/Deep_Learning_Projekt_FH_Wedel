@@ -122,19 +122,19 @@
       <DxSeries :name=selectedStock open-value-field="Open" high-value-field="High" low-value-field="Low"
         close-value-field="Close" argument-field="DateTime">
       </DxSeries>
-      <DxSeries v-if="showCNNLine" :name="'CNN' + this.selectedStock" :data-source="combinedData" type="line"
+      <DxSeries v-if="showCNNLine" :name="'CNN-' + this.selectedStock" :data-source="combinedData" type="line"
         value-field="CNNValue" argument-field="date" :color="seriesColors[0]">
       </DxSeries>
-      <DxSeries v-if="showTransformerLine" :name="'Transformer' + this.selectedStock" :data-source="combinedData"
+      <DxSeries v-if="showTransformerLine" :name="'Transformer-' + this.selectedStock" :data-source="combinedData"
         type="line" value-field="TransformerValue" argument-field="date" :color="seriesColors[1]">
       </DxSeries>
-      <DxSeries v-if="showLSTMLine" :name="'LSTM' + this.selectedStock" :data-source="combinedData" type="line"
+      <DxSeries v-if="showLSTMLine" :name="'LSTM-' + this.selectedStock" :data-source="combinedData" type="line"
         value-field="LSTMValue" argument-field="date" :color="seriesColors[2]">
       </DxSeries>
-      <DxSeries v-if="showrandomForestLine" :name="'randomForest' + this.selectedStock" :data-source="combinedData"
+      <DxSeries v-if="showrandomForestLine" :name="'randomForest-' + this.selectedStock" :data-source="combinedData"
         type="line" value-field="randomForestValue" argument-field="date" :color="seriesColors[3]">
       </DxSeries>
-      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost' + this.selectedStock" :data-source="combinedData"
+      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost-' + this.selectedStock" :data-source="combinedData"
         type="line" value-field="gradientBoostValue" argument-field="date" :color="seriesColors[4]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
@@ -151,7 +151,7 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData" :title="CNNchartTitle">
+    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData[this.selectedStock]" :title="CNNchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'CNN Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[0]">
       </DxSeries>
@@ -169,7 +169,7 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="this.transformerData"
+    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="this.transformerData[this.selectedStock]"
       :title="TransformerchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line"
@@ -189,7 +189,7 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData" :title="LSTMchartTitle">
+    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData" :title="LSTMchartTitle[this.selectedStock]">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'LSTM Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
       </DxSeries>
@@ -207,7 +207,7 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart" :data-source="this.randomForestData"
+    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart" :data-source="this.randomForestData[this.selectedStock]"
       :title="RandomForestchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line"
@@ -227,7 +227,7 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart" :data-source="this.gradientBoostData"
+    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart" :data-source="this.gradientBoostData[this.selectedStock]"
       :title="GradientBoostchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line"
@@ -266,25 +266,6 @@ import Header from './Header.vue'
 import axios from "axios";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import { useMyPiniaStore } from "../store.js";
-
-// Add the calculateMeanErrorAndMeanAbsoluteError function here
-function calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues) {
-  if (actualValues.length !== predictedValues.length) {
-    throw new Error("The lengths of actualValues and predictedValues should be the same.");
-  }
-
-  // Calculate errors for each data point
-  const errors = actualValues.map((actual, index) => predictedValues[index] - actual);
-
-  // Calculate mean error
-  const meanError = errors.reduce((sum, error) => sum + error, 0) / errors.length;
-
-  // Calculate mean absolute error
-  const absoluteErrors = errors.map(error => Math.abs(error));
-  const meanAbsoluteError = absoluteErrors.reduce((sum, error) => sum + error, 0) / absoluteErrors.length;
-
-  return { meanError, meanAbsoluteError };
-};
 
 export default {
   components: {
@@ -475,22 +456,6 @@ export default {
       const month = this.currentDate.getMonth() + 1; // Month is zero-based
       this.selectedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
       this.showDatePicker = false;
-    },
-    // Method to calculate mean error and mean absolute error
-    calculateErrorsAndDisplay(actualValues, predictedValues) {
-      const { meanError, meanAbsoluteError } = calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues);
-      this.meanError = meanError.toFixed(2); // Round to 2 decimal places
-      console.log("MA " + str(this.meanError))
-      this.meanAbsoluteError = meanAbsoluteError.toFixed(2); // Round to 2 decimal places
-      console.log("MAN " + str(this.meanAbsoluteError))
-    },
-
-    // Example method to trigger calculation and display
-    displayErrors() {
-      // Example actual and predicted data
-      const actualValues = [10, 20, 30, 40, 50];
-      const predictedValues = [12, 18, 28, 38, 48];
-      this.calculateErrorsAndDisplay(actualValues, predictedValues);
     },
 
     handleSelection() {
