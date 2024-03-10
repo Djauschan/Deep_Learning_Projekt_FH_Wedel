@@ -156,7 +156,7 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
 
     stock_symbol_list = stock_symbols[1:-1].split(", ")
 
-    dfs = []  # List to store DataFrames for each stock
+    dfs = {}
 
     for stock in stock_symbol_list:
         rsc_completePath = f"../data/Aktien/{stock}_1min.txt"
@@ -175,14 +175,16 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
 
             if interval == 'H':
                 data = data.resample('2H').mean().round(2)
+                complete_index = pd.date_range(start=start_date, end=end_date, freq='2H')
             elif interval == 'M':
                 data = data.resample('1T').mean().round(2)
+                complete_index = pd.date_range(start=start_date, end=end_date, freq='1T')
             else:
                 data = data.resample('1H').mean().round(2)
+                complete_index = pd.date_range(start=start_date, end=end_date, freq='24H')
 
             data.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-            complete_index = pd.date_range(start=start_date, end=end_date, freq='2H')
             complete_data = pd.DataFrame(index=complete_index)
 
             data = pd.merge(complete_data, data, left_index=True, right_index=True, how='left')
@@ -192,19 +194,14 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
             data.bfill(inplace=True)
 
             data.reset_index(inplace=True)
-            data.rename(columns={'index': 'DateTime'}, inplace=True)
+            data.rename(columns={'index': 'date', 'Close': 'value'}, inplace=True)
 
-            dfs.append(data)
+            # Convert DataFrame to list of dictionaries
+            data_dict = data[['date', 'value']].to_dict('records')
 
-    return_data = pd.concat(dfs)
+            dfs[stock] = data_dict
 
-    return_data = return_data.replace([np.inf, -np.inf], np.nan)
-    return_data.ffill(inplace=True)
-    return_data.bfill(inplace=True)
-
-    return_data = return_data.to_dict(orient='records')
-
-    return return_data
+    return dfs
 
 
 # method to get stock data of specific stock symbol for n days

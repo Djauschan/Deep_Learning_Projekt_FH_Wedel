@@ -335,6 +335,7 @@ def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04
                                  ALL_DATA_COLUMNS=allColumns,
                                  COLUMNS_TO_KEEP=relevantColumns)
 
+
     return data
 
 
