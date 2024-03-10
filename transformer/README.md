@@ -51,7 +51,7 @@ NOTE: As the main goal of this project was to create a fully-fledged web applica
 ## Project Structure
 
 - `data/`: The directory containing all data (input data for model training, output data such as scaler and model files, all configs used for our pipelines and miscellaneous data, e.g. the index mappings).
-- `notebooks`: Contains a notebook for the analysis of the distribution of the data (time distribution, impact of normalization and outlier detection).
+- `notebooks/`: Contains a notebook for the analysis of the distribution of the data (time distribution, impact of normalization and outlier detection).
 - `scoring_functions/`: Contains the evaluation functions, developed for the comparison between the model as well as sample data to test the functions.
 - `src_transformers/`: Holds the actual codebase used for model training and prediction.
 - `api.py`: The API that is started inside the transformers docker container. Requests to it are sent from the web application's backend and it returns the model predictions.
@@ -61,3 +61,14 @@ NOTE: As the main goal of this project was to create a fully-fledged web applica
 - `requirements_torch.txt`: Specifies the PyTorch requirements and the Index URL from which to download them from.
 - `requirements.txt`: Specifies all other required python libraries.
 - `setup.cfg`: The configuration we used for autopep8.
+
+## Structure of src_transformers
+
+- `models/`: The directory containing all model classes.
+- `pipelines/`: Contains the trainer class and relevant helper classes.
+- `preprocessing/`: The directory containing all dataset classes, preprocessing code, and relevant helper classes.
+- `test/`: Holds code files with Pytest test cases.
+- `utils/`: The directory containing miscellaneous classes and scripts (e.g. the logger class and visualisation scripts).
+- `abstract_model.py`: The abstract class from which `prediction_interface.py` inherits from.
+- `main.py`: The file acting as the entrypoint to run pipelines.
+- `prediction_interface.py`: The transformer interface class which generates predictions and sends them to the transformers API.
