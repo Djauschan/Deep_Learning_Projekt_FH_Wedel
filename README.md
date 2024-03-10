@@ -30,7 +30,7 @@ Open your web browser and navigate to `http://localhost:8080` to start using the
 ## Project Structure
 
 - `ann/`: The project directory of the ANN group.
-- `CNN/`: The project directory of the CNN group.
+- `cnn/`: The project directory of the CNN group.
 - `data/`: Contains the raw, unprocessed data that all groups use in their projects.
 - `rl/`: The project directory of the RL group.
 - `transformer/`: The project directory of the Transformers group.
@@ -50,7 +50,7 @@ If you want to expand the web application by adding more models, you can easily 
     - For this step, you might be able to reuse a large proportion of the current code, e.g. the data loader source code.
 3. Add a prediction API (`api.py`) to your group's directory which returns your model predictions when called.
     - Refer to other groups' prediction APIs when implementing yours.
-4. Extend `WebApp/backend/main.py` by adding a prediction route which sends an HTTP request to your group's prediction API.
+4. Extend `web-app/backend/main.py` by adding a prediction route which sends an HTTP request to your group's prediction API.
     - Follow the same pattern of the other predictions routes.
 5. Add a `DOCKERFILE`, which details how your container should be built, to your group directory.
 6. Extend `docker-compose.yaml` in the repository's root to create your container along the others when using `docker compose up`.
