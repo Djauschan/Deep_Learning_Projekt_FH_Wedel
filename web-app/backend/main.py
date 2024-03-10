@@ -2,6 +2,7 @@ import bcrypt
 import crud
 import models
 import pandas as pd
+import numpy as np
 import requests
 import schemas
 from database import SessionLocal, engine
@@ -338,6 +339,68 @@ def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04
 
     return data
 
+@app.get("/get/MAE")
+def get_MAE_for_model(stock_symbols: str = '[AAPL, SNAP]', start_date: str = '2021-01-04', resolution: str = 'H', model_type: str = 'transformer'):
+    if model_type.lower() == "transformer":
+        pred_model = predict_transformer
+    elif model_type.lower() == "cnn":
+        pred_model = predict_cnn
+    elif model_type.lower() == "randomforest":
+        pred_model = predict_randomForest
+    elif model_type.lower() == "gradientboost":
+        pred_model = predict_gradientBoost
+    else:
+        raise ValueError("Invalid model type")
+    y_true = load_data(stock_symbols, start_date, resolution)
+    y_pred = pred_model(stock_symbols, start_date, resolution)
+    stock_symbols = stock_symbols[1:-1].split(", ")
+    for stock_symbol in stock_symbols:
+        df_true = pd.DataFrame(y_true[stock_symbol])
+        df_pred = pd.DataFrame(y_pred[stock_symbol])
+        
+        df_complete = pd.concat([df_pred.set_index('date'), df_true.set_index('DateTime').Close], axis=1)
+        print("="*20)
+        print(stock_symbol)
+        print(df_complete)
+        print("="*20)
+
+
+def mean_absolute_error(predictions, targets):
+    """
+    Calculate the mean absolute error between two NumPy arrays.
+
+    Parameters:
+    predictions (numpy.ndarray): A NumPy array of predicted values.
+    targets (numpy.ndarray): A NumPy array of target (true) values.
+
+    Returns:
+    float: Mean Absolute Error (MAE)
+    """
+    if predictions.shape != targets.shape:
+        raise ValueError("Shape of predictions and targets must be the same.")
+
+    total_error = np.sum(np.abs(predictions - targets))
+
+    return total_error / len(predictions)
+
+
+def mean_error(predictions, targets):
+    """
+    Calculate the mean error between two NumPy arrays.
+
+    Parameters:
+    predictions (numpy.ndarray): A NumPy array of predicted values.
+    targets (numpy.ndarray): A NumPy array of target (true) values.
+
+    Returns:
+    float: Mean Error (ME)
+    """
+    if predictions.shape != targets.shape:
+        raise ValueError("Shape of predictions and targets must be the same.")
+
+    total_error = np.sum(predictions - targets)
+
+    return total_error / len(predictions) 
 
 """ Outdated code from the original main.py"""
 
