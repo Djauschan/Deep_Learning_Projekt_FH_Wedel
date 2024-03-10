@@ -35,15 +35,16 @@ class PredictionDataset(Dataset):
         data (pd.DataFrame): The DataFrame containing the data for making predictions.
     """
 
-    def __init__(self, data: pd.DataFrame, first_index: int, encoder_intervals: int) -> None:
+    def __init__(self, data: pd.DataFrame, first_index: int, encoder_length: int) -> None:
         """
-        Initializes the PredictionDataset with the given data and index.
+        Initializes the PredictionDataset with the given data, index, and encocer length.
 
         Args:
             data (pd.DataFrame): The DataFrame containing the data for making predictions.
             first_index (int): The index of the first row of data not included in the sample.
+            encoder_length (int): The length of the encoder input.
         """
-        self.data = data.iloc[first_index - encoder_intervals: first_index, :]
+        self.data = data.iloc[first_index - encoder_length: first_index, :]
         self.data.set_index("posix_time", inplace=True)
 
     def __len__(self) -> int:
@@ -82,19 +83,25 @@ class TransformerInterface(AbstractModel):
     converting relative prices to absolute prices. It inherits from the AbstractModel class.
 
     Attributes:
-        interval_minutes (int): The interval between predictions in minutes.
-        num_intervals (int): The number of intervals.
+        resolution (resolution_enum): The resolution of the data.
+        num_intervals (int): The number of intervals (in the prediction).
         model_path (Path): The path to the model file.
         data_path (Path): The path to the data file.
         prices_path (Path): The path to the prices file.
+        model_name (str): The name of the model used for predictions.
+        encoder_length (int): The length of the encoder input.
+        time_resolution (int): The time resolution of the data.
+        start_day (str): The time a day starts in the data.
+        end_day (str): The time a day ends in the data.
+        symbols (list): The symbols of the stocks in the data.
     """
 
     def __init__(self, resolution: resolution_enum) -> None:
         """
-        Initializes the TransformerInterface with default values.
+        Initializes the TransformerInterface with the correct paths based on the given resolution.
 
-        This method sets the interval between predictions, the number of intervals,
-        and the paths to the model file, the data file, and the prices file.
+        Args:
+            resolution (resolution_enum): The resolution of the data.
         """
         self.resolution = resolution
 
@@ -103,29 +110,23 @@ class TransformerInterface(AbstractModel):
         models_path = Path("data", "output", "models")
         configs_path = Path("data", "test_configs")
 
-        # Set the correct model, data and config paths based on the requested resolution
-        # The division sign is used to join paths in pathlib
-        # self.num_intervals defines the number of intervals for the prediction
         if resolution == resolution.MINUTE:
             self.num_intervals = 20
-            self.model_path = models_path / "TransformerEncoder_v23.pt"
-            self.data_path = data_path / "1_min_input_data.csv"
-            self.prices_path = data_path / "te_prices_for_1_min.pkl"
-            config_path = configs_path / "training_config_encoder_1min.yaml"
+            file_prefix = "te_minutely"
         elif resolution == resolution.TWO_HOURLY:
             self.num_intervals = 24
-            self.model_path = models_path / "TransformerModel_v2.pt"
-            self.data_path = data_path / "120_min_input_data.csv"
-            self.prices_path = data_path / "tt_prices_for_120_min.pkl"
-            config_path = configs_path / "config_tt_hourly.yaml"
+            file_prefix = "tt_twohourly"
         elif resolution == resolution.DAILY:
             self.num_intervals = 30
-            self.model_path = models_path / "TransformerModel_v5.pt"
-            self.data_path = data_path / "1440_min_input_data.csv"
-            self.prices_path = data_path / "tt_prices_for_1440_min.pkl"
-            config_path = configs_path / "config_tt_daily.yaml"
+            file_prefix = "tt_daily"
         else:
             raise ValueError("Invalid resolution")
+
+        # The division sign is used to join paths in pathlib
+        self.model_path = models_path / f"{file_prefix}_model.pt"
+        self.data_path = data_path / f"{file_prefix}_input_data.csv"
+        self.prices_path = data_path / f"{file_prefix}_prices.pkl"
+        config_path = configs_path / f"{file_prefix}_config.yaml"
 
         # Load configuration file of the chosen model
         with open(config_path, "r", encoding="utf-8") as f:
@@ -146,12 +147,12 @@ class TransformerInterface(AbstractModel):
         self.symbols = dataset_parameters["decoder_symbols"]
 
     def predict(self, symbol_list: list, timestamp_start: pd.Timestamp) -> pd.DataFrame:
-        """predicts the stock prices for the given symbols and time range.
+        """
+        Predicts the stock prices for the requested symbols starting at a specified timestamp.
 
         Args:
             symbol_list (list): The list of symbols for which the stock prices should be predicted.
-            timestamp_start (pd.Timestamp): The start of the time range for which the stock prices should be predicted.
-            timestamp_end (pd.Timestamp): The end of the time range for which the stock prices should be predicted.
+            timestamp_start (pd.Timestamp): The timestamp for the start of the predictions.
 
         Returns:
             pd.DataFrame: The predicted stock prices.
@@ -183,7 +184,7 @@ class TransformerInterface(AbstractModel):
             # Set the timestamps as the index of the DataFrame and set the time to 20:00
             prediction.index = pd.Index(timestamps) + pd.Timedelta(hours=20)
         elif self.resolution == resolution_enum.TWO_HOURLY:
-            # When dealing with 2-hourly data, we need to add in the weeken days
+            # When dealing with 2-hourly data, we need to add in the weekend days
             start_day = dt.datetime.strptime(
                 self.start_day, '%H:%M').time().hour
             end_day = dt.datetime.strptime(self.end_day, '%H:%M').time().hour
@@ -215,13 +216,14 @@ class TransformerInterface(AbstractModel):
         # Only return the predictions for the requested stock symbols
         return prediction[symbol_list]
 
-    def load_data(self, timestamp_start: pd.Timestamp) -> tuple[dict[str, float], PredictionDataset]:
+    def load_data(self,
+                  timestamp_start: pd.Timestamp) -> tuple[dict[str, float], PredictionDataset]:
         """
         Loads the data for making predictions.
 
         This method loads the data from the csv file specified by the `data_path` attribute.
-        It then creates a PredictionDataset containing the 96 rows of data preceding the given
-        start timestamp. Furthermore, it calculates the prices of the stocks just before the
+        It then creates a PredictionDataset containing the data preceding the given start
+        timestamp. Furthermore, it calculates the prices of the stocks just before the
         start timestamp.
 
         Args:
@@ -255,7 +257,9 @@ class TransformerInterface(AbstractModel):
         return prices_before_prediction, dataset
 
     def preprocess(self) -> None:
-        """Not implemented in this interface as stored data is already preprocessed."""
+        """
+        Not implemented in this interface as the stored data is already preprocessed.
+        """
 
     def load_model(self) -> nn.Module:
         """
