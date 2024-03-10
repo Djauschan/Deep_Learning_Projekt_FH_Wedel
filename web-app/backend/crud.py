@@ -180,12 +180,11 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
                 data = data.resample('1min').mean().round(2)
                 complete_index = pd.date_range(start=start_date, end=end_date, freq='1min')
             elif interval == 'D':
-                data = data.at_time('20:00').mean().round(2)
-                #data = data.resample('24h').mean().round(2)
-                
+                data = data.resample('24h').mean().round(2)
                 complete_index = pd.date_range(start=start_date, end=end_date, freq='24h')
 
             data.replace([np.inf, -np.inf], np.nan, inplace=True)
+            data.fillna(0, inplace=True)
 
             complete_data = pd.DataFrame(index=complete_index)
 
@@ -196,10 +195,10 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
             data.bfill(inplace=True)
 
             data.reset_index(inplace=True)
-            data.rename(columns={'index': 'date', 'Close': 'value'}, inplace=True)
+            data.rename(columns={'index': 'DateTime', 'Close': 'Close', 'High': 'High', 'Low': 'Low', 'Open': 'Open'}, inplace=True)
 
             # Convert DataFrame to list of dictionaries
-            data_dict = data[['date', 'value']].to_dict('records')
+            data_dict = data[['DateTime', 'Close', 'High', 'Low', 'Open']].to_dict('records')
 
             dfs[stock] = data_dict
 

@@ -541,21 +541,21 @@ export default {
     },
 
     formatCalendarEntry(dateString) {
-    // Create a new Date object
-    let date = new Date(dateString);
+      // Create a new Date object
+      let date = new Date(dateString);
 
-    // Format the date
-    let year = date.getFullYear();
-    let month = date.getMonth() + 1; // Months are zero-based
-    let day = date.getDate();
+      // Format the date
+      let year = date.getFullYear();
+      let month = date.getMonth() + 1; // Months are zero-based
+      let day = date.getDate();
 
-    // Pad single digit numbers with a leading zero
-    month = month < 10 ? '0' + month : month;
-    day = day < 10 ? '0' + day : day;
+      // Pad single digit numbers with a leading zero
+      month = month < 10 ? '0' + month : month;
+      day = day < 10 ? '0' + day : day;
 
-    // Return the formatted date string
-    return `${year}-${month}-${day}`;
-  },
+      // Return the formatted date string
+      return `${year}-${month}-${day}`;
+    },
 
     async hideAll() {
       this.showCNNLine = false;
@@ -571,38 +571,6 @@ export default {
       this.showgradientBoostLine = true;
       this.showLSTMLine = true;
       this.showCNNLine = true;
-    },
-
-    async get_stock_data(stock_symbol, days_back) {
-      try {
-        const response = await axios.get(this.store.API + "/getStock", {
-          params: {
-            stock_symbol: this.selectedStock,
-            start_date: this.formatCalendarEntry(this.startDate), // Replace with the start date of the prediction
-            resolution: this.selectedTime, // Replace with the resolution:
-          }
-        });
-        console.log([response.data])
-        return response.data
-      } catch (error) {
-        Swal.fire({
-          title: "Error at getting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.detail
-        ) {
-          console.log(error.response.data.detail);
-        } else {
-          console.log(error);
-        }
-      }
     },
 
     async load_CNN_data() {
@@ -810,7 +778,7 @@ export default {
           params: {
             stock_symbols: "[" + this.selectedStock + "]",
             start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
-            resolution: this.selectedTime, 
+            resolution: this.selectedTime,
           }
         });
         console.log("### normal loaded ###")
@@ -890,6 +858,39 @@ export default {
         });
       }
     },
+
+    async get_stock_data(stock_symbol, days_back) {
+      try {
+        const response = await axios.get(this.store.API + "/getStock", {
+          params: {
+            stock_symbol: this.selectedStock,
+            start_date: this.formatCalendarEntry(this.startDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
+          }
+        });
+        console.log([response.data])
+        return response.data
+      } catch (error) {
+        Swal.fire({
+          title: "Error at getting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.detail
+        ) {
+          console.log(error.response.data.detail);
+        } else {
+          console.log(error);
+        }
+      }
+    },
+
     checkAllBoxes() {
       if (this.showCNNLine || this.showTransformerLine || this.showLSTMLine || this.showrandomForestLine || this.showgradientBoostLine) {
         return true;
