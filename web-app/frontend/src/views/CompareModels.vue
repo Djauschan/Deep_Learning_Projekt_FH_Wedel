@@ -141,7 +141,7 @@
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
           <DxFormat type="currency" precision="2" />
@@ -151,7 +151,8 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData[this.selectedStock]" :title="CNNchartTitle">
+    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData[this.selectedStock]"
+      :title="CNNchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'CNN Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[0]">
       </DxSeries>
@@ -169,8 +170,8 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="this.transformerData[this.selectedStock]"
-      :title="TransformerchartTitle">
+    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart"
+      :data-source="this.transformerData[this.selectedStock]" :title="TransformerchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line"
         :color="seriesColors[1]">
@@ -189,7 +190,8 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData" :title="LSTMchartTitle[this.selectedStock]">
+    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData"
+      :title="LSTMchartTitle[this.selectedStock]">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'LSTM Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
       </DxSeries>
@@ -207,8 +209,8 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart" :data-source="this.randomForestData[this.selectedStock]"
-      :title="RandomForestchartTitle">
+    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart"
+      :data-source="this.randomForestData[this.selectedStock]" :title="RandomForestchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line"
         :color="seriesColors[3]">
@@ -227,8 +229,8 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart" :data-source="this.gradientBoostData[this.selectedStock]"
-      :title="GradientBoostchartTitle">
+    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart"
+      :data-source="this.gradientBoostData[this.selectedStock]" :title="GradientBoostchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line"
         :color="seriesColors[4]">
@@ -410,17 +412,17 @@ export default {
       this.showCalendar = !this.showCalendar;
     },
     selectDay(day) {
-    const selectedDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
-    if (selectedDate >= this.minDate && selectedDate <= this.maxDate) {
-      // Handle day selection
-      if (this.selectingStart) {
-        this.startDate = day;
-        this.showCalendar = false;
+      const selectedDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
+      if (selectedDate >= this.minDate && selectedDate <= this.maxDate) {
+        // Handle day selection
+        if (this.selectingStart) {
+          this.startDate = day;
+          this.showCalendar = false;
+        }
+      } else {
+        alert('Please select a date between 2021-01-04 and 2021-02-10');
       }
-    } else {
-      alert('Please select a date between 2021-01-04 and 2021-02-10');
-    }
-  },
+    },
     previousMonth() {
       // Logic for moving to the previous month
       this.currentDate.setMonth(this.currentDate.getMonth() - 1);
@@ -499,9 +501,7 @@ export default {
       };
 
       // Merge all data points into combinedData
-      //mergeDataPoints(this.LSTMData, 'LSTMValue');
       if (this.showCNNLine) {
-        console.log("CNNData");
         mergeDataPoints(this.CNNData, 'CNNValue');
       }
       if (this.showTransformerLine) {
@@ -513,6 +513,13 @@ export default {
       if (this.showrandomForestLine) {
         mergeDataPoints(this.randomForestData, 'randomForestValue');
       }
+      if (this.showgradientBoostLine) {
+        mergeDataPoints(this.gradientBoostData, 'gradientBoostValue');
+      }
+      if (this.lstmLine) {
+        mergeDataPoints(this.LSTMData, 'LSTMValue');
+      }
+
 
       // Set the result to combinedData
       this.combinedData = combinedDataWithNull;
@@ -586,7 +593,7 @@ export default {
         });
         this.cnnMeanError = maeResponse.data[this.selectedStock].ME;
         this.cnnMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
-        
+
         return response.data;
 
       } catch (error) {
@@ -610,10 +617,10 @@ export default {
             resolution: this.selectedTime, // Replace with the resolution:
           }
         });
-        
+
         console.log("Prediction transformer loaded");
         console.log(response.data);
-        
+
         // Assuming the response.data is an object with date and close properties
         this.transformerData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
@@ -834,18 +841,36 @@ export default {
 
         console.log("datasource: " + this.dataSource)
 
-        
-        if (this.dataSource) {
 
-          const prices = this.dataSource.flatMap(data => [data.open, data.close]);
-          this.priceRange = {
-            min: Math.min(...prices) * 0.5,
-            max: Math.max(...prices) * 2
-          };
-          this.priceRangeKey = Math.random();
-          console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
+        if (this.dataSource) {
+          const prices = this.dataSource.flatMap(data => [data.Open, data.Close]);
+          console.log('dataSource:', this.dataSource);
+          console.log('prices:', prices);
+
+          let minIsNull = false;
+          for (let price in prices) {
+            if (prices[price] == 0) {
+              minIsNull = true;
+            }
+          }
+          if (minIsNull) {
+            const sum = prices.reduce((a, b) => a + b, 0);
+            const avg = sum / prices.length;
+            this.priceRange = {
+              min: avg * 0.5,
+              max: Math.max(...prices) * 2
+            };
+            this.priceRangeKey = Math.random();
+            console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
+          } else {
+            this.priceRange = {
+              min: Math.min(...prices) * 0.5,
+              max: Math.max(...prices) * 2
+            };
+            this.priceRangeKey = Math.random();
+            console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
+          }
         }
-        
 
         await this.updateCombinedData();
         this.showChart = true;
