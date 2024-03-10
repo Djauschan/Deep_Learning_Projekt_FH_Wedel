@@ -486,8 +486,8 @@ export default {
     },
 
     handleSelection() {
-      console.log("SelectedTime:", this.selectedTime);
-      console.log("SelectedStock:", this.selectedStock);
+      //console.log("SelectedTime:", this.selectedTime);
+      //console.log("SelectedStock:", this.selectedStock);
     },
 
     async updateCombinedData() {
@@ -544,9 +544,6 @@ export default {
     // Pad single digit numbers with a leading zero
     month = month < 10 ? '0' + month : month;
     day = day < 10 ? '0' + day : day;
-
-    console.log("original date: " + dateString);
-    console.log("formatted date: " + `${year}-${month}-${day}`);
 
     // Return the formatted date string
     return `${year}-${month}-${day}`;
@@ -615,7 +612,10 @@ export default {
 
         // Assuming the response.data is an object with date and close properties
         this.CNNData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-        this.calculateErrorsAndDisplay(this.real_data.map(data => data.close), this.CNNData.map(data => data.value));
+
+        console.log("mapped cnnData:");
+        console.log(this.CNNData);
+
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -677,17 +677,7 @@ export default {
 
         // Assuming the response.data is an object with date and close properties
         this.randomForestData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-        console.log("===================================================================================");
-        console.log("===================================================================================");
-        console.log("transformerData:");
-        
-        this.transformerData.forEach(item => {
-          console.log(item.value);
-        });
-        console.log("===================================================================================");
-        console.log("===================================================================================");
-        // console.log(this.transformerData[this.selectedStock][0].value);
-        this.calculateErrorsAndDisplay(this.real_data.map(data => data.close), this.transformerData.map(data => data.value));
+
         console.log("mapped randomForestData:");
         console.log(this.randomForestData);
 
