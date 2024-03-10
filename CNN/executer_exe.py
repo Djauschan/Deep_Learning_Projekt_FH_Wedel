@@ -1,4 +1,7 @@
 import time
+
+import numpy as np
+
 from CNN_TimeSeriesModel_exe import CNN_TimeSeriesModel
 from Preprocessor import Preprocessor
 from Importer import Importer
@@ -118,5 +121,5 @@ class executer:
         print('END 4: train & export Model')
 
 exe = executer()
-exe.buildTimeSeriesData_w()
-#exe.startTraining_w()
+#exe.buildTimeSeriesData_w()
+exe.startTraining_w()

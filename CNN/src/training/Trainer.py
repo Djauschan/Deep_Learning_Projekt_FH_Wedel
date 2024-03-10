@@ -75,6 +75,8 @@ class ModelTrainer:
         # y1 = 'epoch', y2='modelOut', y3='label', y4='loss', y5='running_avg'
         train_logging_arr_interval = np.zeros(
             (int((len(self.train_dataloader) * self.NUM_EPOCH / self.LOGGING_INTERVAL)) + self.NUM_EPOCH, 5))
+        train_epoch_logging_arr_interval = np.zeros(
+            (int((len(self.train_dataloader) / self.LOGGING_INTERVAL)) + 2, 5))
         logColumns_train = ["EPOCH", "idx", "rIDX", "prediction", "label", "LOSS", "epochAvgLOSS", "rAvgLOSS"]
         logColumns_test = ["EPOCH", "idx", "prediction", "label", "LOSS", "epochAvgLOSS"]
         train_logging_arr = np.zeros(
@@ -125,6 +127,8 @@ class ModelTrainer:
                         print("Training Loss: {}".format(loss_val))
                         print('________________')
                         # '''
+            #soll-ist logging training epoch
+
 
             ##### TEST FOR EACH EPOCH
             with torch.no_grad():

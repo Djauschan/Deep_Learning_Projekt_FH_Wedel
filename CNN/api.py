@@ -18,13 +18,6 @@ def predict_cnn(stock_symbol: str, start_date: str, end_date: str, resolution: r
     cnn_interface = ModelExe()
     prediction = cnn_interface.predict(stock_symbols, pd.to_datetime(start_date),
                                        pd.to_datetime(end_date), resolution)
-    print("############")
-    print("############")
-    print(prediction)
-    print("############")
-    print("############")
-    #prediction.set_index('Timestamp', inplace=True)
-    #prediction = prediction.astype("Float64")
 
     data = {}
     for symbol in stock_symbols:
