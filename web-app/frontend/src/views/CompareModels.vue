@@ -115,6 +115,9 @@
     <div class="separator"></div>
     <button class="button-stock" @click="updateChart">Load Charts</button>
   </div>
+  <div v-if="isLoading" class="loading-container">
+    {{ loadingMessage }}
+  </div>
   <!-- Combined Chart -->
   <div class="newChart">
     <DxChart v-if="showChart" :data-source="combinedData" title="Stock Price">
@@ -340,6 +343,9 @@ export default {
       selectingStart: true, // Flag to indicate if currently selecting start date
       minDate: new Date(2021, 0, 4), // January is 0 in JavaScript
       maxDate: new Date(2021, 1, 10),
+      isLoading: false,
+      loadingMessage: 'Loading',
+      loadingInterval: null,
     };
   },
 
@@ -816,6 +822,9 @@ export default {
     },
 
     async updateChart() {
+      this.showChart = false;
+      this.isLoading = true;
+      this.startLoadingAnimation();
       console.log("##### SelectedTime: ", this.selectedTime);
       console.log("##### SelectedStock:", this.selectedStock);
       console.log("##### checkAllBoxes:", this.checkAllBoxes());
@@ -874,7 +883,8 @@ export default {
 
         await this.updateCombinedData();
         this.showChart = true;
-
+        this.isLoading = false;
+        this.stopLoadingAnimation();
       } else {
         Swal.fire({
           title: "Error at getting data",
@@ -884,7 +894,21 @@ export default {
           confirmButtonText: "Close",
           confirmButtonColor: "#d0342c",
         });
+        this.isLoading = false;
       }
+    },
+
+    startLoadingAnimation() {
+      let dots = 0;
+      this.loadingInterval = setInterval(() => {
+        dots = (dots + 1) % 4;
+        this.loadingMessage = 'Loading' + '.'.repeat(dots);
+      }, 1000);
+    },
+
+    stopLoadingAnimation() {
+      clearInterval(this.loadingInterval);
+      this.loadingMessage = 'Loading';
     },
 
     async get_stock_data(stock_symbol, days_back) {
@@ -934,6 +958,14 @@ export default {
 .short-input {
   width: 100px;
   /* Adjust width as needed */
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh; /* Adjust as needed */
+  font-size: 1.5em; /* Adjust as needed */
 }
 
 .calendar-popup {
