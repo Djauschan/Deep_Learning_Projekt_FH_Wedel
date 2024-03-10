@@ -354,7 +354,7 @@ def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04
 
     if(resolution == "H"):
         end_date = (pd.Timestamp(start_date) + pd.Timedelta(days=2)).strftime("%Y-%m-%d")
-    else :
+    else:
         end_date = calculate_end_date(start_date, resolution)
 
     data = crud.loadDataFromFile(stock_symbols=stock_symbols,
@@ -363,7 +363,6 @@ def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04
                                  interval=resolution,
                                  ALL_DATA_COLUMNS=allColumns,
                                  COLUMNS_TO_KEEP=relevantColumns)
-
 
     return data
 

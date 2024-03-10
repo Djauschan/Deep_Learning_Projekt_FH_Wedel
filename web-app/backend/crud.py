@@ -174,14 +174,16 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
             data.set_index('DateTime', inplace=True)
 
             if interval == 'H':
-                data = data.resample('2H').mean().round(2)
-                complete_index = pd.date_range(start=start_date, end=end_date, freq='2H')
+                data = data.resample('2h').mean().round(2)
+                complete_index = pd.date_range(start=start_date, end=end_date, freq='2h')
             elif interval == 'M':
-                data = data.resample('1T').mean().round(2)
-                complete_index = pd.date_range(start=start_date, end=end_date, freq='1T')
-            else:
-                data = data.resample('1H').mean().round(2)
-                complete_index = pd.date_range(start=start_date, end=end_date, freq='24H')
+                data = data.resample('1min').mean().round(2)
+                complete_index = pd.date_range(start=start_date, end=end_date, freq='1min')
+            elif interval == 'D':
+                data = data.at_time('20:00').mean().round(2)
+                #data = data.resample('24h').mean().round(2)
+                
+                complete_index = pd.date_range(start=start_date, end=end_date, freq='24h')
 
             data.replace([np.inf, -np.inf], np.nan, inplace=True)
 
