@@ -318,6 +318,7 @@ def predict_rl(stock_symbols: str = "[AAPL, NVDA]",
 
 @app.get("/load/data")
 def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', resolution: str = "H"):
+def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', resolution: str = "H"):
     allColumns = ["DateTime", "Open", "Close", "High", "Low", "a"]
     relevantColumns = ["DateTime", "Open", "Close", "High", "Low"]
 
