@@ -337,8 +337,16 @@ export default {
       selectedTime: "H",
       selectedStock: "AAL",
       seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'], // Array of colors for each series
-      meanError: null,
-      meanAbsoluteError: null,
+      cnnMeanError: null,
+      cnnMeanAbsoluteError: null,
+      tfMeanError: null,
+      tfMeanAbsoluteError: null,
+      lstmMeanError: null,
+      lstmMeanAbsoluteError: null,
+      gbMeanError: null,
+      gbMeanAbsoluteError: null,
+      rfMeanError: null,
+      rfMeanAbsoluteError: null,
       showCalendar: false,
       currentDate: new Date("2021-01-04"), // Current date
       currentMonth: '', // Current month displayed in the header
@@ -374,19 +382,19 @@ export default {
     },
 
     CNNchartTitle() {
-      return `CNN Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `CNN Chart; Mean Error: ${this.cnnMeanError}; Mean Absolute Error: ${this.cnnMeanAbsoluteError}`;
     },
     TransformerchartTitle() {
-      return `Transformer Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `Transformer Chart; Mean Error: ${this.tfMeanError}; Mean Absolute Error: ${this.tfMeanAbsoluteError}`;
     },
     LSTMchartTitle() {
-      return `LSTM Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `LSTM Chart; Mean Error: ${this.lstmMeanError}; Mean Absolute Error: ${this.lstmMeanAbsoluteError}`;
     },
     RandomForestchartTitle() {
-      return `Random Forest Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `Random Forest Chart; Mean Error: ${this.rfMeanError}; Mean Absolute Error: ${this.rfMeanAbsoluteError}`;
     },
     GradientBoostchartTitle() {
-      return `Gradient Boost Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `Gradient Boost Chart; Mean Error: ${this.gbMeanError}; Mean Absolute Error: ${this.gbMeanAbsoluteError}`;
     },
     tooltip: {
       enabled: true,
@@ -628,6 +636,18 @@ export default {
         });
         console.error(error);
       }
+
+      const response = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "cnn",
+          }
+        });
+      
+      this.cnnMeanError = response.data.mean_error;
+      this.cnnMeanAbsoluteError = response.data.mean_absolute_error;
     },
     async load_transformer_data() {
       try {
