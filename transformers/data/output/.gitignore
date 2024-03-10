@@ -1,0 +1,9 @@
+*.png
+*.pkl
+
+# Don't ignore files for prediction-interface
+! 20_min_input_data.csv
+! tt_prices_for_20_min.pkl
+
+! 120_min_input_data.csv
+! tt_prices_for_120_min.pkl
