@@ -767,7 +767,7 @@ export default {
 
         console.log("datasource: " + this.dataSource)
 
-        /*
+        
         if (this.dataSource) {
 
           const prices = this.dataSource.flatMap(data => [data.open, data.close]);
@@ -778,7 +778,7 @@ export default {
           this.priceRangeKey = Math.random();
           console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
         }
-        */
+        
 
         await this.updateCombinedData();
         this.showChart = true;
