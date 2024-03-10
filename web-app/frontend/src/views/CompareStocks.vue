@@ -4,9 +4,6 @@
      <span class="home-logo">Compare Stocks!</span>
   </div>
   <div class="center">
-    
-    <button class="button-stock" @click="updateChart">Show Predictions</button>
-    <div class="separator"></div>
     <div>
     <button class="button-stock" @click="toggleCalendar">Select Dates</button>
     <div class="calendar-popup" v-if="showCalendar">
@@ -111,6 +108,8 @@
       </div>
       <br>
     </div>
+    <div class="separator"></div>
+    <button class="button-stock" @click="updateChart">Show Predictions</button>
   </div>
   <!-- Combined Chart -->
   <div class="newChart">
