@@ -347,12 +347,8 @@ def predict_rl(stock_symbols: str = "[AAPL, NVDA]",
 def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', resolution: str = "H"):
     if resolution == "M":
         start_date += " 10:01:00"
-    elif resolution == "D":
-        start_date += " 16:00:00"
     allColumns = ["DateTime", "Open", "Close", "High", "Low", "a"]
     relevantColumns = ["DateTime", "Open", "Close", "High", "Low"]
-
-    print(f"{stock_symbols=}, {resolution=}, {start_date=}")
 
     if(resolution == "H"):
         end_date = (pd.Timestamp(start_date) + pd.Timedelta(days=2)).strftime("%Y-%m-%d")
