@@ -624,7 +624,18 @@ export default {
         console.log("mapped cnnData:");
         console.log(this.CNNData);
 
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "cnn",
+          }
+        });
+        this.cnnMeanError = maeResponse.data[this.selectedStock].ME;
+        this.cnnMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
         return response.data;
+
       } catch (error) {
         Swal.fire({
           title: "Error at predicting data",
@@ -636,18 +647,6 @@ export default {
         });
         console.error(error);
       }
-
-      const response = await axios.get(`${this.store.API}/get/MAE`, {
-          params: {
-            stock_symbols: "[" + this.selectedStock + "]",
-            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
-            resolution: this.selectedTime,
-            model_type: "cnn",
-          }
-        });
-      
-      this.cnnMeanError = response.data.mean_error;
-      this.cnnMeanAbsoluteError = response.data.mean_absolute_error;
     },
     async load_transformer_data() {
       try {
@@ -658,16 +657,25 @@ export default {
             resolution: this.selectedTime, // Replace with the resolution:
           }
         });
-
+        
         console.log("Prediction transformer loaded");
         console.log(response.data);
-
+        
         // Assuming the response.data is an object with date and close properties
         this.transformerData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
         console.log("mapped transformerData:");
         console.log(this.transformerData);
-
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "transformer",
+          }
+        });
+        this.tfMeanError = maeResponse.data[this.selectedStock].ME;
+        this.tfMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -700,7 +708,16 @@ export default {
 
         console.log("mapped randomForestData:");
         console.log(this.randomForestData);
-
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "randomforest",
+          }
+        });
+        this.rfMeanError = maeResponse.data[this.selectedStock].ME;
+        this.rfMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -733,7 +750,16 @@ export default {
 
         console.log("mapped gradientBoostData:");
         console.log(this.gradientBoostData);
-
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "gradientboost",
+          }
+        });
+        this.gbMeanError = maeResponse.data[this.selectedStock].ME;
+        this.gbMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
         return response.data;
       } catch (error) {
         Swal.fire({
