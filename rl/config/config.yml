@@ -1,0 +1,69 @@
+directories:
+  train_data: data/train_data.csv # Path to training data
+  test_data: data/train_AAL_combined_data.csv # Path to test data
+  train_data_directory: data
+
+agent_types: ['ma5', 'ma30', 'ma200']
+
+aggregation:
+  aggregation_state_size: 7 #Inputsize from each agent
+  
+q_models: # Path to q-models
+  ma5: models/1_ma5_agent_q_table.npy
+  ma30: models/2_ma30_agent_q_table.npy
+  ma200: models/3_ma200_agent_q_table.npy
+  rsi: models/4_rsi_agent_q_table.npy
+  rf: models/5_rf_agent_q_table.npy
+  gbm: models/6_gbm_agent_q_table.npy
+  transformer: models/7_trans_agent_q_table.npy
+  aggregation: models/aggregation_agent_q_table.npy
+
+
+train_parameters:
+  epochs: 100  # 150 # Number of epochs to train
+  state_size: 20  # Number of different states that an agent can distinguish 
+  action_size: 3   # Possible actions: sell (+1), hold (0), buy (+2)
+
+  #monitor the Portfoliovalue over the trainingcycle:
+  start_cash_monitoring: 1000000 #monitor the cashvalue over the trainingcycle
+  start_stock_monitoring: 0 #monitor the stockamount over the trainingcycle
+
+  # parameters for Q-Learning Agents
+  learning_rate: 0.2 # Learning rate
+  discount_factor: 0.9 # Discount factor for future rewards
+  exploration_rate: 0.2 # Initial exploration rate #0,2
+  exploration_decay: 0.1 # Decay rate for the exploration rate #0,1
+  exploration_min: 0.01 # Minimum exploration rate
+
+  # parameters for rewards
+  reward: 2 #correct prediction
+  hold_reward: 0.0
+  penalty: -2 #incorrect prediction
+
+  #additional penalty, when the portfolio value undercut the min threshold
+  min_portfolio_threshold: 0.3 #< 30% from the started value
+  threshold_penalty10: -1
+  threshold_reward10: 1
+  threshold_penalty5: -0.5
+  threshold_reward5: 0.5
+  threshold_penalty2: -0.2
+  threshold_reward2: 0.2
+  threshold_penalty1: -0.1
+  threshold_reward1: 0.1
+
+#Use manual Stopp loss orders:
+stopp_loss:
+  use_stopp_loss: FALSE #TRUE #FALSE
+  buy_stop_loss_under_buy_price: 0.1 #0.1 Percent
+  stopp_under_sell_price: 0.01 #0.01 Percent
+
+
+traiding:
+  startvalue: 10000
+
+
+
+
+
+
+

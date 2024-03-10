@@ -7,12 +7,12 @@ networks:
 services:
   backend:
     build:
-      context: ./WebApp/services/backend
+      context: ./web-app/backend
       dockerfile: Dockerfile
     ports:
       - 8000:8000
     volumes:
-      - ./WebApp/services/backend:/app
+      - ./web-app/backend:/app
       - ./data:/data
     entrypoint:
       [
@@ -20,13 +20,18 @@ services:
         "-c",
         "uvicorn main:app --host 0.0.0.0 --port 8000"
       ]
+    depends_on:
+      - predict_transformer
+      - predict_cnn
+      - predict_ann
+      - predict_rl
     networks:
       - backend_network
 
   frontend:
     # user: "node"
     build:
-      context: ./WebApp/services/frontend
+      context: ./web-app/frontend
       dockerfile: Dockerfile
     ports:
       - 8080:8080
@@ -41,12 +46,12 @@ services:
   predict_transformer:
     # Specify the build context for this service (current directory)
     build:
-      context: ./transformer
+      context: ./transformers
       dockerfile: Dockerfile
 
     # Bind mount the current directory to /app in the container
     volumes:
-      - ./transformer:/app
+      - ./transformers:/app
 
     # Map port 8001 on the host to port 8000 in the container
     ports:
@@ -101,6 +106,31 @@ services:
     # Map port 8003 on the host to port 8000 in the container
     ports:
       - 8003:8000
+
+    # Set the entrypoint of the container to start a Uvicorn server running the app defined in 'api' of 'src_transformers' directory
+    entrypoint:
+      [
+        "bash",
+        "-c",
+        "uvicorn api:app --host 0.0.0.0 --port 8000"
+      ]
+    networks:
+      - backend_network
+
+  predict_rl:
+    # Specify the build context for this service (current directory)
+    build:
+      context: ./rl
+      dockerfile: Dockerfile
+
+    # Bind mount the current directory to /app in the container
+    volumes:
+      - ./rl:/app
+      - ./data:/data
+
+    # Map port 8004 on the host to port 8000 in the container
+    ports:
+      - 8004:8000
 
     # Set the entrypoint of the container to start a Uvicorn server running the app defined in 'api' of 'src_transformers' directory
     entrypoint:
