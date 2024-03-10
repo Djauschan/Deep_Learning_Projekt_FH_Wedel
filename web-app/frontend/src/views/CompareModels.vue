@@ -7,34 +7,33 @@
     <button class="button-stock" @click="updateChart">Load Charts</button>
     <div class="separator"></div>
     <div>
-    <button class="button-stock" @click="toggleCalendar">Select Dates</button>
-    <div class="calendar-popup" v-if="showCalendar">
-      <div class="calendar">
-        <div class="calendar-header">
-          <button @click="previousMonth">&lt;</button>
-          <div>
-            <h2>{{ currentMonthName }}</h2>
-            <h2>{{ currentMonth }}</h2>
-            <h2>{{ currentYear }}</h2>
+      <button class="button-stock" @click="toggleCalendar">Select Dates</button>
+      <div class="calendar-popup" v-if="showCalendar">
+        <div class="calendar">
+          <div class="calendar-header">
+            <button @click="previousMonth">&lt;</button>
+            <div>
+              <h2>{{ currentMonthName }}</h2>
+              <h2>{{ currentMonth }}</h2>
+              <h2>{{ currentYear }}</h2>
+            </div>
+            <button @click="nextMonth">&gt;</button>
           </div>
-          <button @click="nextMonth">&gt;</button>
-        </div>
-        <div class="calendar-days">
-          <div v-for="day in daysInMonth" :key="day" class="calendar-day"
-               :class="{ 'selected-start': day === startDate}"
-               @click="selectDay(day)">
-            {{ day }}
+          <div class="calendar-days">
+            <div v-for="day in daysInMonth" :key="day" class="calendar-day"
+              :class="{ 'selected-start': day === startDate }" @click="selectDay(day)">
+              {{ day }}
+            </div>
           </div>
         </div>
       </div>
+      <div>
+        <label>Selected Start Date:</label>
+      </div>
+      <div>
+        <input type="text" v-model="formattedStartDate" readonly class="short-input">
+      </div>
     </div>
-    <div>
-      <label>Selected Start Date:</label>
-    </div>
-    <div>
-      <input type="text" v-model="formattedStartDate" readonly class="short-input">
-    </div>
-  </div>
 
     <div class="separator"></div>
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
@@ -335,7 +334,7 @@ export default {
       combinedData: [],
       store: useMyPiniaStore(),
       selectedTime: "H",
-      selectedStock: "AAPL",
+      selectedStock: "AAL",
       seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'], // Array of colors for each series
       meanError: null,
       meanAbsoluteError: null,
@@ -349,7 +348,7 @@ export default {
       selectingStart: true // Flag to indicate if currently selecting start date
     };
   },
-  
+
   watch: {
     currentDate() {
       this.getDaysInMonth();
@@ -358,22 +357,20 @@ export default {
   },
 
   computed: {
-    
+
     currentMonth() {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    let currentMonthIndex = this.currentDate.getMonth() + (this.currentMonthOffset-this.currentMonthOffset);
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      let currentMonthIndex = this.currentDate.getMonth() + (this.currentMonthOffset - this.currentMonthOffset);
 
-    // Adjust the index to handle cases where it goes beyond the boundaries
-    if (currentMonthIndex < 0) {
-      currentMonthIndex += 12; // Wrap around to December
-    } else if (currentMonthIndex >= 12) {
-      currentMonthIndex -= 12; // Wrap around to January
-    }
+      // Adjust the index to handle cases where it goes beyond the boundaries
+      if (currentMonthIndex < 0) {
+        currentMonthIndex += 12; // Wrap around to December
+      } else if (currentMonthIndex >= 12) {
+        currentMonthIndex -= 12; // Wrap around to January
+      }
 
-
-    
-    return months[currentMonthIndex];
-  },
+      return months[currentMonthIndex];
+    },
 
     CNNchartTitle() {
       return `CNN Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
@@ -413,8 +410,8 @@ export default {
         startDayElement.classList.remove('selected-start');
       }
     },
-      
-    
+
+
     toggleCalendar() {
       this.startDate = null;
       this.selectingStart = true;
@@ -454,22 +451,22 @@ export default {
       const month = this.currentDate.getMonth();
       return new Date(year, month, date).toLocaleDateString('en-US');
     },
-  
 
 
-  getDaysInMonth() {
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  },
-  
-  selectDate(day) {
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth() + 1; // Month is zero-based
-    this.selectedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    this.showDatePicker = false;
-  },
+
+    getDaysInMonth() {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    },
+
+    selectDate(day) {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth() + 1; // Month is zero-based
+      this.selectedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      this.showDatePicker = false;
+    },
     // Method to calculate mean error and mean absolute error
     calculateErrorsAndDisplay(actualValues, predictedValues) {
       const { meanError, meanAbsoluteError } = calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues);
@@ -519,7 +516,7 @@ export default {
       };
 
       // Merge all data points into combinedData
-      mergeDataPoints(this.LSTMData, 'LSTMValue');
+      //mergeDataPoints(this.LSTMData, 'LSTMValue');
       mergeDataPoints(this.CNNData, 'CNNValue');
       mergeDataPoints(this.transformerData, 'TransformerValue');
       mergeDataPoints(this.randomForestData, 'randomForestValue');
@@ -531,6 +528,26 @@ export default {
       console.log("combinedData");
       console.log(this.combinedData);
     },
+
+    formatCalendarEntry(dateString) {
+    // Create a new Date object
+    let date = new Date(dateString);
+
+    // Format the date
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1; // Months are zero-based
+    let day = date.getDate();
+
+    // Pad single digit numbers with a leading zero
+    month = month < 10 ? '0' + month : month;
+    day = day < 10 ? '0' + day : day;
+
+    console.log("original date: " + dateString);
+    console.log("formatted date: " + `${year}-${month}-${day}`);
+
+    // Return the formatted date string
+    return `${year}-${month}-${day}`;
+  },
 
     async hideAll() {
       this.showCNNLine = false;
@@ -553,8 +570,8 @@ export default {
         const response = await axios.get(this.store.API + "/getStock", {
           params: {
             stock_symbol: this.selectedStock,
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
+            start_date: this.formatCalendarEntry(this.startDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
           }
         });
         console.log([response.data])
@@ -584,9 +601,9 @@ export default {
       try {
         const response = await axios.get(`${this.store.API}/predict/cnn`, {
           params: {
-            stock_symbol: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
           }
         });
 
@@ -609,44 +626,13 @@ export default {
         console.error(error);
       }
     },
-
-    async load_LSTM_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/lstm`, {
-          params: {
-            stock_symbol: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
-          }
-        });
-
-        console.log("Prediction lstm loaded");
-        console.log(response.data);
-
-        // Assuming the response.data is an object with date and close properties
-        this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
     async load_transformer_data() {
       try {
         const response = await axios.get(`${this.store.API}/predict/transformer`, {
           params: {
             stock_symbols: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
           }
         });
 
@@ -677,9 +663,9 @@ export default {
       try {
         const response = await axios.get(`${this.store.API}/predict/randomForest`, {
           params: {
-            stock_symbol: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
           }
         });
 
@@ -710,9 +696,9 @@ export default {
       try {
         const response = await axios.get(`${this.store.API}/predict/gradientBoost`, {
           params: {
-            stock_symbol: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
           }
         });
 
@@ -739,13 +725,43 @@ export default {
       }
     },
 
+    async load_LSTM_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/lstm`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
+          }
+        });
+
+        console.log("Prediction lstm loaded");
+        console.log(response.data);
+
+        // Assuming the response.data is an object with date and close properties
+        this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
     async load_data() {
       try {
         const response = await axios.get(this.store.API + "/load/data", {
           params: {
             stock_symbols: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime,
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, 
           }
         });
         console.log("### normal loaded ###")
@@ -777,7 +793,7 @@ export default {
       console.log("##### SelectedStock:", this.selectedStock);
       console.log("##### checkAllBoxes:", this.checkAllBoxes());
 
-      if (this.selectedStock && this.selectedTime && this.checkAllBoxes()) {
+      if (this.selectedStock && this.selectedTime && this.checkAllBoxes() && this.startDate) {
         this.dataSource = await this.load_data();
         if (this.showCNNLine == true) {
           this.CNNData = await this.load_CNN_data();
@@ -814,7 +830,7 @@ export default {
       } else {
         Swal.fire({
           title: "Error at getting data",
-          text: "Please select a stock, the time interval and a model",
+          text: "Please select a stock, the time interval, the start date and a model",
           icon: "info",
           showCloseButton: false,
           confirmButtonText: "Close",
@@ -835,7 +851,8 @@ export default {
 
 <style>
 .short-input {
-  width: 100px; /* Adjust width as needed */
+  width: 100px;
+  /* Adjust width as needed */
 }
 
 .calendar-popup {
@@ -873,11 +890,13 @@ export default {
 }
 
 .selected-start {
-  background-color: #90EE90; /* Light green */
+  background-color: #90EE90;
+  /* Light green */
 }
 
 .selected-range {
-  background-color: #ADD8E6; /* Light blue */
+  background-color: #ADD8E6;
+  /* Light blue */
 }
 
 .calendar-day:hover {
@@ -899,17 +918,22 @@ export default {
   background-color: #fff;
   border: 1px solid #ccc;
   padding: 10px;
-  max-width: 400px; /* Adjust max-width as needed */
-  max-height: 300px; /* Adjust max-height as needed */
-  overflow-y: auto; /* Add scrollbar when content exceeds max-height */
+  max-width: 400px;
+  /* Adjust max-width as needed */
+  max-height: 300px;
+  /* Adjust max-height as needed */
+  overflow-y: auto;
+  /* Add scrollbar when content exceeds max-height */
 }
 
 .date-picker-popup {
-  width: 100%; /* Make date picker content full width */
+  width: 100%;
+  /* Make date picker content full width */
 }
 
 .time-picker-popup {
-  width: 100%; /* Make time picker content full width */
+  width: 100%;
+  /* Make time picker content full width */
 }
 
 .popup h3 {

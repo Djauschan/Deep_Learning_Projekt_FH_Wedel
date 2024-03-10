@@ -175,7 +175,7 @@ def calculate_end_date(start_date: str, resolution: str):
     if resolution == "D":
         return (pd.Timestamp(start_date) + pd.Timedelta(days=30)).strftime("%Y-%m-%d")
     elif resolution == "H":
-        return (pd.Timestamp(start_date) + pd.Timedelta(days=2)).strftime("%Y-%m-%d")
+        return (pd.Timestamp(start_date) + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
     elif resolution == "M":
         # We use 19 minutes because of the ann prediction interface implementation (it returns 1 value too much)
         return (pd.Timestamp(start_date) + pd.Timedelta(minutes=19)).strftime("%Y-%m-%d %H:%M:%S")
@@ -229,16 +229,10 @@ def predict_cnn(stock_symbols: str = "[AAPL, NVDA]",
 
     return response.json()
 
-# @app.get("/predict/lstm")
-# def predict_lstm(stock_symbol: str):
-#     lstm = LstmInterface()
-#     return lstm.predict('2021-01-04', '2021-01-06', 120)
-
-
 @app.get("/predict/randomForest")
-def predict_randomForest(stock_symbols: str = "[AAPL, NVDA]",
+def predict_randomForest(stock_symbols: str = "[AAPL]",
                          start_date: str = "2021-01-04",
-                         resolution: str = "D"):
+                         resolution: str = "H"):
     if resolution == "M":
         start_date += " 10:01:00"
     end_date = calculate_end_date(start_date, resolution)
@@ -264,9 +258,9 @@ def predict_randomForest(stock_symbols: str = "[AAPL, NVDA]",
 
 
 @app.get("/predict/gradientBoost")
-def predict_gradientBoost(stock_symbols: str = "[AAPL, NVDA]",
+def predict_gradientBoost(stock_symbols: str = "[AAPL]",
                           start_date: str = "2021-01-04",
-                          resolution: str = "D"):
+                          resolution: str = "H"):
     if resolution == "M":
         start_date += " 10:01:00"
     end_date = calculate_end_date(start_date, resolution)
@@ -323,15 +317,20 @@ def predict_rl(stock_symbols: str = "[AAPL, NVDA]",
 
 
 @app.get("/load/data")
-def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', end_date: str = '2021-01-06', resolution: str = "H"):
+def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04', resolution: str = "H"):
     allColumns = ["DateTime", "Open", "Close", "High", "Low", "a"]
     relevantColumns = ["DateTime", "Open", "Close", "High", "Low"]
 
-    print(f"{stock_symbols}, {resolution=}, {start_date=}, {end_date=}")
+    print(f"{stock_symbols=}, {resolution=}, {start_date=}")
+
+    if(resolution == "H"):
+        end_date = (pd.Timestamp(start_date) + pd.Timedelta(days=2)).strftime("%Y-%m-%d")
+    else :
+        end_date = calculate_end_date(start_date, resolution)
 
     data = crud.loadDataFromFile(stock_symbols=stock_symbols,
                                  start_date=pd.Timestamp(start_date),
-                                 end_date=pd.Timestamp(end_date),
+                                 end_date=end_date,
                                  interval=resolution,
                                  ALL_DATA_COLUMNS=allColumns,
                                  COLUMNS_TO_KEEP=relevantColumns)
@@ -474,3 +473,8 @@ def load_data(stock_symbols: str = "[AAPL, NVDA]", start_date: str = '2021-01-04
 #         }
 
 #     return response.json()
+
+# @app.get("/predict/lstm")
+# def predict_lstm(stock_symbol: str):
+#     lstm = LstmInterface()
+#     return lstm.predict('2021-01-04', '2021-01-06', 120)

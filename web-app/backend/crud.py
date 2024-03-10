@@ -8,12 +8,13 @@ import pandas as pd
 import schemas
 import os
 
-# import pandas_market_calendars as mcal
-# import yfinance as yf
-# from yahoo_fin.stock_info import get_data
 from fastapi import HTTPException
 from sqlalchemy import MetaData, Table
 from sqlalchemy.orm import Session
+
+# import pandas_market_calendars as mcal
+# import yfinance as yf
+# from yahoo_fin.stock_info import get_data
 
 
 # method to delete the table "users"
@@ -147,23 +148,9 @@ def update_budget_by_user(db: Session, username: str, updated_data: schemas.User
         db.refresh(db_user)
         return db_user
     else:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="User not found")   
 
-# method to get stock data of specific stock symbol for n days
-# def get_stock_days(db: Session, stock_symbol: str, n: int):
-#     # Download historical data from Yahoo Finance
-#     stock_data = yf.download(stock_symbol, period=f"{n}d")
-#     stock_data["Volume"] = stock_data["Volume"].astype(float)
-#     return_data = []
-
-#     for index, row in stock_data.iterrows():
-#         return_data.append({"date": index.strftime(
-#             '%m/%d/%y'), "open": row["Open"], "high": row["High"], "low": row["Low"], "close": row["Close"], "volume": row["Volume"]})
-
-#     return return_data
-    
-
-# method to load data from csv file
+# Python
 def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.Timestamp, interval: str,
                      ALL_DATA_COLUMNS: list, COLUMNS_TO_KEEP: list) -> pd.DataFrame:
 
@@ -186,37 +173,49 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
             data = data[(data['DateTime'] >= start_date) & (data['DateTime'] <= end_date)]
             data.set_index('DateTime', inplace=True)
 
-            # Resample the data to the specified interval
             if interval == 'H':
-                data = data.resample('2H').mean()
-            #elif interval == 'D':
-                #data = data.resample('24H').mean()
+                data = data.resample('2H').mean().round(2)
             elif interval == 'M':
-                data = data.resample('20T').mean()
+                data = data.resample('1T').mean().round(2)
             else:
-                data = data.resample('1H').mean()
+                data = data.resample('1H').mean().round(2)
 
-            # Filter out data from 20:00 to 04:00
-            # if not data.empty and isinstance(data.index, pd.DatetimeIndex):
-            #     data = data[(data.index.hour <= 20) & (data.index.hour >= 4)]
-            # else:
-            #     print("The DataFrame is either empty or its index is not a DatetimeIndex.")
+            data.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-            # Reset the index
+            complete_index = pd.date_range(start=start_date, end=end_date, freq='2H')
+            complete_data = pd.DataFrame(index=complete_index)
+
+            data = pd.merge(complete_data, data, left_index=True, right_index=True, how='left')
+
+            # Fill missing values with the last valid observation and then the next valid one
+            data.ffill(inplace=True)
+            data.bfill(inplace=True)
+
             data.reset_index(inplace=True)
+            data.rename(columns={'index': 'DateTime'}, inplace=True)
 
-            # Replace non-compliant values with a compliant value (e.g., None)
-            data.replace([np.inf, -np.inf, np.nan], None, inplace=True)
-
-            # Filter the data to include only the rows at 16:00:00
-            if(interval == 'D'):
-                data = data[data['DateTime'].dt.time == pd.to_datetime('16:00:00').time()]
-
-            dfs.append(data)  # Add the DataFrame to the list
+            dfs.append(data)
 
     return_data = pd.concat(dfs)
 
-    # Convert the DataFrame to a list of dictionaries
+    return_data = return_data.replace([np.inf, -np.inf], np.nan)
+    return_data.ffill(inplace=True)
+    return_data.bfill(inplace=True)
+
     return_data = return_data.to_dict(orient='records')
 
     return return_data
+
+
+# method to get stock data of specific stock symbol for n days
+# def get_stock_days(db: Session, stock_symbol: str, n: int):
+#     # Download historical data from Yahoo Finance
+#     stock_data = yf.download(stock_symbol, period=f"{n}d")
+#     stock_data["Volume"] = stock_data["Volume"].astype(float)
+#     return_data = []
+
+#     for index, row in stock_data.iterrows():
+#         return_data.append({"date": index.strftime(
+#             '%m/%d/%y'), "open": row["Open"], "high": row["High"], "low": row["Low"], "close": row["Close"], "volume": row["Volume"]})
+
+#     return return_data
