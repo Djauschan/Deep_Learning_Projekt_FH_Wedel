@@ -7,7 +7,7 @@ RSC_DATA_FILES: [
   #key: [fileName, [columns in file], [relevant feature columns], y-variable]
   AAL: ["Aktien\\AAL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
   AAPL: ["Aktien\\AAPL_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
-  AMD: ["Aktien\\AMD_1min.txt.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
+  AMD: ["Aktien\\AMD_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
   C: ["Aktien\\C_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
   MRNS: ["Aktien\\MRNS_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
   NIO: ["Aktien\\NIO_1min.txt", ["DateTime", "Open", "a", "b", "c", "Volume"], ["DateTime", "Open", "Volume"]],
@@ -84,9 +84,12 @@ MODELS_TO_LOAD: {
         AAPL: "2024-03-02_14_51_49_AAPL\\20_120_8_swingTrayding_3_AAPL232024_1521.pt",
         AMD: "2024-03-02_15_21_48_AMD\\20_120_8_swingTrayding_3_AMD232024_1551.pt",
         C: "2024-03-02_15_51_21_C\\20_120_8_swingTrayding_3_C232024_1620.pt",
-        NIO: "2024-03-02_15_51_21_C\\20_120_8_swingTrayding_3_C232024_1620.pt",
-        NVDA: "2024-03-02_15_51_21_C\\20_120_8_swingTrayding_3_C232024_1620.pt",
-        TSLA: "2024-03-02_15_51_21_C\\20_120_8_swingTrayding_3_C232024_1620.pt"
+        MRNS: "2024-03-11_00_11_36_MRNS\\20_120_8_swingTrayding_3_MRNS1132024_026.pt",
+        NIO: "2024-03-11_00_26_58_NIO\\20_120_8_swingTrayding_3_NIO1132024_037.pt",
+        NVDA: "2024-03-11_00_37_46_NVDA\\20_120_8_swingTrayding_3_NVDA1132024_18.pt",
+        SNAP: "2024-03-11_01_08_14_SNAP\\20_120_8_swingTrayding_3_SNAP1132024_125.pt",
+        SQ: "2024-03-11_01_25_38_SQ\\20_120_8_swingTrayding_3_SQ1132024_147.pt",
+        TSLA: "2024-03-11_01_47_58_TSLA\\20_120_8_swingTrayding_3_TSLA1132024_218.pt"
       ]
     },
     10: {
@@ -96,9 +99,12 @@ MODELS_TO_LOAD: {
         AAPL: "2024-03-02_16_57_35_AAPL\\20_120_10_swingTrayding_4_AAPL232024_1736.pt",
         AMD: "2024-03-02_17_36_37_AMD\\20_120_10_swingTrayding_4_AMD232024_1814.pt",
         C: "2024-03-02_18_14_04_C\\20_120_10_swingTrayding_4_C232024_1853.pt",
-        NIO: "2024-03-02_18_14_04_C\\20_120_10_swingTrayding_4_C232024_1853.pt",
-        NVDA: "2024-03-02_18_14_04_C\\20_120_10_swingTrayding_4_C232024_1853.pt",
-        TSLA: "2024-03-02_18_14_04_C\\20_120_10_swingTrayding_4_C232024_1853.pt"
+        MRNS: "2024-03-11_06_07_57_MRNS\\20_120_10_swingTrayding_4_MRNS1132024_626.pt",
+        NIO: "2024-03-11_06_26_00_NIO\\20_120_10_swingTrayding_4_NIO1132024_639.pt",
+        NVDA: "2024-03-11_06_39_02_NVDA\\20_120_10_swingTrayding_4_NVDA1132024_715.pt",
+        SNAP: "2024-03-11_06_39_02_NVDA\\20_120_10_swingTrayding_4_NVDA1132024_715.pt",
+        SQ: "2024-03-11_06_39_02_NVDA\\20_120_10_swingTrayding_4_NVDA1132024_715.pt",
+        TSLA: "2024-03-11_06_39_02_NVDA\\20_120_10_swingTrayding_4_NVDA1132024_715.pt"
       ]
     }
   ],
@@ -110,8 +116,11 @@ MODELS_TO_LOAD: {
         AAPL: "2024-03-02_21_45_59_AAPL\\20_300_8_longTrayding_1_AAPL232024_2216.pt",
         AMD: "2024-03-02_22_16_39_AMD\\20_300_8_longTrayding_1_AMD232024_2246.pt",
         C: "2024-03-02_22_46_20_C\\20_300_8_longTrayding_1_C232024_2316.pt",
+        MRNS: "2024-03-02_22_46_20_C\\20_300_8_longTrayding_1_C232024_2316.pt",
         NIO: "2024-03-02_22_46_20_C\\20_300_8_longTrayding_1_C232024_2316.pt",
         NVDA: "2024-03-02_22_46_20_C\\20_300_8_longTrayding_1_C232024_2316.pt",
+        SNAP: "2024-03-02_22_46_20_C\\20_300_8_longTrayding_1_C232024_2316.pt",
+        SQ: "2024-03-02_22_46_20_C\\20_300_8_longTrayding_1_C232024_2316.pt",
         TSLA: "2024-03-02_22_46_20_C\\20_300_8_longTrayding_1_C232024_2316.pt"
       ]
     },
@@ -122,9 +131,12 @@ MODELS_TO_LOAD: {
         AAPL: "2024-03-02_23_49_16_AAPL\\20_300_12_longTrayding_2_AAPL332024_020.pt",
         AMD: "2024-03-03_00_20_23_AMD\\20_300_12_longTrayding_2_AMD332024_052.pt",
         C: "2024-03-03_00_52_24_C\\20_300_12_longTrayding_2_C332024_124.pt",
+        MRNS: "2024-03-03_00_52_24_C\\20_300_12_longTrayding_2_C332024_124.pt",
         NIO: "2024-03-03_00_52_24_C\\20_300_12_longTrayding_2_C332024_124.pt",
         NVDA: "2024-03-03_00_52_24_C\\20_300_12_longTrayding_2_C332024_124.pt",
-        TSLA: "2024-03-03_00_52_24_C\\20_300_12_longTrayding_2_C332024_124.pt"
+        SNAP: "2024-03-03_00_52_24_C\\20_300_12_longTrayding_2_C332024_124.pt",
+        SQ: "2024-03-03_00_52_24_C\\20_300_12_longTrayding_2_C332024_124.pt",
+        TSLA: "2024-03-03_00_52_24_C\\20_300_12_longTrayding_2_C332024_124.pt",
       ]
     },
     16: {
@@ -134,8 +146,11 @@ MODELS_TO_LOAD: {
         AAPL: "2024-03-03_01_54_54_AAPL\\20_300_16_longTrayding_3_AAPL332024_223.pt",
         AMD: "2024-03-03_02_23_43_AMD\\20_300_16_longTrayding_3_AMD332024_252.pt",
         C: "2024-03-03_02_52_31_C\\20_300_16_longTrayding_3_C332024_321.pt",
+        MRNS: "2024-03-03_02_52_31_C\\20_300_16_longTrayding_3_C332024_321.pt",
         NIO: "2024-03-03_02_52_31_C\\20_300_16_longTrayding_3_C332024_321.pt",
         NVDA: "2024-03-03_02_52_31_C\\20_300_16_longTrayding_3_C332024_321.pt",
+        SNAP: "2024-03-03_02_52_31_C\\20_300_16_longTrayding_3_C332024_321.pt",
+        SQ: "2024-03-03_02_52_31_C\\20_300_16_longTrayding_3_C332024_321.pt",
         TSLA: "2024-03-03_02_52_31_C\\20_300_16_longTrayding_3_C332024_321.pt"
       ]
     },
@@ -146,9 +161,27 @@ MODELS_TO_LOAD: {
         AAPL: "2024-03-03_03_57_29_AAPL\\20_300_20_longTrayding_4_AAPL332024_432.pt",
         AMD: "2024-03-03_13_15_20_AMD\\20_300_20_longTrayding_4_AMD332024_1351.pt",
         C: "2024-03-03_13_51_05_C\\20_300_20_longTrayding_4_C332024_1426.pt",
+        MRNS: "2024-03-03_13_51_05_C\\20_300_20_longTrayding_4_C332024_1426.pt",
         NIO: "2024-03-03_13_51_05_C\\20_300_20_longTrayding_4_C332024_1426.pt",
         NVDA: "2024-03-03_13_51_05_C\\20_300_20_longTrayding_4_C332024_1426.pt",
+        SNAP: "2024-03-03_13_51_05_C\\20_300_20_longTrayding_4_C332024_1426.pt",
+        SQ: "2024-03-03_13_51_05_C\\20_300_20_longTrayding_4_C332024_1426.pt",
         TSLA: "2024-03-03_13_51_05_C\\20_300_20_longTrayding_4_C332024_1426.pt"
+      ]
+    },
+    30: {
+      folder: "long_5",
+      models: [
+        AAL: "2024-03-11_07_30_51_AAL\\20_300_30_longTrayding_5_AAL1132024_818.pt",
+        AAPL: "2024-03-11_08_18_55_AAPL\\20_300_30_longTrayding_5_AAPL1132024_916.pt",
+        AMD: "2024-03-11_17_43_46_AMD\\20_300_30_longTrayding_5_AMD1132024_1843.pt",
+        C: "2024-03-11_18_43_10_C\\20_300_30_longTrayding_5_C1132024_1933.pt",
+        MRNS: "2024-03-11_18_43_10_C\\20_300_30_longTrayding_5_C1132024_1933.pt",
+        NIO: "2024-03-11_18_43_10_C\\20_300_30_longTrayding_5_C1132024_1933.pt",
+        NVDA: "2024-03-11_18_43_10_C\\20_300_30_longTrayding_5_C1132024_1933.pt",
+        SNAP: "2024-03-11_18_43_10_C\\20_300_30_longTrayding_5_C1132024_1933.pt",
+        SQ: "2024-03-11_18_43_10_C\\20_300_30_longTrayding_5_C1132024_1933.pt",
+        TSLA: "2024-03-11_18_43_10_C\\20_300_30_longTrayding_5_C1132024_1933.pt"
       ]
     }
   ]

@@ -63,28 +63,21 @@ class executer:
         LCONFIG_PATH4 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\configs\\preprocessing\\dataCreating_longTrayding_4.yml"
         preProcessingService = Preprocessor(LCONFIG_PATH4)
         print('LONG 4 -> BUILD ALL DATA with CONFIG_PATH 4')
-
+"""
         LCONFIG_PATH5 = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\configs\\preprocessing\\dataCreating_longTrayding_5.yml"
         preProcessingService = Preprocessor(LCONFIG_PATH5)
-        print('LONG 4 -> BUILD ALL DATA with CONFIG_PATH 4')"""
+        print('LONG 4 -> BUILD ALL DATA with CONFIG_PATH 4')
 
     def startTraining_w(self):
-        #Swing 3
-        SWING3_CONFIG_PATH = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\configs\\training\\baseModel_SwingTrading_3.yml"
-        #start 12:50
-        importer: Importer = Importer(SWING3_CONFIG_PATH)
-        trainExe = CNN_TimeSeriesModel(importer)
-        trainExe.exe()
-        print('END 1: train & export Model')
-        time.sleep(900)
         #Swing 4
+        """
         SWING4_CONFIG_PATH = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\configs\\training\\baseModel_SwingTrading_4.yml"
         #start 12:50
         importer: Importer = Importer(SWING4_CONFIG_PATH)
         trainExe = CNN_TimeSeriesModel(importer)
         trainExe.exe()
         print('END 1: train & export Model')
-        time.sleep(900)
+        time.sleep(900)"""
         #long 5
         SWING1_CONFIG_PATH = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\configs\\training\\baseModel_Langfristig_5.yml"
         #start 12:50
@@ -95,5 +88,5 @@ class executer:
 
 
 exe = executer()
-#exe.buildTimeSeriesData_w()
 exe.startTraining_w()
+exe.buildTimeSeriesData_w()
