@@ -19,7 +19,8 @@
           </div>
           <div class="calendar-days">
             <div v-for="day in daysInMonth" :key="day" class="calendar-day"
-              :class="{ 'selected-start': day === startDate }" @click="selectDay(day)">
+              :class="{ 'selected-start': day === startDate }" :id="{ 'weekend': !isWeekDay(day.date) }"
+              @click="selectDay(day)">
               {{ day }}
             </div>
           </div>
@@ -113,10 +114,13 @@
     <button class="button-stock" @click="updateChart">Show Predictions</button>
   </div>
   <div class="newChart">
-    <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" :data-source="this.combinedData['AAPL']"
-      title="AAPL Chart">
+    <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" :data-source="this.combinedData" title="AAPL Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AAPL Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[1]">
+      <DxSeries :name="'AAPL Line'" value-field="value" :data-source="this.combinedData['AAPL']" argument-field="date"
+        type="line" :color="seriesColors[1]">
+      </DxSeries>
+      <DxSeries :name="'AAPL'" :data-source="this.dataSource" open-value-field="Open" high-value-field="High" low-value-field="Low"
+        close-value-field="Close" argument-field="DateTime">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -439,13 +443,6 @@ export default {
       this.selectingStart = true;
       this.showCalendar = !this.showCalendar;
     },
-    selectDay(day) {
-      // Handle day selection
-      if (this.selectingStart) {
-        this.startDate = day;
-        this.showCalendar = false; // Close the calendar after selecting end date
-      }
-    },
     previousMonth() {
       // Logic for moving to the previous month
       this.currentDate.setMonth(this.currentDate.getMonth() - 1);
@@ -587,6 +584,15 @@ export default {
           this.startDate = day;
           this.showCalendar = false;
         }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Please select a weekday",
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
       }
     },
     isWeekday(day) {
@@ -594,9 +600,37 @@ export default {
       return dayOfWeek !== 0 && dayOfWeek !== 6; // 0 is Sunday, 6 is Saturday
     },
     checkDataInput() {
-      console.log(this.activeCharts);
-      console.log(this.selectedDate);
-      if (this.activeCharts.length > 0 && this.selectedDate) {
+      console.log(this.activeCharts.length);
+      console.log(this.formattedStartDate);
+      if (this.showAALLine) {
+        this.activeCharts.push('AAL');
+      }
+      if (this.showCLine) {
+        this.activeCharts.push('C');
+      }
+      if (this.showNIOLine) {
+        this.activeCharts.push('NIO');
+      }
+      if (this.showNVDALine) {
+        this.activeCharts.push('NVDA');
+      }
+      if (this.showSNAPLine) {
+        this.activeCharts.push('SNAP');
+      }
+      if (this.showSQLine) {
+        this.activeCharts.push('SQ');
+      }
+      if (this.showTSLALine) {
+        this.activeCharts.push('TSLA');
+      }
+      if (this.showAMDLine) {
+        this.activeCharts.push('AMD');
+      }
+      if (this.showAAPLLine) {
+        this.activeCharts.push('AAPL');
+      }
+
+      if (this.activeCharts.length > 0 && this.formattedStartDate != "") {
         return true;
       } else {
         return false;
@@ -604,38 +638,9 @@ export default {
     },
     async updateChart() {
       if (this.checkDataInput()) {
-
-        if (this.showAALLine) {
-          this.activeCharts.push('AAL');
-        }
-        if (this.showCLine) {
-          this.activeCharts.push('C');
-        }
-        if (this.showNIOLine) {
-          this.activeCharts.push('NIO');
-        }
-        if (this.showNVDALine) {
-          this.activeCharts.push('NVDA');
-        }
-        if (this.showSNAPLine) {
-          this.activeCharts.push('SNAP');
-        }
-        if (this.showSQLine) {
-          this.activeCharts.push('SQ');
-        }
-        if (this.showTSLALine) {
-          this.activeCharts.push('TSLA');
-        }
-        if (this.showAMDLine) {
-          this.activeCharts.push('AMD');
-        }
-        if (this.showAAPLLine) {
-          this.activeCharts.push('AAPL');
-        }
         this.dataSource = await this.load_data();
         this.combinedData = await this.load_model_data();
         this.showChart = true;
-
         this.activeCharts = [];
       } else {
         Swal.fire({
@@ -915,5 +920,9 @@ input::placeholder {
 
 .button-stock:hover {
   background-color: darkgrey;
+}
+
+#weekend {
+  color: gray;
 }
 </style>
