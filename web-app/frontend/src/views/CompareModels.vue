@@ -52,9 +52,6 @@
         <option value="C">
           Citigroup
         </option>
-        <option value="MRNS">
-          Marinus Pharmaceuticals Inc
-        </option>
         <option value="NIO">
           Nio Inc
         </option>

@@ -84,13 +84,10 @@
         <label>
           <input type="checkbox" v-model="showAMDLine"> Advanced Micro Devices
         </label>
-        <label>
-          <input type="checkbox" v-model="showCLine"> Citigroup
-        </label>
       </div>
       <div class="checkboxes2">
         <label>
-          <input v-if="selectedModel != 'transformer'" type="checkbox" v-model="showMRNALine"> Moderna
+          <input type="checkbox" v-model="showCLine"> Citigroup
         </label>
         <label>
           <input v-if="selectedModel != 'transformer'" type="checkbox" v-model="showNIOLine"> NIO
@@ -116,7 +113,8 @@
     <button class="button-stock" @click="updateChart">Show Predictions</button>
   </div>
   <div class="newChart">
-    <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" :data-source="this.combinedData['AAPL']" title="AAPL Chart">
+    <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" :data-source="this.combinedData['AAPL']"
+      title="AAPL Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'AAPL Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[1]">
       </DxSeries>
@@ -173,25 +171,6 @@
     <DxChart v-if="showCLine && showChart" id="C-chart" :data-source="this.combinedData['C']" title="C Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'C Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[4]">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showMRNALine && showChart" id="Window Average-chart" :data-source="this.combinedData['MRNA']"
-      title="Window Average Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'MRNA Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[6]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -282,7 +261,8 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showTSLALine && showChart" id="TSLA-chart" :data-source="this.combinedData['TSLA']" title="TSLA Chart">
+    <DxChart v-if="showTSLALine && showChart" id="TSLA-chart" :data-source="this.combinedData['TSLA']"
+      title="TSLA Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'TSLA Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
@@ -347,8 +327,7 @@ export default {
       this.CData = [],
       this.AMDData = [],
       this.AAPLData = [],
-      this.NIOData = [],
-      this.MRNAData = [];
+      this.NIOData = [];
   },
   data() {
     return {
@@ -363,7 +342,6 @@ export default {
       TSLAData: [],
       CData: [],
       NIOData: [],
-      MRNAData: [],
       selectedStock: "",
       selectedDays: null,
       showChart: false,
@@ -386,8 +364,6 @@ export default {
       TSLApredictionData: [],
       showNIOLine: false,
       NIOPredictionData: [],
-      showMRNALine: false,
-      MRNAPredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
       selectedTime: 'H',
@@ -532,7 +508,6 @@ export default {
       this.showSQLine = false;
       this.showTSLALine = false;
       this.showNIOLine = false;
-      this.showMRNALine = false;
     },
     async showAll() {
       this.showAALLine = true;
@@ -545,7 +520,6 @@ export default {
       this.showAAPLLine = true;
       if (this.selectedModel != 'transformer') {
         this.showNIOLine = true;
-        this.showMRNALine = true;
       }
     },
     async load_model_data() {
@@ -615,9 +589,6 @@ export default {
       if (this.showCLine) {
         this.activeCharts.push('C');
       }
-      if (this.showMRNALine) {
-        this.activeCharts.push('MRNA');
-      }
       if (this.showNIOLine) {
         this.activeCharts.push('NIO');
       }
@@ -644,36 +615,6 @@ export default {
       this.showChart = true;
 
       this.activeCharts = [];
-    },
-    async get_stock_data(stock_symbol, days_back) {
-      try {
-        const response = await axios.get(this.store.API + "/getStock", {
-          params: {
-            stock_symbol: stock_symbol,
-            days_back: days_back,
-          }
-        });
-        console.log([response.data])
-        return response.data
-      } catch (error) {
-        Swal.fire({
-          title: "Error at getting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.detail
-        ) {
-          console.log(error.response.data.detail);
-        } else {
-          console.log(error);
-        }
-      }
     },
   },
 };

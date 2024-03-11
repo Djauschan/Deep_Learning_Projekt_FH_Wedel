@@ -49,11 +49,6 @@ export default {
           description: '<b>Information:</b><br> Citigroup ist eine multinationale Investmentbank und ein Finanzdienstleistungsunternehmen. <br> <b>Tags:</b><br>  Bankwesen, Finanzen, Investitionen, Finanzdienstleistungen',
         },
         {
-          id: 5,
-          title: 'MRNA (Moderna Inc.)',
-          description: '<b>Information:</b><br> Moderna ist ein Biotechnologieunternehmen, das sich auf die Entwicklung von mRNA-basierten Impfstoffen und Therapeutika spezialisiert hat. <br> <b>Tags:</b><br>  Biotechnologie, Pharmazeutika, Impfstoffe, mRNA',
-        },
-        {
           id: 6,
           title: 'NIO (NIO Inc.)',
           description: '<b>Information:</b><br> NIO ist ein chinesischer Hersteller von Elektrofahrzeugen, der für die Produktion von Elektroautos und verwandter Technologie bekannt ist. <br> <b>Tags:</b><br>  Elektrofahrzeuge, Automobilindustrie, Technologie, EVs, China',

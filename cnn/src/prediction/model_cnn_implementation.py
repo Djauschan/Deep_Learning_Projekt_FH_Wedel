@@ -10,8 +10,8 @@ from src.preprocessing.services.DifferencingService import differencingService
 class ModelExe(AbstractModel):
     def __init__(self):
         self.configService = ConfigService()
-        #configPath = "./configs/execution/docker_PredictionConfig.yml"
-        configPath = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\configs\\execution\\PredictionConfig.yml"
+        configPath = "./configs/execution/docker_PredictionConfig.yml"
+        #configPath = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\configs\\execution\\PredictionConfig.yml"
         self.config = self.configService.loadModelConfig(configPath)
         self.modelWrapper = ModelWrapper(self.config)
 
