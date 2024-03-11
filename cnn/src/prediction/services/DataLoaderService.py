@@ -1,5 +1,7 @@
 import pandas as pd
 
+from src.preprocessing.services.TimeModificationService import TimeModificationService
+
 
 class DataLoaderService:
     """
@@ -9,13 +11,13 @@ class DataLoaderService:
     def __init__(self):
         pass
 
+    @staticmethod
     def loadDataFromFile(
-        self,
-        start_date: pd.Timestamp,
-        end_date: pd.Timestamp,
-        rsc_completePath: str,
-        ALL_DATA_COLUMNS: list,
-        COLUMNS_TO_KEEP: list,
+            start_date: pd.Timestamp,
+            end_date: pd.Timestamp,
+            rsc_completePath: str,
+            ALL_DATA_COLUMNS: list,
+            COLUMNS_TO_KEEP: list,
     ) -> pd.DataFrame:
         df = pd.read_csv(
             rsc_completePath, sep=",", names=ALL_DATA_COLUMNS, index_col=False

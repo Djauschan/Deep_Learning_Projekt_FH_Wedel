@@ -27,7 +27,7 @@ class ModelWrapper:
         self.modelsToLoad = config['MODELS_TO_LOAD']
         self.MODEL_FOLDER = config['MODEL_FOLDER']
         self.modelCollection = []
-        self.modelResults = []
+        self.modelResults = {}
         self.modelInputData = []
         self.loadModels()
 
@@ -41,42 +41,70 @@ class ModelWrapper:
         # the model input = the start of the dateTimes to predict is the last input of the model
         endDate = startDate
         startDate = startDate - pd.Timedelta(days=30)
-
+        AVAIL_MODELS = 0
+        EXECUTION_ITERATION = 0
         modelsToExecute = []
         timestamps_array = []
         if trading_type == resolution.MINUTE:
+            """
+                Bspw: 04.01
+                startDate = 10:00am
+                1.) EndDate = 10:05
+                2.) EndDate = 10:10
+                3.) EndDate = 10:15
+                4.) EndDate = 10:20
+            """
+            EXECUTION_ITERATION = 5
+            AVAIL_MODELS = 1
+            StartDate = TimeModificationService.getSameDay10am(endDate)
+            # list of endates to recursively call the models
+            timestamps_array = [StartDate + pd.Timedelta(minutes=5 * i) for i in range(EXECUTION_ITERATION)]
             modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'dayTrading']
-            timestamps_array = [TimeModificationService.getSameDay1020am(endDate)]
         elif trading_type == resolution.TWO_HOURLY:
+            EXECUTION_ITERATION = 2
+            AVAIL_MODELS = 4
             modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'swingTrading']
             startDate_dateTime = TimeModificationService.getSameDay10am(endDate)
-            timestamps_array = [startDate_dateTime + pd.Timedelta(hours=2 * i) for i in range(4)]
+            i = 1
+            timestamps_array = [startDate_dateTime]
+            while i < (AVAIL_MODELS * EXECUTION_ITERATION):
+                if i == 6:
+                    timestamps_array.append(TimeModificationService.getNextDay10am(timestamps_array[i - 1]))
+                else:
+                    timestamps_array.append(timestamps_array[i - 1] + pd.Timedelta(hours=2))
+                i = i + 1
         elif trading_type == resolution.DAILY:
+            EXECUTION_ITERATION = 4
+            AVAIL_MODELS = 5
             modelsToExecute = [d for d in self.modelCollection if d.get('tradingType') == 'longTrading']
             startDate_dateTime = TimeModificationService.getSameDay8pm(endDate)
-            timestamps_array = [startDate_dateTime]
-            #when time ahead model 5 was executed
-            #timestamps_array.extend([startDate_dateTime + pd.Timedelta(days=1) for i in range(3)])
-            timestamps_array.extend([startDate_dateTime + pd.Timedelta(days=1) for i in range(2)])
-            lastEle = timestamps_array[len(timestamps_array) - 1]
-            timestamps_array.append(lastEle + pd.Timedelta(days=2))
+            timestamps_array = [startDate_dateTime + pd.Timedelta(days=1 * i) for i in range(AVAIL_MODELS *
+                                                                                             EXECUTION_ITERATION)]
         else:
             print("error")
 
         preprocessor = Preprocessor(self.config)
-        datesTimes = []
-        for stock_symbol in symbol_list:
-            modelInputData, endRawPrice = preprocessor.pipeline(stock_symbol, startDate, endDate,
-                                                                length=20, interval=interval)
-            predictions = self.getAllPredictionsForSingleStock(modelsToExecute, stock_symbol,
-                                                               modelInputData, endDate, endRawPrice,
-                                                               interval)
-            self.modelResults.append({stock_symbol: predictions})
+        # times how often the models are called and how often the data has to be prepared
+        idx = 0
+        predictionMap = {}
+        while idx < EXECUTION_ITERATION:
+            for stock_symbol in symbol_list:
+                _endDate = pd.Timestamp(timestamps_array[idx])
+                modelInputData, endRawPrice = preprocessor.pipeline(stock_symbol, startDate, _endDate,
+                                                                    length=20, interval=interval)
+                predictions = self.getAllPredictionsForSingleStock(modelsToExecute, stock_symbol,
+                                                                   modelInputData, endRawPrice)
+                if stock_symbol in predictionMap:
+                    predictionMap[stock_symbol].extend(predictions)
+                else:
+                    predictionMap[stock_symbol] = predictions
 
-        return self.createPredictionDataframe(self.modelResults, timestamps_array)
+            idx = idx + 1
+
+        return self.createPredictionDataframe(predictionMap, timestamps_array)
 
     @staticmethod
-    def getAllPredictionsForSingleStock(modelsToExecute, stock_symbol, modelInputData, endDate, rawEndPrice, interval):
+    def getAllPredictionsForSingleStock(modelsToExecute, stock_symbol, modelInputData, rawEndPrice):
         """
             execute predictions iteratively for all horizons defined
             for a single Model for a specified stock_symbol
@@ -115,9 +143,8 @@ class ModelWrapper:
                 01.01.2022:17:00    16      25
         """
         toReturn = pd.DataFrame(dateTimes, columns=['Timestamp'])
-        for stock in resultMap:
-            for key in stock:
-                toReturn[key] = stock[key]
+        for (stockSymbol, predictions) in resultMap.items():
+            toReturn[stockSymbol] = predictions
 
         toReturn.set_index('Timestamp', inplace=True)
         toReturn = toReturn.astype("Float64")
