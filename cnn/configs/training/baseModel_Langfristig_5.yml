@@ -15,10 +15,10 @@ TRAINING_FOLDER: "longTrayding_20_300_30_DATA_Open_Volume_MCHI_IVV_MVG_ahead30\\
 MODEL_NAME: "20_300_30_longTrayding_5" #name of created model
 TRAINING_DATA_LIST: [
   #Training_Data, "Label_Data
-  AAL: ["AAL\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "AAL\\ImageGafData\\LABELS.npy"],
-  AAPL: ["AAPL\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "AAPL\\ImageGafData\\LABELS.npy"],
-  #---AMD: ["AMD\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "AMD\\ImageGafData\\LABELS.npy"],
-  #---C: ["C\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "C\\ImageGafData\\LABELS.npy"],
+  #AAL: ["AAL\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "AAL\\ImageGafData\\LABELS.npy"],
+  #AAPL: ["AAPL\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "AAPL\\ImageGafData\\LABELS.npy"],
+  AMD: ["AMD\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "AMD\\ImageGafData\\LABELS.npy"],
+  C: ["C\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "C\\ImageGafData\\LABELS.npy"],
   #MRNS: [ "MRNS\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "MRNS\\ImageGafData\\LABELS.npy" ],
   #NIO: [ "NIO\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "NIO\\ImageGafData\\LABELS.npy" ],
   #NVDA: [ "NVDA\\ImageGafData\\DATA_Open_Volume_MCHI_IVV_MVG_ahead30.npy", "NVDA\\ImageGafData\\LABELS.npy" ],
