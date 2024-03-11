@@ -391,9 +391,7 @@ def get_MAE_for_model(stock_symbols: str = '[AAPL, SNAP]', start_date: str = '20
             df_true["date"] = pd.to_datetime(df_true["DateTime"])
             
             df_complete = pd.concat([df_pred.set_index('date'), df_true.set_index('date')], axis=1)
-            print(df_complete)
-            df_complete.dropna(inplace=True)
-            print(df_complete)
+            df_complete = df_complete[df_complete.Close != 0.0].dropna()
             
             return_dict[stock_symbol] = {'MAE' : round(mean_absolute_error(df_complete["value_pred"].values,df_complete["Close"].values), 2),
                                         'ME' : round(mean_error(df_complete["value_pred"].values, df_complete["Close"].values), 2)}

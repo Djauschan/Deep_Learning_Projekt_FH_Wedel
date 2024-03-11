@@ -41,13 +41,13 @@
     <span class="selection">Time Interval</span>
     <div class="selector">
       <select v-model="selectedTime" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
-        <option value="Option 1" selected>
+        <option value="D" selected>
           Daily
         </option>
-        <option value="Option 2">
+        <option value="H">
           Hourly
         </option>
-        <option value="Option 3">
+        <option value="M">
           Minutely
         </option>
       </select>
@@ -57,17 +57,20 @@
     <span class="selection">Model</span>
     <div class="selector">
       <select v-model="selectedModel" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
-        <option value="Option 1" selected>
+        <option value="transformer" selected>
           Transformer
         </option>
-        <option value="Option 2">
+        <option value="cnn">
           CNN
         </option>
-        <option value="Option 3">
+        <option value="randomForest">
           Random Forest
         </option>
-        <option value="Option 4">
+        <option value="gradientBoost">
           Gradient Boost
+        </option>
+        <option value="lstm">
+          LSTM
         </option>
       </select>
     </div>
@@ -388,11 +391,11 @@ export default {
       TSLApredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
-      selectedTime: 'Option 1',
-      selectedModel: 'Option 1',
+      selectedTime: 'H',
+      selectedModel: 'transformer',
       seriesColors:  ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC', '#FFB733', '#FF3385', '#33B5FF'], // Array of colors for each series
       showCalendar: false,
-      currentDate: new Date(), // Current date
+      currentDate: new Date("2021-01-04"), // Current date
       currentMonth: '', // Current month displayed in the header
       currentMonthName: '', // Current month name displayed in the header
       currentYear: '', // Current year displayed in the header
@@ -458,6 +461,22 @@ export default {
   },
 
   methods: {
+    formatCalendarEntry(dateString) {
+      // Create a new Date object
+      let date = new Date(dateString);
+
+      // Format the date
+      let year = date.getFullYear();
+      let month = date.getMonth() + 1; // Months are zero-based
+      let day = date.getDate();
+
+      // Pad single digit numbers with a leading zero
+      month = month < 10 ? '0' + month : month;
+      day = day < 10 ? '0' + day : day;
+
+      // Return the formatted date string
+      return `${year}-${month}-${day}`;
+    },
     toggleCalendar() {
       this.startDate = null;
       this.selectingStart = true;
@@ -534,6 +553,8 @@ export default {
 
     async updateCombinedData() {
     // Map dataSource points with AALValue set to null
+    console.log("dataSource");
+    console.log(this.dataSource);
     const combinedDataWithNull = this.dataSource.map(data => ({
       ...data,
       AALValue: null,
@@ -721,9 +742,11 @@ export default {
     
     async load_C_data() {
       try {
-        const response = await axios.get(`${this.store.API}/predict/C`, {
+        const response = await axios.get(`${this.store.API}/predict/` + this.selectedModel, {
           params: {
-            stock_symbol: "AAPL"
+            stock_symbols: "[C]",
+            startDate: this.formatCalendarEntry(this.formattedStartDate),
+            time_interval: this.selectedTime,
           }
         });
 
@@ -749,9 +772,11 @@ export default {
 
     async load_AAPL_data() {
       try {
-        const response = await axios.get(`${this.store.API}/predict/AAPL`, {
+        const response = await axios.get(`${this.store.API}/predict/` + this.selectedModel, {
           params: {
-            stock_symbol: "AAPL"
+            stock_symbols: "[AAPL]",
+            startDate: this.formatCalendarEntry(this.formattedStartDate),
+            time_interval: this.selectedTime,
           }
         });
 
@@ -800,36 +825,36 @@ export default {
       }
     },
 
-    async load_AAL_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/AAL`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
+    // async load_AAL_data() {
+    //   try {
+    //     const response = await axios.get(`${this.store.API}/predict/AAL`, {
+    //       params: {
+    //         stock_symbol: "AAPL"
+    //       }
+    //     });
 
-        console.log("Prediction loaded");
-        console.log(response.data);
+    //     console.log("Prediction loaded");
+    //     console.log(response.data);
 
-        // Assuming the response.data is an object with date and close properties
-        this.AALData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+    //     // Assuming the response.data is an object with date and close properties
+    //     this.AALData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
-        console.log("mapped");
-        console.log(this.AALData);
+    //     console.log("mapped");
+    //     console.log(this.AALData);
 
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
+    //     return response.data;
+    //   } catch (error) {
+    //     Swal.fire({
+    //       title: "Error at predicting data",
+    //       text: error,
+    //       icon: "info",
+    //       showCloseButton: false,
+    //       confirmButtonText: "Close",
+    //       confirmButtonColor: "#d0342c",
+    //     });
+    //     console.error(error);
+    //   }
+    // },
 
     async load_NVDA_data() {
       try {
@@ -933,7 +958,17 @@ export default {
 
     async load_data() {
       try {
+        
+        // const symbols = ['AAPL', 'AAL', 'AMD', 'C', 'NVDA', 'Snap', 'SQ', 'TSLA'];
+        // const selectedSymbols = symbols.filter(symbol => this['show' + symbol + 'Line']);
+        // selectedSymbols = '[AAPL, C]';
+        // console.log(selectedSymbols);
         const response = await axios.get(this.store.API + "/load/data", {
+          params: {
+            stock_symbols: '[AAPL, C]', // Replace with the stock symbols to load
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+          }
         });
         console.log("normal loaded")
         console.log([response.data])
@@ -961,13 +996,13 @@ export default {
 
     async updateChart() {
       this.dataSource = await this.load_data();
-      this.AALData = await this.load_AAL_data();
+      // this.AALData = await this.load_AAL_data();
       this.CData = await this.load_C_data();
-      this.NVDAData = await this.load_NVDA_data();
-      this.SnapData = await this.load_Snap_data();
-      this.SQData = await this.load_SQ_data();
-      this.TSLAData = await this.load_TSLA_data();
-      this.AMDData = await this.load_AMD_data();
+      // this.NVDAData = await this.load_NVDA_data();
+      // this.SnapData = await this.load_Snap_data();
+      // this.SQData = await this.load_SQ_data();
+      // this.TSLAData = await this.load_TSLA_data();
+      // this.AMDData = await this.load_AMD_data();
       this.AAPLData = await this.load_AAPL_data();
       
 
@@ -975,18 +1010,18 @@ export default {
       
       if (this.dataSource) {
 
-        const prices = this.dataSource.flatMap(data => [data.open, data.close]);
-        this.priceRange = {
-          min: Math.min(...prices) * 0.5,
-          max: Math.max(...prices) * 2
-        };
-        this.priceRangeKey = Math.random();
-        console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
-      }
+      //   const prices = this.dataSource.flatMap(data => [data.open, data.close]);
+      //   this.priceRange = {
+      //     min: Math.min(...prices) * 0.5,
+      //     max: Math.max(...prices) * 2
+      //   };
+      //   this.priceRangeKey = Math.random();
+      //   console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
+      // }
       
       await this.updateCombinedData();
       this.showChart = true;
-      //}
+      }
     },
   },
 };
