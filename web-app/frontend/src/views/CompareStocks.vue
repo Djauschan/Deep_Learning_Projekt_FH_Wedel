@@ -125,7 +125,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -143,7 +143,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -161,7 +161,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -179,7 +179,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -198,7 +198,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -217,7 +217,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -236,7 +236,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -254,7 +254,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -273,7 +273,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -581,40 +581,72 @@ export default {
         }
       }
     },
-
+    selectDay(day) {
+      if (this.isWeekday(day)) {
+        if (this.selectingStart) {
+          this.startDate = day;
+          this.showCalendar = false;
+        }
+      }
+    },
+    isWeekday(day) {
+      const dayOfWeek = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day).getDay();
+      return dayOfWeek !== 0 && dayOfWeek !== 6; // 0 is Sunday, 6 is Saturday
+    },
+    checkDataInput() {
+      console.log(this.activeCharts);
+      console.log(this.selectedDate);
+      if (this.activeCharts.length > 0 && this.selectedDate) {
+        return true;
+      } else {
+        return false;
+      }
+    },
     async updateChart() {
-      if (this.showAALLine) {
-        this.activeCharts.push('AAL');
-      }
-      if (this.showCLine) {
-        this.activeCharts.push('C');
-      }
-      if (this.showNIOLine) {
-        this.activeCharts.push('NIO');
-      }
-      if (this.showNVDALine) {
-        this.activeCharts.push('NVDA');
-      }
-      if (this.showSNAPLine) {
-        this.activeCharts.push('SNAP');
-      }
-      if (this.showSQLine) {
-        this.activeCharts.push('SQ');
-      }
-      if (this.showTSLALine) {
-        this.activeCharts.push('TSLA');
-      }
-      if (this.showAMDLine) {
-        this.activeCharts.push('AMD');
-      }
-      if (this.showAAPLLine) {
-        this.activeCharts.push('AAPL');
-      }
-      this.dataSource = await this.load_data();
-      this.combinedData = await this.load_model_data();
-      this.showChart = true;
+      if (this.checkDataInput()) {
 
-      this.activeCharts = [];
+        if (this.showAALLine) {
+          this.activeCharts.push('AAL');
+        }
+        if (this.showCLine) {
+          this.activeCharts.push('C');
+        }
+        if (this.showNIOLine) {
+          this.activeCharts.push('NIO');
+        }
+        if (this.showNVDALine) {
+          this.activeCharts.push('NVDA');
+        }
+        if (this.showSNAPLine) {
+          this.activeCharts.push('SNAP');
+        }
+        if (this.showSQLine) {
+          this.activeCharts.push('SQ');
+        }
+        if (this.showTSLALine) {
+          this.activeCharts.push('TSLA');
+        }
+        if (this.showAMDLine) {
+          this.activeCharts.push('AMD');
+        }
+        if (this.showAAPLLine) {
+          this.activeCharts.push('AAPL');
+        }
+        this.dataSource = await this.load_data();
+        this.combinedData = await this.load_model_data();
+        this.showChart = true;
+
+        this.activeCharts = [];
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Please select a date, and at least one stock to display",
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+      }
     },
   },
 };
