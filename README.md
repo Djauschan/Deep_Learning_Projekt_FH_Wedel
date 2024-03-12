@@ -32,6 +32,8 @@ Open your web browser and navigate to `http://localhost:8080` to start using the
 - `ann/`: The project directory of the ANN group.
 - `cnn/`: The project directory of the CNN group.
 - `data/`: Contains the raw, unprocessed data that all groups use in their projects.
+- `lstm/`: The project directory of the LSTM group.
+- `report/`: This directory contains the report of the project.
 - `rl/`: The project directory of the RL group.
 - `transformer/`: The project directory of the Transformers group.
 - `web-app/`: Contains the project directories of the Frontend and Backend groups.
