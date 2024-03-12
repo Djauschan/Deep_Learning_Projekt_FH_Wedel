@@ -42,7 +42,7 @@ export default {
         {
           id: 2,
           title: 'CNN',
-          description: '<b>CNN Restrictions:</b><br> Daily Predictions, only implemented for: AAL, AAPL, AMD, C",
+          description: '<b>CNN Restrictions:</b><br> Daily Predictions, only implemented for: AAL, AAPL, AMD, C',
           image: '/CNN.png'
         },
         {
