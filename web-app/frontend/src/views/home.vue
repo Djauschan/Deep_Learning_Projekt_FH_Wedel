@@ -321,6 +321,7 @@ export default {
         this.stopLoadingAnimation();
         this.isLoading = false;
         this.rlData = response.data;
+        this.budget = await this.get_budget();
       } catch (error) {
         console.error(error);
       }
