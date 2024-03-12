@@ -124,7 +124,7 @@
         :color="seriesColors[8]">
       </DxSeries>
       <DxSeries :name="'AAPL Real Value'" value-field="close" argument-field="date" type="line"
-        :color="seriesColors[8]">
+        :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -224,7 +224,8 @@
     <DxChart v-if="showNVDALine && showChart" id="Historic Average-chart" :data-source="this.combinedData['NVDA']"
       title="Historic Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'NVDA Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'NVDA Prediction'" value-field="value" argument-field="date" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
       <DxSeries :name="'NVDA Real Value'" value-field="close" argument-field="date" type="line"
         :color="seriesColors[3]">
@@ -246,7 +247,8 @@
     <DxChart v-if="showSNAPLine && showChart" id="Window Average-chart" :data-source="this.combinedData['SNAP']"
       title="Window Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Snap Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'Snap Prediction'" value-field="value" argument-field="date" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
       <DxSeries :name="'Snap Real Value'" value-field="close" argument-field="date" type="line"
         :color="seriesColors[3]">
@@ -288,7 +290,8 @@
     <DxChart v-if="showTSLALine && showChart" id="TSLA-chart" :data-source="this.combinedData['TSLA']"
       title="TSLA Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'TSLA Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'TSLA Prediction'" value-field="value" argument-field="date" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
       <DxSeries :name="'TSLA Real Value'" value-field="close" argument-field="date" type="line"
         :color="seriesColors[3]">
@@ -567,7 +570,7 @@ export default {
 
         console.log("Prediction loaded");
         console.log(response.data);
-        return response.data; 
+        return response.data;
       } catch (error) {
         Swal.fire({
           title: "Error at predicting data",
@@ -682,6 +685,7 @@ export default {
         this.combinedData[key] = this.combinedData[key].filter(data => !(data.Close === 0 && data.Open === 0 && data.High === 0 && data.Low === 0));
       }
 
+      console.log(this.combinedData);
     },
     async updateChart() {
       if (this.checkDataInput()) {

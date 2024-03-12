@@ -525,11 +525,11 @@ export default {
       // Set the result to combinedData
       this.combinedData = combinedDataWithNull;
 
-      this.combinedData = combinedDataWithNull.filter(data =>
-        this.dataSource.some(sourceData => sourceData.DateTime === data.date)
-      );
-
       this.combinedData = this.combinedData.filter(data => !(data.Close === 0 && data.Open === 0 && data.High === 0 && data.Low === 0));
+
+      this.combinedData = this.combinedData.filter(data =>
+        this.combinedData.some(sourceData => sourceData.DateTime === data.date)
+      );
 
       console.log("combinedData");
       console.log(this.combinedData);
