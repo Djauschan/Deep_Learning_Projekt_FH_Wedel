@@ -91,16 +91,13 @@
           <input type="checkbox" v-model="showCLine"> Citigroup
         </label>
         <label>
-          <input v-if="selectedModel != 'transformer'" type="checkbox" v-model="showNIOLine"> NIO
-        </label>
-        <label>
           <input type="checkbox" v-model="showNVDALine"> NVDIA
         </label>
-      </div>
-      <div class="checkboxes3">
         <label>
           <input type="checkbox" v-model="showSNAPLine"> Snap
         </label>
+      </div>
+      <div class="checkboxes3">
         <label>
           <input type="checkbox" v-model="showSQLine"> Block
         </label>
@@ -142,9 +139,11 @@
   <div class="newChart">
     <DxChart v-if="showAALLine && showChart" id="AAL-chart" :data-source="this.combinedData['AAL']" title="AAL Chart">
       <DxCommonSeriesSettings argument-field="DateTime" type="line" />
-      <DxSeries :name="'AAL Prediction'" value-field="value_pred" argument-field="DateTime" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'AAL Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'AAL Real Value'" value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'AAL Real Value'" value-field="Close" argument-field="DateTime" type="line"
+        :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -162,9 +161,11 @@
   <div class="newChart">
     <DxChart v-if="showAMDLine && showChart" id="AMD-chart" :data-source="this.combinedData['AMD']" title="AMD Chart">
       <DxCommonSeriesSettings argument-field="DateTime" type="line" />
-      <DxSeries :name="'AMD Prediction'" value-field="value_pred" argument-field="DateTime" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'AMD Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'AMD Real Value'" value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'AMD Real Value'" value-field="Close" argument-field="DateTime" type="line"
+        :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -182,29 +183,11 @@
   <div class="newChart">
     <DxChart v-if="showCLine && showChart" id="C-chart" :data-source="this.combinedData['C']" title="C Chart">
       <DxCommonSeriesSettings argument-field="DateTime" type="line" />
-      <DxSeries :name="'C Prediction'" value-field="value_pred" argument-field="DateTime" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'C Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'C Real Value'" value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" precision="2" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showNIOLine && showChart" id="NIO-chart" :data-source="this.combinedData['NIO']" title="NIO Chart">
-      <DxCommonSeriesSettings argument-field="DateTime" type="line" />
-      <DxSeries :name="'NIO Prediction'" value-field="value_pred" argument-field="DateTime" type="line" :color="seriesColors[8]">
-      </DxSeries>
-      <DxSeries :name="'NIO Real Value'" value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'C Real Value'" value-field="Close" argument-field="DateTime" type="line"
+        :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -268,9 +251,11 @@
   <div class="newChart">
     <DxChart v-if="showSQLine && showChart" id="SQ-chart" :data-source="this.combinedData['SQ']" title="SQ Chart">
       <DxCommonSeriesSettings argument-field="DateTime" type="line" />
-      <DxSeries :name="'SQ Prediction'" value-field="value_pred" argument-field="DateTime" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'SQ Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'SQ Real Value'" value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'SQ Real Value'" value-field="Close" argument-field="DateTime" type="line"
+        :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -370,8 +355,6 @@ export default {
       SQpredictionData: [],
       showTSLALine: false,
       TSLApredictionData: [],
-      showNIOLine: false,
-      NIOPredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
       selectedTime: 'H',
@@ -523,7 +506,6 @@ export default {
       this.showSNAPLine = false;
       this.showSQLine = false;
       this.showTSLALine = false;
-      this.showNIOLine = false;
     },
     async showAll() {
       this.showAALLine = true;
@@ -534,9 +516,6 @@ export default {
       this.showTSLALine = true;
       this.showAMDLine = true;
       this.showAAPLLine = true;
-      if (this.selectedModel != 'transformer') {
-        this.showNIOLine = true;
-      }
     },
     async load_model_data() {
       console.log(this.selectedModel)
@@ -610,9 +589,6 @@ export default {
       }
       if (this.showCLine) {
         this.activeCharts.push('C');
-      }
-      if (this.showNIOLine) {
-        this.activeCharts.push('NIO');
       }
       if (this.showNVDALine) {
         this.activeCharts.push('NVDA');
