@@ -19,7 +19,7 @@
           </div>
           <div class="calendar-days">
             <div v-for="day in daysInMonth" :key="day" class="calendar-day"
-              :class="{ 'selected-start': day === startDate }" :id="{ 'weekend': !isWeekDay(day.date) }"
+              :class="{ 'selected-start': day === startDate }" :style="{ color: !isWeekday(day) ? 'red' : 'black' }"
               @click="selectDay(day)">
               {{ day }}
             </div>
@@ -114,13 +114,14 @@
     <button class="button-stock" @click="updateChart">Show Predictions</button>
   </div>
   <div class="newChart">
-    <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" :data-source="this.combinedData" title="AAPL Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AAPL Line'" value-field="value" :data-source="this.combinedData['AAPL']" argument-field="date"
-        type="line" :color="seriesColors[1]">
+    <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" title="AAPL Chart"
+      :data-source="this.combinedData['AAPL']">
+      <!--<DxCommonSeriesSettings argument-field="date" type="line" />-->
+      <DxSeries :name="'AAPL Prediction'" value-field="value" argument-field="date" type="line"
+        :color="seriesColors[3]">
       </DxSeries>
-      <DxSeries :name="'AAPL'" :data-source="this.dataSource" open-value-field="Open" high-value-field="High" low-value-field="Low"
-        close-value-field="Close" argument-field="DateTime">
+      <DxSeries :name="'AAPL Real Value'" value-field="close" argument-field="date" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -138,7 +139,9 @@
   <div class="newChart">
     <DxChart v-if="showAALLine && showChart" id="AAL-chart" :data-source="this.combinedData['AAL']" title="AAL Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AAL Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
+      <DxSeries :name="'AAL Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries :name="'AAL Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -156,7 +159,9 @@
   <div class="newChart">
     <DxChart v-if="showAMDLine && showChart" id="AMD-chart" :data-source="this.combinedData['AMD']" title="AMD Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AMD Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'AMD Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries :name="'AMD Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -174,7 +179,9 @@
   <div class="newChart">
     <DxChart v-if="showCLine && showChart" id="C-chart" :data-source="this.combinedData['C']" title="C Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'C Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[4]">
+      <DxSeries :name="'C Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries :name="'C Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -193,7 +200,9 @@
     <DxChart v-if="showNIOLine && showChart" id="Window Average-chart" :data-source="this.combinedData['NIO']"
       title="Window Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'NIO Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[6]">
+      <DxSeries :name="'NIO Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries :name="'NIO Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -212,7 +221,10 @@
     <DxChart v-if="showNVDALine && showChart" id="Historic Average-chart" :data-source="this.combinedData['NVDA']"
       title="Historic Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'NVDA Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[5]">
+      <DxSeries :name="'NVDA Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries :name="'NVDA Real Value'" value-field="close" argument-field="date" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -231,7 +243,10 @@
     <DxChart v-if="showSNAPLine && showChart" id="Window Average-chart" :data-source="this.combinedData['SNAP']"
       title="Window Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Snap Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[6]">
+      <DxSeries :name="'Snap Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries :name="'Snap Real Value'" value-field="close" argument-field="date" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -249,7 +264,9 @@
   <div class="newChart">
     <DxChart v-if="showSQLine && showChart" id="SQ-chart" :data-source="this.combinedData['SQ']" title="SQ Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'SQ Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[7]">
+      <DxSeries :name="'SQ Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries :name="'SQ Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -268,7 +285,10 @@
     <DxChart v-if="showTSLALine && showChart" id="TSLA-chart" :data-source="this.combinedData['TSLA']"
       title="TSLA Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'TSLA Line'" value-field="value" argument-field="date" type="line">
+      <DxSeries :name="'TSLA Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries :name="'TSLA Real Value'" value-field="close" argument-field="date" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -492,8 +512,6 @@ export default {
       this.calculateErrorsAndDisplay(actualValues, predictedValues);
     },
     handleSelection() {
-      console.log("SelectedTime:", this.selectedTime);
-      console.log("SelectedModel:", this.selectedModel);
     },
     async hideAll() {
       this.showAAPLLine = false;
@@ -636,10 +654,24 @@ export default {
         return false;
       }
     },
+    async updateCombinedData() {
+      // Iterate over the keys of this.dataSource
+      for (let key in this.dataSource) {
+        this.combinedData[key] = (this.combinedData[key] || []).concat(this.dataSource[key].map(data => ({
+          ...data,
+          date: data.DateTime,
+          close: data.Close,
+        })));
+        this.combinedData[key] = this.combinedData[key].filter(data => !(data.Close === 0 && data.Open === 0 && data.High === 0 && data.Low === 0));
+      }
+
+    },
     async updateChart() {
       if (this.checkDataInput()) {
         this.dataSource = await this.load_data();
         this.combinedData = await this.load_model_data();
+
+        this.updateCombinedData();
         this.showChart = true;
         this.activeCharts = [];
       } else {
@@ -920,9 +952,5 @@ input::placeholder {
 
 .button-stock:hover {
   background-color: darkgrey;
-}
-
-#weekend {
-  color: gray;
 }
 </style>

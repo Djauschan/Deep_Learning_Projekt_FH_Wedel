@@ -154,7 +154,7 @@
     <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData[this.selectedStock]"
       :title="CNNchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'CNN Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[0]">
+      <DxSeries :name="'CNN Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[0]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -173,7 +173,7 @@
     <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart"
       :data-source="this.transformerData[this.selectedStock]" :title="TransformerchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line"
+      <DxSeries :name="'Transformer Prediction'" value-field="value" argument-field="date" type="line"
         :color="seriesColors[1]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
@@ -193,7 +193,7 @@
     <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData"
       :title="LSTMchartTitle[this.selectedStock]">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'LSTM Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
+      <DxSeries :name="'LSTM Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -212,7 +212,7 @@
     <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart"
       :data-source="this.randomForestData[this.selectedStock]" :title="RandomForestchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line"
+      <DxSeries :name="'randomForest Prediction'" value-field="value" argument-field="date" type="line"
         :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
@@ -232,7 +232,7 @@
     <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart"
       :data-source="this.gradientBoostData[this.selectedStock]" :title="GradientBoostchartTitle">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line"
+      <DxSeries :name="'gradientBoost Prediction'" value-field="value" argument-field="date" type="line"
         :color="seriesColors[4]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
@@ -439,16 +439,12 @@ export default {
       const month = this.currentDate.getMonth();
       return new Date(year, month, date).toLocaleDateString('en-US');
     },
-
-
-
     getDaysInMonth() {
       const year = this.currentDate.getFullYear();
       const month = this.currentDate.getMonth();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     },
-
     selectDate(day) {
       const year = this.currentDate.getFullYear();
       const month = this.currentDate.getMonth() + 1; // Month is zero-based
@@ -512,6 +508,7 @@ export default {
 
       // Set the result to combinedData
       this.combinedData = combinedDataWithNull;
+
 
       console.log("combinedData");
       console.log(this.combinedData);
@@ -808,9 +805,6 @@ export default {
       this.showChart = false;
       this.isLoading = true;
       this.startLoadingAnimation();
-      console.log("##### SelectedTime: ", this.selectedTime);
-      console.log("##### SelectedStock:", this.selectedStock);
-      console.log("##### checkAllBoxes:", this.checkAllBoxes());
 
       if (this.selectedStock && this.selectedTime && this.checkAllBoxes() && this.startDate) {
         this.dataSource = await this.load_data();
@@ -892,38 +886,6 @@ export default {
     stopLoadingAnimation() {
       clearInterval(this.loadingInterval);
       this.loadingMessage = 'Loading';
-    },
-
-    async get_stock_data(stock_symbol, days_back) {
-      try {
-        const response = await axios.get(this.store.API + "/getStock", {
-          params: {
-            stock_symbol: this.selectedStock,
-            start_date: this.formatCalendarEntry(this.startDate), // Replace with the start date of the prediction
-            resolution: this.selectedTime, // Replace with the resolution:
-          }
-        });
-        console.log([response.data])
-        return response.data
-      } catch (error) {
-        Swal.fire({
-          title: "Error at getting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.detail
-        ) {
-          console.log(error.response.data.detail);
-        } else {
-          console.log(error);
-        }
-      }
     },
     selectDay(day) {
       if (this.isWeekday(day)) {
