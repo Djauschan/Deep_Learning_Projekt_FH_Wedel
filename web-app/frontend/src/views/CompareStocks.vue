@@ -200,8 +200,7 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showNIOLine && showChart" id="NIO-chart" :data-source="this.combinedData['NIO']"
-      title="NIO Chart">
+    <DxChart v-if="showNIOLine && showChart" id="NIO-chart" :data-source="this.combinedData['NIO']" title="NIO Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'NIO Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
@@ -410,6 +409,8 @@ export default {
       isLoading: false,
       loadingMessage: 'Loading',
       loadingInterval: null,
+      minDate: new Date(2021, 0, 4), // January is 0 in JavaScript
+      maxDate: new Date(2021, 1, 10),
     };
   },
 
@@ -560,16 +561,18 @@ export default {
     },
     async load_model_data() {
       try {
-        const response = await axios.get(`${this.store.API}/predict/${this.selectedModel}`, {
+        const response = await axios.get(`${this.store.API}/get/combinedData`, {
           params: {
             stock_symbols: "[" + this.activeCharts.join(', ') + "]",
             start_date: this.formatCalendarEntry(this.formattedStartDate),
             resolution: this.selectedTime,
+            modelType: this.selectedModel,
           }
         });
 
-        console.log("Prediction loaded");
+        console.log("ALL loaded");
         console.log(response.data);
+
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -618,9 +621,22 @@ export default {
     },
     selectDay(day) {
       if (this.isWeekday(day)) {
-        if (this.selectingStart) {
-          this.startDate = day;
-          this.showCalendar = false;
+        const selectedDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
+        if (selectedDate >= this.minDate && selectedDate <= this.maxDate) {
+          // Handle day selection
+          if (this.selectingStart) {
+            this.startDate = day;
+            this.showCalendar = false;
+          }
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: "Please select a date between 2021-01-04 and 2021-02-10",
+            icon: "info",
+            showCloseButton: false,
+            confirmButtonText: "Close",
+            confirmButtonColor: "#d0342c",
+          });
         }
       } else {
         Swal.fire({
