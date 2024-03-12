@@ -12,7 +12,6 @@
                             </div>
                             <div class="LoginText">
                                 <span class="home-text">{{ username }} <br></span>
-                                <span class="home-text01">View Profile</span>
                             </div>
                         </div>
                     </div>

@@ -4,37 +4,35 @@
     <span class="home-logo">Compare Models!</span>
   </div>
   <div class="center">
-    <button class="button-stock" @click="updateChart">Load Charts</button>
-    <div class="separator"></div>
     <div>
-    <button class="button-stock" @click="toggleCalendar">Select Dates</button>
-    <div class="calendar-popup" v-if="showCalendar">
-      <div class="calendar">
-        <div class="calendar-header">
-          <button @click="previousMonth">&lt;</button>
-          <div>
-            <h2>{{ currentMonthName }}</h2>
-            <h2>{{ currentMonth }}</h2>
-            <h2>{{ currentYear }}</h2>
+      <button class="button-stock" @click="toggleCalendar">Select Dates</button>
+      <div class="calendar-popup" v-if="showCalendar">
+        <div class="calendar">
+          <div class="calendar-header">
+            <button @click="previousMonth">&lt;</button>
+            <div>
+              <h2>{{ currentMonthName }}</h2>
+              <h2>{{ currentMonth }}</h2>
+              <h2>{{ currentYear }}</h2>
+            </div>
+            <button @click="nextMonth">&gt;</button>
           </div>
-          <button @click="nextMonth">&gt;</button>
-        </div>
-        <div class="calendar-days">
-          <div v-for="day in daysInMonth" :key="day" class="calendar-day"
-               :class="{ 'selected-start': day === startDate}"
-               @click="selectDay(day)">
-            {{ day }}
+          <div class="calendar-days">
+            <div v-for="day in daysInMonth" :key="day" class="calendar-day"
+              :class="{ 'selected-start': day === startDate }" :style="{ color: !isWeekday(day) ? 'red' : 'black' }"
+              @click="selectDay(day)">
+              {{ day }}
+            </div>
           </div>
         </div>
       </div>
+      <div>
+        <label>Selected Start Date:</label>
+      </div>
+      <div>
+        <input type="text" v-model="formattedStartDate" readonly class="short-input">
+      </div>
     </div>
-    <div>
-      <label>Selected Start Date:</label>
-    </div>
-    <div>
-      <input type="text" v-model="formattedStartDate" readonly class="short-input">
-    </div>
-  </div>
 
     <div class="separator"></div>
     <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
@@ -54,9 +52,6 @@
         </option>
         <option value="C">
           Citigroup
-        </option>
-        <option value="MRNS">
-          Marinus Pharmaceuticals Inc
         </option>
         <option value="NIO">
           Nio Inc
@@ -115,133 +110,150 @@
         </label>
       </div>
     </div>
+    <div class="separator"></div>
+    <button class="button-stock" @click="updateChart">Load Charts</button>
+  </div>
+  <div v-if="isLoading" class="loading-container">
+    {{ loadingMessage }}
   </div>
   <!-- Combined Chart -->
   <div class="newChart">
     <DxChart v-if="showChart" :data-source="combinedData" title="Stock Price">
       <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
-      <DxSeries :name=selectedStock open-value-field="Open" high-value-field="High" low-value-field="Low"
-        close-value-field="Close" argument-field="DateTime">
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
       </DxSeries>
-      <DxSeries v-if="showCNNLine" :name="'CNN' + this.selectedStock" :data-source="combinedData" type="line"
+      <DxSeries v-if="showCNNLine" :name="'CNN-' + this.selectedStock" :data-source="combinedData" type="line"
         value-field="CNNValue" argument-field="date" :color="seriesColors[0]">
       </DxSeries>
-      <DxSeries v-if="showTransformerLine" :name="'Transformer' + this.selectedStock" :data-source="combinedData"
+      <DxSeries v-if="showTransformerLine" :name="'Transformer-' + this.selectedStock" :data-source="combinedData"
         type="line" value-field="TransformerValue" argument-field="date" :color="seriesColors[1]">
       </DxSeries>
-      <DxSeries v-if="showLSTMLine" :name="'LSTM' + this.selectedStock" :data-source="combinedData" type="line"
+      <DxSeries v-if="showLSTMLine" :name="'LSTM-' + this.selectedStock" :data-source="combinedData" type="line"
         value-field="LSTMValue" argument-field="date" :color="seriesColors[2]">
       </DxSeries>
-      <DxSeries v-if="showrandomForestLine" :name="'randomForest' + this.selectedStock" :data-source="combinedData"
-        type="line" value-field="randomForestValue" argument-field="date" :color="seriesColors[3]">
+      <DxSeries v-if="showrandomForestLine" :name="'randomForest-' + this.selectedStock" :data-source="combinedData"
+        type="line" value-field="randomForestValue" argument-field="date" :color="seriesColors[5]">
       </DxSeries>
-      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost' + this.selectedStock" :data-source="combinedData"
+      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost-' + this.selectedStock" :data-source="combinedData"
         type="line" value-field="gradientBoostValue" argument-field="date" :color="seriesColors[4]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData" :title="CNNchartTitle">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'CNN Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[0]">
+    <DxChart v-if="showCNNLine && showChart" :data-source="combinedData" id="CNN-chart" :title="CNNchartTitle">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries v-if="showCNNLine" :name="'CNN-' + this.selectedStock" :data-source="combinedData" type="line"
+        value-field="CNNValue" argument-field="date" :color="seriesColors[0]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :data-source="this.transformerData"
-      :title="TransformerchartTitle">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Transformer Line'" value-field="value" argument-field="date" type="line"
-        :color="seriesColors[1]">
+    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :title="TransformerchartTitle"
+      :data-source="combinedData">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries v-if="showTransformerLine" :name="'Transformer-' + this.selectedStock" :data-source="combinedData"
+        type="line" value-field="TransformerValue" argument-field="date" :color="seriesColors[1]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData" :title="LSTMchartTitle">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'LSTM Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
+    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="combinedData"
+      :title="LSTMchartTitle[this.selectedStock]">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries v-if="showLSTMLine" :name="'LSTM-' + this.selectedStock" :data-source="combinedData" type="line"
+        value-field="LSTMValue" argument-field="date" :color="seriesColors[2]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart" :data-source="this.randomForestData"
+    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart" :data-source="combinedData"
       :title="RandomForestchartTitle">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'randomForest Line'" value-field="value" argument-field="date" type="line"
-        :color="seriesColors[3]">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries v-if="showrandomForestLine" :name="'randomForest-' + this.selectedStock" :data-source="combinedData"
+        type="line" value-field="randomForestValue" argument-field="date" :color="seriesColors[5]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart" :data-source="this.gradientBoostData"
+    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart" :data-source="combinedData"
       :title="GradientBoostchartTitle">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'gradientBoost Line'" value-field="value" argument-field="date" type="line"
-        :color="seriesColors[4]">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost-' + this.selectedStock" :data-source="combinedData"
+        type="line" value-field="gradientBoostValue" argument-field="date" :color="seriesColors[4]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -268,25 +280,6 @@ import axios from "axios";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import { useMyPiniaStore } from "../store.js";
 
-// Add the calculateMeanErrorAndMeanAbsoluteError function here
-function calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues) {
-  if (actualValues.length !== predictedValues.length) {
-    throw new Error("The lengths of actualValues and predictedValues should be the same.");
-  }
-
-  // Calculate errors for each data point
-  const errors = actualValues.map((actual, index) => predictedValues[index] - actual);
-
-  // Calculate mean error
-  const meanError = errors.reduce((sum, error) => sum + error, 0) / errors.length;
-
-  // Calculate mean absolute error
-  const absoluteErrors = errors.map(error => Math.abs(error));
-  const meanAbsoluteError = absoluteErrors.reduce((sum, error) => sum + error, 0) / absoluteErrors.length;
-
-  return { meanError, meanAbsoluteError };
-};
-
 export default {
   components: {
     Header,
@@ -304,6 +297,7 @@ export default {
   },
   async created() {
     this.dataSource = [];
+    this.real_data = [];
     this.selectedDays = null;
     this.transformerData = [];
     this.LSTMData = [];
@@ -335,21 +329,39 @@ export default {
       combinedData: [],
       store: useMyPiniaStore(),
       selectedTime: "H",
-      selectedStock: "AAPL",
-      seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'], // Array of colors for each series
-      meanError: null,
-      meanAbsoluteError: null,
+      selectedStock: "AAL",
+      seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC', '#FFB733', '#FF3385', '#33B5FF'], // Array of colors for each series
+      cnnMeanError: null,
+      cnnMeanAbsoluteError: null,
+      cnnProfit: null,
+      tfMeanError: null,
+      tfMeanAbsoluteError: null,
+      tfProfit: null,
+      lstmMeanError: null,
+      lstmMeanAbsoluteError: null,
+      lstmProfit: null,
+      gbMeanError: null,
+      gbMeanAbsoluteError: null,
+      gbProfit: null,
+      rfMeanError: null,
+      rfMeanAbsoluteError: null,
+      rfProfit: null,
       showCalendar: false,
-      currentDate: new Date(), // Current date
+      currentDate: new Date("2021-01-04"), // Current date
       currentMonth: '', // Current month displayed in the header
       currentMonthName: '', // Current month name displayed in the header
       currentYear: '', // Current year displayed in the header
       daysInMonth: [], // Array to hold days of the month
       startDate: null, // Selected start date
-      selectingStart: true // Flag to indicate if currently selecting start date
+      selectingStart: true, // Flag to indicate if currently selecting start date
+      minDate: new Date(2021, 0, 4), // January is 0 in JavaScript
+      maxDate: new Date(2021, 1, 10),
+      isLoading: false,
+      loadingMessage: 'Loading',
+      loadingInterval: null,
     };
   },
-  
+
   watch: {
     currentDate() {
       this.getDaysInMonth();
@@ -358,37 +370,35 @@ export default {
   },
 
   computed: {
-    
+
     currentMonth() {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    let currentMonthIndex = this.currentDate.getMonth() + (this.currentMonthOffset-this.currentMonthOffset);
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      let currentMonthIndex = this.currentDate.getMonth() + (this.currentMonthOffset - this.currentMonthOffset);
 
-    // Adjust the index to handle cases where it goes beyond the boundaries
-    if (currentMonthIndex < 0) {
-      currentMonthIndex += 12; // Wrap around to December
-    } else if (currentMonthIndex >= 12) {
-      currentMonthIndex -= 12; // Wrap around to January
-    }
+      // Adjust the index to handle cases where it goes beyond the boundaries
+      if (currentMonthIndex < 0) {
+        currentMonthIndex += 12; // Wrap around to December
+      } else if (currentMonthIndex >= 12) {
+        currentMonthIndex -= 12; // Wrap around to January
+      }
 
-
-    
-    return months[currentMonthIndex];
-  },
+      return months[currentMonthIndex];
+    },
 
     CNNchartTitle() {
-      return `CNN Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `CNN Chart; Mean Error: ${this.cnnMeanError}; Mean Absolute Error: ${this.cnnMeanAbsoluteError}; Gewinn: ${this.cnnProfit}$`;
     },
     TransformerchartTitle() {
-      return `Transformer Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `Transformer Chart; Mean Error: ${this.tfMeanError}; Mean Absolute Error: ${this.tfMeanAbsoluteError}; Gewinn: ${this.tfProfit}$`;
     },
     LSTMchartTitle() {
-      return `LSTM Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `LSTM Chart; Mean Error: ${this.lstmMeanError}; Mean Absolute Error: ${this.lstmMeanAbsoluteError}; Gewinn: ${this.lstmProfit}$`;
     },
     RandomForestchartTitle() {
-      return `Random Forest Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `Random Forest Chart; Mean Error: ${this.rfMeanError}; Mean Absolute Error: ${this.rfMeanAbsoluteError}; Gewinn: ${this.rfProfit}$`;
     },
     GradientBoostchartTitle() {
-      return `Gradient Boost Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
+      return `Gradient Boost Chart; Mean Error: ${this.gbMeanError}; Mean Absolute Error: ${this.gbMeanAbsoluteError}; Gewinn: ${this.gbProfit}$`;
     },
     tooltip: {
       enabled: true,
@@ -413,19 +423,10 @@ export default {
         startDayElement.classList.remove('selected-start');
       }
     },
-      
-    
     toggleCalendar() {
       this.startDate = null;
       this.selectingStart = true;
       this.showCalendar = !this.showCalendar;
-    },
-    selectDay(day) {
-      // Handle day selection
-      if (this.selectingStart) {
-        this.startDate = day;
-        this.showCalendar = false;
-      }
     },
     previousMonth() {
       // Logic for moving to the previous month
@@ -454,40 +455,22 @@ export default {
       const month = this.currentDate.getMonth();
       return new Date(year, month, date).toLocaleDateString('en-US');
     },
-  
-
-
-  getDaysInMonth() {
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  },
-  
-  selectDate(day) {
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth() + 1; // Month is zero-based
-    this.selectedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    this.showDatePicker = false;
-  },
-    // Method to calculate mean error and mean absolute error
-    calculateErrorsAndDisplay(actualValues, predictedValues) {
-      const { meanError, meanAbsoluteError } = calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues);
-      this.meanError = meanError.toFixed(2); // Round to 2 decimal places
-      this.meanAbsoluteError = meanAbsoluteError.toFixed(2); // Round to 2 decimal places
+    getDaysInMonth() {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     },
-
-    // Example method to trigger calculation and display
-    displayErrors() {
-      // Example actual and predicted data
-      const actualValues = [10, 20, 30, 40, 50];
-      const predictedValues = [12, 18, 28, 38, 48];
-      this.calculateErrorsAndDisplay(actualValues, predictedValues);
+    selectDate(day) {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth() + 1; // Month is zero-based
+      this.selectedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      this.showDatePicker = false;
     },
 
     handleSelection() {
-      console.log("SelectedTime:", this.selectedTime);
-      console.log("SelectedStock:", this.selectedStock);
+      //console.log("SelectedTime:", this.selectedTime);
+      //console.log("SelectedStock:", this.selectedStock);
     },
 
     async updateCombinedData() {
@@ -519,17 +502,54 @@ export default {
       };
 
       // Merge all data points into combinedData
-      mergeDataPoints(this.LSTMData, 'LSTMValue');
-      mergeDataPoints(this.CNNData, 'CNNValue');
-      mergeDataPoints(this.transformerData, 'TransformerValue');
-      mergeDataPoints(this.randomForestData, 'randomForestValue');
-      mergeDataPoints(this.gradientBoostData, 'gradientBoostValue');
+      if (this.showCNNLine) {
+        mergeDataPoints(this.CNNData, 'CNNValue');
+      }
+      if (this.showTransformerLine) {
+        mergeDataPoints(this.transformerData, 'TransformerValue');
+      }
+      if (this.showLSTMLine) {
+        mergeDataPoints(this.LSTMData, 'LSTMValue');
+      }
+      if (this.showrandomForestLine) {
+        mergeDataPoints(this.randomForestData, 'randomForestValue');
+      }
+      if (this.showgradientBoostLine) {
+        mergeDataPoints(this.gradientBoostData, 'gradientBoostValue');
+      }
+      if (this.lstmLine) {
+        mergeDataPoints(this.LSTMData, 'LSTMValue');
+      }
+
 
       // Set the result to combinedData
       this.combinedData = combinedDataWithNull;
 
+      this.combinedData = this.combinedData.filter(data => !(data.Close === 0 && data.Open === 0 && data.High === 0 && data.Low === 0));
+
+      this.combinedData = this.combinedData.filter(data =>
+        this.combinedData.some(sourceData => sourceData.DateTime === data.date)
+      );
+
       console.log("combinedData");
       console.log(this.combinedData);
+    },
+
+    formatCalendarEntry(dateString) {
+      // Create a new Date object
+      let date = new Date(dateString);
+
+      // Format the date
+      let year = date.getFullYear();
+      let month = date.getMonth() + 1; // Months are zero-based
+      let day = date.getDate();
+
+      // Pad single digit numbers with a leading zero
+      month = month < 10 ? '0' + month : month;
+      day = day < 10 ? '0' + day : day;
+
+      // Return the formatted date string
+      return `${year}-${month}-${day}`;
     },
 
     async hideAll() {
@@ -548,85 +568,42 @@ export default {
       this.showCNNLine = true;
     },
 
-    async get_stock_data(stock_symbol, days_back) {
-      try {
-        const response = await axios.get(this.store.API + "/getStock", {
-          params: {
-            stock_symbol: this.selectedStock,
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
-          }
-        });
-        console.log([response.data])
-        return response.data
-      } catch (error) {
-        Swal.fire({
-          title: "Error at getting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.detail
-        ) {
-          console.log(error.response.data.detail);
-        } else {
-          console.log(error);
-        }
-      }
-    },
-
     async load_CNN_data() {
       try {
         const response = await axios.get(`${this.store.API}/predict/cnn`, {
           params: {
-            stock_symbol: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
           }
         });
 
         console.log("Prediction cnn loaded");
         console.log(response.data);
+        if (response.data['status_code'] !== undefined) {
+          this.showCNNLine = false;
+        }
 
         // Assuming the response.data is an object with date and close properties
-        this.CNNData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+        //this.CNNData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
+        console.log("mapped cnnData:");
+        console.log(this.CNNData);
 
-    async load_LSTM_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/lstm`, {
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
           params: {
-            stock_symbol: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "cnn",
           }
         });
-
-        console.log("Prediction lstm loaded");
-        console.log(response.data);
-
-        // Assuming the response.data is an object with date and close properties
-        this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+        this.cnnMeanError = maeResponse.data[this.selectedStock].ME;
+        this.cnnMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        this.cnnProfit = maeResponse.data[this.selectedStock].profit;
 
         return response.data;
+
       } catch (error) {
         Swal.fire({
           title: "Error at predicting data",
@@ -639,14 +616,13 @@ export default {
         console.error(error);
       }
     },
-
     async load_transformer_data() {
       try {
         const response = await axios.get(`${this.store.API}/predict/transformer`, {
           params: {
             stock_symbols: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
           }
         });
 
@@ -658,7 +634,21 @@ export default {
 
         console.log("mapped transformerData:");
         console.log(this.transformerData);
+        if (response.data['status_code'] !== undefined) {
+          this.showTransformerLine = false;
+        }
 
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "transformer",
+          }
+        });
+        this.tfMeanError = maeResponse.data[this.selectedStock].ME;
+        this.tfMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        this.tfProfit = maeResponse.data[this.selectedStock].profit;
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -677,21 +667,34 @@ export default {
       try {
         const response = await axios.get(`${this.store.API}/predict/randomForest`, {
           params: {
-            stock_symbol: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
           }
         });
 
         console.log("Prediction randomforst loaded");
         console.log(response.data);
+        if (response.data['status_code'] !== undefined) {
+          this.showrandomForestLine = false;
+        }
 
         // Assuming the response.data is an object with date and close properties
-        this.randomForestData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+        //this.randomForestData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
         console.log("mapped randomForestData:");
         console.log(this.randomForestData);
-
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "randomforest",
+          }
+        });
+        this.rfMeanError = maeResponse.data[this.selectedStock].ME;
+        this.rfMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        this.rfProfit = maeResponse.data[this.selectedStock].profit;
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -710,20 +713,77 @@ export default {
       try {
         const response = await axios.get(`${this.store.API}/predict/gradientBoost`, {
           params: {
-            stock_symbol: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime, // Replace with the resolution:
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
           }
         });
 
         console.log("Prediction gradientBoost loaded");
         console.log(response.data);
+        if (response.data['status_code'] !== undefined) {
+          this.showgradientBoostLine = false;
+        }
 
         // Assuming the response.data is an object with date and close properties
-        this.gradientBoostData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
+        //this.gradientBoostData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
         console.log("mapped gradientBoostData:");
         console.log(this.gradientBoostData);
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "gradientboost",
+          }
+        });
+        this.gbMeanError = maeResponse.data[this.selectedStock].ME;
+        this.gbMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        this.gbProfit = maeResponse.data[this.selectedStock].profit;
+        return response.data;
+      } catch (error) {
+        Swal.fire({
+          title: "Error at predicting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        console.error(error);
+      }
+    },
+
+    async load_LSTM_data() {
+      try {
+        const response = await axios.get(`${this.store.API}/predict/lstm`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime, // Replace with the resolution:
+          }
+        });
+
+        console.log("Prediction lstm loaded");
+        console.log(response.data);
+        if (response.data['status_code'] !== undefined) {
+          this.showLSTMLine = false;
+        }
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "lstm",
+          }
+        });
+        this.lstmMeanError = maeResponse.data[this.selectedStock].ME;
+        this.lstmMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        this.lstmProfit = maeResponse.data[this.selectedStock].profit;
+
+        // Assuming the response.data is an object with date and close properties
+        //this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
 
         return response.data;
       } catch (error) {
@@ -744,13 +804,18 @@ export default {
         const response = await axios.get(this.store.API + "/load/data", {
           params: {
             stock_symbols: "[" + this.selectedStock + "]",
-            start_date: "2021-02-04", // Replace with the start date of the prediction
-            resolution: this.selectedtime,
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
           }
         });
         console.log("### normal loaded ###")
-        console.log([response.data])
-        return response.data
+        if (response.data['status_code'] !== undefined) {
+          return [];
+        }
+        else {
+          console.log(response.data[this.selectedStock])
+          return response.data[this.selectedStock]
+        }
       } catch (error) {
         Swal.fire({
           title: "Error at getting data",
@@ -773,20 +838,21 @@ export default {
     },
 
     async updateChart() {
-      console.log("##### SelectedTime: ", this.selectedTime);
-      console.log("##### SelectedStock:", this.selectedStock);
-      console.log("##### checkAllBoxes:", this.checkAllBoxes());
+      this.showChart = false;
+      this.isLoading = true;
+      this.startLoadingAnimation();
 
-      if (this.selectedStock && this.selectedTime && this.checkAllBoxes()) {
+      if (this.selectedStock && this.selectedTime && this.checkAllBoxes() && this.startDate) {
         this.dataSource = await this.load_data();
-        if (this.showCNNLine == true) {
+        this.real_data = await this.load_data();
+        if (this.showCNNLine) {
           this.CNNData = await this.load_CNN_data();
         }
         if (this.showTransformerLine) {
           this.transformerData = await this.load_transformer_data();
         }
         if (this.showLSTMLine) {
-          //this.LSTMData = await this.load_LSTM_data();
+          this.LSTMData = await this.load_LSTM_data();
         }
         if (this.showrandomForestLine) {
           this.randomForestData = await this.load_randomForest_data();
@@ -797,24 +863,82 @@ export default {
 
         console.log("datasource: " + this.dataSource)
 
-        if (this.dataSource) {
 
-          const prices = this.dataSource.flatMap(data => [data.open, data.close]);
-          this.priceRange = {
-            min: Math.min(...prices) * 0.5,
-            max: Math.max(...prices) * 2
-          };
-          this.priceRangeKey = Math.random();
-          console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
+        if (this.dataSource) {
+          const prices = this.dataSource.flatMap(data => [data.Open, data.Close]);
+          console.log('dataSource:', this.dataSource);
+          console.log('prices:', prices);
+
+          let minIsNull = false;
+          for (let price in prices) {
+            if (prices[price] == 0) {
+              minIsNull = true;
+            }
+          }
+          if (minIsNull) {
+            const sum = prices.reduce((a, b) => a + b, 0);
+            const avg = sum / prices.length;
+            this.priceRange = {
+              min: avg * 0.5,
+              max: Math.max(...prices) * 2
+            };
+            this.priceRangeKey = Math.random();
+            console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
+          } else {
+            this.priceRange = {
+              min: Math.min(...prices) * 0.5,
+              max: Math.max(...prices) * 2
+            };
+            this.priceRangeKey = Math.random();
+            console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
+          }
         }
 
         await this.updateCombinedData();
         this.showChart = true;
-
+        this.isLoading = false;
+        this.stopLoadingAnimation();
       } else {
         Swal.fire({
           title: "Error at getting data",
-          text: "Please select a stock, the time interval and a model",
+          text: "Please select a stock, the time interval, the start date and a model",
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        this.isLoading = false;
+      }
+    },
+
+    startLoadingAnimation() {
+      let dots = 0;
+      this.loadingInterval = setInterval(() => {
+        dots = (dots + 1) % 4;
+        this.loadingMessage = 'Loading' + '.'.repeat(dots);
+      }, 1000);
+    },
+
+    stopLoadingAnimation() {
+      clearInterval(this.loadingInterval);
+      this.loadingMessage = 'Loading';
+    },
+    selectDay(day) {
+      if (this.isWeekday(day)) {
+        const selectedDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
+        if (selectedDate >= this.minDate && selectedDate <= this.maxDate) {
+          // Handle day selection
+          if (this.selectingStart) {
+            this.startDate = day;
+            this.showCalendar = false;
+          }
+        } else {
+          alert('Please select a date between 2021-01-04 and 2021-02-10');
+        }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Please select a weekday",
           icon: "info",
           showCloseButton: false,
           confirmButtonText: "Close",
@@ -822,6 +946,11 @@ export default {
         });
       }
     },
+    isWeekday(day) {
+      const dayOfWeek = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day).getDay();
+      return dayOfWeek !== 0 && dayOfWeek !== 6; // 0 is Sunday, 6 is Saturday
+    },
+
     checkAllBoxes() {
       if (this.showCNNLine || this.showTransformerLine || this.showLSTMLine || this.showrandomForestLine || this.showgradientBoostLine) {
         return true;
@@ -835,7 +964,18 @@ export default {
 
 <style>
 .short-input {
-  width: 100px; /* Adjust width as needed */
+  width: 100px;
+  /* Adjust width as needed */
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  /* Adjust as needed */
+  font-size: 1.5em;
+  /* Adjust as needed */
 }
 
 .calendar-popup {
@@ -873,11 +1013,13 @@ export default {
 }
 
 .selected-start {
-  background-color: #90EE90; /* Light green */
+  background-color: #90EE90;
+  /* Light green */
 }
 
 .selected-range {
-  background-color: #ADD8E6; /* Light blue */
+  background-color: #ADD8E6;
+  /* Light blue */
 }
 
 .calendar-day:hover {
@@ -899,17 +1041,22 @@ export default {
   background-color: #fff;
   border: 1px solid #ccc;
   padding: 10px;
-  max-width: 400px; /* Adjust max-width as needed */
-  max-height: 300px; /* Adjust max-height as needed */
-  overflow-y: auto; /* Add scrollbar when content exceeds max-height */
+  max-width: 400px;
+  /* Adjust max-width as needed */
+  max-height: 300px;
+  /* Adjust max-height as needed */
+  overflow-y: auto;
+  /* Add scrollbar when content exceeds max-height */
 }
 
 .date-picker-popup {
-  width: 100%; /* Make date picker content full width */
+  width: 100%;
+  /* Make date picker content full width */
 }
 
 .time-picker-popup {
-  width: 100%; /* Make time picker content full width */
+  width: 100%;
+  /* Make time picker content full width */
 }
 
 .popup h3 {

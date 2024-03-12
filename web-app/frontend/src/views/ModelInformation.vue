@@ -42,14 +42,21 @@ export default {
         {
           id: 2,
           title: 'CNN',
-          description: "<b>Input:</b><br> 30x6 Daten Matrix, wobei 30 Tageswerte und 7 die Features sind (GoldPreis und verschiedene ETFs) (in der Datengrundlage ggb.).<br> Dieser Input wird transformiert in 7x30x30 array => somit ist der fertig Model Input = 6x30x30; <br><b>Output:</b><br>Ein Skalar, welcher die Kurs Veränderung nach 5 Tagen predicted."
+          description: '<b>CNN Restrictions:</b><br> Daily Predictions, only implemented for: AAL, AAPL, AMD, C',
+          image: '/CNN.png'
         },
         {
           id: 3,
           title: 'ANN',
-          description: '<b>Input:</b><br> Forecast Horizon. <br> <b>Output:</b><br>  Dictionary, mit Angabe, welche Modelle welche Prognosen abgeben.',
+          description: 'Random Forest ist ein Ensemble-Modell, das aus vielen unabhängigen Entscheidungsbäumen besteht und durchschnittliche Vorhersagen liefert. Anstatt sich auf ein einzelnes Modell zu stützen, nutzt Random Forest die Stärken vieler Bäume, um präzisere und robustere Ergebnisse zu erzielen.<br>Das Gradient Boosting Machines ist ebenfalls eine Ensemble-Modelle, die jedoch ihre Fehler sequenziell durch aufeinanderfolgende Bäume korrigieren. Jeder Baum im Gradient Boosting Machines wird nacheinander gebaut, wobei er versucht, die Fehler seines Vorgängers zu korrigieren. Dies unterscheidet sich somit vom Random Forest, welche unabhängigen Bäume erstellt.<br>Die Eingabevariablen setzen sich aus Merkmalen zusammen, die mittels Feature-Engineering aus dem eigenen Datensatz abgeleitet wurden. Dabei wurden unterschiedliche Features entwickelt. Dazu zählt das DateTime-Feature, welches zeitliche Informationen wie Wochentage, Stunden und Monate erfasst. Des weiteren ein Merkmal, das prozentuale Veränderungen abbildet, sowie Lag-Features, welche Verzögerungsindikatoren darstellen und zeitlich verschobene Datenpunkte erfassen.<br>Der Output der Modelle liefert Prognosen für zukünftige Aktienschlusskurse, wobei das jeweilige Vorhersageintervall von der Auswahl des Modells abhängt. Das Daily-Modell prognostiziert die Schlusskurse der kommenden Tage. Beim 2-Stunden-Modell werden Vorhersagen in Zwei-Stunden-Intervallen getroffen, während das minütliche Modell alle 20 Minuten Vorhersagen bereitstellt.',
           image: '' // No image for this topic
         },
+        {
+          id: 4,
+          title: 'LSTM',
+          description: "Das LSTM-Modell ist eine spezielle Art von rekurrentem neuronalem Netzwerk, das sich besonders gut für die Vorhersage von Zeitreihendaten eignet, wie sie im Finanzmarkt vorzufinden sind. LSTMs zeichnen sich durch ihre Fähigkeit aus, sowohl kurzfristige als auch langfristige Abhängigkeiten in den Daten zu erkennen und zu nutzen. Diese Eigenschaft ist besonders vorteilhaft für die Vorhersage von Aktienkursbewegungen, da sie eine umfassende Berücksichtigung historischer Daten ermöglicht, ohne dass ein explizites Feature-Engineering erforderlich ist. Die Stärke der LSTM-Modelle liegt in ihrer Struktur, die aus Zellen, Gates und Zuständen besteht, die es dem Modell ermöglichen, Informationen über lange Zeiträume zu speichern und zu vergessen."
+        },
+
       ],
     };
   },
@@ -103,4 +110,4 @@ export default {
   max-height: 70%;
 }
 
-</style>
+</style>../../../../../web-app/frontend/src/views/Header.vue

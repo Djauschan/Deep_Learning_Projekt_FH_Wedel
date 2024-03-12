@@ -46,30 +46,13 @@
                         <div class="home-container27">
                           <button ref="myButton4" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
                             class="button" @click="update_budget">Aufladen</button>
+                          <button ref="myButton3000" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
+                            class="button" @click="update_budget2">Auszahlen</button>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="seperator"></div>
-                <div class="home-container29">
-                  <div class="hover-effect">
-                    <div class="home-container262">
-                      <div class="home-container23">
-                        <span>Modell Guthaben</span>
-                      </div>
-                      <div class="home-container24">
-                        <svg viewBox="0 0 1024 1024" class="home-icon28">
-                          <path
-                            d="M928 128h-832c-52.8 0-96 43.2-96 96v576c0 52.8 43.2 96 96 96h832c52.8 0 96-43.2 96-96v-576c0-52.8-43.2-96-96-96zM96 192h832c17.346 0 32 14.654 32 32v96h-896v-96c0-17.346 14.654-32 32-32zM928 832h-832c-17.346 0-32-14.654-32-32v-288h896v288c0 17.346-14.654 32-32 32zM128 640h64v128h-64zM256 640h64v128h-64zM384 640h64v128h-64z">
-                          </path>
-                        </svg>
-                        <input type="text" placeholder="Wert in Euro" class="home-textinput" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 <div class="seperator"></div>
                 <div class="hover-effect">
                   <div class="home-container71">
@@ -78,38 +61,22 @@
                         <span>Aktienwahl</span>
                       </div>
                       <div class="home-container35">
-                        <select v-model="selectedStock" ref="myButton3" @mouseover="changeCursor"
+                        <select v-model="selectedInterval" ref="myButton3" @mouseover="changeCursor"
                           @mouseleave="resetCursor">
-                          <option value="Option 1" selected>
-                            Apple
+                          <option value="D" selected>
+                            Täglich
                           </option>
-                          <option value="Option 2">
-                            American Airlines
+                          <option value="H">
+                            Stündlich
                           </option>
-                          <option value="Option 3">
-                            Advanced Micro Devices
-                          </option>
-                          <option value="Option 4">
-                            Citigroup
-                          </option>
-                          <option value="Option 5">
-                            NVIDIA
-                          </option>
-                          <option value="Option 6">
-                            Snap
-                          </option>
-                          <option value="Option 7">
-                            Block
-                          </option>
-                          <option value="Option 8">
-                            Tesla
+                          <option value="M">
+                            Minütlich
                           </option>
                         </select>
                       </div>
                     </div>
                   </div>
                 </div>
-
                 <div class="seperator"></div>
                 <div class="hover-effect">
                   <div class="home-container33">
@@ -126,35 +93,38 @@
                         </path>
                       </svg>
                       <button ref="myButton2" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
-                        class="button" @click="">Prognose</button>
+                        class="button" @click="load_rl_data">Prognose</button>
                     </div>
                   </div>
                 </div>
                 <div class="seperator"></div>
-                <!--<div class="hover-effect">>-->
-                <div class="home-container70">
+                <div class="hover-effect">
                   <div class="home-container33">
                     <div class="home-container34">
-                      <span>Der Agent empfiehlt:</span>
+                      <span>Gewinn: {{ rlData ? rlData.profit : 'TBD' }}</span>
                     </div>
-                    <span>Kaufen!</span>
-                    <!--<button ref="myButton" @click="extractLastEnsembleValue" @mouseover="changeCursor" @mouseleave="resetCursor" type="button"
-                        class="button"><pre>{{ this.lastEnsembleValue }}</pre></button>-->
                   </div>
                 </div>
-                <!--</div>>-->
               </div>
-            </div>
+              </div>
             <div class="home-container36">
+              
               <div class="home-container37">
                 <div class="home-container38">
                   <div class="home-container39">
-                    <DxChart id="chart" :data-source="dataSource" title="Predicted Stock Price">
-                      <DxCommonSeriesSettings argument-field="date" type="stock" />
-                      <DxSeries name="E-Mart" open-value-field="o" high-value-field="h" low-value-field="l"
-                        close-value-field="c">
-                        <DxReduction color="red" />
-                      </DxSeries>
+                    <div v-if="isLoading" class="loading-container">
+                      {{ loadingMessage }}
+                    </div>
+                    <DxChart v-if="rlData" id="chart" :data-source="transformedData" title="Kapitalaufstellung">
+                      <DxCommonSeriesSettings argument-field="timestamp" type="stackedBar" />
+                      <DxSeries value-field="AAPL" name="Apple" stack="assets" />
+                      <DxSeries value-field="NVDA" name="Nvidia" stack="assets" />
+                      <DxSeries value-field="AAL" name="American Airlines" stack="assets" />
+                      <DxSeries value-field="AMD" name="AMD" stack="assets" />
+                      <DxSeries value-field="SNAP" name="Snap inc" stack="assets" />
+                      <DxSeries value-field="C" name="Citigroup" stack="assets" />
+                      <DxSeries value-field="SQ" name="Block (SQ)" stack="assets" />
+                      <DxSeries value-field="liquid_money" name="Liquide Mittel" stack="assets" />
                       <DxArgumentAxis :workdays-only="true">
                         <DxLabel format="shortDate" />
                       </DxArgumentAxis>
@@ -165,33 +135,33 @@
                         </DxLabel>
                       </DxValueAxis>
                       <DxExport :enabled="true" />
-                      <DxTooltip :enabled="true" :customize-tooltip="customizeTooltip" location="edge" />
+                      <DxTooltip :enabled="true" location="edge" />
                     </DxChart>
                   </div>
                 </div>
               </div>
               <div class="home-container40">
                 <div class="home-container43">
-                  <div class="home-container42">
-                    <span>Detailed Agent Info</span>
+                  <div class="home-container42" v-if="rlData">
+                    <span>Trade Historie</span>
                   </div>
                   <div class="table-container" v-if="rlData">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th v-for="stock in Object.keys(rlData[Object.keys(rlData)[0]])">{{ stock }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(dateData, date) in rlData" :key="date">
-                          <td>{{ date }}</td>
-                          <td v-for="stockData in Object.values(dateData)">
-                            <pre>{{ formatStockData(stockData) }}</pre>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Uhrzeit</th>
+                            <th v-for="stock in Object.keys(rlData.actions[Object.keys(rlData.actions)[0]].actions)">{{ stock }}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="(dateData, date) in rlData.actions" :key="date">
+                            <td>{{ new Date(date).toLocaleString() }}</td>
+                            <td v-for="stock in Object.keys(dateData.actions)">
+                              {{ dateData.actions[stock] }}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
                   </div>
 
                   <!--<div class="home-container12">
@@ -206,6 +176,7 @@
       <div class="home-container48"></div>
     </div>
   </div>
+
 </template>
 
 <script>
@@ -262,7 +233,6 @@ export default {
     };
   },
   async created() {
-    this.load_rl_data();
     this.budget = await this.get_budget();
   },
   data() {
@@ -276,6 +246,9 @@ export default {
       budget: null,
       username: localStorage.logged_user,
       email: localStorage.logged_email,
+      isLoading: false,
+      loadingMessage: "Loading",
+      selectedInterval: "D",
     };
   },
   mounted() {
@@ -286,7 +259,22 @@ export default {
     // Extract the last "ensemble" value
     this.extractLastEnsembleValue();
   },
+  computed: {
+  transformedData() {
+    if (!this.rlData) {
+      return [];
+    }
 
+    const timestamps = Object.keys(this.rlData.actions);
+    return timestamps.map(timestamp => {
+      const assets = this.rlData.actions[timestamp].assets;
+      return {
+        timestamp,
+        ...assets
+      };
+    });
+  }
+},
   methods: {
     extractLastEnsembleValue() {
       // Assuming rlData is available in your component's data
@@ -317,16 +305,23 @@ export default {
 
 
     async load_rl_data() {
+      this.rlData = null;
+      this.isLoading = true;
+      this.startLoadingAnimation();
       try {
-        const response = await axios.get(`${this.store.API}/predict/rl`, { // Use store.state.API
+        const response = await axios.get(`${this.store.API}/simulate/rl`, { // Use store.state.API
           params: {
-            stock_symbols: '[AAPL, AAL, SNAP, TSLA]',
+            stock_symbols: '[AAPL, AAL, SNAP, TSLA, NVDA, C, SQ, AMD]',
             start_date: '2021-01-04',
-            end_date: '2021-01-08',
-            resolution: 'H'
+            resolution: this.selectedInterval,
+            username: this.username,
+
           }
         });
+        this.stopLoadingAnimation();
+        this.isLoading = false;
         this.rlData = response.data;
+        this.budget = await this.get_budget();
       } catch (error) {
         console.error(error);
       }
@@ -394,12 +389,46 @@ export default {
         }
       }
     },
+    async update_budget2() {
+      console.log(this.budget);
+      try {
+        const response = await axios.put(this.store.API + "/update_user/" + this.username, {
+
+          username: this.username,
+          email: this.username,
+          budget: this.budgetInput * -1,
+
+        });
+        console.log([response.data])
+        this.budget = await this.get_budget();
+        return response.data
+      } catch (error) {
+        Swal.fire({
+          title: "Error at getting data",
+          text: error,
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.detail
+        ) {
+          console.log(error.response.data.detail);
+        } else {
+          console.log(error);
+        }
+      }
+    },
     changeCursor() {
       //this.$refs.myButton.style.cursor = 'pointer'; // or any other cursor value
       //this.$refs.myButton1.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton2.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton3.style.cursor = 'pointer'; // or any other cursor value
       this.$refs.myButton4.style.cursor = 'pointer'; // or any other cursor value
+      this.$refs.myButton3000.style.cursor = 'pointer'; // or any other cursor value
       //this.$refs.myButton5.style.cursor = 'pointer'; // or any other cursor value
     },
     resetCursor() {
@@ -408,6 +437,7 @@ export default {
       this.$refs.myButton2.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton3.style.cursor = 'auto'; // reset to the default cursor
       this.$refs.myButton4.style.cursor = 'auto'; // reset to the default cursor
+      this.$refs.myButton3000.style.cursor = 'auto'; // reset to the default cursor
       //this.$refs.myButton5.style.cursor = 'auto'; // reset to the default cursor
     },
     toggleDarkMode() {
@@ -440,6 +470,17 @@ export default {
           clearInterval(intervalId);
         }
       }, 500);
+    },
+    startLoadingAnimation() {
+      let dots = 0;
+      this.loadingInterval = setInterval(() => {
+        dots = (dots + 1) % 4;
+        this.loadingMessage = 'Loading' + '.'.repeat(dots);
+      }, 1000);
+    },
+    stopLoadingAnimation() {
+      clearInterval(this.loadingInterval);
+      this.loadingMessage = 'Loading';
     },
   },
 
@@ -827,7 +868,7 @@ th {
 }
 
 .home-container27 {
-  margin-top: 5px;
+  margin-top: 25px;
   width: 200px;
   height: 27px;
   display: flex;
@@ -1222,6 +1263,13 @@ th {
   .home-logo1 {
     font-size: 1.5em;
   }
+  .loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh; /* Adjust as needed */
+  font-size: 1.5em; /* Adjust as needed */
+}
 
 }
 </style>

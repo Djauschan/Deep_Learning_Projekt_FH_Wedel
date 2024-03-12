@@ -65,8 +65,9 @@ class TimeSeriesBuilder:
                                                    pd.Timedelta(hours=1)
                         prevDay = TimeModificationService.getPreviousDayVal(optimalDateTimeFromPosix, reTryCounter)
                         candidateIdx, minimalAbw, closestCandidateIdx = \
-                            self._binary_search_dateTime(df, 1, previousCandidateIdx - 1,
-                                                         prevDay, 100000, -1, True)
+                            self._binary_search_dateTime(df=df, lowIdx=0, highIdx=len_df,
+                                                         optimalDateToFind=prevDay, minimal_abw=100000, closestIdx=-1,
+                                                         closestVal_isBigger=True)
                         reTryCounter += 1
                         if candidateIdx != -1:
                             noValidAlternativeFound = False

@@ -8,12 +8,13 @@ import pandas as pd
 import schemas
 import os
 
-# import pandas_market_calendars as mcal
-# import yfinance as yf
-# from yahoo_fin.stock_info import get_data
 from fastapi import HTTPException
 from sqlalchemy import MetaData, Table
 from sqlalchemy.orm import Session
+
+# import pandas_market_calendars as mcal
+# import yfinance as yf
+# from yahoo_fin.stock_info import get_data
 
 
 # method to delete the table "users"
@@ -43,7 +44,7 @@ def get_user_by_username(db: Session, username: str):
 
 def get_budget_by_username(db: Session, username: str):
     user = db.query(models.User).filter(models.User.username == username).first()
-    return user.budget
+    return round(user.budget, 2)
 
 # method to get a user from table "users" by email
 def get_user_by_email(db: Session, email: str):
@@ -131,45 +132,31 @@ def update_budget_by_user(db: Session, username: str, new_budget: int):
     else:
         raise HTTPException(status_code=404, detail="Benutzer nicht gefunden")
 
-def update_budget_by_user(db: Session, username: str, updated_data: schemas.UserUpdate):
-    db_user = db.query(models.User).filter(
-        models.User.username == username).first()
+# def update_budget_by_user(db: Session, username: str, updated_data: schemas.UserUpdate):
+#     db_user = db.query(models.User).filter(
+#         models.User.username == username).first()
 
-    if db_user:
-        if updated_data.username:
-            db_user.username = updated_data.username
-        if updated_data.email:
-            db_user.email = updated_data.email
-        if updated_data.budget:
-            db_user.budget = updated_data.budget    # update budget TODO: check if budget is valid
+#     if db_user:
+#         if updated_data.username:
+#             db_user.username = updated_data.username
+#         if updated_data.email:
+#             db_user.email = updated_data.email
+#         if updated_data.budget:
+#             db_user.budget = updated_data.budget    # update budget TODO: check if budget is valid
 
-        db.commit()
-        db.refresh(db_user)
-        return db_user
-    else:
-        raise HTTPException(status_code=404, detail="User not found")
+#         db.commit()
+#         db.refresh(db_user)
+#         return db_user
+#     else:
+#         raise HTTPException(status_code=404, detail="User not found")   
 
-# method to get stock data of specific stock symbol for n days
-# def get_stock_days(db: Session, stock_symbol: str, n: int):
-#     # Download historical data from Yahoo Finance
-#     stock_data = yf.download(stock_symbol, period=f"{n}d")
-#     stock_data["Volume"] = stock_data["Volume"].astype(float)
-#     return_data = []
-
-#     for index, row in stock_data.iterrows():
-#         return_data.append({"date": index.strftime(
-#             '%m/%d/%y'), "open": row["Open"], "high": row["High"], "low": row["Low"], "close": row["Close"], "volume": row["Volume"]})
-
-#     return return_data
-    
-
-# method to load data from csv file
+# method to get stock data of specific stock symbols for n days
 def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.Timestamp, interval: str,
                      ALL_DATA_COLUMNS: list, COLUMNS_TO_KEEP: list) -> pd.DataFrame:
 
     stock_symbol_list = stock_symbols[1:-1].split(", ")
 
-    dfs = []  # List to store DataFrames for each stock
+    dfs = {}
 
     for stock in stock_symbol_list:
         rsc_completePath = f"../data/Aktien/{stock}_1min.txt"
@@ -186,37 +173,59 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
             data = data[(data['DateTime'] >= start_date) & (data['DateTime'] <= end_date)]
             data.set_index('DateTime', inplace=True)
 
-            # Resample the data to the specified interval
             if interval == 'H':
-                data = data.resample('2H').mean()
-            #elif interval == 'D':
-                #data = data.resample('24H').mean()
+                data = data.resample('2h').mean().round(2)
+                complete_index = pd.date_range(start=start_date, end=end_date, freq='2h')
             elif interval == 'M':
-                data = data.resample('20T').mean()
-            else:
-                data = data.resample('1H').mean()
+                data = data.resample('1min').mean().round(2)
+                complete_index = pd.date_range(start=start_date, end=end_date, freq='1min')
+            elif interval == 'D':
+                # Shift the time to start at '20:00:00' for each day
+                data.index = data.index.shift(-20, freq='H').shift(-00, freq='T')
+                
+                # Resample the data and create the date range with a 'D' frequency
+                data = data.resample('D').first().round(2)
+                complete_index = pd.date_range(start=start_date, end=end_date, freq='D')
+                
+                # Shift the time back to '20:00:00' for each day
+                data.index = data.index.shift(20, freq='H').shift(00, freq='T')
+                complete_index = complete_index.shift(20, freq='H').shift(00, freq='T')
 
-            # Filter out data from 20:00 to 04:00
-            # if not data.empty and isinstance(data.index, pd.DatetimeIndex):
-            #     data = data[(data.index.hour <= 20) & (data.index.hour >= 4)]
-            # else:
-            #     print("The DataFrame is either empty or its index is not a DatetimeIndex.")
+                # Filter the data to only include dates within the specified range
+                data = data[(data.index >= start_date) & (data.index <= end_date)]
 
-            # Reset the index
+            data.replace([np.inf, -np.inf], np.nan, inplace=True)
+            data.fillna(0, inplace=True)
+
+            complete_data = pd.DataFrame(index=complete_index)
+
+            data = pd.merge(complete_data, data, left_index=True, right_index=True, how='right')
+
+            # Fill missing values with the last valid observation and then the next valid one
+            data.ffill(inplace=True)
+            if data.isnull().any().any():
+                data.bfill(inplace=True)
+
             data.reset_index(inplace=True)
+            data.rename(columns={'index': 'DateTime', 'Close': 'Close', 'High': 'High', 'Low': 'Low', 'Open': 'Open'}, inplace=True)
 
-            # Replace non-compliant values with a compliant value (e.g., None)
-            data.replace([np.inf, -np.inf, np.nan], None, inplace=True)
+            # Convert DataFrame to list of dictionaries
+            data_dict = data[['DateTime', 'Close', 'High', 'Low', 'Open']].to_dict('records')
 
-            # Filter the data to include only the rows at 16:00:00
-            if(interval == 'D'):
-                data = data[data['DateTime'].dt.time == pd.to_datetime('16:00:00').time()]
+            dfs[stock] = data_dict
 
-            dfs.append(data)  # Add the DataFrame to the list
+    return dfs
 
-    return_data = pd.concat(dfs)
 
-    # Convert the DataFrame to a list of dictionaries
-    return_data = return_data.to_dict(orient='records')
+# method to get stock data of specific stock symbol for n days
+# def get_stock_days(db: Session, stock_symbol: str, n: int):
+#     # Download historical data from Yahoo Finance
+#     stock_data = yf.download(stock_symbol, period=f"{n}d")
+#     stock_data["Volume"] = stock_data["Volume"].astype(float)
+#     return_data = []
 
-    return return_data
+#     for index, row in stock_data.iterrows():
+#         return_data.append({"date": index.strftime(
+#             '%m/%d/%y'), "open": row["Open"], "high": row["High"], "low": row["Low"], "close": row["Close"], "volume": row["Volume"]})
+
+#     return return_data

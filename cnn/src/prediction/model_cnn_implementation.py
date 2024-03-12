@@ -10,8 +10,8 @@ from src.preprocessing.services.DifferencingService import differencingService
 class ModelExe(AbstractModel):
     def __init__(self):
         self.configService = ConfigService()
-        #configPath = "./configs/execution/docker_PredictionConfig.yml"
-        configPath = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\configs\\execution\\PredictionConfig.yml"
+        configPath = "./configs/execution/docker_PredictionConfig.yml"
+        #configPath = "C:\\Projekte\\__PorjectDeepLearningMain\\Deep_Learning\\cnn\\configs\\execution\\PredictionConfig.yml"
         self.config = self.configService.loadModelConfig(configPath)
         self.modelWrapper = ModelWrapper(self.config)
 
@@ -40,7 +40,7 @@ class ModelExe(AbstractModel):
 #Test Code
 
 model_Exe = ModelExe()
-startDate = pd.Timestamp("2021-02-01")#ab da will ich predictions
+startDate = pd.Timestamp("2021-02-03")#ab da will ich predictions
 endDate = pd.Timestamp("2021-03-01")
-t = model_Exe.predict(["AAL", "AAPL", "TSLA"], startDate, endDate, resolution.MINUTE)
+t = model_Exe.predict(["AAL", "AAPL", "TSLA"], startDate, endDate, resolution.TWO_HOURLY)
 print(t)
