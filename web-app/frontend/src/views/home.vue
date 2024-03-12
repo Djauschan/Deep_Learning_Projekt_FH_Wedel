@@ -305,6 +305,9 @@ export default {
 
 
     async load_rl_data() {
+      if (this.budget == 0.0){
+        return;
+      }
       this.rlData = null;
       this.isLoading = true;
       this.startLoadingAnimation();
