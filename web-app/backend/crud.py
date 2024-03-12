@@ -44,7 +44,7 @@ def get_user_by_username(db: Session, username: str):
 
 def get_budget_by_username(db: Session, username: str):
     user = db.query(models.User).filter(models.User.username == username).first()
-    return user.budget
+    return round(user.budget, 2)
 
 # method to get a user from table "users" by email
 def get_user_by_email(db: Session, email: str):
@@ -132,23 +132,23 @@ def update_budget_by_user(db: Session, username: str, new_budget: int):
     else:
         raise HTTPException(status_code=404, detail="Benutzer nicht gefunden")
 
-def update_budget_by_user(db: Session, username: str, updated_data: schemas.UserUpdate):
-    db_user = db.query(models.User).filter(
-        models.User.username == username).first()
+# def update_budget_by_user(db: Session, username: str, updated_data: schemas.UserUpdate):
+#     db_user = db.query(models.User).filter(
+#         models.User.username == username).first()
 
-    if db_user:
-        if updated_data.username:
-            db_user.username = updated_data.username
-        if updated_data.email:
-            db_user.email = updated_data.email
-        if updated_data.budget:
-            db_user.budget = updated_data.budget    # update budget TODO: check if budget is valid
+#     if db_user:
+#         if updated_data.username:
+#             db_user.username = updated_data.username
+#         if updated_data.email:
+#             db_user.email = updated_data.email
+#         if updated_data.budget:
+#             db_user.budget = updated_data.budget    # update budget TODO: check if budget is valid
 
-        db.commit()
-        db.refresh(db_user)
-        return db_user
-    else:
-        raise HTTPException(status_code=404, detail="User not found")   
+#         db.commit()
+#         db.refresh(db_user)
+#         return db_user
+#     else:
+#         raise HTTPException(status_code=404, detail="User not found")   
 
 # method to get stock data of specific stock symbols for n days
 def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.Timestamp, interval: str,
