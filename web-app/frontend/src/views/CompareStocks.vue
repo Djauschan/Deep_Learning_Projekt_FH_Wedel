@@ -91,16 +91,13 @@
           <input type="checkbox" v-model="showCLine"> Citigroup
         </label>
         <label>
-          <input v-if="selectedModel != 'transformer'" type="checkbox" v-model="showNIOLine"> NIO
-        </label>
-        <label>
           <input type="checkbox" v-model="showNVDALine"> NVDIA
         </label>
-      </div>
-      <div class="checkboxes3">
         <label>
           <input type="checkbox" v-model="showSNAPLine"> Snap
         </label>
+      </div>
+      <div class="checkboxes3">
         <label>
           <input type="checkbox" v-model="showSQLine"> Block
         </label>
@@ -119,11 +116,11 @@
   <div class="newChart">
     <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" title="AAPL Chart"
       :data-source="this.combinedData['AAPL']">
-      <!--<DxCommonSeriesSettings argument-field="date" type="line" />-->
-      <DxSeries :name="'AAPL Prediction'" value-field="value" argument-field="date" type="line"
+      <!--<DxCommonSeriesSettings argument-field="DateTime" type="line" />-->
+      <DxSeries :name="'AAPL Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
         :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'AAPL Real Value'" value-field="close" argument-field="date" type="line"
+      <DxSeries :name="'AAPL Real Value'" value-field="Close" argument-field="DateTime" type="line"
         :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
@@ -141,93 +138,11 @@
   </div>
   <div class="newChart">
     <DxChart v-if="showAALLine && showChart" id="AAL-chart" :data-source="this.combinedData['AAL']" title="AAL Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AAL Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
-      </DxSeries>
-      <DxSeries :name="'AAL Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[3]">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" precision="2" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showAMDLine && showChart" id="AMD-chart" :data-source="this.combinedData['AMD']" title="AMD Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AMD Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
-      </DxSeries>
-      <DxSeries :name="'AMD Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[3]">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" precision="2" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showCLine && showChart" id="C-chart" :data-source="this.combinedData['C']" title="C Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'C Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
-      </DxSeries>
-      <DxSeries :name="'C Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[3]">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" precision="2" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showNIOLine && showChart" id="Window Average-chart" :data-source="this.combinedData['NIO']"
-      title="Window Average Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'NIO Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
-      </DxSeries>
-      <DxSeries :name="'NIO Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[3]">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" precision="2" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showNVDALine && showChart" id="Historic Average-chart" :data-source="this.combinedData['NVDA']"
-      title="Historic Average Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'NVDA Prediction'" value-field="value" argument-field="date" type="line"
+      <DxCommonSeriesSettings argument-field="DateTime" type="line" />
+      <DxSeries :name="'AAL Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
         :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'NVDA Real Value'" value-field="close" argument-field="date" type="line"
+      <DxSeries :name="'AAL Real Value'" value-field="Close" argument-field="DateTime" type="line"
         :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
@@ -244,13 +159,80 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showSNAPLine && showChart" id="Window Average-chart" :data-source="this.combinedData['SNAP']"
-      title="Window Average Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Snap Prediction'" value-field="value" argument-field="date" type="line"
+    <DxChart v-if="showAMDLine && showChart" id="AMD-chart" :data-source="this.combinedData['AMD']" title="AMD Chart">
+      <DxCommonSeriesSettings argument-field="DateTime" type="line" />
+      <DxSeries :name="'AMD Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
         :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'Snap Real Value'" value-field="close" argument-field="date" type="line"
+      <DxSeries :name="'AMD Real Value'" value-field="Close" argument-field="DateTime" type="line"
+        :color="seriesColors[3]">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" precision="2" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="showCLine && showChart" id="C-chart" :data-source="this.combinedData['C']" title="C Chart">
+      <DxCommonSeriesSettings argument-field="DateTime" type="line" />
+      <DxSeries :name="'C Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
+        :color="seriesColors[8]">
+      </DxSeries>
+      <DxSeries :name="'C Real Value'" value-field="Close" argument-field="DateTime" type="line"
+        :color="seriesColors[3]">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" precision="2" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="showNVDALine && showChart" id="NVDA-chart" :data-source="this.combinedData['NVDA']"
+      title="NVDA Chart">
+      <DxCommonSeriesSettings argument-field="DateTime" type="line" />
+      <DxSeries :name="'NVDA Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
+        :color="seriesColors[8]">
+      </DxSeries>
+      <DxSeries :name="'NVDA Real Value'" value-field="Close" argument-field="DateTime" type="line"
+        :color="seriesColors[3]">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" precision="2" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="showSNAPLine && showChart" id="SNAP Average-chart" :data-source="this.combinedData['SNAP']"
+      title="SNAP Average Chart">
+      <DxCommonSeriesSettings argument-field="DateTime" type="line" />
+      <DxSeries :name="'Snap Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
+        :color="seriesColors[8]">
+      </DxSeries>
+      <DxSeries :name="'Snap Real Value'" value-field="Close" argument-field="DateTime" type="line"
         :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
@@ -268,10 +250,12 @@
   </div>
   <div class="newChart">
     <DxChart v-if="showSQLine && showChart" id="SQ-chart" :data-source="this.combinedData['SQ']" title="SQ Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'SQ Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
+      <DxCommonSeriesSettings argument-field="DateTime" type="line" />
+      <DxSeries :name="'SQ Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
+        :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'SQ Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'SQ Real Value'" value-field="Close" argument-field="DateTime" type="line"
+        :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -289,11 +273,11 @@
   <div class="newChart">
     <DxChart v-if="showTSLALine && showChart" id="TSLA-chart" :data-source="this.combinedData['TSLA']"
       title="TSLA Chart">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'TSLA Prediction'" value-field="value" argument-field="date" type="line"
+      <DxCommonSeriesSettings argument-field="DateTime" type="line" />
+      <DxSeries :name="'TSLA Prediction'" value-field="value_pred" argument-field="DateTime" type="line"
         :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'TSLA Real Value'" value-field="close" argument-field="date" type="line"
+      <DxSeries :name="'TSLA Real Value'" value-field="Close" argument-field="DateTime" type="line"
         :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
@@ -346,32 +330,11 @@ export default {
     DxTooltip,
   },
   async created() {
-    this.dataSource = [],
-      this.selectedDays = null,
-      this.AALData = [],
-      this.NVDAData = [],
-      this.svmData = [],
-      this.SNAPData = [],
-      this.SQData = [],
-      this.TSLAData = [],
-      this.CData = [],
-      this.AMDData = [],
-      this.AAPLData = [],
-      this.NIOData = [];
+    this.selectedDays = null;
   },
   data() {
     return {
       activeCharts: [],
-      dataSource: [],
-      AALData: [],
-      AMDData: [],
-      AAPLData: [],
-      NVDAData: [],
-      SNAPData: [],
-      SQData: [],
-      TSLAData: [],
-      CData: [],
-      NIOData: [],
       selectedStock: "",
       selectedDays: null,
       showChart: false,
@@ -392,8 +355,6 @@ export default {
       SQpredictionData: [],
       showTSLALine: false,
       TSLApredictionData: [],
-      showNIOLine: false,
-      NIOPredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
       selectedTime: 'H',
@@ -410,6 +371,8 @@ export default {
       isLoading: false,
       loadingMessage: 'Loading',
       loadingInterval: null,
+      minDate: new Date(2021, 0, 4), // January is 0 in JavaScript
+      maxDate: new Date(2021, 1, 10),
     };
   },
 
@@ -543,7 +506,6 @@ export default {
       this.showSNAPLine = false;
       this.showSQLine = false;
       this.showTSLALine = false;
-      this.showNIOLine = false;
     },
     async showAll() {
       this.showAALLine = true;
@@ -554,22 +516,24 @@ export default {
       this.showTSLALine = true;
       this.showAMDLine = true;
       this.showAAPLLine = true;
-      if (this.selectedModel != 'transformer') {
-        this.showNIOLine = true;
-      }
     },
     async load_model_data() {
+      console.log(this.selectedModel)
+      console.log("[" + this.activeCharts.join(', ') + "]")
+
       try {
-        const response = await axios.get(`${this.store.API}/predict/${this.selectedModel}`, {
+        const response = await axios.get(`${this.store.API}/get/combinedData`, {
           params: {
             stock_symbols: "[" + this.activeCharts.join(', ') + "]",
             start_date: this.formatCalendarEntry(this.formattedStartDate),
             resolution: this.selectedTime,
+            modelType: this.selectedModel,
           }
         });
 
-        console.log("Prediction loaded");
+        console.log("combinedData loaded");
         console.log(response.data);
+
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -583,44 +547,24 @@ export default {
         console.error(error);
       }
     },
-    async load_data() {
-      try {
-        const response = await axios.get(this.store.API + "/load/data", {
-          params: {
-            stock_symbols: "[" + this.activeCharts.join(', ') + "]",
-            start_date: this.formatCalendarEntry(this.formattedStartDate),
-            resolution: this.selectedTime,
-          }
-        });
-        console.log("normal loaded")
-        console.log(response.data)
-
-        return response.data
-      } catch (error) {
-        Swal.fire({
-          title: "Error at getting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.detail
-        ) {
-          console.log(error.response.data.detail);
-        } else {
-          console.log(error);
-        }
-      }
-    },
     selectDay(day) {
       if (this.isWeekday(day)) {
-        if (this.selectingStart) {
-          this.startDate = day;
-          this.showCalendar = false;
+        const selectedDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
+        if (selectedDate >= this.minDate && selectedDate <= this.maxDate) {
+          // Handle day selection
+          if (this.selectingStart) {
+            this.startDate = day;
+            this.showCalendar = false;
+          }
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: "Please select a date between 2021-01-04 and 2021-02-10",
+            icon: "info",
+            showCloseButton: false,
+            confirmButtonText: "Close",
+            confirmButtonColor: "#d0342c",
+          });
         }
       } else {
         Swal.fire({
@@ -646,9 +590,6 @@ export default {
       if (this.showCLine) {
         this.activeCharts.push('C');
       }
-      if (this.showNIOLine) {
-        this.activeCharts.push('NIO');
-      }
       if (this.showNVDALine) {
         this.activeCharts.push('NVDA');
       }
@@ -667,35 +608,22 @@ export default {
       if (this.showAAPLLine) {
         this.activeCharts.push('AAPL');
       }
-
       if (this.activeCharts.length > 0 && this.formattedStartDate != "") {
         return true;
       } else {
         return false;
       }
     },
-    async updateCombinedData() {
-      // Iterate over the keys of this.dataSource
-      for (let key in this.dataSource) {
-        this.combinedData[key] = (this.combinedData[key] || []).concat(this.dataSource[key].map(data => ({
-          ...data,
-          date: data.DateTime,
-          close: data.Close,
-        })));
-        this.combinedData[key] = this.combinedData[key].filter(data => !(data.Close === 0 && data.Open === 0 && data.High === 0 && data.Low === 0));
-      }
-
-      console.log(this.combinedData);
-    },
     async updateChart() {
       if (this.checkDataInput()) {
         this.showChart = false;
         this.isLoading = true;
         this.startLoadingAnimation();
-        this.dataSource = await this.load_data();
         this.combinedData = await this.load_model_data();
 
-        this.updateCombinedData();
+        console.log("this.combinedData")
+        console.log(this.combinedData)
+
         this.showChart = true;
         this.isLoading = false;
         this.stopLoadingAnimation();

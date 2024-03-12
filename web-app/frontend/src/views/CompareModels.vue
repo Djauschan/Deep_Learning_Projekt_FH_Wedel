@@ -933,7 +933,14 @@ export default {
             this.showCalendar = false;
           }
         } else {
-          alert('Please select a date between 2021-01-04 and 2021-02-10');
+          Swal.fire({
+            title: "Error",
+            text: "Please select a date between 2021-01-04 and 2021-02-10",
+            icon: "info",
+            showCloseButton: false,
+            confirmButtonText: "Close",
+            confirmButtonColor: "#d0342c",
+          });
         }
       } else {
         Swal.fire({

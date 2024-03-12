@@ -576,6 +576,52 @@ def get_model_profit(predictions, targets) -> float:
 
     return round(profit, 2)
 
+@app.get('/get/combinedData')
+def getCombinedData(stock_symbols: str = "[AAPL, SNAP]",
+                    start_date: str = "2021-01-04",
+                    resolution: str = "H",
+                    model_type: str = "transformer",):
+
+    if model_type.lower() == "transformer":
+        pred_model = predict_transformer
+    elif model_type.lower() == "cnn":
+        pred_model = predict_cnn
+    elif model_type.lower() == "randomforest":
+        pred_model = predict_randomForest
+    elif model_type.lower() == "gradientboost":
+        pred_model = predict_gradientBoost
+    elif model_type.lower() == "lstm":
+        pred_model = predict_lstm
+    else:
+        raise ValueError("Invalid model type")
+
+    return_dict = {}
+
+    y_true = load_data(stock_symbols, start_date, resolution)
+    y_pred = pred_model(stock_symbols, start_date, resolution)
+    stock_symbols = stock_symbols[1:-1].split(", ")
+    for stock_symbol in stock_symbols:
+        try:
+            df_true = pd.DataFrame(y_true[stock_symbol])
+            df_pred = pd.DataFrame(y_pred[stock_symbol]).rename(
+                columns={"value": "value_pred"}
+            )
+            df_pred["date"] = pd.to_datetime(df_pred["date"])
+            df_true["date"] = pd.to_datetime(df_true["DateTime"])
+
+            df_complete = pd.concat(
+                [df_pred.set_index("date"), df_true.set_index("date")], axis=1
+            )
+            df_complete = df_complete[df_complete.Close != 0.0].dropna()
+
+            # Convert the DataFrame to a dictionary and add it to the return_dict
+            return_dict[stock_symbol] = df_complete.to_dict('records')
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+    return return_dict
+
 
 """ Outdated code from the original main.py"""
 
