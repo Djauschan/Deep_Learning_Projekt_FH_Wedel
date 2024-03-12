@@ -113,6 +113,9 @@
     <div class="separator"></div>
     <button class="button-stock" @click="updateChart">Show Predictions</button>
   </div>
+  <div v-if="isLoading" class="loading-container">
+    {{ loadingMessage }}
+  </div>
   <div class="newChart">
     <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" title="AAPL Chart"
       :data-source="this.combinedData['AAPL']">
@@ -401,6 +404,9 @@ export default {
       daysInMonth: [], // Array to hold days of the month
       startDate: null, // Selected start date
       selectingStart: true, // Flag to indicate if currently selecting start date
+      isLoading: false,
+      loadingMessage: 'Loading',
+      loadingInterval: null,
     };
   },
 
@@ -444,6 +450,18 @@ export default {
   },
 
   methods: {
+    startLoadingAnimation() {
+      let dots = 0;
+      this.loadingInterval = setInterval(() => {
+        dots = (dots + 1) % 4;
+        this.loadingMessage = 'Loading' + '.'.repeat(dots);
+      }, 1000);
+    },
+
+    stopLoadingAnimation() {
+      clearInterval(this.loadingInterval);
+      this.loadingMessage = 'Loading';
+    },
     formatCalendarEntry(dateString) {
       let date = new Date(dateString);
 
@@ -549,8 +567,7 @@ export default {
 
         console.log("Prediction loaded");
         console.log(response.data);
-
-        return response.data;
+        return response.data; 
       } catch (error) {
         Swal.fire({
           title: "Error at predicting data",
@@ -668,11 +685,16 @@ export default {
     },
     async updateChart() {
       if (this.checkDataInput()) {
+        this.showChart = false;
+        this.isLoading = true;
+        this.startLoadingAnimation();
         this.dataSource = await this.load_data();
         this.combinedData = await this.load_model_data();
 
         this.updateCombinedData();
         this.showChart = true;
+        this.isLoading = false;
+        this.stopLoadingAnimation();
         this.activeCharts = [];
       } else {
         Swal.fire({
@@ -952,5 +974,15 @@ input::placeholder {
 
 .button-stock:hover {
   background-color: darkgrey;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  /* Adjust as needed */
+  font-size: 1.5em;
+  /* Adjust as needed */
 }
 </style>
