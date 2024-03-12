@@ -19,7 +19,8 @@
           </div>
           <div class="calendar-days">
             <div v-for="day in daysInMonth" :key="day" class="calendar-day"
-              :class="{ 'selected-start': day === startDate }" @click="selectDay(day)">
+              :class="{ 'selected-start': day === startDate }" :style="{ color: !isWeekday(day) ? 'red' : 'black' }"
+              @click="selectDay(day)">
               {{ day }}
             </div>
           </div>
@@ -119,8 +120,7 @@
   <div class="newChart">
     <DxChart v-if="showChart" :data-source="combinedData" title="Stock Price">
       <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
-      <DxSeries :name=selectedStock open-value-field="Open" high-value-field="High" low-value-field="Low"
-        close-value-field="Close" argument-field="DateTime">
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
       </DxSeries>
       <DxSeries v-if="showCNNLine" :name="'CNN-' + this.selectedStock" :data-source="combinedData" type="line"
         value-field="CNNValue" argument-field="date" :color="seriesColors[0]">
@@ -132,7 +132,7 @@
         value-field="LSTMValue" argument-field="date" :color="seriesColors[2]">
       </DxSeries>
       <DxSeries v-if="showrandomForestLine" :name="'randomForest-' + this.selectedStock" :data-source="combinedData"
-        type="line" value-field="randomForestValue" argument-field="date" :color="seriesColors[3]">
+        type="line" value-field="randomForestValue" argument-field="date" :color="seriesColors[5]">
       </DxSeries>
       <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost-' + this.selectedStock" :data-source="combinedData"
         type="line" value-field="gradientBoostValue" argument-field="date" :color="seriesColors[4]">
@@ -151,16 +151,18 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showCNNLine && showChart" id="CNN-chart" :data-source="this.CNNData[this.selectedStock]"
-      :title="CNNchartTitle">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'CNN Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[0]">
+    <DxChart v-if="showCNNLine && showChart" :data-source="combinedData" id="CNN-chart" :title="CNNchartTitle">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries v-if="showCNNLine" :name="'CNN-' + this.selectedStock" :data-source="combinedData" type="line"
+        value-field="CNNValue" argument-field="date" :color="seriesColors[0]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
           <DxFormat type="currency" precision="2" />
@@ -170,17 +172,19 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart"
-      :data-source="this.transformerData[this.selectedStock]" :title="TransformerchartTitle">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Transformer Prediction'" value-field="value" argument-field="date" type="line"
-        :color="seriesColors[1]">
+    <DxChart v-if="showTransformerLine && showChart" id="Transformer-chart" :title="TransformerchartTitle"
+      :data-source="combinedData">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries v-if="showTransformerLine" :name="'Transformer-' + this.selectedStock" :data-source="combinedData"
+        type="line" value-field="TransformerValue" argument-field="date" :color="seriesColors[1]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
           <DxFormat type="currency" precision="2" />
@@ -190,16 +194,19 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="this.LSTMData"
+    <DxChart v-if="showLSTMLine && showChart" id="LSTM-chart" :data-source="combinedData"
       :title="LSTMchartTitle[this.selectedStock]">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'LSTM Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries v-if="showLSTMLine" :name="'LSTM-' + this.selectedStock" :data-source="combinedData" type="line"
+        value-field="LSTMValue" argument-field="date" :color="seriesColors[2]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
           <DxFormat type="currency" precision="2" />
@@ -209,17 +216,19 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart"
-      :data-source="this.randomForestData[this.selectedStock]" :title="RandomForestchartTitle">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'randomForest Prediction'" value-field="value" argument-field="date" type="line"
-        :color="seriesColors[3]">
+    <DxChart v-if="showrandomForestLine && showChart" id="Random Forest-chart" :data-source="combinedData"
+      :title="RandomForestchartTitle">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries v-if="showrandomForestLine" :name="'randomForest-' + this.selectedStock" :data-source="combinedData"
+        type="line" value-field="randomForestValue" argument-field="date" :color="seriesColors[5]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
           <DxFormat type="currency" precision="2" />
@@ -229,17 +238,19 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart"
-      :data-source="this.gradientBoostData[this.selectedStock]" :title="GradientBoostchartTitle">
-      <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'gradientBoost Prediction'" value-field="value" argument-field="date" type="line"
-        :color="seriesColors[4]">
+    <DxChart v-if="showgradientBoostLine && showChart" id="Gradient Boost-chart" :data-source="combinedData"
+      :title="GradientBoostchartTitle">
+      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
+      <DxSeries :name=selectedStock value-field="Close" argument-field="DateTime" type="line" :color="seriesColors[3]">
+      </DxSeries>
+      <DxSeries v-if="showgradientBoostLine" :name="'gradientBoost-' + this.selectedStock" :data-source="combinedData"
+        type="line" value-field="gradientBoostValue" argument-field="date" :color="seriesColors[4]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
       </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
+      <DxValueAxis name="price" position="left" :min="priceRange.min * 0.9">
         <DxTitle text="US dollars" />
         <DxLabel>
           <DxFormat type="currency" precision="2" />
@@ -319,7 +330,7 @@ export default {
       store: useMyPiniaStore(),
       selectedTime: "H",
       selectedStock: "AAL",
-      seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'], // Array of colors for each series
+      seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC', '#FFB733', '#FF3385', '#33B5FF'], // Array of colors for each series
       cnnMeanError: null,
       cnnMeanAbsoluteError: null,
       cnnProfit: null,
@@ -514,6 +525,11 @@ export default {
       // Set the result to combinedData
       this.combinedData = combinedDataWithNull;
 
+      this.combinedData = combinedDataWithNull.filter(data =>
+        this.dataSource.some(sourceData => sourceData.DateTime === data.date)
+      );
+
+      this.combinedData = this.combinedData.filter(data => !(data.Close === 0 && data.Open === 0 && data.High === 0 && data.Low === 0));
 
       console.log("combinedData");
       console.log(this.combinedData);

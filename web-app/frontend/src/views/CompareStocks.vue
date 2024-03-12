@@ -118,7 +118,7 @@
       :data-source="this.combinedData['AAPL']">
       <!--<DxCommonSeriesSettings argument-field="date" type="line" />-->
       <DxSeries :name="'AAPL Prediction'" value-field="value" argument-field="date" type="line"
-        :color="seriesColors[3]">
+        :color="seriesColors[8]">
       </DxSeries>
       <DxSeries :name="'AAPL Real Value'" value-field="close" argument-field="date" type="line"
         :color="seriesColors[8]">
@@ -139,9 +139,9 @@
   <div class="newChart">
     <DxChart v-if="showAALLine && showChart" id="AAL-chart" :data-source="this.combinedData['AAL']" title="AAL Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AAL Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'AAL Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'AAL Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'AAL Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -159,9 +159,9 @@
   <div class="newChart">
     <DxChart v-if="showAMDLine && showChart" id="AMD-chart" :data-source="this.combinedData['AMD']" title="AMD Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AMD Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'AMD Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'AMD Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'AMD Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -179,9 +179,9 @@
   <div class="newChart">
     <DxChart v-if="showCLine && showChart" id="C-chart" :data-source="this.combinedData['C']" title="C Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'C Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'C Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'C Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'C Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -200,9 +200,9 @@
     <DxChart v-if="showNIOLine && showChart" id="Window Average-chart" :data-source="this.combinedData['NIO']"
       title="Window Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'NIO Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'NIO Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'NIO Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'NIO Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -221,10 +221,10 @@
     <DxChart v-if="showNVDALine && showChart" id="Historic Average-chart" :data-source="this.combinedData['NVDA']"
       title="Historic Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'NVDA Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'NVDA Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
       <DxSeries :name="'NVDA Real Value'" value-field="close" argument-field="date" type="line"
-        :color="seriesColors[8]">
+        :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -243,10 +243,10 @@
     <DxChart v-if="showSNAPLine && showChart" id="Window Average-chart" :data-source="this.combinedData['SNAP']"
       title="Window Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'Snap Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'Snap Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
       <DxSeries :name="'Snap Real Value'" value-field="close" argument-field="date" type="line"
-        :color="seriesColors[8]">
+        :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -264,9 +264,9 @@
   <div class="newChart">
     <DxChart v-if="showSQLine && showChart" id="SQ-chart" :data-source="this.combinedData['SQ']" title="SQ Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'SQ Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'SQ Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
-      <DxSeries :name="'SQ Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[8]">
+      <DxSeries :name="'SQ Real Value'" value-field="close" argument-field="date" type="line" :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -285,10 +285,10 @@
     <DxChart v-if="showTSLALine && showChart" id="TSLA-chart" :data-source="this.combinedData['TSLA']"
       title="TSLA Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'TSLA Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
+      <DxSeries :name="'TSLA Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
       <DxSeries :name="'TSLA Real Value'" value-field="close" argument-field="date" type="line"
-        :color="seriesColors[8]">
+        :color="seriesColors[3]">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
