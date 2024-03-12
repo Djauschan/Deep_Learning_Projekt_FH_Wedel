@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import requests
 import schemas
+import math
 from database import SessionLocal, engine
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -328,9 +329,12 @@ def predict_rl(stock_symbols: str = "[AAPL, NVDA]",
     """
     if resolution == "M":
         start_date += " 10:00:00"
-    data_to_send = {"stock_symbol": stock_symbols,
+    end_date = calculate_end_date(start_date, resolution)
+    if resolution == "H":
+        end_date = calculate_end_date(end_date, resolution)
+    data_to_send = {"stock_symbols": stock_symbols,
                     "start_date": start_date,
-                    "end_date": calculate_end_date(start_date, resolution),
+                    "end_date": end_date,
                     "resolution": resolution}
     api_url = "http://predict_rl:8000/predict"
     response = requests.get(api_url, params=data_to_send)
@@ -340,6 +344,78 @@ def predict_rl(stock_symbols: str = "[AAPL, NVDA]",
             "response_text": response.text
         }
     return response.json()
+
+@app.get("/simulate/rl")
+def rl_simulation(stock_symbols: str = "[AAPL, NVDA]",
+                  start_date: str = "2021-01-04",
+                  resolution: str = "D",
+                  username : str = '1',
+                  db : Session = Depends(get_db)):
+    stock_db = {}
+    data_dict = {}
+    data = load_data(stock_symbols, start_date, resolution)
+    for symbol in stock_symbols[1:-1].split(", "):
+        stock_db[symbol] = 0
+        data_dict[symbol] = pd.DataFrame(data[symbol]).set_index("DateTime")
+    actions = {}
+    profit = 0
+    start_budget = crud.get_budget_by_username(db, username)
+    if start_budget == 0.0:
+        return {'Message': 'Geld_Aufladen!'}
+    budget = start_budget
+    budget_per_trade = round(budget / 10, 2)
+    if resolution == "M":
+        start_date += " 10:00:00"
+    rl_results = predict_rl(stock_symbols, start_date, resolution)
+    dates = list(rl_results[symbol].keys())
+    for date in dates:
+        no_action = True
+        actions[date] = {'assets' : {},
+                         'actions' : {}}
+        for symbol in stock_db.keys():
+            actions[date]['actions'][symbol] = ''
+            df = data_dict[symbol]
+            try:
+                price = float(df[df.index == date].Close[0])
+            except IndexError:
+                price = 0.0
+            if price == 0.0:
+                continue
+            try:
+                rl_results[symbol][date]
+            except KeyError:
+                continue
+            if rl_results[symbol][date]['ensemble'] == 'buy' and budget >= price:
+                stocks_to_buy = math.ceil(budget_per_trade / price)
+                if budget < stocks_to_buy * price:
+                    stocks_to_buy = 1
+                no_action = False
+                budget -= price * stocks_to_buy
+                actions[date]['actions'][symbol] = f'{stocks_to_buy}xbuy'
+                stock_db[symbol] += stocks_to_buy
+            elif stock_db[symbol] != 0:
+                if rl_results[symbol][date]['ensemble'] == 'hold':
+                    no_action = False
+                    actions[date]['actions'][symbol] = 'hold'
+                elif rl_results[symbol][date]['ensemble'] == 'sell':
+                    no_action = False
+                    actions[date]['actions'][symbol] = 'sell'
+                    budget += price * stock_db[symbol]
+                    stock_db[symbol] = 0
+            if stock_db[symbol] > 0:
+                actions[date]['assets'][symbol] = round(stock_db[symbol] * price, 2)
+        if no_action:
+            actions.pop(date)
+        else:
+            actions[date]['assets']['liquid_money'] = round(budget, 2)
+    assets = 0
+    date = list(actions.keys())[-1]
+    for key in actions[date]['assets'].keys():
+        assets += round(actions[date]['assets'][key], 2)
+    profit = round(assets - start_budget, 2)
+    crud.update_budget_by_user(db, username, profit)
+    return {'profit' : profit, 'actions' : actions}
+    
 
 
 
@@ -374,6 +450,8 @@ def get_MAE_for_model(stock_symbols: str = '[AAPL, SNAP]', start_date: str = '20
         pred_model = predict_randomForest
     elif model_type.lower() == "gradientboost":
         pred_model = predict_gradientBoost
+    elif model_type.lower() == "lstm":
+        pred_model = predict_lstm
     else:
         raise ValueError("Invalid model type")
     
@@ -392,12 +470,14 @@ def get_MAE_for_model(stock_symbols: str = '[AAPL, SNAP]', start_date: str = '20
             df_complete = pd.concat([df_pred.set_index('date'), df_true.set_index('date')], axis=1)
             df_complete = df_complete[df_complete.Close != 0.0].dropna()
             
-            return_dict[stock_symbol] = {'MAE' : round(mean_absolute_error(df_complete["value_pred"].values,df_complete["Close"].values), 2),
-                                        'ME' : round(mean_error(df_complete["value_pred"].values, df_complete["Close"].values), 2)}
+            return_dict[stock_symbol] = {'MAE' : mean_absolute_error(df_complete["value_pred"].values,df_complete["Close"].values),
+                                        'ME' : mean_error(df_complete["value_pred"].values, df_complete["Close"].values),
+                                        'profit' : get_model_profit(df_complete["value_pred"].values, df_complete["Close"].values)}
         except Exception as e:
             print(f"Error: {e}")
             return_dict[stock_symbol] = {'MAE' : -999.9,
-                                         'ME' : -999.9}
+                                         'ME' : -999.9,
+                                         'profit' : -999.9}
 
     return return_dict
 
@@ -417,7 +497,7 @@ def mean_absolute_error(predictions, targets):
 
     total_error = np.sum(np.abs(predictions - targets))
 
-    return total_error / len(predictions)
+    return round(total_error / len(predictions), 2)
 
 
 def mean_error(predictions, targets):
@@ -436,7 +516,23 @@ def mean_error(predictions, targets):
 
     total_error = np.sum(predictions - targets)
 
-    return total_error / len(predictions) 
+    return round(total_error / len(predictions), 2)
+
+def get_model_profit(predictions, targets) -> float:
+    stocks = 0
+    invested = 0.0
+    cash_out = 0.0
+    for real, pred in zip(targets, predictions):
+        if real > pred:
+            stocks += 5
+            invested += (real * 5)
+        else:
+            cash_out += (real * stocks)
+            stocks = 0
+    
+    profit = stocks * real + cash_out - invested
+    
+    return round(profit, 2)
 
 """ Outdated code from the original main.py"""
 

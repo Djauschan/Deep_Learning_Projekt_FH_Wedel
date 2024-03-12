@@ -1,5 +1,7 @@
 from prediction_interface.rl_interface import RLInterface
 from prediction_interface.abstract_model import resolution as resolution_type
+import warnings
+warnings.filterwarnings("ignore")
 
 from fastapi import FastAPI
 

@@ -44,7 +44,7 @@ def get_user_by_username(db: Session, username: str):
 
 def get_budget_by_username(db: Session, username: str):
     user = db.query(models.User).filter(models.User.username == username).first()
-    return user.budget
+    return round(user.budget, 2)
 
 # method to get a user from table "users" by email
 def get_user_by_email(db: Session, email: str):

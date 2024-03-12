@@ -322,14 +322,19 @@ export default {
       seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC'], // Array of colors for each series
       cnnMeanError: null,
       cnnMeanAbsoluteError: null,
+      cnnProfit: null,
       tfMeanError: null,
       tfMeanAbsoluteError: null,
+      tfProfit: null,
       lstmMeanError: null,
       lstmMeanAbsoluteError: null,
+      lstmProfit: null,
       gbMeanError: null,
       gbMeanAbsoluteError: null,
+      gbProfit: null,
       rfMeanError: null,
       rfMeanAbsoluteError: null,
+      rfProfit: null,
       showCalendar: false,
       currentDate: new Date("2021-01-04"), // Current date
       currentMonth: '', // Current month displayed in the header
@@ -370,19 +375,19 @@ export default {
     },
 
     CNNchartTitle() {
-      return `CNN Chart; Mean Error: ${this.cnnMeanError}; Mean Absolute Error: ${this.cnnMeanAbsoluteError}`;
+      return `CNN Chart; Mean Error: ${this.cnnMeanError}; Mean Absolute Error: ${this.cnnMeanAbsoluteError}; Gewinn: ${this.cnnProfit}$`;
     },
     TransformerchartTitle() {
-      return `Transformer Chart; Mean Error: ${this.tfMeanError}; Mean Absolute Error: ${this.tfMeanAbsoluteError}`;
+      return `Transformer Chart; Mean Error: ${this.tfMeanError}; Mean Absolute Error: ${this.tfMeanAbsoluteError}; Gewinn: ${this.tfProfit}$`;
     },
     LSTMchartTitle() {
-      return `LSTM Chart; Mean Error: ${this.lstmMeanError}; Mean Absolute Error: ${this.lstmMeanAbsoluteError}`;
+      return `LSTM Chart; Mean Error: ${this.lstmMeanError}; Mean Absolute Error: ${this.lstmMeanAbsoluteError}; Gewinn: ${this.lstmProfit}$`;
     },
     RandomForestchartTitle() {
-      return `Random Forest Chart; Mean Error: ${this.rfMeanError}; Mean Absolute Error: ${this.rfMeanAbsoluteError}`;
+      return `Random Forest Chart; Mean Error: ${this.rfMeanError}; Mean Absolute Error: ${this.rfMeanAbsoluteError}; Gewinn: ${this.rfProfit}$`;
     },
     GradientBoostchartTitle() {
-      return `Gradient Boost Chart; Mean Error: ${this.gbMeanError}; Mean Absolute Error: ${this.gbMeanAbsoluteError}`;
+      return `Gradient Boost Chart; Mean Error: ${this.gbMeanError}; Mean Absolute Error: ${this.gbMeanAbsoluteError}; Gewinn: ${this.gbProfit}$`;
     },
     tooltip: {
       enabled: true,
@@ -579,6 +584,7 @@ export default {
         });
         this.cnnMeanError = maeResponse.data[this.selectedStock].ME;
         this.cnnMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        this.cnnProfit = maeResponse.data[this.selectedStock].profit;
 
         return response.data;
 
@@ -626,6 +632,7 @@ export default {
         });
         this.tfMeanError = maeResponse.data[this.selectedStock].ME;
         this.tfMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        this.tfProfit = maeResponse.data[this.selectedStock].profit;
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -671,6 +678,7 @@ export default {
         });
         this.rfMeanError = maeResponse.data[this.selectedStock].ME;
         this.rfMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        this.rfProfit = maeResponse.data[this.selectedStock].profit;
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -716,6 +724,7 @@ export default {
         });
         this.gbMeanError = maeResponse.data[this.selectedStock].ME;
         this.gbMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        this.gbProfit = maeResponse.data[this.selectedStock].profit;
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -745,6 +754,17 @@ export default {
         if (response.data['status_code'] !== undefined) {
           this.showLSTMLine = false;
         }
+        const maeResponse = await axios.get(`${this.store.API}/get/MAE`, {
+          params: {
+            stock_symbols: "[" + this.selectedStock + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            resolution: this.selectedTime,
+            model_type: "lstm",
+          }
+        });
+        this.lstmMeanError = maeResponse.data[this.selectedStock].ME;
+        this.lstmMeanAbsoluteError = maeResponse.data[this.selectedStock].MAE;
+        this.lstmProfit = maeResponse.data[this.selectedStock].profit;
 
         // Assuming the response.data is an object with date and close properties
         //this.LSTMData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
