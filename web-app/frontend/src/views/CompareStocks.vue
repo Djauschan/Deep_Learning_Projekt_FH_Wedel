@@ -200,8 +200,8 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showNIOLine && showChart" id="Window Average-chart" :data-source="this.combinedData['NIO']"
-      title="Window Average Chart">
+    <DxChart v-if="showNIOLine && showChart" id="NIO-chart" :data-source="this.combinedData['NIO']"
+      title="NIO Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'NIO Prediction'" value-field="value" argument-field="date" type="line" :color="seriesColors[8]">
       </DxSeries>
@@ -221,8 +221,8 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showNVDALine && showChart" id="Historic Average-chart" :data-source="this.combinedData['NVDA']"
-      title="Historic Average Chart">
+    <DxChart v-if="showNVDALine && showChart" id="NVDA-chart" :data-source="this.combinedData['NVDA']"
+      title="NVDA Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'NVDA Prediction'" value-field="value" argument-field="date" type="line"
         :color="seriesColors[8]">
@@ -244,8 +244,8 @@
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showSNAPLine && showChart" id="Window Average-chart" :data-source="this.combinedData['SNAP']"
-      title="Window Average Chart">
+    <DxChart v-if="showSNAPLine && showChart" id="SNAP Average-chart" :data-source="this.combinedData['SNAP']"
+      title="SNAP Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'Snap Prediction'" value-field="value" argument-field="date" type="line"
         :color="seriesColors[8]">
