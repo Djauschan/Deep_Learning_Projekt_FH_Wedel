@@ -62,7 +62,7 @@ class Preprocessor:
                 startDate, endDate, RSC_ROOT, FEATURES_DATA_TO_LOAD, stock_data
             )
             data, dateTimeArr = self.timeSeriesBuilderService.buildSingleTimeSeries(
-                data, FEATURES, length, interval, tolerance=30
+                data, FEATURES, length, interval, tolerance=60
             )
             data = self.averagingService.calcAvgOnSingleTs(data)
 

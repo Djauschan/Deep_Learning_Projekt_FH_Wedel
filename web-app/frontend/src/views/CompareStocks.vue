@@ -1,43 +1,39 @@
 <template>
   <Header />
   <div class="home-container01">
-     <span class="home-logo">Compare Stocks!</span>
+    <span class="home-logo">Compare Stocks!</span>
   </div>
   <div class="center">
     <div>
-    <button class="button-stock" @click="toggleCalendar">Select Dates</button>
-    <div class="calendar-popup" v-if="showCalendar">
-      <div class="calendar">
-        <div class="calendar-header">
-          <button @click="previousMonth">&lt;</button>
-          <div>
-            <h2>{{ currentMonthName }}</h2>
-            <h2>{{ currentMonth }}</h2>
-            <h2>{{ currentYear }}</h2>
+      <button class="button-stock" @click="toggleCalendar">Select Dates</button>
+      <div class="calendar-popup" v-if="showCalendar">
+        <div class="calendar">
+          <div class="calendar-header">
+            <button @click="previousMonth">&lt;</button>
+            <div>
+              <h2>{{ currentMonthName }}</h2>
+              <h2>{{ currentMonth }}</h2>
+              <h2>{{ currentYear }}</h2>
+            </div>
+            <button @click="nextMonth">&gt;</button>
           </div>
-          <button @click="nextMonth">&gt;</button>
-        </div>
-        <div class="calendar-days">
-          <div v-for="day in daysInMonth" :key="day" class="calendar-day"
-               :class="{ 'selected-start': day === startDate}"
-               @click="selectDay(day)">
-            {{ day }}
+          <div class="calendar-days">
+            <div v-for="day in daysInMonth" :key="day" class="calendar-day"
+              :class="{ 'selected-start': day === startDate }" :id="{ 'weekend': !isWeekDay(day.date) }"
+              @click="selectDay(day)">
+              {{ day }}
+            </div>
           </div>
         </div>
       </div>
+      <div>
+        <label>Selected Start Date:</label>
+      </div>
+      <div>
+        <input type="text" v-model="formattedStartDate" readonly class="short-input">
+      </div>
     </div>
-    <div>
-      <label>Selected Start Date:</label>
-    </div>
-    <div>
-      <input type="text" v-model="formattedStartDate" readonly class="short-input">
-    </div>
-  </div>
     <div class="separator"></div>
-    <!--<input class="text-input" v-model="selectedStock" placeholder="Please enter a stock">
-    <input type="number" class="number-input" v-model.number="selectedDays" placeholder="Last n days">
-    <button class="button-stock" @click="updateChart">Show Stock</button>!-->
-    <!-- Add checkboxes for additional data points -->
     <span class="selection">Time Interval</span>
     <div class="selector">
       <select v-model="selectedTime" ref="selectorIn" @mouseover="changeCursor" @mouseleave="resetCursor">
@@ -95,13 +91,16 @@
           <input type="checkbox" v-model="showCLine"> Citigroup
         </label>
         <label>
-          <input type="checkbox" v-model="showNVDALine"> NVIDIA
+          <input v-if="selectedModel != 'transformer'" type="checkbox" v-model="showNIOLine"> NIO
         </label>
         <label>
-          <input type="checkbox" v-model="showSnapLine"> Snap
+          <input type="checkbox" v-model="showNVDALine"> NVDIA
         </label>
       </div>
       <div class="checkboxes3">
+        <label>
+          <input type="checkbox" v-model="showSNAPLine"> Snap
+        </label>
         <label>
           <input type="checkbox" v-model="showSQLine"> Block
         </label>
@@ -114,56 +113,14 @@
     <div class="separator"></div>
     <button class="button-stock" @click="updateChart">Show Predictions</button>
   </div>
-  <!-- Combined Chart -->
   <div class="newChart">
-    <DxChart v-if="showChart" :data-source="combinedData" title="Stock Price">
-      <DxCommonSeriesSettings argument-field="DateTime" type="stock" />
-       <!--real werte anzeigen?
-      <DxSeries :name="'aapl'" open-value-field="Open" high-value-field="High" low-value-field="Low"
-        close-value-field="Close" argument-field="DateTime">
-      </DxSeries> -->
-
-      <DxSeries v-if="showAAPLLine" :name="'AAPL Line' + selectedStock" :data-source="combinedData" type="line"
-        value-field="AAPLValue" argument-field="date" :color="seriesColors[0]">
-      </DxSeries>
-      <DxSeries v-if="showAALLine" :name="'AAL Line' + selectedStock" :data-source="combinedData"
-        type="line" value-field="AALValue" argument-field="date" :color="seriesColors[1]">
-      </DxSeries>
-      <DxSeries v-if="showAMDLine" :name="'AMD Line' + selectedStock" :data-source="combinedData" type="line"
-        value-field="AMDValue" argument-field="date" :color="seriesColors[2]">
-      </DxSeries>
-      <DxSeries v-if="showCLine" :name="'C Line' + selectedStock" :data-source="combinedData" type="line"
-        value-field="CValue" argument-field="date" :color="seriesColors[3]">
-      </DxSeries>
-      <DxSeries v-if="showNVDALine" :name="'NVDA Line' + selectedStock"
-        :data-source="combinedData" type="line" value-field="NVDAValue" argument-field="date" :color="seriesColors[4]">
-      </DxSeries>
-      <DxSeries v-if="showSnapLine" :name="'Snap Line' + selectedStock"
-        :data-source="combinedData" type="line" value-field="SnapValue" argument-field="date" :color="seriesColors[5]">
-      </DxSeries>
-      <DxSeries v-if="showSQLine" :name="'SQ Line' + selectedStock"
-        :data-source="combinedData" type="line" value-field="SQValue" argument-field="date" :color="seriesColors[6]">
-      </DxSeries>
-      <DxSeries v-if="showTSLALine" :name="'TSLA Line' + selectedStock"
-        :data-source="combinedData" type="line" value-field="TSLAValue" argument-field="date" :color="seriesColors[7]">
-      </DxSeries>
-      <DxArgumentAxis :workdays-only="true">
-        <DxTitle text="Time" />
-        <DxLabel format="shortDate" />
-      </DxArgumentAxis>
-      <DxValueAxis name="price" position="left">
-        <DxTitle text="US dollars" />
-        <DxLabel>
-          <DxFormat type="currency" />
-        </DxLabel>
-      </DxValueAxis>
-      <DxTooltip :enabled="true" />
-    </DxChart>
-  </div>
-  <div class="newChart">
-    <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" :data-source="this.AAPLData" title="AAPL Chart">
+    <DxChart v-if="showAAPLLine && showChart" id="AAPL-chart" :data-source="this.combinedData" title="AAPL Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
-      <DxSeries :name="'AAPL Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[1]">
+      <DxSeries :name="'AAPL Line'" value-field="value" :data-source="this.combinedData['AAPL']" argument-field="date"
+        type="line" :color="seriesColors[1]">
+      </DxSeries>
+      <DxSeries :name="'AAPL'" :data-source="this.dataSource" open-value-field="Open" high-value-field="High" low-value-field="Low"
+        close-value-field="Close" argument-field="DateTime">
       </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
@@ -172,17 +129,17 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-   <DxChart v-if="showAALLine && showChart" id="AAL-chart" :data-source="this.AALData" title="AAL Chart">
-    <DxCommonSeriesSettings argument-field="date" type="line" />
-    <DxSeries :name="'AAL Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
-    </DxSeries>
+    <DxChart v-if="showAALLine && showChart" id="AAL-chart" :data-source="this.combinedData['AAL']" title="AAL Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'AAL Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[2]">
+      </DxSeries>
       <DxArgumentAxis :workdays-only="true">
         <DxTitle text="Time" />
         <DxLabel format="shortDate" />
@@ -190,14 +147,14 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
-   </DxChart>
+    </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showAMDLine && showChart" id="AMD-chart" :data-source="this.AMDData" title="AMD Chart">
+    <DxChart v-if="showAMDLine && showChart" id="AMD-chart" :data-source="this.combinedData['AMD']" title="AMD Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'AMD Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[3]">
       </DxSeries>
@@ -208,14 +165,14 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showCLine && showChart" id="C-chart" :data-source="this.CData" title="C Chart">
+    <DxChart v-if="showCLine && showChart" id="C-chart" :data-source="this.combinedData['C']" title="C Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'C Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[4]">
       </DxSeries>
@@ -226,15 +183,34 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showNVDALine && showChart" id="Historic Average-chart"
-      :data-source="this.NVDAData" title="Historic Average Chart">
+    <DxChart v-if="showNIOLine && showChart" id="Window Average-chart" :data-source="this.combinedData['NIO']"
+      title="Window Average Chart">
+      <DxCommonSeriesSettings argument-field="date" type="line" />
+      <DxSeries :name="'NIO Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[6]">
+      </DxSeries>
+      <DxArgumentAxis :workdays-only="true">
+        <DxTitle text="Time" />
+        <DxLabel format="shortDate" />
+      </DxArgumentAxis>
+      <DxValueAxis name="price" position="left">
+        <DxTitle text="US dollars" />
+        <DxLabel>
+          <DxFormat type="currency" precision="2" />
+        </DxLabel>
+      </DxValueAxis>
+      <DxTooltip :enabled="true" />
+    </DxChart>
+  </div>
+  <div class="newChart">
+    <DxChart v-if="showNVDALine && showChart" id="Historic Average-chart" :data-source="this.combinedData['NVDA']"
+      title="Historic Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'NVDA Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[5]">
       </DxSeries>
@@ -245,15 +221,15 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showSnapLine && showChart" id="Window Average-chart"
-      :data-source="this.SnapData" title="Window Average Chart">
+    <DxChart v-if="showSNAPLine && showChart" id="Window Average-chart" :data-source="this.combinedData['SNAP']"
+      title="Window Average Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'Snap Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[6]">
       </DxSeries>
@@ -264,15 +240,14 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showSQLine && showChart" id="SQ-chart"
-      :data-source="this.SQData" title="SQ Chart">
+    <DxChart v-if="showSQLine && showChart" id="SQ-chart" :data-source="this.combinedData['SQ']" title="SQ Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'SQ Line'" value-field="value" argument-field="date" type="line" :color="seriesColors[7]">
       </DxSeries>
@@ -283,15 +258,15 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
     </DxChart>
   </div>
   <div class="newChart">
-    <DxChart v-if="showTSLALine && showChart" id="TSLA-chart"
-      :data-source="this.TSLAData" title="TSLA Chart">
+    <DxChart v-if="showTSLALine && showChart" id="TSLA-chart" :data-source="this.combinedData['TSLA']"
+      title="TSLA Chart">
       <DxCommonSeriesSettings argument-field="date" type="line" />
       <DxSeries :name="'TSLA Line'" value-field="value" argument-field="date" type="line">
       </DxSeries>
@@ -302,7 +277,7 @@
       <DxValueAxis name="price" position="left">
         <DxTitle text="US dollars" />
         <DxLabel>
-          <DxFormat type="currency" />
+          <DxFormat type="currency" precision="2" />
         </DxLabel>
       </DxValueAxis>
       <DxTooltip :enabled="true" />
@@ -324,7 +299,6 @@ import DxChart, {
   DxTooltip,
 } from 'devextreme-vue/chart';
 
-//import { dataSource } from './data.js';
 import Header from './Header.vue'
 import axios from "axios";
 import Swal from "sweetalert2/dist/sweetalert2.js";
@@ -346,29 +320,32 @@ export default {
     DxTooltip,
   },
   async created() {
-    this.dataSource = [];
-    this.selectedDays = null;
-    this.AALData =[];
-    this.NVDAData = [];
-    this.svmData = [];
-    this.SnapData = [];
-    this.SQData = [];
-    this.TSLAData = [];
-    this.CData = [];
-    this.AMDData =[];
-    this.AAPLData =[];
+    this.dataSource = [],
+      this.selectedDays = null,
+      this.AALData = [],
+      this.NVDAData = [],
+      this.svmData = [],
+      this.SNAPData = [],
+      this.SQData = [],
+      this.TSLAData = [],
+      this.CData = [],
+      this.AMDData = [],
+      this.AAPLData = [],
+      this.NIOData = [];
   },
   data() {
     return {
+      activeCharts: [],
       dataSource: [],
       AALData: [],
       AMDData: [],
       AAPLData: [],
       NVDAData: [],
-      SnapData: [],
+      SNAPData: [],
       SQData: [],
       TSLAData: [],
       CData: [],
+      NIOData: [],
       selectedStock: "",
       selectedDays: null,
       showChart: false,
@@ -383,17 +360,19 @@ export default {
       CpredictionData: [],
       showNVDALine: false,
       NVDApredictionData: [],
-      showSnapLine: false,
-      SnappredictionData: [],
+      showSNAPLine: false,
+      SNAPpredictionData: [],
       showSQLine: false,
       SQpredictionData: [],
       showTSLALine: false,
       TSLApredictionData: [],
+      showNIOLine: false,
+      NIOPredictionData: [],
       combinedData: [],
       store: useMyPiniaStore(),
       selectedTime: 'H',
       selectedModel: 'transformer',
-      seriesColors:  ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC', '#FFB733', '#FF3385', '#33B5FF'], // Array of colors for each series
+      seriesColors: ['#FF5733', '#33FF57', '#337AFF', '#FF33DC', '#33FFDC', '#FFB733', '#FF3385', '#33B5FF'], // Array of colors for each series
       showCalendar: false,
       currentDate: new Date("2021-01-04"), // Current date
       currentMonth: '', // Current month displayed in the header
@@ -413,22 +392,6 @@ export default {
   },
 
   computed: {
-    currentMonth() {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    let currentMonthIndex = this.currentDate.getMonth() + (this.currentMonthOffset-this.currentMonthOffset);
-
-    // Adjust the index to handle cases where it goes beyond the boundaries
-    if (currentMonthIndex < 0) {
-      currentMonthIndex += 12; // Wrap around to December
-    } else if (currentMonthIndex >= 12) {
-      currentMonthIndex -= 12; // Wrap around to January
-    }
-
-
-    
-    return months[currentMonthIndex];
-  },
-
     CNNchartTitle() {
       return `CNN Chart; Mean Error: ${this.meanError}; Mean Absolute Error: ${this.meanAbsoluteError}`;
     },
@@ -449,12 +412,12 @@ export default {
     },
 
     tooltip: {
-          enabled: true,
-          // Customize tooltip appearance or behavior if needed
-        },
+      enabled: true,
+      // Customize tooltip appearance or behavior if needed
+    },
   },
 
-  mounted(){
+  mounted() {
     this.handleSelection();
     this.getDaysInMonth();
     this.updateCalendar();
@@ -462,12 +425,10 @@ export default {
 
   methods: {
     formatCalendarEntry(dateString) {
-      // Create a new Date object
       let date = new Date(dateString);
 
-      // Format the date
       let year = date.getFullYear();
-      let month = date.getMonth() + 1; // Months are zero-based
+      let month = date.getMonth() + 1;
       let day = date.getDate();
 
       // Pad single digit numbers with a leading zero
@@ -481,13 +442,6 @@ export default {
       this.startDate = null;
       this.selectingStart = true;
       this.showCalendar = !this.showCalendar;
-    },
-    selectDay(day) {
-      // Handle day selection
-      if (this.selectingStart) {
-        this.startDate = day;
-        this.showCalendar = false; // Close the calendar after selecting end date
-      }
     },
     previousMonth() {
       // Logic for moving to the previous month
@@ -514,248 +468,70 @@ export default {
       const month = this.currentDate.getMonth();
       return new Date(year, month, date).toLocaleDateString('en-US');
     },
-  
-
-
-  getDaysInMonth() {
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  },
-  
-  selectDate(day) {
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth() + 1; // Month is zero-based
-    this.selectedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    this.showDatePicker = false;
-  },
-
-    // Method to calculate mean error and mean absolute error
+    getDaysInMonth() {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      this.daysInMonth = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    },
+    selectDate(day) {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth() + 1; // Month is zero-based
+      this.selectedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      this.showDatePicker = false;
+    },
     calculateErrorsAndDisplay(actualValues, predictedValues) {
       const { meanError, meanAbsoluteError } = calculateMeanErrorAndMeanAbsoluteError(actualValues, predictedValues);
       this.meanError = meanError.toFixed(2); // Round to 2 decimal places
       this.meanAbsoluteError = meanAbsoluteError.toFixed(2); // Round to 2 decimal places
     },
-
-    // Example method to trigger calculation and display
     displayErrors() {
       // Example actual and predicted data
       const actualValues = [10, 20, 30, 40, 50];
       const predictedValues = [12, 18, 28, 38, 48];
       this.calculateErrorsAndDisplay(actualValues, predictedValues);
     },
-
-    handleSelection(){
+    handleSelection() {
       console.log("SelectedTime:", this.selectedTime);
       console.log("SelectedModel:", this.selectedModel);
     },
-
-    async updateCombinedData() {
-    // Map dataSource points with AALValue set to null
-    console.log("dataSource");
-    console.log(this.dataSource);
-    const combinedDataWithNull = this.dataSource.map(data => ({
-      ...data,
-      AALValue: null,
-      AAPLValue: null,
-      AMDValue: null,
-      CValue: null,
-      NVDAValue: null,
-      SnapValue: null,
-      SQValue: null,
-      TSLAValue: null,
-    }));
-
-    // Merge AALData points into combinedData
-    this.AALData.forEach(AALDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === AALDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update AALValue
-        combinedDataWithNull[index].AALValue = AALDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: AALDataPoint.date,
-          AALValue: AALDataPoint.value,
-        });
-      }
-    });
-
-    this.AMDData.forEach(AMDDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === AMDDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update AALValue
-        combinedDataWithNull[index].AMDValue = AMDDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: AMDDataPoint.date,
-          AMDValue: AMDDataPoint.value,
-        });
-      }
-    });
-
-    this.AAPLData.forEach(AAPLDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === AAPLDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update AALValue
-        combinedDataWithNull[index].AAPLValue = AAPLDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: AAPLDataPoint.date,
-          AAPLValue: AAPLDataPoint.value,
-        });
-      }
-    });
-
-        this.NVDAData.forEach(NVDADataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === NVDADataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update AALValue
-        combinedDataWithNull[index].NVDAValue = NVDADataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: NVDADataPoint.date,
-          NVDAValue: NVDADataPoint.value,
-        });
-      }
-    });
-
-    this.SnapData.forEach(SnapDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === SnapDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update AALValue
-        combinedDataWithNull[index].SnapValue = SnapDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: SnapDataPoint.date,
-          SnapValue: SnapDataPoint.value,
-        });
-      }
-    });
-
-    this.SQData.forEach(SQDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === SQDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update AALValue
-        combinedDataWithNull[index].SQValue = SQDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: SQDataPoint.date,
-          SQValue: SQDataPoint.value,
-        });
-      }
-    });
-
-    this.TSLAData.forEach(TSLADataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === TSLADataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update AALValue
-        combinedDataWithNull[index].TSLAValue = TSLADataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: TSLADataPoint.date,
-          TSLAValue: TSLADataPoint.value,
-        });
-      }
-    });
-
-        this.CData.forEach(CDataPoint => {
-      const index = combinedDataWithNull.findIndex(data => data.date === CDataPoint.date);
-      if (index !== -1) {
-        // If date exists in combinedData, update AALValue
-        combinedDataWithNull[index].CValue = CDataPoint.value;
-      } else {
-        // If date doesn't exist in combinedData, add a new point
-        combinedDataWithNull.push({
-          date: CDataPoint.date,
-          CValue: CDataPoint.value,
-        });
-      }
-    });
-
-    // Set the result to combinedData
-    this.combinedData = combinedDataWithNull;
-
-    console.log("combinedData");
-    console.log(this.combinedData);
-  },
-
     async hideAll() {
       this.showAAPLLine = false;
       this.showAALLine = false;
       this.showAMDLine = false;
       this.showCLine = false;
       this.showNVDALine = false;
-      this.showSnapLine = false;
+      this.showSNAPLine = false;
       this.showSQLine = false;
       this.showTSLALine = false;
-     },
-
+      this.showNIOLine = false;
+    },
     async showAll() {
       this.showAALLine = true;
       this.showCLine = true;
       this.showNVDALine = true;
-      this.showSnapLine = true;
+      this.showSNAPLine = true;
       this.showSQLine = true;
       this.showTSLALine = true;
       this.showAMDLine = true;
       this.showAAPLLine = true;
-    },
-
-    async get_stock_data(stock_symbol, days_back) {
-      try {
-        const response = await axios.get(this.store.API + "/getStock", {
-          params: {
-            stock_symbol: stock_symbol,
-            days_back: days_back,
-          }
-        });
-        console.log([response.data])
-        return response.data
-      } catch (error) {
-        Swal.fire({
-          title: "Error at getting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.detail
-        ) {
-          console.log(error.response.data.detail);
-        } else {
-          console.log(error);
-        }
+      if (this.selectedModel != 'transformer') {
+        this.showNIOLine = true;
       }
     },
-    
-    async load_C_data() {
+    async load_model_data() {
       try {
-        const response = await axios.get(`${this.store.API}/predict/` + this.selectedModel, {
+        const response = await axios.get(`${this.store.API}/predict/${this.selectedModel}`, {
           params: {
-            stock_symbols: "[C]",
-            startDate: this.formatCalendarEntry(this.formattedStartDate),
-            time_interval: this.selectedTime,
+            stock_symbols: "[" + this.activeCharts.join(', ') + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate),
+            resolution: this.selectedTime,
           }
         });
 
         console.log("Prediction loaded");
         console.log(response.data);
 
-        // Assuming the response.data is an object with date and close properties
-        this.CData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
         return response.data;
       } catch (error) {
         Swal.fire({
@@ -769,209 +545,18 @@ export default {
         console.error(error);
       }
     },
-
-    async load_AAPL_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/` + this.selectedModel, {
-          params: {
-            stock_symbols: "[AAPL]",
-            startDate: this.formatCalendarEntry(this.formattedStartDate),
-            time_interval: this.selectedTime,
-          }
-        });
-
-        console.log("Prediction loaded");
-        console.log(response.data);
-
-        // Assuming the response.data is an object with date and close properties
-        this.AAPLData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
-    async load_AMD_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/AMD`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.AMDData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
-    // async load_AAL_data() {
-    //   try {
-    //     const response = await axios.get(`${this.store.API}/predict/AAL`, {
-    //       params: {
-    //         stock_symbol: "AAPL"
-    //       }
-    //     });
-
-    //     console.log("Prediction loaded");
-    //     console.log(response.data);
-
-    //     // Assuming the response.data is an object with date and close properties
-    //     this.AALData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-    //     console.log("mapped");
-    //     console.log(this.AALData);
-
-    //     return response.data;
-    //   } catch (error) {
-    //     Swal.fire({
-    //       title: "Error at predicting data",
-    //       text: error,
-    //       icon: "info",
-    //       showCloseButton: false,
-    //       confirmButtonText: "Close",
-    //       confirmButtonColor: "#d0342c",
-    //     });
-    //     console.error(error);
-    //   }
-    // },
-
-    async load_NVDA_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/NVDA`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.NVDAData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
-    async load_Snap_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/Snap`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.SnapData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
-    async load_SQ_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/SQ`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.SQData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
-    async load_TSLA_data() {
-      try {
-        const response = await axios.get(`${this.store.API}/predict/TSLA`, {
-          params: {
-            stock_symbol: "AAPL"
-          }
-        });
-
-        // Assuming the response.data is an object with date and close properties
-        this.TSLAData = Object.entries(response.data).map(([date, { value }]) => ({ date, value }));
-
-        return response.data;
-      } catch (error) {
-        Swal.fire({
-          title: "Error at predicting data",
-          text: error,
-          icon: "info",
-          showCloseButton: false,
-          confirmButtonText: "Close",
-          confirmButtonColor: "#d0342c",
-        });
-        console.error(error);
-      }
-    },
-
     async load_data() {
       try {
-        
-        // const symbols = ['AAPL', 'AAL', 'AMD', 'C', 'NVDA', 'Snap', 'SQ', 'TSLA'];
-        // const selectedSymbols = symbols.filter(symbol => this['show' + symbol + 'Line']);
-        // selectedSymbols = '[AAPL, C]';
-        // console.log(selectedSymbols);
         const response = await axios.get(this.store.API + "/load/data", {
           params: {
-            stock_symbols: '[AAPL, C]', // Replace with the stock symbols to load
-            start_date: this.formatCalendarEntry(this.formattedStartDate), // Replace with the start date of the prediction
+            stock_symbols: "[" + this.activeCharts.join(', ') + "]",
+            start_date: this.formatCalendarEntry(this.formattedStartDate),
             resolution: this.selectedTime,
           }
         });
         console.log("normal loaded")
-        console.log([response.data])
+        console.log(response.data)
+
         return response.data
       } catch (error) {
         Swal.fire({
@@ -993,34 +578,79 @@ export default {
         }
       }
     },
+    selectDay(day) {
+      if (this.isWeekday(day)) {
+        if (this.selectingStart) {
+          this.startDate = day;
+          this.showCalendar = false;
+        }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Please select a weekday",
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+      }
+    },
+    isWeekday(day) {
+      const dayOfWeek = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day).getDay();
+      return dayOfWeek !== 0 && dayOfWeek !== 6; // 0 is Sunday, 6 is Saturday
+    },
+    checkDataInput() {
+      console.log(this.activeCharts.length);
+      console.log(this.formattedStartDate);
+      if (this.showAALLine) {
+        this.activeCharts.push('AAL');
+      }
+      if (this.showCLine) {
+        this.activeCharts.push('C');
+      }
+      if (this.showNIOLine) {
+        this.activeCharts.push('NIO');
+      }
+      if (this.showNVDALine) {
+        this.activeCharts.push('NVDA');
+      }
+      if (this.showSNAPLine) {
+        this.activeCharts.push('SNAP');
+      }
+      if (this.showSQLine) {
+        this.activeCharts.push('SQ');
+      }
+      if (this.showTSLALine) {
+        this.activeCharts.push('TSLA');
+      }
+      if (this.showAMDLine) {
+        this.activeCharts.push('AMD');
+      }
+      if (this.showAAPLLine) {
+        this.activeCharts.push('AAPL');
+      }
 
+      if (this.activeCharts.length > 0 && this.formattedStartDate != "") {
+        return true;
+      } else {
+        return false;
+      }
+    },
     async updateChart() {
-      this.dataSource = await this.load_data();
-      // this.AALData = await this.load_AAL_data();
-      this.CData = await this.load_C_data();
-      // this.NVDAData = await this.load_NVDA_data();
-      // this.SnapData = await this.load_Snap_data();
-      // this.SQData = await this.load_SQ_data();
-      // this.TSLAData = await this.load_TSLA_data();
-      // this.AMDData = await this.load_AMD_data();
-      this.AAPLData = await this.load_AAPL_data();
-      
-
-      console.log(this.dataSource)
-      
-      if (this.dataSource) {
-
-      //   const prices = this.dataSource.flatMap(data => [data.open, data.close]);
-      //   this.priceRange = {
-      //     min: Math.min(...prices) * 0.5,
-      //     max: Math.max(...prices) * 2
-      //   };
-      //   this.priceRangeKey = Math.random();
-      //   console.log("price range: " + this.priceRange.min + " - " + this.priceRange.max)
-      // }
-      
-      await this.updateCombinedData();
-      this.showChart = true;
+      if (this.checkDataInput()) {
+        this.dataSource = await this.load_data();
+        this.combinedData = await this.load_model_data();
+        this.showChart = true;
+        this.activeCharts = [];
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Please select a date, and at least one stock to display",
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
       }
     },
   },
@@ -1028,7 +658,8 @@ export default {
 </script>
 <style>
 .short-input {
-  width: 100px; /* Adjust width as needed */
+  width: 100px;
+  /* Adjust width as needed */
 }
 
 .calendar-popup {
@@ -1066,11 +697,13 @@ export default {
 }
 
 .selected-start {
-  background-color: #90EE90; /* Light green */
+  background-color: #90EE90;
+  /* Light green */
 }
 
 .selected-range {
-  background-color: #ADD8E6; /* Light blue */
+  background-color: #ADD8E6;
+  /* Light blue */
 }
 
 .calendar-day:hover {
@@ -1092,17 +725,22 @@ export default {
   background-color: #fff;
   border: 1px solid #ccc;
   padding: 10px;
-  max-width: 400px; /* Adjust max-width as needed */
-  max-height: 300px; /* Adjust max-height as needed */
-  overflow-y: auto; /* Add scrollbar when content exceeds max-height */
+  max-width: 400px;
+  /* Adjust max-width as needed */
+  max-height: 300px;
+  /* Adjust max-height as needed */
+  overflow-y: auto;
+  /* Add scrollbar when content exceeds max-height */
 }
 
 .date-picker-popup {
-  width: 100%; /* Make date picker content full width */
+  width: 100%;
+  /* Make date picker content full width */
 }
 
 .time-picker-popup {
-  width: 100%; /* Make time picker content full width */
+  width: 100%;
+  /* Make time picker content full width */
 }
 
 .popup h3 {
@@ -1196,19 +834,23 @@ export default {
   height: 10%;
   background-color: white;
   padding: 1%;
-  border: 2px solid #ccc; /* Adjust border thickness and color as needed */
+  border: 2px solid #ccc;
+  /* Adjust border thickness and color as needed */
 }
 
-.selection{
+.selection {
   margin-right: 5px;
   margin-left: 5px;
 }
 
 .separator {
   height: 100px;
-  width: 2px; /* Adjust the width of the separator */
-  background-color: #817f7f; /* Adjust the color of the separator */
-  margin: 0 10px; /* Adjust the margin around the separator */
+  width: 2px;
+  /* Adjust the width of the separator */
+  background-color: #817f7f;
+  /* Adjust the color of the separator */
+  margin: 0 10px;
+  /* Adjust the margin around the separator */
 }
 
 select {
@@ -1239,7 +881,8 @@ input {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 30px; /* Adjust the font size as needed */
+  font-size: 30px;
+  /* Adjust the font size as needed */
   margin-top: 15px;
 }
 
@@ -1270,12 +913,16 @@ input::placeholder {
   margin-left: 5px;
 }
 
-.checkboxes4{
+.checkboxes4 {
   margin-right: 5px;
   margin-left: 5px;
 }
 
 .button-stock:hover {
   background-color: darkgrey;
+}
+
+#weekend {
+  color: gray;
 }
 </style>

@@ -52,9 +52,6 @@
         <option value="C">
           Citigroup
         </option>
-        <option value="MRNS">
-          Marinus Pharmaceuticals Inc
-        </option>
         <option value="NIO">
           Nio Inc
         </option>
@@ -415,24 +412,10 @@ export default {
         startDayElement.classList.remove('selected-start');
       }
     },
-
-
     toggleCalendar() {
       this.startDate = null;
       this.selectingStart = true;
       this.showCalendar = !this.showCalendar;
-    },
-    selectDay(day) {
-      const selectedDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
-      if (selectedDate >= this.minDate && selectedDate <= this.maxDate) {
-        // Handle day selection
-        if (this.selectingStart) {
-          this.startDate = day;
-          this.showCalendar = false;
-        }
-      } else {
-        alert('Please select a date between 2021-01-04 and 2021-02-10');
-      }
     },
     previousMonth() {
       // Logic for moving to the previous month
@@ -962,6 +945,33 @@ export default {
         }
       }
     },
+    selectDay(day) {
+      if (this.isWeekday(day)) {
+        const selectedDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
+        if (selectedDate >= this.minDate && selectedDate <= this.maxDate) {
+          // Handle day selection
+          if (this.selectingStart) {
+            this.startDate = day;
+            this.showCalendar = false;
+          }
+        } else {
+          alert('Please select a date between 2021-01-04 and 2021-02-10');
+        }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Please select a weekday",
+          icon: "info",
+          showCloseButton: false,
+          confirmButtonText: "Close",
+          confirmButtonColor: "#d0342c",
+        });
+      }
+    },
+    isWeekday(day) {
+      const dayOfWeek = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day).getDay();
+      return dayOfWeek !== 0 && dayOfWeek !== 6; // 0 is Sunday, 6 is Saturday
+    },
 
     checkAllBoxes() {
       if (this.showCNNLine || this.showTransformerLine || this.showLSTMLine || this.showrandomForestLine || this.showgradientBoostLine) {
@@ -984,8 +994,10 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 50vh; /* Adjust as needed */
-  font-size: 1.5em; /* Adjust as needed */
+  height: 50vh;
+  /* Adjust as needed */
+  font-size: 1.5em;
+  /* Adjust as needed */
 }
 
 .calendar-popup {

@@ -459,7 +459,6 @@ def get_MAE_for_model(stock_symbols: str = '[AAPL, SNAP]', start_date: str = '20
 
     y_true = load_data(stock_symbols, start_date, resolution)
     y_pred = pred_model(stock_symbols, start_date, resolution)
-    print(y_pred)
     stock_symbols = stock_symbols[1:-1].split(", ")
     for stock_symbol in stock_symbols:
         try:

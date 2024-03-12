@@ -1,10 +1,12 @@
 from datetime import timedelta
 
-import numpy as np
 import pandas as pd
 
 
 class TimeModificationService:
+    """
+        service that executes time operations
+    """
 
     def __init__(self):
         pass
@@ -29,14 +31,8 @@ class TimeModificationService:
         return df_DateTimeColumn.apply(lambda x: (x.timestamp()) / 60)
 
     @staticmethod
-    def calcDateTimeFromStartDateAndInterval(endTimeSeries: pd.Timestamp, interval, horizon) -> pd.Timestamp:
-        difference = interval * horizon
-        nextDateTime: pd.Timestamp = endTimeSeries + timedelta(minutes=difference)
-        return nextDateTime
-
-    @staticmethod
-    def getSameDay10am(date: pd.Timestamp) -> pd.Timestamp:
-        startDate: pd.Timestamp = pd.Timestamp(year=date.year, month=date.month, day=date.day,
+    def getNextDay10am(date: pd.Timestamp) -> pd.Timestamp:
+        startDate: pd.Timestamp = pd.Timestamp(year=date.year, month=date.month, day=date.day + 1,
                                                hour=10, minute=00, second=0)
         return startDate
 
@@ -47,9 +43,9 @@ class TimeModificationService:
         return startDate
 
     @staticmethod
-    def getSameDay1020am(date: pd.Timestamp) -> pd.Timestamp:
+    def getSameDay10am(date: pd.Timestamp) -> pd.Timestamp:
         startDate: pd.Timestamp = pd.Timestamp(year=date.year, month=date.month, day=date.day,
-                                               hour=10, minute=20, second=0)
+                                               hour=10, minute=0, second=0)
         return startDate
 
     """

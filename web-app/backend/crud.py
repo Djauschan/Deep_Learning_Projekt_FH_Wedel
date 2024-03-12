@@ -173,8 +173,6 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
             data = data[(data['DateTime'] >= start_date) & (data['DateTime'] <= end_date)]
             data.set_index('DateTime', inplace=True)
 
-            print(f"1: {data.head()    }")
-
             if interval == 'H':
                 data = data.resample('2h').mean().round(2)
                 complete_index = pd.date_range(start=start_date, end=end_date, freq='2h')
@@ -196,8 +194,6 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
                 # Filter the data to only include dates within the specified range
                 data = data[(data.index >= start_date) & (data.index <= end_date)]
 
-            print(f"2: {data.head()}")
-
             data.replace([np.inf, -np.inf], np.nan, inplace=True)
             data.fillna(0, inplace=True)
 
@@ -217,8 +213,6 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
             data_dict = data[['DateTime', 'Close', 'High', 'Low', 'Open']].to_dict('records')
 
             dfs[stock] = data_dict
-
-            print(f"4: {dfs[stock]}")
 
     return dfs
 
