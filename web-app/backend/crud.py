@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import bcrypt
@@ -6,8 +7,6 @@ import models
 import numpy as np
 import pandas as pd
 import schemas
-import os
-
 from fastapi import HTTPException
 from sqlalchemy import MetaData, Table
 from sqlalchemy.orm import Session
@@ -24,6 +23,7 @@ def delete_users(db: Session):
     table.drop(database.engine)
     metadata.create_all(database.engine)
 
+
 # method to delete a single user in table "users"
 def delete_user(db: Session, username: str):
     user = get_user_by_username(db, username)
@@ -34,6 +34,7 @@ def delete_user(db: Session, username: str):
     db.commit()
     return "User deleted successfully"
 
+
 # method to get a user from table "users" by id
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -42,26 +43,34 @@ def get_user(db: Session, user_id: int):
 def get_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
+
 def get_budget_by_username(db: Session, username: str):
     user = db.query(models.User).filter(models.User.username == username).first()
     return round(user.budget, 2)
+
 
 # method to get a user from table "users" by email
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
+
 # method to get all data from table "users" (max. 100 entries)
-def get_users(db: Session, query: str = '', limit: int = 100):
-    users = db.query(models.User).filter(
-        models.User.username.like(f"%{query}%")).limit(limit).all()
+def get_users(db: Session, query: str = "", limit: int = 100):
+    users = (
+        db.query(models.User)
+        .filter(models.User.username.like(f"%{query}%"))
+        .limit(limit)
+        .all()
+    )
     return [u.__dict__ for u in users]
+
 
 # method to create a user into table "users"
 def create_user(db: Session, user: schemas.UserCreate):
-    hashed_password = bcrypt.hashpw(
-        user.password.encode('utf-8'), bcrypt.gensalt())
+    hashed_password = bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt())
     db_user = models.User(
-        email=user.email, password=hashed_password, username=user.username)
+        email=user.email, password=hashed_password, username=user.username
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -69,9 +78,10 @@ def create_user(db: Session, user: schemas.UserCreate):
     return schemas.User.from_orm(db_user).dict()
 
 
-def update_user_by_username(db: Session, username: str, updated_data: schemas.UserUpdate):
-    db_user = db.query(models.User).filter(
-        models.User.username == username).first()
+def update_user_by_username(
+    db: Session, username: str, updated_data: schemas.UserUpdate
+):
+    db_user = db.query(models.User).filter(models.User.username == username).first()
 
     if db_user:
         if updated_data.username:
@@ -79,7 +89,11 @@ def update_user_by_username(db: Session, username: str, updated_data: schemas.Us
         if updated_data.email:
             db_user.email = updated_data.email
         if updated_data.budget:
-            db_user.budget += updated_data.budget    # update budget TODO: check if budget is valid
+            db_user.budget += (
+                updated_data.budget
+            )  # update budget TODO: check if budget is valid
+            if db_user.budget < 0.0:
+                db_user.budget = 0.0
 
         db.commit()
         db.refresh(db_user)
@@ -87,50 +101,59 @@ def update_user_by_username(db: Session, username: str, updated_data: schemas.Us
     else:
         raise HTTPException(status_code=404, detail="User not found")
 
+
 # method to create a login entry into table "login"
 def create_login(db: Session, owner_id: int):
     now = datetime.now()
     current_date = now
-    db_login = models.Login(
-        login_time=current_date,
-        user_id=owner_id
-    )
+    db_login = models.Login(login_time=current_date, user_id=owner_id)
     db.add(db_login)
     db.commit()
     db.refresh(db_login)
     return db_login
 
+
 # method to return all logins in table "login" (max. 100 entries)
-def get_logins(db: Session, query: str = '', limit: int = 100):
-    logins = db.query(models.Login).filter(
-        models.Login.login_time.like(f"%{query}%")).limit(limit).all()
+def get_logins(db: Session, query: str = "", limit: int = 100):
+    logins = (
+        db.query(models.Login)
+        .filter(models.Login.login_time.like(f"%{query}%"))
+        .limit(limit)
+        .all()
+    )
     return [u.__dict__ for u in logins]
+
 
 # method to return all logins of a user in table "login"
 def get_logins_by_user_id(db: Session, owner_id: int):
     return db.query(models.Login).filter(models.Login.user_id == owner_id).all()
 
+
 # method to validate login
 def check_login(db: Session, user: schemas.User, pw: str):
     pass
+
 
 # method to return login by userid of a user in table "login"
 def get_logins_by_user_id(db: Session, owner_id: int):
     return db.query(models.Login).filter(models.Login.user_id == owner_id).all()
 
-#method to update budget of a user in table "users"
+
+# method to update budget of a user in table "users"
 def update_budget_by_user(db: Session, username: str, new_budget: int):
-    db_user = db.query(models.User).filter(
-        models.User.username == username).first()
+    db_user = db.query(models.User).filter(models.User.username == username).first()
 
     if db_user:
         db_user.budget += new_budget
+        if db_user.budget < 0.0:
+            db_user.budget = 0.0
 
         db.commit()
         db.refresh(db_user)
         return db_user
     else:
         raise HTTPException(status_code=404, detail="Benutzer nicht gefunden")
+
 
 # def update_budget_by_user(db: Session, username: str, updated_data: schemas.UserUpdate):
 #     db_user = db.query(models.User).filter(
@@ -148,11 +171,18 @@ def update_budget_by_user(db: Session, username: str, new_budget: int):
 #         db.refresh(db_user)
 #         return db_user
 #     else:
-#         raise HTTPException(status_code=404, detail="User not found")   
+#         raise HTTPException(status_code=404, detail="User not found")
+
 
 # method to get stock data of specific stock symbols for n days
-def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.Timestamp, interval: str,
-                     ALL_DATA_COLUMNS: list, COLUMNS_TO_KEEP: list) -> pd.DataFrame:
+def loadDataFromFile(
+    stock_symbols: str,
+    start_date: pd.Timestamp,
+    end_date: pd.Timestamp,
+    interval: str,
+    ALL_DATA_COLUMNS: list,
+    COLUMNS_TO_KEEP: list,
+) -> pd.DataFrame:
 
     stock_symbol_list = stock_symbols[1:-1].split(", ")
 
@@ -161,7 +191,9 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
     for stock in stock_symbol_list:
         rsc_completePath = f"../data/Aktien/{stock}_1min.txt"
         if os.path.exists(rsc_completePath):
-            df = pd.read_csv(rsc_completePath, sep=",", names=ALL_DATA_COLUMNS, index_col=False)
+            df = pd.read_csv(
+                rsc_completePath, sep=",", names=ALL_DATA_COLUMNS, index_col=False
+            )
 
             toRemove = []
             for col in df:
@@ -169,27 +201,33 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
                     toRemove.append(col)
 
             data = df.drop(toRemove, axis=1)
-            data['DateTime'] = pd.to_datetime(data['DateTime'])
-            data = data[(data['DateTime'] >= start_date) & (data['DateTime'] <= end_date)]
-            data.set_index('DateTime', inplace=True)
+            data["DateTime"] = pd.to_datetime(data["DateTime"])
+            data = data[
+                (data["DateTime"] >= start_date) & (data["DateTime"] <= end_date)
+            ]
+            data.set_index("DateTime", inplace=True)
 
-            if interval == 'H':
-                data = data.resample('2h').mean().round(2)
-                complete_index = pd.date_range(start=start_date, end=end_date, freq='2h')
-            elif interval == 'M':
-                data = data.resample('1min').mean().round(2)
-                complete_index = pd.date_range(start=start_date, end=end_date, freq='1min')
-            elif interval == 'D':
+            if interval == "H":
+                data = data.resample("2h").mean().round(2)
+                complete_index = pd.date_range(
+                    start=start_date, end=end_date, freq="2h"
+                )
+            elif interval == "M":
+                data = data.resample("1min").mean().round(2)
+                complete_index = pd.date_range(
+                    start=start_date, end=end_date, freq="1min"
+                )
+            elif interval == "D":
                 # Shift the time to start at '20:00:00' for each day
-                data.index = data.index.shift(-20, freq='H').shift(-00, freq='T')
-                
+                data.index = data.index.shift(-20, freq="H").shift(-00, freq="T")
+
                 # Resample the data and create the date range with a 'D' frequency
-                data = data.resample('D').first().round(2)
-                complete_index = pd.date_range(start=start_date, end=end_date, freq='D')
-                
+                data = data.resample("D").first().round(2)
+                complete_index = pd.date_range(start=start_date, end=end_date, freq="D")
+
                 # Shift the time back to '20:00:00' for each day
-                data.index = data.index.shift(20, freq='H').shift(00, freq='T')
-                complete_index = complete_index.shift(20, freq='H').shift(00, freq='T')
+                data.index = data.index.shift(20, freq="H").shift(00, freq="T")
+                complete_index = complete_index.shift(20, freq="H").shift(00, freq="T")
 
                 # Filter the data to only include dates within the specified range
                 data = data[(data.index >= start_date) & (data.index <= end_date)]
@@ -199,7 +237,9 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
 
             complete_data = pd.DataFrame(index=complete_index)
 
-            data = pd.merge(complete_data, data, left_index=True, right_index=True, how='right')
+            data = pd.merge(
+                complete_data, data, left_index=True, right_index=True, how="right"
+            )
 
             # Fill missing values with the last valid observation and then the next valid one
             data.ffill(inplace=True)
@@ -207,10 +247,21 @@ def loadDataFromFile(stock_symbols: str, start_date: pd.Timestamp, end_date: pd.
                 data.bfill(inplace=True)
 
             data.reset_index(inplace=True)
-            data.rename(columns={'index': 'DateTime', 'Close': 'Close', 'High': 'High', 'Low': 'Low', 'Open': 'Open'}, inplace=True)
+            data.rename(
+                columns={
+                    "index": "DateTime",
+                    "Close": "Close",
+                    "High": "High",
+                    "Low": "Low",
+                    "Open": "Open",
+                },
+                inplace=True,
+            )
 
             # Convert DataFrame to list of dictionaries
-            data_dict = data[['DateTime', 'Close', 'High', 'Low', 'Open']].to_dict('records')
+            data_dict = data[["DateTime", "Close", "High", "Low", "Open"]].to_dict(
+                "records"
+            )
 
             dfs[stock] = data_dict
 
